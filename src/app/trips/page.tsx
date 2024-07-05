@@ -104,7 +104,7 @@ const TripsPage = () => {
                 <td>{trip.truck}</td>
                 <td>{trip.route.origin} -&gt; {trip.route.destination}</td>
                 <td>{statuses[trip.status]}</td>
-                <td>{parties?.find((party) => party.party_id == trip.party)?.balance}</td>
+                <td>{trip.balance}</td>
 
               </tr>
             ))}

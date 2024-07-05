@@ -42,12 +42,14 @@ export async function POST(this: any, req: Request) {
       },
       billingType: data.billingType,
       amount: data.amount,
+      balance: data.amount,
       dates: datearr, // Assuming startDate is passed as string and needs conversion
       truckHireCost: data.truckHireCost || 0,
       LR: data.LR,
       status : 0,
       material: data.material || '',
-      notes: data.notes || ''
+      notes: data.notes || '',
+      accounts : []
     });
 
     // Save the new trip document

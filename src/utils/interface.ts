@@ -23,29 +23,39 @@ export interface IDriver extends Document {
 }
 // interfaces/Trip.ts
 
+export interface PaymentBook {
+  accountType: string
+  amount: number;
+  paymentType: 'Cash' | 'Cheque' | 'Online Transfer';
+  receivedByDriver: boolean;
+  paymentDate: Date;
+  notes?: string;
+}
 
+interface Route {
+  origin: string;
+  destination: string;
+}
 
 export interface ITrip extends Document {
   tripId: string;
   party: string;
   truck: string;
   driver: string;
-  supplier: string,
-  route: {
-    origin: string;
-    destination: string;
-  };
+  route: Route;
   billingType: 'Fixed' | 'Per Tonne' | 'Per Kg' | 'Per Trip' | 'Per Day' | 'Per Hour' | 'Per Litre' | 'Per Bag';
   amount: number;
   startDate: Date;
   truckHireCost?: number;
   LR: string;
-  status?: 0|1|2|3|4;
-  POD?: string
-  dates? : Date[]
+  status?: 0 | 1 | 2 | 3 | 4;
+  POD?: string;
+  dates: Date[];
   material?: string;
   notes?: string;
+  accounts : PaymentBook[]
 }
+
 
 // interfaces/Party.ts
 

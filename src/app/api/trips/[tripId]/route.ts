@@ -26,33 +26,44 @@ export async function GET(req: Request, { params }: { params: { tripId: string }
     }
   }
 
-export async function PATCH(req : Request, {params} : {params :{ tripId : string} }) {
-  try {
-    const { tripId } = params;
-    const {data} = await req.json();
-    console.log(data)
-    const {amount, POD, status , dates} = data
+  export async function PATCH(req: Request, { params }: { params: { tripId: string } }) {
+    try {
+      const { tripId } = params;
+      const { data } = await req.json();
+      const { amount, POD, status, dates, account, notes } = data;
+      console.log(data);
+  
+      await connectToDatabase();
+  
+      const trip = await Trip.findOne({ tripId: tripId });
+      
+      if (!trip) {
+        return NextResponse.json({ message: 'No Trip Found' }, { status: 404 });
+      }
 
-    await connectToDatabase(); // Ensure this function is properly defined and imported
-
-    const trip = await Trip.findOne({ tripId: tripId });
-    
-    if (!trip) {
-      return NextResponse.json({ message: 'No Driver Found' }, { status: 404 });
+      if(notes){
+        trip.notes = notes
+      }
+  
+      if (account) {
+        trip.accounts.push(account);
+        if(trip.balance - account.amount >= 0) trip.balance = parseFloat(trip.balance) - parseFloat(account.amount)
+        else NextResponse.json({error : 'Failed to update'})
+        
+      }
+  
+      if (status && dates) {
+        trip.status = status;
+        trip.dates = dates;
+      }
+  
+  
+      trip.POD = POD || "";
+  
+      await trip.save();
+      return NextResponse.json({ trip: trip }, { status: 200 });
+    } catch (err: any) {
+      console.log(err);
+      return NextResponse.json({ message: err.message }, { status: 500 });
     }
-    if (status && dates){
-      trip.status = status
-      trip.dates = dates
-    }
-    if (amount){
-      trip.balance = 0
-    }
-    trip.POD = POD || ""
-
-    await trip.save()
-    return NextResponse.json({ trip: trip }, { status: 200 });
-  } catch (err: any) {
-    console.log(err)
-    return NextResponse.json({ message: err.message }, { status: 500 });
   }
-}

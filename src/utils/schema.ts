@@ -42,6 +42,34 @@ export const partySchema = new Schema({
   });
 
 
+  export const PaymentBookSchema = {
+    accountType :{
+      type : String,
+      enum : ['Payments', 'Advances']
+    },
+    amount: {
+      type: Number,
+      required: true
+    },
+    paymentType: {
+      type: String,
+      enum: ['Cash', 'Cheque', 'Online Transfer'],
+      required: true
+    },
+    receivedByDriver: {
+      type: String,
+      required: true
+    },
+    paymentDate : {
+      type: Date,
+      required: true
+    },
+    notes: {
+      type: String
+    },
+  }
+
+
 export const tripSchema = new Schema({
     tripId: {
       type: String,
@@ -73,6 +101,10 @@ export const tripSchema = new Schema({
       type : Number,
       required: true
     },
+    balance : {
+      type: Number,
+      required : true
+    },
     startDate : {
       type : Date,
       default : Date.now(),
@@ -101,7 +133,12 @@ export const tripSchema = new Schema({
     notes : {
       type : String
     },
+    accounts : [
+      PaymentBookSchema,
+    ]
   });
+
+
 
 const driverAccountSchema = {
   account_id: String,
