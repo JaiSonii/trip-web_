@@ -5,13 +5,12 @@ const Driver = models.Driver || model('Driver', driverSchema)
 
 import { NextResponse } from 'next/server';
 import { IDriver } from '@/utils/interface';
-import { NextApiRequest } from "next";
 
 
 
 
 
-export async function DELETE(req: NextApiRequest,{ params }: { params: { driverId: string; accountId: string } }) {
+export async function DELETE(req: Request,{ params }: { params: { driverId: string; accountId: string } }) {
     // const { driverId, accountId } = params;
     const url = req.url
     const url_arr = url?.split('/')
