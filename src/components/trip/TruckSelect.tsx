@@ -52,6 +52,7 @@ export const TruckSelect: React.FC<Props> = ({ trucks, formData, handleChange, s
       ...prev,
       truck: truck.truckNo
     }));
+    
     setDropdownOpen(false);
   };
 

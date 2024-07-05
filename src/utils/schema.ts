@@ -219,9 +219,11 @@ export const userSchema = new Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+const connectString = process.env.NEXT_PUBLIC_MONGO_URL
+
 export async function connectToDatabase() {
   if (!mongoose.connection.readyState) {
-    await mongoose.connect('mongodb://localhost:27017/transportbook', {
+    await mongoose.connect(connectString, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });

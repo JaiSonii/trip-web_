@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import mongoose, { model, models } from 'mongoose';
-import { driverSchema } from '@/utils/schema';
+import { connectToDatabase, driverSchema } from '@/utils/schema';
 import { IDriver } from '@/utils/interface';
 
 
@@ -10,13 +10,7 @@ const Driver = models.Driver || model('Driver', driverSchema);
 
 export async function GET() {
   try {
-    if (!mongoose.connection.readyState) {
-      await mongoose.connect('mongodb://localhost:27017/transportbook', {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      });
-      console.log('Connected to MongoDB');
-    }
+    await connectToDatabase()
 
     const drivers = await Driver.find().exec();
     return NextResponse.json({ drivers });
@@ -28,13 +22,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    if (!mongoose.connection.readyState) {
-      await mongoose.connect('mongodb://localhost:27017/transportbook', {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      });
-      console.log('Connected to MongoDB');
-    }
+    await connectToDatabase()
 
     const data = await req.json();
 

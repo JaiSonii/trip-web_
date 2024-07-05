@@ -7,13 +7,7 @@ const Truck = models.Truck || model('Truck', truckSchema);
 
 export async function GET() {
   try {
-    if (!mongoose.connection.readyState) {
-      await mongoose.connect('mongodb://localhost:27017/transportbook', {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      });
-      console.log('Connected to MongoDB');
-    }
+    await connectToDatabase()
 
     const trucks = await Truck.find().exec();
     return NextResponse.json({ trucks });

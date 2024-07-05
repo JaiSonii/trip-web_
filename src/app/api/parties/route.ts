@@ -1,18 +1,13 @@
 import { NextResponse, NextRequest } from 'next/server';
-import mongoose, { model, models } from 'mongoose';
-import { partySchema } from '@/utils/schema';
+import  { model, models } from 'mongoose';
+import { connectToDatabase, partySchema } from '@/utils/schema';
 import { IParty } from '@/utils/interface';
-import { v4 as uuidv4 }from 'uuid';
 
 const Party = models.Party || model('Party', partySchema);
 
 export async function GET() {
   try {
-    if (!mongoose.connection.readyState) {
-      await mongoose.connect('mongodb://localhost:27017/transportbook', {
-      });
-      console.log('Connected to MongoDB');
-    }
+    await connectToDatabase()
 
     const parties = await Party.find().exec();
     return NextResponse.json({ parties });
@@ -25,13 +20,7 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    if (!mongoose.connection.readyState) {
-      await mongoose.connect('mongodb://localhost:27017/transportbook', {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      });
-      console.log('Connected to MongoDB');
-    }
+    await connectToDatabase()
 
     const data = await req.json();
 

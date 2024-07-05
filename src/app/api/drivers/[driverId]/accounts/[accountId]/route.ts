@@ -1,22 +1,14 @@
-import { driverSchema } from "@/utils/schema";
+import { connectToDatabase, driverSchema } from "@/utils/schema";
 import  {model, models } from "mongoose";
 
 const Driver = models.Driver || model('Driver', driverSchema)
 
 import { NextResponse } from 'next/server';
-import mongoose from 'mongoose';
 import { IDriver } from '@/utils/interface';
 import { NextApiRequest } from "next";
 
 
-async function connectToDatabase() {
-  if (!mongoose.connection.readyState) {
-    await mongoose.connect('mongodb://localhost:27017/transportbook', {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-  }
-}
+
 
 
 export async function DELETE(req: NextApiRequest,{ params }: { params: { driverId: string; accountId: string } }) {
