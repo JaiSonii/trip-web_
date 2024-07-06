@@ -1,14 +1,7 @@
 import React, { useEffect } from "react";
 
 interface BillingInfoProps {
-  formData: {
-    billingType: string;
-    amount: number;
-    perUnit: number;
-    totalUnits: number;
-    hasSupplier: boolean;
-    truckHireCost: number;
-  };
+  formData: any
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   setFormData: React.Dispatch<React.SetStateAction<any>>; // Adding setFormData prop
 }
@@ -16,8 +9,8 @@ interface BillingInfoProps {
 export const BillingInfo: React.FC<BillingInfoProps> = ({ formData, handleChange, setFormData }) => {
   useEffect(() => {
     if (formData.billingType !== 'Fixed') {
-      const newAmount = parseFloat(formData.perUnit) * parseFloat(formData.totalUnits);
-      setFormData(prevFormData => ({
+      const newAmount = parseFloat(formData.perUnit as any) * parseFloat(formData.totalUnits as any);
+      setFormData((prevFormData : any) => ({
         ...prevFormData,
         amount: newAmount
       }));

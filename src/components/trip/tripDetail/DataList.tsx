@@ -26,7 +26,14 @@ const DataList: React.FC<DataListProps> = ({ data, label, modalTitle, trip, setD
   }, [data]);
   
 
-  const handleAddItem = async (newItem: PaymentBook) => {
+  const handleAddItem = async (newItem: {
+    accountType: string;
+    amount: number;
+    paymentType: 'Cash' | 'Cheque' | 'Online Transfer';
+    receivedByDriver: boolean;
+    paymentDate: string;
+    notes?: string;
+  }) => {
     try {
       const res = await fetch(`/api/trips/${trip.tripId}`, {
         method: 'PATCH',

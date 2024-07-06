@@ -12,7 +12,7 @@ type Props = {
     parties: IParty[];
     trucks: TruckModel[];
     drivers: IDriver[];
-    onSubmit: (trip: typeof tripSchema) => void;
+    onSubmit: (trip: any) => void;
 };
 
 const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit }) => {
@@ -48,7 +48,7 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit }) => {
 
     useEffect(() => {
         if (formData.billingType !== 'Fixed') {
-            const newAmount = parseFloat(formData.perUnit) * parseFloat(formData.totalUnits);
+            const newAmount = parseFloat(formData.perUnit as any) * parseFloat(formData.totalUnits as any);
             setFormData(prevFormData => ({
                 ...prevFormData,
                 amount: newAmount
@@ -56,7 +56,7 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit }) => {
         }
     }, [formData.billingType, formData.perUnit, formData.totalUnits]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
 
         if (name.includes('route.')) {

@@ -22,14 +22,14 @@ export async function DELETE(req: Request,{ params }: { params: { driverId: stri
       await connectToDatabase();
   
       // Find the driver document by driverId
-      const driver: IDriver = await Driver.findOne({ driver_id: driverId });
+      const driver = await Driver.findOne({ driver_id: driverId });
   
       if (!driver) {
         return NextResponse.json({ message: 'Driver not found' }, { status: 404 });
       }
   
       // Filter out the account with the specified accountId from the accounts array
-      driver.accounts = driver.accounts.filter(account => account.account_id.toString() !== accountId);
+      driver.accounts = driver.accounts.filter((account : any)  => account.account_id.toString() !== accountId);
   
       // Save the updated driver document
       await driver.save();

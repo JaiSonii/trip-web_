@@ -17,9 +17,9 @@ const CreateTripPage: React.FC = () => {
     const fetchData = async () => {
       try {
         const [partiesRes, trucksRes, driversRes] = await Promise.all([
-          fetch('http://localhost:3000/api/parties'),
-          fetch('http://localhost:3000/api/trucks'),
-          fetch('http://localhost:3000/api/drivers')
+          fetch('/api/parties'),
+          fetch('/api/trucks'),
+          fetch('/api/drivers')
         ]);
 
         if (!partiesRes.ok || !trucksRes.ok || !driversRes.ok) {
@@ -46,11 +46,11 @@ const CreateTripPage: React.FC = () => {
   }, []);
 
 
-  const handleTripSubmit = async (trip: ITrip) => {
+  const handleTripSubmit = async (trip: any) => {
   
     try {
       // Create the trip
-      const tripRes = await fetch('http://localhost:3000/api/trips', {
+      const tripRes = await fetch('/api/trips', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +63,8 @@ const CreateTripPage: React.FC = () => {
       }
   
       // Update supplier truck hire cost
-      const supplierRes = await fetch(`http://localhost:3000/api/suppliers/${trip.supplierId}`, {
+      if (trip.supplierId){
+        const supplierRes = await fetch(`/api/suppliers/${trip.supplierId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -74,9 +75,11 @@ const CreateTripPage: React.FC = () => {
       if (!supplierRes.ok) {
         throw new Error('Failed to update supplier');
       }
+      }
+      
   
       // Update driver status
-      const driverRes = await fetch(`http://localhost:3000/api/drivers/${trip.driver}`, {
+      const driverRes = await fetch(`/api/drivers/${trip.driver}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -88,7 +91,7 @@ const CreateTripPage: React.FC = () => {
         throw new Error('Failed to update driver status');
       }
 
-      const truckRes = await fetch(`http://localhost:3000/api/trucks/${trip.truck}`, {
+      const truckRes = await fetch(`/api/trucks/${trip.truck}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

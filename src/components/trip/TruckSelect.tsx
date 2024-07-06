@@ -4,6 +4,8 @@ import { TruckModel } from '@/utils/interface';
 type Props = {
   trucks: TruckModel[];
   formData: any; // Adjust type as per your formData structure
+  selectedTruck : any
+  hasSupplier : boolean
   handleChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   setFormData: React.Dispatch<React.SetStateAction<any>>;
 };

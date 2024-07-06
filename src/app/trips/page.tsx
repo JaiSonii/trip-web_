@@ -18,7 +18,7 @@ const TripsPage = () => {
   useEffect(() => {
     const fetchTrips = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/trips', {
+        const res = await fetch('/api/trips', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -40,7 +40,7 @@ const TripsPage = () => {
 
     const fetchParties = async () => {
       try {
-        const res = await fetch('http://localhost:3000/api/parties', {
+        const res = await fetch('/api/parties', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -103,7 +103,7 @@ const TripsPage = () => {
 
                 <td>{trip.truck}</td>
                 <td>{trip.route.origin} -&gt; {trip.route.destination}</td>
-                <td>{statuses[trip.status]}</td>
+                <td>{statuses[trip.status as number]}</td>
                 <td>{trip.balance}</td>
 
               </tr>

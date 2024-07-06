@@ -4,6 +4,7 @@ import { IDriver } from '@/utils/interface';
 type Props = {
   drivers: IDriver[];
   formData: any; // Adjust type as per your formData structure
+  setFormData : any
   handleChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 };
 

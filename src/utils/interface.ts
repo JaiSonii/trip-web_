@@ -45,6 +45,7 @@ export interface ITrip extends Document {
   route: Route;
   billingType: 'Fixed' | 'Per Tonne' | 'Per Kg' | 'Per Trip' | 'Per Day' | 'Per Hour' | 'Per Litre' | 'Per Bag';
   amount: number;
+  balance : number;
   startDate: Date;
   truckHireCost?: number;
   LR: string;
@@ -78,7 +79,7 @@ export interface IParty extends Document {
 export interface TruckModel extends Document {
   truckNo: string;
   truckType: string;
-  model: string;
+  model: any;
   capacity: string;
   bodyLength: string | null;
   ownership: string;

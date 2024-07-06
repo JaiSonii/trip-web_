@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { useState } from 'react';
 import PhoneInput from 'react-phone-input-2';
@@ -7,10 +7,9 @@ import { ConfirmationResult, RecaptchaVerifier, signInWithPhoneNumber } from 'fi
 import { auth } from '@/firebase/firbaseConfig'; // Adjust path as per your actual setup
 import OtpInput from 'react-otp-input';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/context/AuthContext';
 
 const PhoneSignIn = () => {
-    const router = useRouter()
+    const router = useRouter();
     const [phone, setPhone] = useState('');
     const [otp, setOtp] = useState('');
     const [user, setUser] = useState<ConfirmationResult>();
@@ -18,11 +17,11 @@ const PhoneSignIn = () => {
     const sendOtp = async () => {
         try {
             const recaptcha = new RecaptchaVerifier(auth, 'recaptcha-container', {
-                'size': 'invisible',
-                'callback': (response: any) => {
+                size: 'invisible',
+                callback: (response: any) => {
                     // reCAPTCHA solved, allow signInWithPhoneNumber.
                     console.log('reCAPTCHA solved');
-                }
+                },
             });
 
             const confirmation = await signInWithPhoneNumber(auth, phone, recaptcha);
@@ -31,7 +30,7 @@ const PhoneSignIn = () => {
             console.log(error);
         }
     };
-    
+
     const verifyOtp = async () => {
         try {
             const data = await user?.confirm(otp);
@@ -39,23 +38,22 @@ const PhoneSignIn = () => {
 
             // Assuming success, update authenticated state here
             // Example: dispatch an action to update authenticated state in global context
-            
 
             // Example dispatch action to update authenticated state
             // dispatch({ type: 'AUTH_SUCCESS', payload: { user: data.user } });
 
             await fetch('http://localhost:3000/api/auth/signIn', {
-                method: "POST",
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     phoneNumber: phone,
-                    uid: data?.user.uid
+                    uid: data?.user.uid,
                 }),
-                credentials: 'include'
+                credentials: 'include',
             });
-            router.push('/drivers')
+            router.push('/drivers');
         } catch (error) {
             console.log(error);
         }
@@ -75,11 +73,9 @@ const PhoneSignIn = () => {
                         borderRadius: '0.375rem',
                         outline: 'none',
                         transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out',
-                        '&:focus': {
-                            borderColor: '#4b9cdb',
-                            boxShadow: '0 0 0 3px rgba(66, 153, 225, 0.5)',
-                        }
                     }}
+                    containerClass="w-full"
+                    inputClass="w-full border border-gray-300 rounded-md outline-none transition-colors duration-150 focus:border-blue-400 focus:ring focus:ring-blue-200"
                 />
                 <div className="mt-4">
                     <button
@@ -96,7 +92,6 @@ const PhoneSignIn = () => {
                     value={otp}
                     onChange={setOtp}
                     numInputs={6}
-                    separator={<span>-</span>}
                     inputStyle={{
                         width: '2rem',
                         height: '2rem',
@@ -107,13 +102,13 @@ const PhoneSignIn = () => {
                         borderRadius: '0.375rem',
                         outline: 'none',
                         transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out',
-                        '&:focus': {
-                            borderColor: '#4b9cdb',
-                            boxShadow: '0 0 0 3px rgba(66, 153, 225, 0.5)',
-                        }
                     }}
+                    containerStyle="flex justify-center mt-4"
                     renderInput={(props, index) => (
-                        <input {...props} key={index} />
+                        <React.Fragment key={index}>
+                            <input {...props} className="w-8 h-8 m-1 p-2 text-center border border-gray-300 rounded-md outline-none transition-colors duration-150 focus:border-blue-400 focus:ring focus:ring-blue-200" />
+                            {index < 5 && <span className="mx-1">-</span>} {/* Adding separator between OTP inputs */}
+                        </React.Fragment>
                     )}
                 />
                 <div className="mt-4">

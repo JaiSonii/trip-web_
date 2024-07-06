@@ -41,7 +41,7 @@ const SinglePartyTrips = () => {
       <h1>Trips for {singleParty}</h1>
       <ul>
         {trips.map(trip => (
-          <li key={trip._id as string}>{trip.startLocation} to {trip.endLocation}</li>
+          <li key={trip._id as string}>{trip.route.origin} to {trip.route.destination}</li>
         ))}
       </ul>
     </div>
