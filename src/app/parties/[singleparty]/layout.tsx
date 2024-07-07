@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import PartyLayout from '@/components/parties/PartyLayout';
+import PartyLayout from '@/components/layout/PartyLayout';
 
 interface PartyLayoutProps {
   children: React.ReactNode;
