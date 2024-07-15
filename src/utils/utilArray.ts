@@ -103,3 +103,22 @@ export const truckTypes = [
     'Tipper',
     'Other'
 ]
+
+export const chargeType = [
+    'Detention/Halting Charges',
+    'Repair Expense',
+    'Loading Charges',
+    'Unloading Charges',
+    'Union Charges',
+    'Weight Charges',
+    'Other Charges'
+  ];
+  
+ export const deductionType = [
+    'Material Loss',
+    'Brokerage',
+    'Late Fees',
+    'TDS',
+    'Mamul',
+    'Other'
+  ];

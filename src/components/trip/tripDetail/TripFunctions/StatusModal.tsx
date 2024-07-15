@@ -45,7 +45,7 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
       // Simulating storage of the image path (mocking for demo purposes)
       const imagePath = `/pod/${podImage?.name}`;
       localStorage.setItem('podImagePath', imagePath);
-      data = {  dates: dates, status: status + 1, POD: imagePath };
+      data = { dates: dates, status: status + 1, POD: imagePath };
     } else if (statuses[status] === 'POD Recieved') {
       dates[3] = new Date(startDate);
       data = { dates: dates, status: status + 1 };
@@ -170,7 +170,11 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                 />
+                <p className="mt-2 text-sm text-red-600 font-semibold">
+                  ⚠️ Warning: Make sure to check all the payments and charges. Once settled, they cannot be edited.
+                </p>
               </div>
+
             </>
           )}
           <div className="mt-4 flex justify-end">

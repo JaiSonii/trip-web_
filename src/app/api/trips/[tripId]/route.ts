@@ -1,7 +1,8 @@
 import DriverModal from "@/components/driver/driverModal";
+import { fetchBalance, fetchBalanceBack } from "@/helpers/fetchTripBalance";
 import { verifyToken } from "@/utils/auth";
 import { ITrip, PaymentBook } from "@/utils/interface";
-import { connectToDatabase, driverSchema, partySchema, truckSchema } from "@/utils/schema";
+import { connectToDatabase, driverSchema, partySchema, tripExpenseSchema, truckSchema } from "@/utils/schema";
 import { tripSchema } from "@/utils/schema";
 import { models, model } from 'mongoose'
 import { NextResponse } from "next/server";
@@ -42,8 +43,6 @@ export async function PATCH(req: Request, { params }: { params: { tripId: string
     const { tripId } = params;
     const { data } = await req.json();
     const { amount, POD, status, dates, account, notes } = data;
-    console.log(data);
-
     await connectToDatabase();
 
     const trip = await Trip.findOne({ user_id: user, trip_id: tripId });
@@ -65,15 +64,12 @@ export async function PATCH(req: Request, { params }: { params: { tripId: string
         account.paymentBook_id = 'payment' + uuidv4()
         trip.accounts.push(account);
       }
-      const Party = models.Party || model('Party', partySchema)
-
-      if (trip.balance - account.amount >= 0) {
-        trip.balance = parseFloat(trip.balance) - parseFloat(account.amount)
-        const party = await Party.findOne({ party_id: trip.party })
-        party.balance = parseFloat(party.balance) - parseFloat(account.amount)
-        await party.save()
+      const TripExpense = models.TripExpense || model('TripExpense', tripExpenseSchema)
+      const charges = await TripExpense.find({ user_id: user, trip_id: trip.trip_id })
+      const pending = await fetchBalanceBack(trip, charges)
+      if (pending < 0) {
+        return NextResponse.json({ message: "Balance going negative", status: 400 })
       }
-      else NextResponse.json({ error: 'Failed to update' })
 
     }
 
@@ -110,6 +106,13 @@ export async function PUT(req: Request, { params }: { params: { tripId: string }
     const Truck = models.Truck || model('Truck', truckSchema);
     const Driver = models.Driver || model('Driver', driverSchema);
 
+    const oldTrip = await Trip.findOne({ user_id: user, trip_id: tripId })
+    const TripExpense = models.TripExpense || model('TripExpense', tripExpenseSchema)
+    const charges = await TripExpense.find({ user_id: user, trip_id: oldTrip.trip_id })
+    const pending = await fetchBalanceBack(oldTrip,charges)
+    if (pending < 0) {
+      return NextResponse.json({ message: "Balance going negative", status: 400 })
+    }
 
     const trip = await Trip.findOneAndUpdate({ user_id: user, trip_id: tripId }, data, { new: true });
 

@@ -17,8 +17,9 @@ const CreateSupplierPage: React.FC = () => {
         setSaving(true)
 
 
-        if (!isValidPhone(supplier.contactNumber)) {
+        if ( supplier.contactNumber && !isValidPhone(supplier.contactNumber)) {
             alert('Invalid phone number. Please enter a 10-digit phone number.');
+            setSaving(false)
             return;
         }
 

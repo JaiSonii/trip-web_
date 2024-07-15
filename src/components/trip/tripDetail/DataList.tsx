@@ -42,6 +42,10 @@ const DataList: React.FC<DataListProps> = ({data,label,modalTitle,trip,setData,s
         throw new Error('Failed to add new item');
       }
       const resData = await res.json();
+      if(resData.status == 400){
+        alert(resData.message)
+        return
+      }
       setData(resData.trip.accounts);
       const pending = await fetchBalance(resData.trip)
       setBalance(pending)
@@ -65,7 +69,14 @@ const DataList: React.FC<DataListProps> = ({data,label,modalTitle,trip,setData,s
       if (!res.ok) {
         throw new Error('Failed to edit item');
       }
+
       const resData = await res.json();
+
+      if(resData.status == 400){
+        alert(resData.message)
+        return
+      }
+
       setData(resData.trip.accounts);
       setTrip(resData.trip)
       setEditData(null);
@@ -128,6 +139,7 @@ const DataList: React.FC<DataListProps> = ({data,label,modalTitle,trip,setData,s
           className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500 text-white hover:bg-purple-600 focus:outline-none ml-4 transition duration-300 ease-in-out transform hover:scale-110"
           onClick={openAddModal}
           aria-label={`Add ${label}`}
+          disabled={trip.status == 4}
         >
           +
         </button>
@@ -163,12 +175,14 @@ const DataList: React.FC<DataListProps> = ({data,label,modalTitle,trip,setData,s
                     <button
                       className="text-xs text-blue-500 hover:text-blue-700 focus:outline-none"
                       onClick={() => openEditModal(item)}
+                      disabled={trip.status == 4}
                     >
                       <MdEdit size={20} />
                     </button>
                     <button
                       className="text-xs text-red-500 hover:text-red-700 focus:outline-none"
                       onClick={() => handleDeleteItem(item)}
+                      disabled={trip.status == 4}
                     >
                       <MdDelete size={20} />
                     </button>

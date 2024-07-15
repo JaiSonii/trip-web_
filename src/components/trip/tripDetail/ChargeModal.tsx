@@ -44,6 +44,9 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave }) =>
     notes: '',
   });
 
+ 
+
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
 
@@ -53,6 +56,12 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave }) =>
   const handleSave = () => {
     onSave(formData);
     onClose();
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    if (e.target.value === '0') {
+      handleChange({ target: { name: e.target.name, value: '' } } as React.ChangeEvent<HTMLInputElement>);
+    }
   };
 
   if (!isOpen) return null;
@@ -113,6 +122,7 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave }) =>
             name="amount"
             value={formData.amount}
             onChange={handleChange}
+            onFocus={handleFocus}
             className="w-full p-2 border border-gray-300 rounded-md"
           />
         </div>

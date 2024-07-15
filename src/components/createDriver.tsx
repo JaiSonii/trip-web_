@@ -74,7 +74,6 @@ const DriverForm: React.FC<Props> = ({ onSubmit }) => {
           name="contactNumber"
           value={formData.contactNumber}
           onChange={handleChange}
-          required
           className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
         />
       </label>
@@ -86,7 +85,6 @@ const DriverForm: React.FC<Props> = ({ onSubmit }) => {
           value={formData.balance}
           onChange={handleChange}
           onFocus={handleFocus}
-          required
           className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
         />
       </label>

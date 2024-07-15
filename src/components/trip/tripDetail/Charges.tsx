@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ChargeModal from './ChargeModal';
-import { TripExpense } from '@/utils/interface';
+import { ITrip, TripExpense } from '@/utils/interface';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import EditChargeModal from './EditChargeModal';
 
@@ -9,9 +9,10 @@ interface ChargesProps {
   setCharges: React.Dispatch<React.SetStateAction<TripExpense[]>>;
   tripId: string;
   onAddCharge: (charge: TripExpense) => void;
+  trip : ITrip
 }
 
-const Charges: React.FC<ChargesProps> = ({ charges, onAddCharge, setCharges, tripId }) => {
+const Charges: React.FC<ChargesProps> = ({ charges, setCharges, tripId, trip }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [expandedItem, setExpandedItem] = useState<number | null>(null);
@@ -67,9 +68,11 @@ const Charges: React.FC<ChargesProps> = ({ charges, onAddCharge, setCharges, tri
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-800">Charges</h3>
         <button
+          disabled={trip.status === 4}
           className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500 text-white hover:bg-purple-600 focus:outline-none ml-4 transition duration-300 ease-in-out transform hover:scale-110"
           onClick={() => setIsModalOpen(true)}
           aria-label="Add Charge"
+
         >
           +
         </button>
@@ -103,14 +106,17 @@ const Charges: React.FC<ChargesProps> = ({ charges, onAddCharge, setCharges, tri
                   )}
                   <div className="mt-2 flex justify-end">
                     <button
+                      disabled={trip.status === 4}
                       className="text-xs text-blue-500 mr-2 hover:text-blue-700 focus:outline-none"
                       onClick={() => handleEditCharge(index)}
                     >
                       <MdEdit className="text-xl text-purple-600" /> {/* Increased size of MdEdit */}
                     </button>
                     <button
+                      disabled={trip.status === 4}
                       className="text-xs text-red-500 hover:text-red-700 focus:outline-none"
                       onClick={() => handleDeleteCharge(index)}
+
                     >
                       <MdDelete className="text-xl text-red-700" /> {/* Increased size of MdDelete */}
                     </button>

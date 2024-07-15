@@ -34,13 +34,13 @@ export async function POST(req: Request) {
     const data = await req.json();
 
     // Basic validation
-    if (!data.name || !data.contactNumber) {
+    if (!data.name) {
       return NextResponse.json({ message: 'Missing required fields' }, { status: 400 });
     }
 
 
     const phoneRegex = /^[789]\d{9}$/;
-    if (!phoneRegex.test(data.contactNumber)) {
+    if (data.contactNumber != '' && !phoneRegex.test(data.contactNumber)) {
       return NextResponse.json({ message: 'Invalid phone number' }, { status: 400 });
     }
 

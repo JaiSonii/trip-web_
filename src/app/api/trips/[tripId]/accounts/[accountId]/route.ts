@@ -1,6 +1,7 @@
+import { fetchBalance, fetchBalanceBack } from "@/helpers/fetchTripBalance";
 import { verifyToken } from "@/utils/auth";
 import { ITrip } from "@/utils/interface";
-import { connectToDatabase, tripSchema } from "@/utils/schema";
+import { connectToDatabase, tripExpenseSchema, tripSchema } from "@/utils/schema";
 import { model, models } from "mongoose";
 import { NextResponse } from "next/server";
 
@@ -26,6 +27,12 @@ export async function DELETE(req: Request, { params }: { params: { tripId: strin
 
     // Filter out the account to be deleted
     trip.accounts = trip.accounts.filter(acc => acc._id.toString() !== accountId);
+    const TripExpense = models.TripExpense || model('TripExpense', tripExpenseSchema)
+    const charges = await TripExpense.find({ user_id: user, trip_id: trip.trip_id })
+    const pending = await fetchBalanceBack(trip, charges)
+    if (pending < 0) {
+      return NextResponse.json({ message: "Balance going negative", status: 400 })
+    }
 
     // Save the updated trip
     await trip.save();
@@ -59,6 +66,13 @@ export async function PATCH(req: Request, { params }: { params: { tripId: string
     // Filter out the account to be deleted
     const index = trip.accounts.findIndex(acc => acc._id.toString() === accountId)
     trip.accounts[index] = account
+    
+    const TripExpense = models.TripExpense || model('TripExpense', tripExpenseSchema)
+    const charges = await TripExpense.find({ user_id: user, trip_id: trip.trip_id })
+    const pending = await fetchBalanceBack(trip, charges)
+    if (pending < 0) {
+      return NextResponse.json({ message: "Balance going negative", status: 400 })
+    }
 
     // Save the updated trip
     await trip.save();

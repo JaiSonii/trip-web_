@@ -33,6 +33,8 @@ const Modal: React.FC<ModalProps> = ({
   const [paymentDate, setPaymentDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [notes, setNotes] = useState<string>('');
 
+
+
   useEffect(() => {
     if (editData) {
       setAmount(editData.amount);
@@ -83,6 +85,11 @@ const Modal: React.FC<ModalProps> = ({
                 value={amount}
                 onChange={(e) => setAmount(Number(e.target.value))}
                 className="mt-1 p-2 w-full border border-gray-300 rounded-md"
+                onFocus={(e)=> {
+                  if(e.target.value == '0'){
+                    e.target.value = ''
+                  }
+                }}
                 required
               />
             </div>

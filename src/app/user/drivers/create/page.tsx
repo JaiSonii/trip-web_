@@ -19,7 +19,7 @@ const CreateDriverPage: React.FC = () => {
     const handleDriverSubmit = async (driver: IDriver) => {
         setSaving(true);
 
-        if (!isValidPhone(driver.contactNumber)) {
+        if (driver.contactNumber && !isValidPhone(driver.contactNumber)) {
             alert('Invalid phone number. Please enter a 10-digit phone number.');
             return;
         }

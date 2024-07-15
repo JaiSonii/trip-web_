@@ -81,6 +81,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
       const resData = await res.json();
       setTrip(resData.trip);
     } catch (error) {
+      alert(error)
       console.log('Error settling amount:', error);
     }
 
@@ -106,8 +107,9 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
         if (!truckRes.ok) {
           throw new Error('Failed to update truck status');
         }
-      } catch (error) {
+      } catch (error:any) {
         console.log(error);
+        alert(error.message)
       }
     }
 
@@ -135,16 +137,14 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
           throw new Error('Failed to add new item');
         }
         const resData = await res.json();
-        console.log(resData);
         setAccounts(resData.trip.accounts);
-        console.log('Payment settled');
+        setTrip(resData.trip)
       } catch (error: any) {
         alert(error.message);
         console.log(error);
       }
     }
 
-    console.log('Settle amount button clicked');
   };
 
   const handleAddCharge = (newCharge: any) => {
@@ -192,7 +192,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
         <DataList data={accounts} label="Payments" modalTitle="Add Payment" trip={trip} setData={setAccounts} setBalance = {setBalance} setTrip={setTrip}/>
 
         {/* Charges Component Integration */}
-        <Charges charges={charges} onAddCharge={handleAddCharge} setCharges={setCharges} tripId={trip.trip_id}/>
+        <Charges charges={charges} onAddCharge={handleAddCharge} setCharges={setCharges} tripId={trip.trip_id} trip={trip}/>
       </div>
 
       {/* Right Side - Profit, Balance, and POD Viewer */}
@@ -201,7 +201,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
           <h3 className="text-xl font-bold">Pending Balance</h3>
           <p className="text-2xl font-semibold mt-4">₹ {tripBalance}</p>
         </div>
-        <Profit label="Profit" value={""} />
+        <Profit charges={charges} amount={trip.amount} setCharges={setCharges} tripId={trip.trip_id}/>
         <PODViewer podUrl={podUrl} />
       </div>
     </div>

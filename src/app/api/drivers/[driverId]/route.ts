@@ -27,7 +27,7 @@ export async function GET(req: Request, { params }: { params: { driverId: string
 
     return NextResponse.json(driver, { status: 200 });
   } catch (err: any) {
-    console.error(err);
+    console.log(err);
     return NextResponse.json({ message: 'Internal Server Error', error: err.message }, { status: 500 });
   }
 }

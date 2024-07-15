@@ -63,6 +63,12 @@ const EditTripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, tri
         onSubmit(formData as ITrip);
     };
 
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+        if (e.target.value === '0') {
+          handleChange({ target: { name: e.target.name, value: '' } } as React.ChangeEvent<HTMLInputElement>);
+        }
+      };
+
     return (
         <div className="bg-white text-black p-4 max-w-3xl mx-auto shadow-md rounded-md">
             <form className="space-y-4" onSubmit={handleSubmit}>
@@ -82,6 +88,19 @@ const EditTripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, tri
 
                 <RouteInputs formData={formData} handleChange={handleChange} />
 
+                <label className="block">
+                    <span className="text-gray-700">Freight Amount</span>
+                    <input
+                        className="w-full p-2 border border-gray-300 rounded-md mb-4"
+                        type="number"
+                        name="amount"
+                        value={formData.amount || ''}
+                        placeholder="Freight Amount"
+                        onChange={handleChange}
+                        required
+                    />
+                </label>
+
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700">LR No</label>
                     <input
@@ -89,6 +108,7 @@ const EditTripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, tri
                         className="w-full p-2 border border-gray-300 rounded-md"
                         name="LR"
                         value={formData.LR}
+                        onChange={handleChange}
                         placeholder="LR No"
                     />
                 </div>
@@ -101,7 +121,7 @@ const EditTripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, tri
                             checked={showDetails}
                             onChange={() => setShowDetails(!showDetails)}
                         />
-                        Add More Details
+                        Edit More Details
                     </label>
                 </div>
 

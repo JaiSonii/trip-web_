@@ -41,7 +41,7 @@ export async function POST(req: Request) {
 
     // Phone number validation (10 digits starting with 7, 8, or 9)
     const phoneRegex = /^[6789]\d{9}$/;
-    if (!phoneRegex.test(data.contactNumber)) {
+    if (data.contactNumber != ''  && !phoneRegex.test(data.contactNumber)) {
       return NextResponse.json({ message: 'Invalid phone number' }, { status: 400 });
     }
 

@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 import { MdDelete } from "react-icons/md";
 import DriverLayout from '@/components/driver/driverLayout';
 import { IDriver, ITrip, PaymentBook } from '@/utils/interface';
@@ -13,7 +13,7 @@ const Driver: React.FC = () => {
 
   // Extract the driverId from the URL path
   const pathname = usePathname();
-  const driverId = pathname.split('/')[2];
+  const {driverId} = useParams()
   
   // State variables to hold driver data, loading status, and error messages
   const [driver, setDriver] = useState<IDriver | null>(null);
