@@ -25,19 +25,10 @@ export const partySchema = new Schema({
     },
     gstNumber: {
       type: String,
-      unique: true
     },
     balance: {
       type: Number,
     },
-    createdAt: {
-      type: Date,
-      default: Date.now
-    },
-    updatedAt: {
-      type: Date,
-      default: Date.now
-    }
   });
 
 
@@ -159,12 +150,11 @@ export const driverSchema = new mongoose.Schema({
     },
     name:{
       type: String,
+      unique: true,
       required: true
     },
     contactNumber: {
       type: String,
-      required: true,
-      unique: true
     },
     status : {
       type: String,

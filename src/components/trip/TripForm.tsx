@@ -105,10 +105,13 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr}) =>
                     handleChange={handleChange}
                     setFormData={setFormData}
                 />
+                <div className='z-50 '>
                 <RouteInputs
                     formData={formData}
                     handleChange={handleChange}
                 />
+                </div>
+                
                 <BillingInfo
                     formData={formData}
                     handleChange={handleChange}

@@ -19,6 +19,12 @@ const PartyForm: React.FC<Props> = ({ onSubmit }) => {
     balance: 0,
   });
 
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    if (e.target.value === '0') {
+      handleChange({ target: { name: e.target.name, value: '' } } as React.ChangeEvent<HTMLInputElement>);
+    }
+  };
+
   // Handle input changes and update the state
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -113,6 +119,7 @@ const PartyForm: React.FC<Props> = ({ onSubmit }) => {
           name="balance"
           value={formData.balance}
           onChange={handleChange}
+          onFocus={handleFocus}
           className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
         />
       </label>

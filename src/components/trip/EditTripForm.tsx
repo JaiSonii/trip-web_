@@ -90,7 +90,6 @@ const EditTripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, tri
                         name="LR"
                         value={formData.LR}
                         placeholder="LR No"
-                        disabled
                     />
                 </div>
 

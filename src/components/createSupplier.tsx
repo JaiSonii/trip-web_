@@ -65,7 +65,6 @@ const SupplierForm: React.FC<Props> = ({ onSubmit }) => {
           name="contactNumber"
           value={formData.contactNumber}
           onChange={handleChange}
-          required
           className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
         />
       </label>

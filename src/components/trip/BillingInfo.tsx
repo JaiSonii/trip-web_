@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 
 interface BillingInfoProps {
-  formData: any
+  formData: any;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
   setFormData: React.Dispatch<React.SetStateAction<any>>; // Adding setFormData prop
 }
@@ -9,13 +9,21 @@ interface BillingInfoProps {
 export const BillingInfo: React.FC<BillingInfoProps> = ({ formData, handleChange, setFormData }) => {
   useEffect(() => {
     if (formData.billingType !== 'Fixed') {
-      const newAmount = parseFloat(formData.perUnit as any) * parseFloat(formData.totalUnits as any);
-      setFormData((prevFormData : any) => ({
+      const newAmount =
+        (parseFloat(formData.perUnit) || 0) *
+        (parseFloat(formData.totalUnits) || 0);
+      setFormData((prevFormData: any) => ({
         ...prevFormData,
         amount: newAmount
       }));
     }
   }, [formData.billingType, formData.perUnit, formData.totalUnits, setFormData]);
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    if (e.target.value === '0') {
+      handleChange({ target: { name: e.target.name, value: '' } } as React.ChangeEvent<HTMLInputElement>);
+    }
+  };
 
   return (
     <div className="billing-info">
@@ -25,7 +33,7 @@ export const BillingInfo: React.FC<BillingInfoProps> = ({ formData, handleChange
           <button
             key={type}
             type="button"
-            className={`p-2 rounded-md ${formData.billingType === type ? ' bg-gray-700 text-white' : 'bg-gray-200 text-black'}`}
+            className={`p-2 rounded-md ${formData.billingType === type ? 'bg-gray-700 text-white' : 'bg-gray-200 text-black'}`}
             onClick={() => handleChange({ target: { name: 'billingType', value: type } } as React.ChangeEvent<HTMLInputElement | HTMLSelectElement>)}
           >
             {type}
@@ -39,24 +47,26 @@ export const BillingInfo: React.FC<BillingInfoProps> = ({ formData, handleChange
             className="w-full p-2 border border-gray-300 rounded-md mb-4"
             type="number"
             name="amount"
-            value={formData.amount}
+            value={formData.amount || ''}
             placeholder="Freight Amount"
             onChange={handleChange}
+            onFocus={handleFocus}
             required
           />
         </label>
       ) : (
         <>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <label className="block">
               <span className="text-gray-700">{formData.billingType}</span>
               <input
                 className="w-full p-2 border border-gray-300 rounded-md mb-4"
                 type="number"
                 name="perUnit"
-                value={formData.perUnit}
+                value={formData.perUnit || ''}
                 placeholder="Per Unit"
                 onChange={handleChange}
+                onFocus={handleFocus}
                 required
               />
             </label>
@@ -66,9 +76,10 @@ export const BillingInfo: React.FC<BillingInfoProps> = ({ formData, handleChange
                 className="w-full p-2 border border-gray-300 rounded-md mb-4"
                 type="number"
                 name="totalUnits"
-                value={formData.totalUnits}
+                value={formData.totalUnits || ''}
                 placeholder="Total Units"
                 onChange={handleChange}
+                onFocus={handleFocus}
                 required
               />
             </label>
@@ -79,7 +90,7 @@ export const BillingInfo: React.FC<BillingInfoProps> = ({ formData, handleChange
               className="w-full p-2 border border-gray-300 rounded-md mb-4"
               type="number"
               name="amount"
-              value={formData.amount}
+              value={formData.amount || ''}
               placeholder="Freight Amount"
               readOnly
             />
@@ -93,9 +104,10 @@ export const BillingInfo: React.FC<BillingInfoProps> = ({ formData, handleChange
             className="w-full p-2 border border-gray-300 rounded-md"
             type="number"
             name="truckHireCost"
-            value={formData.truckHireCost}
+            value={formData.truckHireCost || ''}
             placeholder="Truck Hire Cost"
             onChange={handleChange}
+            onFocus={handleFocus}
           />
         </label>
       )}
