@@ -26,7 +26,7 @@ const Charges: React.FC<ChargesProps> = ({ charges, setCharges, tripId, trip }) 
     }
   }, [charges]);
 
-  const handleAddCharge = async (newCharge: TripExpense) => {
+const handleAddCharge = async (newCharge: TripExpense) => {
     const res = await fetch(`/api/trips/${tripId}/expenses`, {
       method: 'POST',
       headers: {

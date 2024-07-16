@@ -2,237 +2,277 @@ import mongoose, { ConnectOptions } from "mongoose";
 import { Schema } from "mongoose";
 
 export const partySchema = new Schema({
-  user_id : {
-    type : String,
-    required : true
+  user_id: {
+    type: String,
+    required: true
   },
-    party_id :{
-      type: String,
-      required: true
-    },
-    name: {
-      type: String,
-      required: true
-    },
-    contactPerson: {
-      type: String,
-    },
-    contactNumber: {
-      type: String,
-    },
-    address: {
-      type: String,
-    },
-    gstNumber: {
-      type: String,
-    },
-    balance: {
-      type: Number,
-    },
-  });
+  party_id: {
+    type: String,
+    required: true
+  },
+  name: {
+    type: String,
+    required: true
+  },
+  contactPerson: {
+    type: String,
+  },
+  contactNumber: {
+    type: String,
+  },
+  address: {
+    type: String,
+  },
+  gstNumber: {
+    type: String,
+  },
+  balance: {
+    type: Number,
+  },
+});
 
 
-  export const PaymentBookSchema = {
-    paymentBook_id: String,
-    accountType :{
-      type : String,
-      enum : ['Payments', 'Advances']
-    },
-    amount: {
-      type: Number,
-      required: true
-    },
-    paymentType: {
-      type: String,
-      enum: ['Cash', 'Cheque', 'Online Transfer'],
-      required: true
-    },
-    receivedByDriver: {
-      type: Boolean,
-      required: true
-    },
-    paymentDate : {
-      type: Date,
-      required: true
-    },
-    notes: {
-      type: String
-    },
-  }
+export const PaymentBookSchema = {
+  paymentBook_id: String,
+  accountType: {
+    type: String,
+    enum: ['Payments', 'Advances']
+  },
+  amount: {
+    type: Number,
+    required: true
+  },
+  paymentType: {
+    type: String,
+    enum: ['Cash', 'Cheque', 'Online Transfer'],
+    required: true
+  },
+  receivedByDriver: {
+    type: Boolean,
+    required: true
+  },
+  paymentDate: {
+    type: Date,
+    required: true
+  },
+  notes: {
+    type: String
+  },
+}
 
 
 export const tripSchema = new Schema({
-  user_id : {
-    type : String,
-    required : true
+  user_id: {
+    type: String,
+    required: true
   },
-    trip_id: {
-      type: String,
-      required: true,
-      unique: true
-    },
-    party:{
-      type: String,
-      required: true
-    },
-    truck:{
-      type : String,
-      required : true
-    },
-    driver: {
-      type : String,
-      required : true,
-    },
-    route : {
-      origin : {type : String, required: true},
-      destination : {type : String, required: true}
-    },
-    billingType : {
-      type : String,
-      enum : ['Fixed', 'Per Tonne', 'Per Kg', 'Per Trip', 'Per Day', 'Per Hour', 'Per Litre', 'Per Bag'],
-      required: true
-    },
-    amount : {
-      type : Number,
-      required: true
-    },
-    startDate : {
-      type : Date,
-      default : Date.now(),
-      required : true
-    },
-    truckHireCost : {
-      type : Number
-    },
-    LR:{
-      type : String,
-      required: true
-    },
-    status : {
-      type : Number,
-      enum : [0, 1, 2, 3, 4]
-    },
-    POD : {
-      type : String,
-    },
-    dates : [
-      Date
-    ],
-    material :{
-      type : String,
-    },
-    notes : {
-      type : String
-    },
-    accounts : [
-      PaymentBookSchema,
-    ]
-  });
+  trip_id: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  party: {
+    type: String,
+    required: true
+  },
+  truck: {
+    type: String,
+    required: true
+  },
+  driver: {
+    type: String,
+    required: true,
+  },
+  route: {
+    origin: { type: String, required: true },
+    destination: { type: String, required: true }
+  },
+  billingType: {
+    type: String,
+    enum: ['Fixed', 'Per Tonne', 'Per Kg', 'Per Trip', 'Per Day', 'Per Hour', 'Per Litre', 'Per Bag'],
+    required: true
+  },
+  amount: {
+    type: Number,
+    required: true
+  },
+  startDate: {
+    type: Date,
+    default: Date.now(),
+    required: true
+  },
+  truckHireCost: {
+    type: Number
+  },
+  LR: {
+    type: String,
+    required: true
+  },
+  status: {
+    type: Number,
+    enum: [0, 1, 2, 3, 4]
+  },
+  POD: {
+    type: String,
+  },
+  dates: [
+    Date
+  ],
+  material: {
+    type: String,
+  },
+  notes: {
+    type: String
+  },
+  accounts: [
+    PaymentBookSchema,
+  ]
+});
 
 
 
 const driverAccountSchema = {
   account_id: String,
-  date : Date,
-  reason : String,
-  gave : Number,
-  got : Number,
+  date: Date,
+  reason: String,
+  gave: Number,
+  got: Number,
 }
 export const driverSchema = new mongoose.Schema({
-  user_id : {
-    type : String,
-    required : true
+  user_id: {
+    type: String,
+    required: true
   },
-    driver_id:{
-      type: String,
-      required: true,
-      unique: true
-    },
-    name:{
-      type: String,
-      unique: true,
-      required: true
-    },
-    contactNumber: {
-      type: String,
-    },
-    status : {
-      type: String,
-      enum: ['Available', 'On Trip'],
-      default: 'Active'
-    },
-    balance: {
-      type: Number
-    },
-    accounts: [{
-      type : driverAccountSchema
-    }]
-  });
+  driver_id: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  name: {
+    type: String,
+    unique: true,
+    required: true
+  },
+  contactNumber: {
+    type: String,
+  },
+  status: {
+    type: String,
+    enum: ['Available', 'On Trip'],
+    default: 'Active'
+  },
+  balance: {
+    type: Number
+  },
+  accounts: [{
+    type: driverAccountSchema
+  }]
+});
 
 
 
 export const truckSchema: Schema = new Schema({
-  user_id : {
-    type : String,
-    required : true
+  user_id: {
+    type: String,
+    required: true
   },
-    truckNo: { type: String, required: true, unique: true },
-    truckType: { type: String },
-    model: { type: String},
-    capacity: { type: String},
-    bodyLength: { type: String },
-    ownership: { type: String, enum: ['Market', 'Self'] },
-    supplier: { type: String },
-    status : {type : String, enum : ['Available', 'On Trip']},
-    trip_id : {type : String, default : ''},
-    documents : [{document_name : String, document_link : String}],
-    updatedAt: { type: Date, default: Date.now }
+  truckNo: { type: String, required: true, unique: true },
+  truckType: { type: String },
+  model: { type: String },
+  capacity: { type: String },
+  bodyLength: { type: String },
+  ownership: { type: String, enum: ['Market', 'Self'] },
+  supplier: { type: String },
+  status: { type: String, enum: ['Available', 'On Trip'] },
+  trip_id: { type: String, default: '' },
+  documents: [{ document_name: String, document_link: String }],
+  updatedAt: { type: Date, default: Date.now }
 });
 
-export const supplierSchema : Schema = new Schema({
-  user_id : {
-    type : String,
-    required : true
+export const supplierSchema: Schema = new Schema({
+  user_id: {
+    type: String,
+    required: true
   },
-  supplier_id :{
+  supplier_id: {
     type: String,
     required: true
   },
   name: {
-    type:String,
+    type: String,
     required: true
   },
-  contactNumber : {
-    type : String
+  contactNumber: {
+    type: String
   },
-  tripCount :{
-    type : Number
+  tripCount: {
+    type: Number
   },
-  balance : {
-    type : Number,
-    default : 0
+  balance: {
+    type: Number,
+    default: 0
   }
 })
 
 export const userSchema = new Schema({
-  uid : {type: String, required : true, unique: true},
+  uid: { type: String, required: true, unique: true },
   phoneNumber: { type: String, required: true, unique: true },
   createdAt: { type: Date, default: Date.now }
 });
 
 export const tripExpenseSchema = new Schema({
-  user_id : {
-    type : String,
-    required : true
-  },
-  trip_id : {
-    type : String,
-    required : true
-  },
-  partyBill : {
-    type : Boolean,
+  user_id: {
+    type: String,
     required: true
   },
+  trip_id: {
+    type: String,
+    required: true
+  },
+  partyBill: {
+    type: Boolean,
+    required: true
+  },
+  amount: {
+    type: Number,
+    required: true
+  },
+  date: {
+    type: Date,
+    required: true
+  },
+  expenseType: {
+    type: String,
+    required: true
+  },
+  notes: {
+    type: String
+  }
+})
+
+export const TruckExpenseSchema = new Schema({
+  user_id : {
+    type :String,
+    required : true
+  },
+  trip : {
+    type : String,
+    required :true
+  },
+  truck : {
+    type : String,
+    required : true
+  },
+  expenseType : {
+    type : String,
+    required : true
+  },
+  paymentMode :{
+    type : String,
+    required : true
+  },
+  transaction_id : String,
+  driver : String,
   amount : {
     type : Number,
     required : true
@@ -241,16 +281,10 @@ export const tripExpenseSchema = new Schema({
     type : Date,
     required : true
   },
-  expenseType:{
-    type : String,
-    required : true
-  },
-  notes : {
-    type : String
-  }
+  notes : String
 })
 
-const connectString : any  = process.env.NEXT_PUBLIC_MONGO_URL
+const connectString: any = process.env.NEXT_PUBLIC_MONGO_URL
 
 export async function connectToDatabase() {
   if (!mongoose.connection.readyState) {

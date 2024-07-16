@@ -20,9 +20,7 @@ export async function DELETE(req: Request,{ params }: { params: { driverId: stri
     const url = req.url
     const url_arr = url?.split('/')
     const accountId = url_arr[7]
-    const driverId = url_arr[5]
-
-  
+    const driverId = url_arr[5]  
     try {
       await connectToDatabase();
   

@@ -22,11 +22,6 @@ const CreatePartyPage: React.FC = () => {
             return;
         }
 
-        if (!isValidPhone(party.contactNumber)) {
-            alert('Invalid phone number. Please enter a 10-digit phone number.');
-            return;
-        }
-
         try {
 
             const res = await fetch('/api/parties', {

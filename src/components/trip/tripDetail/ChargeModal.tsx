@@ -1,3 +1,4 @@
+import { Button } from '@/components/ui/button';
 import React, { useState } from 'react';
 
 interface ChargeModalProps {
@@ -145,13 +146,13 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave }) =>
             className="w-full p-2 border border-gray-300 rounded-md"
           />
         </div>
-        <div className="flex justify-end">
-          <button onClick={onClose} className="mr-2 p-2 bg-gray-300 rounded-md">
+        <div className="flex justify-end gap-2">
+          <Button variant='outline' onClick={onClose} >
             Cancel
-          </button>
-          <button onClick={handleSave} className="p-2 bg-blue-500 text-white rounded-md">
+          </Button>
+          <Button onClick={handleSave} >
             Save
-          </button>
+          </Button>
         </div>
       </div>
     </div>

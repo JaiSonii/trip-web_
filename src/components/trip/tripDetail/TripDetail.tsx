@@ -201,7 +201,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
           <h3 className="text-xl font-bold">Pending Balance</h3>
           <p className="text-2xl font-semibold mt-4">₹ {tripBalance}</p>
         </div>
-        <Profit charges={charges} amount={trip.amount} setCharges={setCharges} tripId={trip.trip_id}/>
+        <Profit charges={charges} amount={trip.amount} setCharges={setCharges} tripId={trip.trip_id} driverId={trip.driver} truckNo={trip.truck}/>
         <PODViewer podUrl={podUrl} />
       </div>
     </div>

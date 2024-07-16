@@ -69,7 +69,7 @@ const TrucksPage = () => {
           </thead>
           <tbody>
             {trucks.map((truck, index) => (
-              <tr key={index} className="border-t">
+              <tr key={index} className="border-t" onClick={()=>router.push(`/user/trucks/${truck.truckNo}`)}>
                 <td className="border p-2">{truck.truckNo}</td>
                 <td className="border p-2">{truck.truckType}</td>
                 <td className="border p-2">{truck.ownership}</td>

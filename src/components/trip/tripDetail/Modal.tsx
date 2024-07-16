@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { PaymentBook } from '@/utils/interface';
 import { revalidatePath } from 'next/cache';
+import { Button } from '@/components/ui/button';
 
 interface ModalProps {
   isOpen: boolean;
@@ -137,19 +138,17 @@ const Modal: React.FC<ModalProps> = ({
               />
             </div>
             <div className="flex justify-end space-x-4">
-              <button
+              <Button variant='outline'
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 type="submit"
-                className="px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600"
               >
                 Save
-              </button>
+              </Button>
             </div>
           </form>
         </div>

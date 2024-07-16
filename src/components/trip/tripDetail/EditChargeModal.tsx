@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { TripExpense } from '@/utils/interface';
+import { Button } from '@/components/ui/button';
 
 interface EditChargeModalProps {
   isOpen: boolean;
@@ -128,19 +129,19 @@ const EditChargeModal: React.FC<EditChargeModalProps> = ({ isOpen, onClose, onSa
             className="w-full p-2 border border-gray-300 rounded-md"
           />
         </div>
-        <div className="flex justify-end">
-          <button
-            className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2 hover:bg-blue-600 focus:outline-none"
+        <div className="flex justify-end gap-2">
+          <Button
+            
             onClick={handleSave}
           >
             Save
-          </button>
-          <button
-            className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 focus:outline-none"
+          </Button>
+          <Button variant={'outline'}
+            
             onClick={onClose}
           >
             Cancel
-          </button>
+          </Button>
         </div>
       </div>
     </div>
