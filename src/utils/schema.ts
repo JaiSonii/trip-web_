@@ -256,8 +256,7 @@ export const TruckExpenseSchema = new Schema({
     required : true
   },
   trip : {
-    type : String,
-    required :true
+    type : String
   },
   truck : {
     type : String,

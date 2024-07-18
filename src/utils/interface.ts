@@ -109,3 +109,16 @@ export interface ISupplier extends Document{
   tripCount : number
   balance : number
 }
+
+export interface ITruckExpense extends Document{
+  user_id: string;
+  trip: string;
+  truck: string;
+  expenseType: string;
+  paymentMode: string;
+  transaction_id?: string; // Optional
+  driver?: string;         // Optional
+  amount: number;
+  date: Date;
+  notes?: string;          // Optional
+}

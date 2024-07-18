@@ -9,9 +9,10 @@ interface ChargeModalProps {
   onSave: any;
   driverId: string;
   selected?: any;
+  truckPage?: boolean
 }
 
-const combinedChargeTypes = [
+const fuelAndDriverChargeTypes = [
   'Brokerage',
   'Detention',
   'Driver bhatta',
@@ -21,11 +22,26 @@ const combinedChargeTypes = [
   'Other',
   'Police Expense',
   'RTO Expense',
-  'Repair Expense',
   'Toll Expense',
   'Union Expense',
   'Weight Charges',
   'Unloading Charges',
+];
+
+const maintenanceChargeTypes = [
+  'Repair Expense',
+  'Showroom Service',
+  'Regular Service',
+  'Minor Repair',
+  'Gear Maintenance',
+  'Brake Oil Change',
+  'Grease Oil Change',
+  'Spare Parts Purchase',
+  'Air Filter Change',
+  'Tyre Puncture',
+  'Tyre Retread',
+  'Tyre Purchase',
+  'Roof Top Repair'
 ];
 
 interface TripExpense {
@@ -42,8 +58,8 @@ interface TripExpense {
   driver: string;
 }
 
-const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, driverId, selected }) => {
-  
+const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, driverId, selected, truckPage }) => {
+
   const [formData, setFormData] = useState<TripExpense>({
     id: selected?._id || undefined,
     trip: selected?.trip_id || '',
@@ -59,6 +75,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
   });
 
   const [driverName, setDriverName] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('Fuel & Driver');
 
   useEffect(() => {
     if (!selected) return;
@@ -106,12 +123,12 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
     if (formData.paymentMode === 'Paid By Driver') {
       setFormData((prev) => ({ ...prev, driver: driverId }));
     }
-    if(selected){
+    if (selected) {
       onSave(formData, selected._id)
-    }else{
+    } else {
       onSave(formData);
     }
-    
+
     onClose();
   };
 
@@ -120,6 +137,8 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
       handleChange({ target: { name: e.target.name, value: '' } } as React.ChangeEvent<HTMLInputElement>);
     }
   };
+
+  const chargeTypes = selectedCategory === 'Fuel & Driver' ? fuelAndDriverChargeTypes : maintenanceChargeTypes;
 
   if (!isOpen) return null;
 
@@ -130,6 +149,32 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
         <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
           <h2 className="text-xl font-semibold mb-4">Add New Charge</h2>
 
+          <div className="flex space-x-4 mb-4 border-b-2 border-gray-200">
+            <Button
+              variant={'link'}
+              onClick={() => setSelectedCategory('Fuel & Driver')}
+              className={`px-4 py-2 transition duration-300 ease-in-out ${selectedCategory === 'Fuel & Driver'
+                ? 'border-b-2 border-blue-500 text-blue-500'
+                : 'border-transparent text-gray-600 hover:text-blue-500 hover:border-blue-500'
+                }`}
+            >
+              Fuel & Driver
+            </Button>
+            {truckPage &&
+              <Button
+                variant={'link'}
+                onClick={() => setSelectedCategory('Maintenance')}
+                className={`px-4 py-2 transition duration-300 ease-in-out ${selectedCategory === 'Maintenance'
+                  ? 'border-b-2 border-blue-500 text-blue-500'
+                  : 'border-transparent text-gray-600 hover:text-blue-500 hover:border-blue-500'
+                  }`}
+              >
+                Maintenance
+              </Button>
+            }
+
+          </div>
+
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Expense Type</label>
             <Select value={formData.expenseType} onValueChange={handleSelectChange}>
@@ -137,7 +182,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
                 <SelectValue>{formData.expenseType || 'Select Expense Type'}</SelectValue>
               </SelectTrigger>
               <SelectContent>
-                {combinedChargeTypes.map((type) => (
+                {chargeTypes.map((type) => (
                   <SelectItem key={type} value={type}>{type}</SelectItem>
                 ))}
               </SelectContent>
@@ -202,7 +247,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
             </div>
           }
 
-          {(formData.expenseType !== 'Fuel Expense' && !selected) &&
+          {(formData.expenseType !== 'Fuel Expense' && !selected && !truckPage)  &&
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">Add to Party Bill</label>
               <input

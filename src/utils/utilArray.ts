@@ -122,3 +122,35 @@ export const chargeType = [
     'Mamul',
     'Other'
   ];
+
+  export const fuelAndDriverChargeTypes = new Set([
+    'Brokerage',
+    'Detention',
+    'Driver bhatta',
+    'Driver payment',
+    'Loading charges',
+    'Fuel Expense',
+    'Other',
+    'Police Expense',
+    'RTO Expense',
+    'Toll Expense',
+    'Union Expense',
+    'Weight Charges',
+    'Unloading Charges',
+  ]);
+  
+  export const maintenanceChargeTypes = new Set([
+    'Repair Expense',
+    'Showroom Service',
+    'Regular Service',
+    'Minor Repair',
+    'Gear Maintenance',
+    'Brake Oil Change',
+    'Grease Oil Change',
+    'Spare Parts Purchase',
+    'Air Filter Change',
+    'Tyre Puncture',
+    'Tyre Retread',
+    'Tyre Purchase',
+    'Roof Top Repair'
+  ]);
