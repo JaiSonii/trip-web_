@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 
 const TruckExpense = models.TruckExpense || model('TruckExpense', TruckExpenseSchema)
 
-export async function PATCH(req: Request, { params }: { params: { expenseId: string } }) {
+export async function PUT(req: Request, { params }: { params: { expenseId: string } }) {
   // Connect to the database
   await connectToDatabase();
   const { expenseId } = params
@@ -21,21 +21,22 @@ export async function PATCH(req: Request, { params }: { params: { expenseId: str
     let data = await req.json();
     console.log(data)
 
-    if (data.partyBill && data.expenseType == 'Fuel Expense') {
-      return NextResponse.json({ status: 400, message: "Cannot Add Fuel to Party Bill" })
-    }
-
     // Create a new instance of TripExpense with the parsed data and tripId
-    const newCharge = TruckExpense.findById(expenseId)
-    if (!newCharge) {
-      return NextResponse.json({ status: 404, message: "Charge Not Found" })
-    }
-
-
+    const charge = await TruckExpense.findById(expenseId)
     
+    charge.amount = data.amount
+    charge.date = data.date
+    charge.notes = data.notes
+    charge.expenseType = data.expenseType
+    charge.paymentMode = data.paymentMode
+    charge.transaction_id = data.transaction_id
+    charge.truck = data.truck
+    charge.driver = data.driver    
+
+    await charge.save()
 
     // Return a success response with the new charge
-    return NextResponse.json({ status: 200, newCharge });
+    return NextResponse.json({ status: 200, charge });
 
   } catch (error) {
     // Handle any errors that occur during the process

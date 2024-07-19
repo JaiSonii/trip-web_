@@ -1,8 +1,11 @@
 'use client'
 import Loading from '@/app/loading'
+import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal'
+import { Button } from '@/components/ui/button'
 import { ITruckExpense } from '@/utils/interface'
 import { useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
+import { MdDelete } from 'react-icons/md'
 
 const maintainenceExpenseTypes = new Set([
   'Repair Expense',
@@ -29,8 +32,13 @@ const TruckMaintainenceBook = () => {
   const { truckNo } = useParams()
   const [error, setError] = useState<any>()
   const [loading, setLoading] = useState<boolean>(true)
-  const [maintainenceBook, setMaintainenceBook] = useState<ITruckExpense[]>()
+  const [maintainenceBook, setMaintainenceBook] = useState<ITruckExpense[]>([])
   const [tripDetails, setTripDetails] = useState<TripDetails>({})
+  const [modelOpen, setModelOpen] = useState(false)
+  const [selected, setSeclected] = useState<ITruckExpense>()
+
+
+
 
   useEffect(() => {
     const getBook = async () => {
@@ -81,6 +89,51 @@ const TruckMaintainenceBook = () => {
   }, [maintainenceBook])
 
 
+  const handleDelete = async (id: string, e : React.FormEvent) => {
+    e.stopPropagation()
+    const res = await fetch(`/api/truckExpense/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!res.ok) {
+      alert('Failed to delete expense');
+      return;
+    }
+    setMaintainenceBook(maintainenceBook.filter((item) => item._id !== id));
+    const deletedItem = maintainenceBook.find((item) => item._id === id);
+  };
+
+  const handleAddCharge = async (newCharge: any, id?: string) => {
+    const truckExpenseData = {
+      ...newCharge,
+      truck: truckNo,
+      transaction_id: newCharge.transactionId || '',
+      driver: newCharge.driver || '',
+      notes: newCharge.notes || '',
+    };
+
+    const res = await fetch(`/api/truckExpense/${id}`,{
+      method : 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(truckExpenseData),
+    })
+    if (!res.ok) {
+      alert('Failed to add charge');
+      return;
+    }
+    const data = await res.json()
+    setMaintainenceBook((prev : ITruckExpense[])=> {
+     const index =  prev.findIndex(item=> item._id == data.charge._id)
+     prev[index] = data.charge
+     return prev
+    })
+  };
+
+
   if(loading) return <Loading />
 
   return (
@@ -91,22 +144,41 @@ const TruckMaintainenceBook = () => {
             <tr>
               <th>Date</th>
               <th>Amount</th>
+              <th>Expense Type</th>
               <th>PaymentMode</th>
+              <th>notes</th>
               <th>Trip</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {maintainenceBook?.map((fuel, index) => (
-              <tr key={index} className="border-t hover:bg-slate-100">
+              <tr key={index} className="border-t hover:bg-slate-100" onClick={()=>{
+                setSeclected(fuel)
+                setModelOpen(true)
+              }}>
                 <td>{new Date(fuel.date).toLocaleDateString()}</td>
                 <td>{fuel.amount}</td>
+                <td>{fuel.expenseType}</td>
                 <td>{fuel.paymentMode}</td>
+                <td>{fuel.notes}</td>
                 <td>{tripDetails[fuel.trip] || 'NA'}</td>
+                <td>
+                <Button onClick={(e) => handleDelete(fuel._id as string, e)} variant={'destructive'} ><MdDelete /></Button>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      <ExpenseModal
+        isOpen={modelOpen}
+        onClose={() => setModelOpen(false)}
+        onSave={handleAddCharge}
+        driverId=''
+        selected={selected}
+        truckPage={true}
+      />
     </div>
   )
 }

@@ -2,6 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Adjust import path as per your project
 import { Button } from '@/components/ui/button';
+import { fuelAndDriverChargeTypes } from '@/utils/utilArray';
+import { maintenanceChargeTypes } from '@/utils/utilArray';
+import { IDriver } from '@/utils/interface';
+import DriverSelect from '../DriverSelect';
 
 interface ChargeModalProps {
   isOpen: boolean;
@@ -12,37 +16,7 @@ interface ChargeModalProps {
   truckPage?: boolean
 }
 
-const fuelAndDriverChargeTypes = [
-  'Brokerage',
-  'Detention',
-  'Driver bhatta',
-  'Driver payment',
-  'Loading charges',
-  'Fuel Expense',
-  'Other',
-  'Police Expense',
-  'RTO Expense',
-  'Toll Expense',
-  'Union Expense',
-  'Weight Charges',
-  'Unloading Charges',
-];
 
-const maintenanceChargeTypes = [
-  'Repair Expense',
-  'Showroom Service',
-  'Regular Service',
-  'Minor Repair',
-  'Gear Maintenance',
-  'Brake Oil Change',
-  'Grease Oil Change',
-  'Spare Parts Purchase',
-  'Air Filter Change',
-  'Tyre Puncture',
-  'Tyre Retread',
-  'Tyre Purchase',
-  'Roof Top Repair'
-];
 
 interface TripExpense {
   id?: string;
@@ -69,13 +43,14 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
     expenseType: selected?.expenseType || '',
     notes: selected?.notes || '',
     partyAmount: 0,
-    paymentMode: 'Cash',
-    transactionId: '',
-    driver: ''
+    paymentMode: selected?.paymentMode || 'Cash',
+    transactionId: selected?.transaction_id ||'',
+    driver: selected?.driver || ''
   });
 
   const [driverName, setDriverName] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Fuel & Driver');
+  const [drivers, setDrivers] = useState<IDriver[]>([])
 
   useEffect(() => {
     if (!selected) return;
@@ -89,9 +64,9 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
         expenseType: selected?.expenseType || '',
         notes: selected?.notes || '',
         partyAmount: 0,
-        paymentMode: 'Cash',
-        transactionId: '',
-        driver: ''
+        paymentMode: selected?.paymentMode || 'Cash',
+        transactionId: selected?.transaction_id ||  '',
+        driver: selected?.driver ||''
       }
     })
   }, [selected])
@@ -108,6 +83,15 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
       setDriverName(data.name || 'Driver Not Found');
     };
     if (formData.paymentMode === 'Paid By Driver') fetchDriverName();
+
+    const fetchDrivers = async () => {
+      const res = await fetch(`/api/drivers`)
+      const data = await res.json();
+      setDrivers(data.drivers);
+    }
+
+    fetchDrivers()
+
   }, [formData.paymentMode, driverId]);
 
   const handleSelectChange = (value: string) => {
@@ -138,7 +122,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
     }
   };
 
-  const chargeTypes = selectedCategory === 'Fuel & Driver' ? fuelAndDriverChargeTypes : maintenanceChargeTypes;
+  const chargeTypes = selectedCategory === 'Fuel & Driver' ? Array.from(fuelAndDriverChargeTypes) : Array.from(maintenanceChargeTypes);
 
   if (!isOpen) return null;
 
@@ -226,12 +210,19 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
             ))}
           </div>
 
-          {formData.paymentMode === 'Paid By Driver' &&
+          {formData.paymentMode === 'Paid By Driver' && !truckPage &&
             <div className="mb-4">
               <button disabled className="block text-sm font-medium text-gray-700 border border-black rounded-md p-2 w-1/3">
                 {driverName}
               </button>
             </div>
+          }
+
+          {formData.paymentMode === 'Paid By Driver' && truckPage &&
+            <DriverSelect 
+            drivers={drivers}
+            formData={formData}
+            handleChange={handleChange} setFormData={setFormData}            />
           }
 
           {formData.paymentMode === 'Online' &&
@@ -247,7 +238,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
             </div>
           }
 
-          {(formData.expenseType !== 'Fuel Expense' && !selected && !truckPage)  &&
+          {(formData.expenseType !== 'Fuel Expense' && !selected && !truckPage) &&
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">Add to Party Bill</label>
               <input
