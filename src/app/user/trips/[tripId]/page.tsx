@@ -7,6 +7,7 @@ import { useParams, useRouter } from 'next/navigation';
 import TripDetails from '@/components/trip/tripDetail/TripDetail';
 import Loading from '@/app/loading';
 import { MdEdit, MdDelete, MdClose } from 'react-icons/md';
+import { Button } from '@/components/ui/button';
 
 // Dynamically import EditTripForm
 const EditTripForm = dynamic(() => import('@/components/trip/EditTripForm'), {
@@ -133,6 +134,7 @@ const TripPage: React.FC = () => {
       console.error('Error editing trip:', error);
     } finally {
       setIsSubmitting(false);
+      setIsEditing(false)
     }
   }, [trip, tripId, router, setTrip]);
 
@@ -167,32 +169,35 @@ const TripPage: React.FC = () => {
     <div className="mx-auto p-4">
       {!isEditing && (
         <div className="flex justify-end space-x-4 mb-4">
-          <button
+          <Button
+          variant={'outline'}
             onClick={() => {
               handleEditClicked();
               setIsEditing(true);
             }}
-            className="flex items-center px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-md shadow-lg hover:from-indigo-400 hover:to-purple-400 transition-all duration-300 ease-in-out transform hover:scale-105"
+            className="transition-all duration-300 ease-in-out transform hover:scale-105"
           >
             <MdEdit className="mr-2" /> Edit
-          </button>
-          <button
+          </Button>
+          <Button
+          variant={'destructive'}
             onClick={handleDelete}
-            className="flex items-center px-4 py-2 bg-gradient-to-r from-red-500 to-red-700 text-white rounded-md shadow-lg hover:from-red-400 hover:to-red-600 transition-all duration-300 ease-in-out transform hover:scale-105"
+            className="transition-all duration-300 ease-in-out transform hover:scale-105"
           >
             <MdDelete className="mr-2" /> Delete
-          </button>
+          </Button>
         </div>
       )}
       {isEditing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg relative w-full max-w-2xl">
-            <button
+            <Button
+            variant={'ghost'}
               onClick={handleCancelEdit}
-              className="absolute top-2 right-2 text-gray-600 hover:text-gray-900"
+              className="absolute top-0 right-0 text-gray-600 hover:text-gray-900"
             >
               <MdClose size={24} />
-            </button>
+            </Button>
             <EditTripForm
               parties={parties}
               trucks={trucks}
