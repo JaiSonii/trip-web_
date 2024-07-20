@@ -104,46 +104,103 @@ body {
 
 /* globals.css */
 
+/* globals.css */
+
 .table-container {
   overflow-x: auto;
+  margin: 20px 0;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background-color: #ffffff;
 }
 
 .custom-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate; /* Allows for rounded corners */
+  border-spacing: 0;
   font-size: 16px;
   table-layout: auto;
-  border-radius: 8px;
+  border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.custom-table th, .custom-table td {
-  padding: 14px 20px;
+.custom-table th,
+.custom-table td {
+  padding: 16px 24px; /* Improved padding */
   text-align: left;
-  border-bottom: 1px solid #e2e8f0; /* Light border for data cells */
+  border: 1px solid #e2e8f0; /* Add border */
+  transition: background-color 0.3s ease; /* Smooth transition */
 }
 
 .custom-table th {
-  background-color: #3b4c78; /* Dark header background */
+  background-color: #4a5568; /* Darker, more modern header background */
   color: #ffffff;
-  border-bottom: 2px solid #2b3856; /* Dark border */
-  font-weight: bold;
+  font-weight: 600;
   text-transform: uppercase;
+  font-size: 14px;
 }
 
 .custom-table tbody tr:nth-child(even) {
-  background-color: #f7fafc; /* Light grey for even rows */
+  background-color: #f9fafb; /* Light grey for even rows */
 }
 
 .custom-table tbody tr:hover {
   background-color: #edf2f7; /* Slightly darker grey on hover */
+  cursor: pointer; /* Pointer cursor on hover */
 }
 
 .custom-table tbody td {
   color: #2d3748;
 }
 
-.custom-table thead th {
-  font-size: 14px;
+.custom-table tbody tr:active {
+  background-color: #e2e8f0; /* Feedback color on click */
 }
+
+.custom-table tbody td:first-child {
+  border-left: 4px solid #4a5568; /* Visual indicator for the first cell */
+}
+
+.custom-table tbody tr.selected {
+  background-color: #4a5568; /* Highlight selected row */
+  color: #ffffff;
+}
+
+.custom-table tbody tr.selected td {
+  color: #ffffff; /* Ensure text is readable on selected row */
+}
+
+.custom-table tfoot td {
+  padding: 16px 24px;
+  background-color: #edf2f7; /* Footer background color */
+  font-weight: bold;
+  border-top: 2px solid #4a5568;
+}
+
+.custom-table tfoot td:first-child {
+  border-left: none;
+}
+
+.custom-table tfoot td:last-child {
+  border-right: none;
+}
+
+.custom-table caption {
+  caption-side: bottom;
+  padding: 10px;
+  font-size: 14px;
+  color: #4a5568;
+}
+
+.custom-table caption a {
+  color: #4a5568;
+  text-decoration: none;
+}
+
+.custom-table caption a:hover {
+  text-decoration: underline;
+}
+
+
+
+

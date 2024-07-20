@@ -2,6 +2,7 @@
 import Loading from '@/app/loading'
 import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal'
 import { Button } from '@/components/ui/button'
+import { fetchDriverName } from '@/helpers/driverOperations'
 import { ITruckExpense } from '@/utils/interface'
 import { connectToDatabase, tripExpenseSchema } from '@/utils/schema'
 import { model, models } from 'mongoose'
@@ -121,6 +122,7 @@ const TruckFuelBook = () => {
                             <th>Amount</th>
                             <th>PaymentMode</th>
                             <th>Notes</th>
+                            <th>Driver</th>
                             <th>Trip</th>
                             <th>Action</th>
                         </tr>
@@ -135,6 +137,7 @@ const TruckFuelBook = () => {
                                 <td>{fuel.amount}</td>
                                 <td>{fuel.paymentMode}</td>
                                 <td>{fuel.notes}</td>
+                                <td>{fetchDriverName(fuel.driver as string) || 'NA'}</td>
                                 <td>{tripDetails[fuel.trip] || 'NA'}</td>
                                 <td>
                                     <Button onClick={(e) => handleDelete(fuel._id as string,e)} variant={'destructive'} ><MdDelete /></Button>

@@ -59,7 +59,7 @@ export async function DELETE(req: Request, { params }: { params: { expenseId: st
     if(!charge){
       return NextResponse.json({ status: 404, message: "Charge Not Found" })
     }
-    return NextResponse.json({message : 'Deletion Success', status : 2000})
+    return NextResponse.json({message : 'Deletion Success', status : 200, charge : charge})
   }catch(error){
     console.log(error)
     return NextResponse.json({message : error, status : 500})

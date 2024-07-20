@@ -1,5 +1,6 @@
 import React from 'react';
 import { MdDeleteForever, MdEdit } from "react-icons/md";
+import { Button } from '../ui/button';
 
 interface DropdownMenuProps {
   onEditClick: () => void;
@@ -11,7 +12,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ onEditClick, onDeleteClick 
 
   return (
     <div className="relative">
-      <button
+      <Button
         className="px-4 py-2 text-white bg-gray-600 rounded-md hover:bg-gray-700 focus:outline-none"
         onClick={() => setDropdownOpen(!dropdownOpen)}
       >
@@ -22,21 +23,21 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ onEditClick, onDeleteClick 
             clipRule="evenodd"
           />
         </svg>
-      </button>
+      </Button>
       {dropdownOpen && (
-        <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow-lg">
-          <button
-            className=" w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center justify-center"
+        <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow-lg flex flex-col">
+          <Button
+            variant={'secondary'}
             onClick={onEditClick}
           >
-            <MdEdit style={{ width: '30px', height: '30px' }} />
-          </button>
-          <button
-            className=" w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center justify-center"
+            <MdEdit style={{ width: '20px', height: '20px' }} /> Edit
+          </Button>
+          <Button
+            variant={'destructive'}
             onClick={onDeleteClick}
           >
-            <MdDeleteForever style={{ width: '30px', height: '30px' }} />
-          </button>
+            <MdDeleteForever style={{ width: '20px', height: '20px' }} /> Delete
+          </Button>
         </div>
       )}
     </div>

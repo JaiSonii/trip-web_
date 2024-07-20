@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '../ui/button';
 
 interface DriverActionsProps {
   onGaveClick: () => void;
@@ -7,19 +8,19 @@ interface DriverActionsProps {
 
 const DriverActions: React.FC<DriverActionsProps> = ({ onGaveClick, onGotClick }) => {
   return (
-    <div className="mr-4 flex items-center">
-      <button
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2"
+    <div className="mr-4 flex items-center gap-2">
+      <Button
+        variant={'destructive'}
         onClick={onGaveClick}
       >
-        Driver Gave
-      </button>
-      <button
-        className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+        (-) Driver Gave
+      </Button>
+      <Button
+        variant={'ghost'}
         onClick={onGotClick}
       >
-        Driver Got
-      </button>
+        (+) Driver Got
+      </Button>
     </div>
   );
 };

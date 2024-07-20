@@ -89,6 +89,7 @@ export interface IParty extends Document {
 
 export interface TruckModel extends Document {
   truckNo: string;
+  truck_id : string
   truckType: string;
   model: any;
   capacity: string;

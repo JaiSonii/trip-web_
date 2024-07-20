@@ -3,6 +3,7 @@ import mongoose, { model, models } from 'mongoose';
 import { connectToDatabase, truckSchema } from '@/utils/schema';
 import { TruckModel } from '@/utils/interface';
 import { verifyToken } from '@/utils/auth';
+import {v4 as uuidv4} from 'uuid'
 
 const Truck = models.Truck || model('Truck', truckSchema);
 
@@ -47,6 +48,7 @@ export async function POST(req: Request) {
     // Create a new TruckModel instance with provided data
     const newTruck = new Truck({
       user_id: user,
+      truck_id : 'truck_id' + uuidv4(),
       truckNo: data.truckNo,
       truckType: data.truckType || '',
       model: data.model || '',

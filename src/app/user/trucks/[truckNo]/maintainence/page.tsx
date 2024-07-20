@@ -2,6 +2,7 @@
 import Loading from '@/app/loading'
 import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal'
 import { Button } from '@/components/ui/button'
+import { fetchDriverName } from '@/helpers/driverOperations'
 import { ITruckExpense } from '@/utils/interface'
 import { useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
@@ -147,6 +148,7 @@ const TruckMaintainenceBook = () => {
               <th>Expense Type</th>
               <th>PaymentMode</th>
               <th>notes</th>
+              <th>Driver</th>
               <th>Trip</th>
               <th>Action</th>
             </tr>
@@ -162,6 +164,7 @@ const TruckMaintainenceBook = () => {
                 <td>{fuel.expenseType}</td>
                 <td>{fuel.paymentMode}</td>
                 <td>{fuel.notes}</td>
+                <td>{fetchDriverName(fuel.driver as string) || 'NA'}</td>
                 <td>{tripDetails[fuel.trip] || 'NA'}</td>
                 <td>
                 <Button onClick={(e) => handleDelete(fuel._id as string, e)} variant={'destructive'} ><MdDelete /></Button>

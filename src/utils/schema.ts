@@ -176,6 +176,7 @@ export const truckSchema: Schema = new Schema({
     type: String,
     required: true
   },
+  truck_id : {type : String, required : true, unique : true},
   truckNo: { type: String, required: true, unique: true },
   truckType: { type: String },
   model: { type: String },

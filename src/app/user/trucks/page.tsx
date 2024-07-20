@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { TruckModel } from '@/utils/interface';
 import Loading from '@/app/loading';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/components/AuthProvider';
 
 const TrucksPage = () => {
   const router = useRouter();

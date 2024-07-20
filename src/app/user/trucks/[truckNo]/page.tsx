@@ -117,7 +117,7 @@ const TruckPage = () => {
      prev[index] = data.charge
      return prev
     })
-    setTotalExpense(totalExpense - (selected?.amount as number) + newCharge.amount)
+    setTotalExpense(totalExpense as number - (selected?.amount as number) + newCharge.amount as number)
   };
 
   return (

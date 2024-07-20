@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ITrip, PaymentBook, TripExpense,  } from '@/utils/interface';
+import { ITrip, PaymentBook, TripExpense, } from '@/utils/interface';
 import TruckHeader from './TruckHeader';
 import TripInfo from './TripInfo';
 import TripStatus from './TripStatus';
@@ -10,6 +10,7 @@ import PODViewer from './PODViewer';
 import DataList from './DataList';
 import Charges from './Charges'; // Import the Charges component
 import { fetchBalance } from '@/helpers/fetchTripBalance';
+import { fetchPartyName } from '@/helpers/fetchPartyName';
 
 interface TripDetailsProps {
   trip: ITrip;
@@ -22,46 +23,38 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
   const [tripBalance, setBalance] = useState(0);
   const [charges, setCharges] = useState<TripExpense[]>([])
 
-  useEffect(()=>{
-    const balance = async ()=>{
-      if (trip){
+  useEffect(() => {
+    const balance = async () => {
+      if (trip) {
         const pending = await fetchBalance(trip)
         setBalance(pending)
       }
     }
     balance()
-    
-  },[trip, charges, accounts])
+
+  }, [trip, charges, accounts])
 
   useEffect(() => {
-    const fetchPartyName = async () => {
+    const fetchParty = async () => {
       try {
-        const partyRes = await fetch(`/api/parties/${trip.party}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        if (!partyRes.ok) {
-          throw new Error('Failed to fetch Party details');
-        }
-        const partyData = await partyRes.json();
-        setPartyName(partyData.party.name);
-      } catch (error) {
+        const name = await fetchPartyName(trip.party)
+        setPartyName(name);
+      } catch (error : any) {
         console.log('Error fetching party name:', error);
+        alert(error.message)
       }
     };
-    const fetchCharges  = async () =>{
+    const fetchCharges = async () => {
       const response = await fetch(`/api/trips/${trip.trip_id}/expenses`);
       const data = await response.json();
       setCharges(data.charges);
     }
-    if (charges){
+    if (charges) {
       const sorted = [...charges].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-    setCharges(sorted);
+      setCharges(sorted);
     }
     fetchCharges()
-    fetchPartyName();
+    fetchParty();
   }, [trip]);
 
   const handleStatusUpdate = async (data: any) => {
@@ -107,7 +100,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
         if (!truckRes.ok) {
           throw new Error('Failed to update truck status');
         }
-      } catch (error:any) {
+      } catch (error: any) {
         console.log(error);
         alert(error.message)
       }
@@ -188,20 +181,20 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
         </div>
 
         {/* Reusable Components */}
-        <DataList data={accounts} label="Advances" modalTitle="Add Advance" trip={trip} setData={setAccounts} setBalance = {setBalance} setTrip={setTrip}/>
-        <DataList data={accounts} label="Payments" modalTitle="Add Payment" trip={trip} setData={setAccounts} setBalance = {setBalance} setTrip={setTrip}/>
+        <DataList data={accounts} label="Advances" modalTitle="Add Advance" trip={trip} setData={setAccounts} setBalance={setBalance} setTrip={setTrip} />
+        <DataList data={accounts} label="Payments" modalTitle="Add Payment" trip={trip} setData={setAccounts} setBalance={setBalance} setTrip={setTrip} />
 
         {/* Charges Component Integration */}
-        <Charges charges={charges} onAddCharge={handleAddCharge} setCharges={setCharges} tripId={trip.trip_id} trip={trip}/>
+        <Charges charges={charges} onAddCharge={handleAddCharge} setCharges={setCharges} tripId={trip.trip_id} trip={trip} />
       </div>
 
       {/* Right Side - Profit, Balance, and POD Viewer */}
       <div className="col-span-1 space-y-6">
-        <div className="bg-gradient-to-r from-purple-500 to-indigo-500 shadow-lg rounded-lg p-6 text-white">
+        <div className="bg-gradient-to-r p-4 from-gray-700 via-gray-600 to-gray-500 rounded-lg shadow-lg text-white">
           <h3 className="text-xl font-bold">Pending Balance</h3>
           <p className="text-2xl font-semibold mt-4">₹ {tripBalance}</p>
         </div>
-        <Profit charges={charges} amount={trip.amount} setCharges={setCharges} tripId={trip.trip_id} driverId={trip.driver} truckNo={trip.truck}/>
+        <Profit charges={charges} amount={trip.amount} setCharges={setCharges} tripId={trip.trip_id} driverId={trip.driver} truckNo={trip.truck} />
         <PODViewer podUrl={podUrl} />
       </div>
     </div>

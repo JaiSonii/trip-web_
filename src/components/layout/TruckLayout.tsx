@@ -1,6 +1,6 @@
 // components/layout/TruckLayout.tsx
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, Ref, RefObject, Reference } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { TruckModel } from '@/utils/interface';
 import Link from 'next/link';
@@ -12,13 +12,18 @@ import Loading from '@/app/loading';
 import { Button } from '../ui/button';
 import ExpenseModal from '../trip/tripDetail/ExpenseModal';
 import { fuelAndDriverChargeTypes, maintenanceChargeTypes } from '@/utils/utilArray';
+import { MdDelete, MdEdit } from 'react-icons/md';
+import { SlOptionsVertical } from "react-icons/sl";
+import { IoCloseCircleOutline } from "react-icons/io5";
+import { IoAddCircle } from "react-icons/io5";
+import EditTruckModal from '../truck/EditTruckModal';
 
 interface TruckLayoutProps {
     children: React.ReactNode;
     truckNo: string;
 }
 
-const TruckLayout = ({ children, truckNo}: TruckLayoutProps) => {
+const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
     const router = useRouter();
     const pathname = usePathname();
     const tabs = [
@@ -32,6 +37,27 @@ const TruckLayout = ({ children, truckNo}: TruckLayoutProps) => {
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
+    const [openOptions, setOpenOptions] = useState(false);
+    const dropdownRef = useRef<any>(null);
+    const [edit, setEdit] = useState<boolean>(false)
+
+    useEffect(() => {
+        const handleClickOutside = (event: any) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setOpenOptions(false);
+            }
+        };
+
+        if (openOptions) {
+            document.addEventListener('mousedown', handleClickOutside);
+        } else {
+            document.removeEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [openOptions]);
 
     const handleAddCharge = async (newCharge: any, id: string | undefined) => {
         const truckExpenseData = {
@@ -78,6 +104,47 @@ const TruckLayout = ({ children, truckNo}: TruckLayoutProps) => {
         else if (maintenanceChargeTypes.has(truckExpenseData.expenseType)) router.push(`/user/trucks/${truckNo}/maintainence`);
     };
 
+    const handleEdit = async(fromdata : any) => {
+        // Handle edit logic
+        try {
+            const response = await fetch(`/api/trucks/${truckNo}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(fromdata)
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update truck');
+            }
+            router.refresh();
+        } catch (error) {
+            console.error('Error updating truck:', error);
+            setError('Failed to update truck. Please try again later.');
+        }
+        router.push(`/user/trucks`)
+    }
+
+    const handleDelete = async () => {
+        const res = await fetch(`/api/trucks/${truckNo}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        if (!res.ok) {
+            alert('Failed to delete truck');
+            return;
+        }
+        const data = await res.json();
+        if (data.status == 400) {
+            alert(data.message);
+            return;
+        }
+        router.push('/user/trucks');
+    }
+
     useEffect(() => {
         const fetchTruckDetails = async () => {
             try {
@@ -99,19 +166,73 @@ const TruckLayout = ({ children, truckNo}: TruckLayoutProps) => {
     }, [truckNo]);
 
     if (loading) return <Loading />;
-    if (error) return <div>Error: {error}</div>;
+    if (error) return <div className="text-red-500 text-center my-4">Error: {error}</div>;
 
     return (
-        <div className="w-full h-full p-4">
+        <div className="w-full h-full p-4 bg-gray-50 rounded-lg shadow-sm">
             <div className="flex flex-col space-y-4">
-                <div className="flex justify-between items-center">
-                    <div className="flex space-x-3">
-                        <Button variant="link" className="text-2xl font-bold" onClick={() => router.push(`/user/trucks/${truckNo}`)}>{truckNo}</Button>
-                        <span className="text-2xl font-bold">{truck?.status}</span>
-                        <span className="text-2xl font-bold">{truck?.truckType} {truck?.model}</span>
-                        <span className="text-2xl font-bold">{truck?.ownership}</span>
+                <div className="flex items-center justify-between p-4 bg-gray-200">
+                    <div className="flex space-x-4">
+                        <Button
+                            variant="link"
+                            className="text-2xl font-bold"
+                            onClick={() => router.push(`/user/trucks/${truckNo}`)}
+                        >
+                            {truckNo}
+                        </Button>
+                        <span className="text-2xl font-bold text-gray-700">{truck?.status}</span>
+                        <span className="text-2xl font-bold text-gray-700">
+                            {truck?.truckType} {truck?.model}
+                        </span>
+                        <span className="text-2xl font-bold text-gray-700">{truck?.ownership}</span>
                     </div>
-                    <Button onClick={() => setModalOpen(true)}>Add Expense</Button>
+                    <div className="relative" ref={dropdownRef}>
+                        <Button onClick={() => setOpenOptions(!openOptions)}>
+                            <SlOptionsVertical size={20} />
+                        </Button>
+                        {openOptions && (
+                            <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md flex flex-col gap-2 p-2 z-10">
+                                <Button
+                                    onClick={() => {
+                                        setModalOpen(true);
+                                        setOpenOptions(false);
+                                    }}
+                                    className="justify-start"
+                                >
+                                    <IoAddCircle className="mr-2" /> Add Expense
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => {
+                                        setEdit(true)
+                                        setOpenOptions(false);
+                                    }}
+                                    className="justify-start"
+                                >
+                                    <MdEdit className="mr-2" /> Edit Truck
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    onClick={() => {
+                                        handleDelete();
+                                        setOpenOptions(false);
+                                    }}
+                                    className="justify-start"
+                                >
+                                    <MdDelete className="mr-2" /> Delete Truck
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => {
+                                        setOpenOptions(false);
+                                    }}
+                                    className="justify-start"
+                                >
+                                    <IoCloseCircleOutline className="mr-2" /> Close
+                                </Button>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
                 <div className="flex space-x-4 border-b-2 border-gray-200">
@@ -143,6 +264,12 @@ const TruckLayout = ({ children, truckNo}: TruckLayoutProps) => {
                 onSave={handleAddCharge}
                 driverId=""
                 truckPage={true}
+            />
+            <EditTruckModal 
+                truck={truck as TruckModel}
+                isOpen={edit}
+                onClose={() => setEdit(false)}
+                onSave={handleEdit}
             />
         </div>
     );

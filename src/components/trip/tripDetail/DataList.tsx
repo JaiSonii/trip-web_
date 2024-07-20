@@ -2,20 +2,20 @@ import React, { useEffect, useState } from 'react';
 import Modal from './Modal';
 import { ITrip, PaymentBook } from '@/utils/interface';
 import { MdDelete, MdEdit } from 'react-icons/md';
-import { useRouter } from 'next/navigation';
 import { fetchBalance } from '@/helpers/fetchTripBalance';
+import { Button } from '@/components/ui/button';
 
 interface DataListProps {
   data: PaymentBook[];
   label: string;
   trip: ITrip;
   setData: React.Dispatch<React.SetStateAction<PaymentBook[]>>;
-  setTrip : any
-  setBalance : any
+  setTrip: any;
+  setBalance: any;
   modalTitle: string;
 }
 
-const DataList: React.FC<DataListProps> = ({data,label,modalTitle,trip,setData,setBalance, setTrip}) => {
+const DataList: React.FC<DataListProps> = ({ data, label, modalTitle, trip, setData, setBalance, setTrip }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editData, setEditData] = useState<PaymentBook | null>(null);
   const [listData, setListData] = useState<PaymentBook[]>([]);
@@ -42,15 +42,15 @@ const DataList: React.FC<DataListProps> = ({data,label,modalTitle,trip,setData,s
         throw new Error('Failed to add new item');
       }
       const resData = await res.json();
-      if(resData.status == 400){
-        alert(resData.message)
-        return
+      if (resData.status == 400) {
+        alert(resData.message);
+        return;
       }
       setData(resData.trip.accounts);
-      const pending = await fetchBalance(resData.trip)
-      setBalance(pending)
+      const pending = await fetchBalance(resData.trip);
+      setBalance(pending);
       setIsModalOpen(false);
-      setTrip(resData.trip)
+      setTrip(resData.trip);
       // router.refresh();
     } catch (error) {
       console.log(error);
@@ -72,13 +72,13 @@ const DataList: React.FC<DataListProps> = ({data,label,modalTitle,trip,setData,s
 
       const resData = await res.json();
 
-      if(resData.status == 400){
-        alert(resData.message)
-        return
+      if (resData.status == 400) {
+        alert(resData.message);
+        return;
       }
 
       setData(resData.trip.accounts);
-      setTrip(resData.trip)
+      setTrip(resData.trip);
       setEditData(null);
       setIsModalOpen(false);
     } catch (error) {
@@ -104,13 +104,12 @@ const DataList: React.FC<DataListProps> = ({data,label,modalTitle,trip,setData,s
         console.log('Updated data:', updatedData);
         return updatedData;
       });
-      setTrip(resData.trip)
+      setTrip(resData.trip);
       // router.refresh();
     } catch (error) {
       console.log(error);
     }
   };
-  
 
   const toggleItemExpansion = (index: number) => {
     setExpandedItem((prev) => (prev === index ? null : index));
@@ -135,14 +134,14 @@ const DataList: React.FC<DataListProps> = ({data,label,modalTitle,trip,setData,s
     <div className="mt-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-800">{label}</h3>
-        <button
-          className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500 text-white hover:bg-purple-600 focus:outline-none ml-4 transition duration-300 ease-in-out transform hover:scale-110"
+        <Button
+          className="rounded-full flex items-center w-8 h-8"
           onClick={openAddModal}
           aria-label={`Add ${label}`}
           disabled={trip.status == 4}
         >
           +
-        </button>
+        </Button>
       </div>
       {!listData || listData.length === 0 ? (
         <p className="text-sm text-gray-500">No {label.toLowerCase()} available.</p>
@@ -164,28 +163,30 @@ const DataList: React.FC<DataListProps> = ({data,label,modalTitle,trip,setData,s
                 </div>
               </div>
               {expandedItem === index && (
-                <div className="mt-4">
+                <div className="mt-4 bg-gray-100 p-4 rounded-md border border-gray-300">
                   <p className="text-xs text-gray-600">
                     Received by Driver: {item.receivedByDriver ? 'Yes' : 'No'}
                   </p>
                   {item.notes && (
-                    <p className="text-xs text-gray-600">Notes: {item.notes}</p>
+                    <p className="text-xs text-gray-600 mb-2">Notes: {item.notes}</p>
                   )}
                   <div className="mt-2 flex justify-end gap-2">
-                    <button
-                      className="text-xs text-blue-500 hover:text-blue-700 focus:outline-none"
+                    <Button
+                      variant={'ghost'}
                       onClick={() => openEditModal(item)}
                       disabled={trip.status == 4}
+                      className="flex items-center justify-center p-2 hover:bg-gray-200"
                     >
                       <MdEdit size={20} />
-                    </button>
-                    <button
-                      className="text-xs text-red-500 hover:text-red-700 focus:outline-none"
+                    </Button>
+                    <Button
+                      variant={'ghost'}
                       onClick={() => handleDeleteItem(item)}
                       disabled={trip.status == 4}
+                      className="flex items-center justify-center p-2 hover:bg-gray-200"
                     >
                       <MdDelete size={20} />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}

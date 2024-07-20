@@ -13,7 +13,6 @@ export async function DELETE(req: Request, { params }: { params: { tripId: strin
     return NextResponse.json({ error });
   }
   const { tripId, accountId } = params;
-  const { amount } = await req.json()
   await connectToDatabase();
 
   try {

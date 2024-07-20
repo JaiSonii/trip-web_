@@ -68,21 +68,15 @@ const DriversPage = () => {
               <th>Contact Number</th>
               <th>Status</th>
               <th>Balance (in Rupees)</th>
-              <th>Details</th>
             </tr>
           </thead>
           <tbody>
             {drivers.map((driver, index) => (
-              <tr key={index}>
+              <tr key={index} onClick={()=> router.push(`/user/drivers/${driver.driver_id}`)}>
                 <td>{driver.name}</td>
                 <td>{driver.contactNumber || '-'}</td>
                 <td>{driver.status}</td>
                 <td>{driver.balance || 0}</td>
-                <td>
-                  <Link href={`/user/drivers/${driver.driver_id}`} className="text-blue-500 hover:underline cursor-pointer">
-                    View Driver
-                  </Link>
-                </td>
               </tr>
             ))}
           </tbody>

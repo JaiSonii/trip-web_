@@ -9,6 +9,7 @@ import { useRouter } from 'next/navigation';
 import Loading from '@/app/loading';
 import { fetchBalance } from '@/helpers/fetchTripBalance';
 import { useAuth } from '@/components/AuthProvider';
+import { fetchPartyName } from '@/helpers/fetchPartyName';
 
 const TripsPage = () => {
   const router = useRouter();
@@ -91,27 +92,27 @@ const TripsPage = () => {
       <div className="table-container">
         <table className="custom-table">
           <thead>
-            <tr>
-              <th>Start Date</th>
-              <th>LR Number</th>
-              <th>Party Name</th>
-              <th>Truck Number</th>
-              <th>Route</th>
-              <th>Status</th>
-              <th>Party Balance</th>
+            <tr className="bg-gray-200">
+              <th className="border p-2">Start Date</th>
+              <th className="border p-2">LR Number</th>
+              <th className="border p-2">Party Name</th>
+              <th className="border p-2">Truck Number</th>
+              <th className="border p-2">Route</th>
+              <th className="border p-2">Status</th>
+              <th className="border p-2">Party Balance</th>
             </tr>
           </thead>
           <tbody>
             {trips.map((trip, index) => (
               <tr key={index} className="border-t hover:bg-slate-100 cursor-pointer" onClick={()=> router.push(`/user/trips/${trip.trip_id}`)}>
-                <td>{new Date(trip.startDate).toLocaleDateString()}</td>
-                <td>{trip.LR}</td>
-                <td>{parties?.find((party) => party.party_id == trip.party)?.name}</td>
+                <td className="border p-2">{new Date(trip.startDate).toLocaleDateString()}</td>
+                <td className="border p-2">{trip.LR}</td>
+                <td className="border p-2">{fetchPartyName(trip.party)}</td>
 
-                <td>{trip.truck}</td>
-                <td>{trip.route.origin.split(',')[0]} -&gt; {trip.route.destination.split(',')[0]}</td>
-                <td>{statuses[trip.status as number]}</td>
-                <td>{fetchBalance(trip)}</td>
+                <td className="border p-2">{trip.truck}</td>
+                <td className="border p-2">{trip.route.origin.split(',')[0]} -&gt; {trip.route.destination.split(',')[0]}</td>
+                <td className="border p-2">{statuses[trip.status as number]}</td>
+                <td className="border p-2">{fetchBalance(trip)}</td>
 
               </tr>
             ))}

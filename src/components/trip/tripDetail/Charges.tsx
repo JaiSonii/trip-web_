@@ -3,13 +3,14 @@ import ChargeModal from './ChargeModal';
 import { ITrip, TripExpense } from '@/utils/interface';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import EditChargeModal from './EditChargeModal';
+import { Button } from '@/components/ui/button';
 
 interface ChargesProps {
   charges: TripExpense[];
   setCharges: React.Dispatch<React.SetStateAction<TripExpense[]>>;
   tripId: string;
   onAddCharge: (charge: TripExpense) => void;
-  trip : ITrip
+  trip: ITrip;
 }
 
 const Charges: React.FC<ChargesProps> = ({ charges, setCharges, tripId, trip }) => {
@@ -26,7 +27,7 @@ const Charges: React.FC<ChargesProps> = ({ charges, setCharges, tripId, trip }) 
     }
   }, [charges]);
 
-const handleAddCharge = async (newCharge: TripExpense) => {
+  const handleAddCharge = async (newCharge: TripExpense) => {
     const res = await fetch(`/api/trips/${tripId}/expenses`, {
       method: 'POST',
       headers: {
@@ -64,18 +65,17 @@ const handleAddCharge = async (newCharge: TripExpense) => {
   };
 
   return (
-    <div className={`mt-6 `}>
+    <div className="mt-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-800">Charges</h3>
-        <button
+        <Button
           disabled={trip.status === 4}
-          className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-500 text-white hover:bg-purple-600 focus:outline-none ml-4 transition duration-300 ease-in-out transform hover:scale-110"
+          className="flex items-center justify-center w-8 h-8 rounded-full focus:outline-none ml-4 transition duration-300 ease-in-out transform hover:scale-110"
           onClick={() => setIsModalOpen(true)}
           aria-label="Add Charge"
-
         >
           +
-        </button>
+        </Button>
       </div>
       {!sortedCharges || sortedCharges.length === 0 ? (
         <p className="text-sm text-gray-500">No charges available.</p>
@@ -100,26 +100,27 @@ const handleAddCharge = async (newCharge: TripExpense) => {
                 </div>
               </div>
               {expandedItem === index && (
-                <div className="mt-4">
+                <div className="mt-4 bg-gray-100 p-4 rounded-md border border-gray-300">
                   {charge.notes && (
-                    <p className="text-xs text-gray-600">Notes: {charge.notes}</p>
+                    <p className="text-xs text-gray-600 mb-2">Notes: {charge.notes}</p>
                   )}
-                  <div className="mt-2 flex justify-end">
-                    <button
+                  <div className="mt-2 flex justify-end space-x-2">
+                    <Button
+                      variant={'ghost'}
                       disabled={trip.status === 4}
-                      className="text-xs text-blue-500 mr-2 hover:text-blue-700 focus:outline-none"
                       onClick={() => handleEditCharge(index)}
+                      className="flex items-center justify-center p-2 hover:bg-gray-200"
                     >
-                      <MdEdit className="text-xl text-purple-600" /> {/* Increased size of MdEdit */}
-                    </button>
-                    <button
+                      <MdEdit size={20} />
+                    </Button>
+                    <Button
+                      variant={'ghost'}
                       disabled={trip.status === 4}
-                      className="text-xs text-red-500 hover:text-red-700 focus:outline-none"
                       onClick={() => handleDeleteCharge(index)}
-
+                      className="flex items-center justify-center p-2 hover:bg-gray-200"
                     >
-                      <MdDelete className="text-xl text-red-700" /> {/* Increased size of MdDelete */}
-                    </button>
+                      <MdDelete size={20} />
+                    </Button>
                   </div>
                 </div>
               )}

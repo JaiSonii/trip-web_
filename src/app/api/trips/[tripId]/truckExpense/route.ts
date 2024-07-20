@@ -49,7 +49,7 @@ export async function POST(req: Request, { params }: { params: { tripId: string 
     }
 
     // Create a new instance of TripExpense with the parsed data and tripId
-    const newCharge = new TruckExpense({
+    const charge = new TruckExpense({
       ...data,
       trip: tripId,
       user_id: user
@@ -57,10 +57,10 @@ export async function POST(req: Request, { params }: { params: { tripId: string 
 
 
     // Save the new charge to the database
-    await newCharge.save();
+    await charge.save();
 
     // Return a success response with the new charge
-    return NextResponse.json({ status: 200, newCharge });
+    return NextResponse.json({ status: 200, charge });
 
   } catch (error) {
     // Handle any errors that occur during the process
@@ -68,4 +68,5 @@ export async function POST(req: Request, { params }: { params: { tripId: string 
     return NextResponse.json({ status: 500, error: "Failed to create new expense" });
   }
 }
+
 

@@ -1,5 +1,18 @@
-export async function fetchPartyName(partyId : string){
-    const res = await fetch(`/api/parties/${partyId}`)
-    const data = await res.json()
-    return data.party.name;
-}
+export const fetchPartyName = async (party : string) => {
+    try {
+      const partyRes = await fetch(`/api/parties/${party}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!partyRes.ok) {
+        throw new Error('Failed to fetch Party details');
+      }
+      const partyData = await partyRes.json();
+      return partyData.party.name
+    } catch (error) {
+      console.log('Error fetching party name:', error);
+      return error
+    }
+  };

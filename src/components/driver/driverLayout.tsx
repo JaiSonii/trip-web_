@@ -11,16 +11,17 @@ interface DriverLayoutProps {
   status: string;
   driverId: string;
   onDriverUpdate: (driver: IDriver) => void;
+  contactNumber: string;
 }
 
-const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onDriverUpdate }) => {
-
-  const router = useRouter()
+const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onDriverUpdate, contactNumber }) => {
+  const router = useRouter();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'gave' | 'got' | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [edit, setEdit] = useState<boolean>(false)
+  const [edit, setEdit] = useState<boolean>(false);
+  const [showContact, setShowContact] = useState<boolean>(false);
 
   const openModal = (type: 'gave' | 'got') => {
     setModalType(type);
@@ -63,7 +64,7 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onD
     }
   };
 
-  const handleEditDriver = async (driverName : string, mobileNumber : string) => {
+  const handleEditDriver = async (driverName: string, mobileNumber: string) => {
     const updatedDriver: Partial<IDriver> = {
       name: driverName,
       contactNumber: mobileNumber,
@@ -81,13 +82,13 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onD
       if (!response.ok) {
         throw new Error('Failed to update driver');
       }
-      const data = await response.json()
-      onDriverUpdate(data.driver)
-     setEdit(false)
-     alert('Driver Info Edited Successfully')
-     router.push('/drivers')
+      const data = await response.json();
+      onDriverUpdate(data.driver);
+      setEdit(false);
+      alert('Driver Info Edited Successfully');
+      router.push('/user/drivers');
     } catch (error: any) {
-      console.log(error)
+      console.log(error);
     }
   };
 
@@ -99,7 +100,7 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onD
           'Content-Type': 'application/json',
         },
       });
-  
+
       const data = await response.json();
       if (!response.ok) {
         if (response.status === 400) {
@@ -108,20 +109,23 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onD
         }
         throw new Error(data.message || 'Failed to delete driver');
       }
-  
+
       alert('Driver Removed Successfully');
       router.push('/drivers');
     } catch (error: any) {
       console.error('Failed to delete driver:', error);
-      alert(error.message);  // Display an alert with the error message
+      alert(error.message); // Display an alert with the error message
       setError(error.message);
     }
   };
 
   return (
     <div className="flex items-center justify-between p-4 bg-gray-200">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold mr-5">{name}</h1>
+      <div className="flex items-center gap-2">
+        <h1 className="text-3xl font-bold mr-5 cursor-pointer" onClick={() => setShowContact(!showContact)}>
+          {name}
+        </h1>
+        {showContact && <span className="ml-2 text-lg text-gray-700">{contactNumber}</span>}
         {status === 'Available' && (
           <svg style={{ width: '20px', height: '20px' }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
             <path fill="#4caf50" d="M44,24c0,11-9,20-20,20S4,35,4,24S13,4,24,4S44,13,44,24z"></path>
@@ -131,12 +135,12 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onD
       </div>
       <div className="flex items-center">
         <DriverActions onGaveClick={() => openModal('gave')} onGotClick={() => openModal('got')} />
-        <DropdownMenu onEditClick={()=> setEdit(true)} onDeleteClick={handleDeleteDriver} />
+        <DropdownMenu onEditClick={() => setEdit(true)} onDeleteClick={handleDeleteDriver} />
       </div>
       <DriverModal open={modalOpen} onClose={closeModal} type={modalType} onConfirm={handleConfirm} />
       {error && <div className="text-red-500 mt-2">{error}</div>}
       {edit && (
-        <EditDriverModal name={name} driverId={driverId} handleEdit = {handleEditDriver} onCancel={()=>setEdit(false)}/>
+        <EditDriverModal name={name} driverId={driverId} handleEdit={handleEditDriver} onCancel={() => setEdit(false)} contactNumber={contactNumber} />
       )}
     </div>
   );

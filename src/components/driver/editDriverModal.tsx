@@ -8,11 +8,12 @@ interface EditDriverModalProps {
   driverId: string;
   handleEdit: (driverName: string, mobileNumber: string) => void;
   onCancel : () =>void;
+  contactNumber : string
 }
 
-const EditDriverModal: React.FC<EditDriverModalProps> = ({ name, driverId, handleEdit, onCancel }) => {
+const EditDriverModal: React.FC<EditDriverModalProps> = ({ name, driverId, handleEdit, onCancel, contactNumber }) => {
   const [driverName, setDriverName] = useState<string>(name);
-  const [mobileNumber, setMobileNumber] = useState<string>(''); // Initialize mobileNumber with an empty string
+  const [mobileNumber, setMobileNumber] = useState<string>(contactNumber); // Initialize mobileNumber with an empty string
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); // Prevent default form submission

@@ -7,6 +7,8 @@ import { useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { MdDelete } from 'react-icons/md'
 import { maintenanceChargeTypes } from '@/utils/utilArray'
+import { handleAddCharge, handleDelete } from '@/helpers/ExpenseOperation'
+import { fetchDriverName } from '@/helpers/driverOperations'
 
 interface TripDetails {
   [key: string]: string;
@@ -69,47 +71,13 @@ const OtherExpense = () => {
     fetchTripDetails()
   }, [maintainenceBook])
 
-  const handleDelete = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent the row's click event from being triggered
-    const res = await fetch(`/api/truckExpense/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    if (!res.ok) {
-      alert('Failed to delete expense');
-      return;
-    }
+  const handleDeleteExpense = async (id: string, e: React.MouseEvent) => {
+    const data = await handleDelete(id, e)
     setMaintainenceBook(maintainenceBook.filter((item) => item._id !== id));
   };
 
-  const handleAddCharge = async (newCharge: any, id?: string) => {
-    const truckExpenseData = {
-      ...newCharge,
-      truck: truckNo,
-      transaction_id: newCharge.transactionId || '',
-      driver: newCharge.driver || '',
-      notes: newCharge.notes || '',
-    };
-
-    const method = id ? 'PUT' : 'POST';
-    const url = id ? `/api/truckExpense/${id}` : `/api/trucks/${truckNo}/expense`;
-
-    const res = await fetch(url, {
-      method: method,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(truckExpenseData),
-    });
-
-    if (!res.ok) {
-      alert('Failed to add charge');
-      return;
-    }
-
-    const data = await res.json();
+  const handleAddExpense = async (newCharge: any, id?: string) => {
+    const data = await handleAddCharge(newCharge,id, truckNo as string)
 
     setMaintainenceBook((prev: any[]) => {
       if (id) {
@@ -121,6 +89,7 @@ const OtherExpense = () => {
       }
     });
   };
+
 
   if (loading) return <Loading />
 
@@ -135,6 +104,7 @@ const OtherExpense = () => {
               <th>Expense Type</th>
               <th>PaymentMode</th>
               <th>Notes</th>
+              <th>Driver</th>
               <th>Trip</th>
               <th>Action</th>
             </tr>
@@ -150,9 +120,10 @@ const OtherExpense = () => {
                 <td>{fuel.expenseType}</td>
                 <td>{fuel.paymentMode}</td>
                 <td>{fuel.notes}</td>
+                <td>{fetchDriverName(fuel.driver as string) || 'NA'}</td>
                 <td>{tripDetails[fuel.trip] || 'NA'}</td>
                 <td>
-                  <Button onClick={(e) => handleDelete(fuel._id as string, e)} variant={'destructive'} ><MdDelete /></Button>
+                  <Button onClick={(e) => handleDeleteExpense(fuel._id as string, e)} variant={'destructive'} ><MdDelete /></Button>
                 </td>
               </tr>
             ))}
@@ -162,7 +133,7 @@ const OtherExpense = () => {
       <ExpenseModal
         isOpen={modelOpen}
         onClose={() => setModelOpen(false)}
-        onSave={handleAddCharge}
+        onSave={handleAddExpense}
         driverId=''
         selected={selected}
         truckPage={true}

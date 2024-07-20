@@ -56,7 +56,7 @@ const EditChargeModal: React.FC<EditChargeModalProps> = ({ isOpen, onClose, onSa
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50">
+    <><div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div><div className="fixed inset-0 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
         <h2 className="text-xl font-semibold mb-4">Edit Charge</h2>
         <div className="mb-4">
@@ -66,8 +66,7 @@ const EditChargeModal: React.FC<EditChargeModalProps> = ({ isOpen, onClose, onSa
             name="partyBill"
             checked={editedCharge.partyBill}
             onChange={handleChange}
-            className="p-2 border border-gray-300 rounded-md"
-          />
+            className="p-2 border border-gray-300 rounded-md" />
         </div>
         {editedCharge.partyBill ? (
           <div className="mb-4">
@@ -107,8 +106,7 @@ const EditChargeModal: React.FC<EditChargeModalProps> = ({ isOpen, onClose, onSa
             name="amount"
             value={editedCharge.amount}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md"
-          />
+            className="w-full p-2 border border-gray-300 rounded-md" />
         </div>
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700">Date</label>
@@ -117,8 +115,7 @@ const EditChargeModal: React.FC<EditChargeModalProps> = ({ isOpen, onClose, onSa
             name="date"
             value={editedCharge.date.toISOString().split('T')[0]}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md"
-          />
+            className="w-full p-2 border border-gray-300 rounded-md" />
         </div>
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700">Notes</label>
@@ -126,25 +123,24 @@ const EditChargeModal: React.FC<EditChargeModalProps> = ({ isOpen, onClose, onSa
             name="notes"
             value={editedCharge.notes}
             onChange={handleChange}
-            className="w-full p-2 border border-gray-300 rounded-md"
-          />
+            className="w-full p-2 border border-gray-300 rounded-md" />
         </div>
         <div className="flex justify-end gap-2">
           <Button
-            
+
             onClick={handleSave}
           >
             Save
           </Button>
           <Button variant={'outline'}
-            
+
             onClick={onClose}
           >
             Cancel
           </Button>
         </div>
       </div>
-    </div>
+    </div></>
   );
 };
 
