@@ -8,51 +8,48 @@ import Loading from '@/app/loading';
 import { ExpenseforDriver } from '@/helpers/ExpenseOperation';
 import { handleDelete as DeleteForExpense } from '@/helpers/ExpenseOperation';
 import { DeleteAccount } from '@/helpers/TripOperation';
-import { deleteDriverAccount } from '@/helpers/driverOperations';
+import { deleteDriverAccount, EditDriverAccount } from '@/helpers/driverOperations';
 import { Button } from '@/components/ui/button';
 import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal';
+import Modal from '@/components/trip/tripDetail/Modal';
+import DriverModal from '@/components/driver/driverModal';
+import { handleEditAccount } from '@/helpers/TripOperation';
+import { handleAddCharge as EditExpense } from '@/helpers/ExpenseOperation';
 
 const Driver: React.FC = () => {
   const router = useRouter();
-  const pathname = usePathname();
   const { driverId } = useParams();
 
-  const [driver, setDriver] = useState<IDriver | null>(null);
+  const [driver, setDriver] = useState<IDriver>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [accounts, setAccounts] = useState<any[]>([]);
-  const [expenseEdit, setExpeneEdit] = useState(false)
-  const [paymentEdit, setPaymentEdit] = useState(false)
-  const [accountEdit, setAccountEdit] = useState(false)
-  const [selected, setSelected] = useState<any>([])
+  const [accounts, setAccounts] = useState<ITruckExpense[] | PaymentBook[] | any[]>([]);
+  const [driverAccounts, setDriverAccounts] = useState<IDriverAccount[]>([])
+  const [expenseEdit, setExpenseEdit] = useState(false);
+  const [paymentEdit, setPaymentEdit] = useState(false);
+  const [accountEdit, setAccountEdit] = useState(false);
+  const [selected, setSelected] = useState<any>([]);
 
   const handleDelete = async (account: any) => {
     if (account.expenseType) {
-      console.log(account.expenseType)
       const result = await DeleteForExpense(account._id);
-      console.log(result)
-      setAccounts((prev) => (
-        prev.filter(acc => acc._id != account._id)
-      ))
-    }
-    else if (account.accountType) {
+      setAccounts(prev => prev.filter(acc => acc._id !== account._id));
+    } else if (account.accountType) {
       try {
-        const deleted = await DeleteAccount(account._id, account.tripId)
-        setAccounts((prev) => prev.filter(acc => acc.paymentBook_id == deleted.paymentBook_id))
+        const deleted = await DeleteAccount(account._id, account.tripId);
+        setAccounts(prev => prev.filter(acc => acc.paymentBook_id !== deleted.paymentBook_id));
       } catch (error) {
-        console.log(error)
-        alert(error)
+        console.log(error);
+        alert(error);
       }
-    }
-    else {
+    } else {
       try {
-        const data = await deleteDriverAccount(driverId as string, account.account_id)
-        const deletedDriver = data.driver
-        console.log(deletedDriver)
-        setAccounts(prev => prev.filter(acc => acc.account_id != account.account_id))
+        const data = await deleteDriverAccount(driverId as string, account.account_id);
+        const deletedDriver = data.driver;
+        setAccounts(prev => prev.filter(acc => acc.account_id !== account.account_id));
       } catch (error: any) {
-        console.log(error)
-        alert(error)
+        console.log(error);
+        alert(error);
       }
     }
   };
@@ -72,7 +69,7 @@ const Driver: React.FC = () => {
 
       const result = await response.json();
       setDriver(result);
-      setAccounts(result.accounts);
+      setDriverAccounts(result.accounts);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -102,8 +99,6 @@ const Driver: React.FC = () => {
           .map((acc: PaymentBook) => ({
             ...acc,
             tripId: trip.trip_id,
-            date: acc.paymentDate,
-            type: 'trip',
           }))
       );
 
@@ -133,21 +128,56 @@ const Driver: React.FC = () => {
     setLoading(true);
     const accountsData = await fetchTrips();
     const truckExpensesData = await fetchTruckExpenses();
-
     const allAccounts = [
       ...accountsData,
       ...truckExpensesData,
+      ...driverAccounts,
     ];
 
-    setAccounts((prev) => [...prev, ...allAccounts].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+    setAccounts(allAccounts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
     setLoading(false);
+  };
+
+  const handleEditAccounts = async (account: any) => {
+    if (account.expenseType) {
+      // Handle expense edit logic
+      console.log(account)
+      const result = await EditExpense(account, selected._id, selected.truck)
+      if(result.error){
+        alert(error)
+        return
+      }
+      const editedAccount = result
+      setAccounts(prev => prev.map((acc: any) => acc._id === selected._id ? { ...acc, ...result } : acc));
+
+    } else if (account.accountType) {
+      // Handle payment edit logic
+      console.log(account)
+      const result = await handleEditAccount(account, selected.tripId)
+      if(result.error){
+        alert(error)
+        return
+      }
+      setAccounts(prev => prev.map((acc: any) => acc._id === selected._id ? { ...acc, ...result } : acc));
+    } else {
+      try {
+        const data = await EditDriverAccount(driverId as string, account, selected.account_id);
+        setAccounts(prev => prev.map((acc: any) => acc.account_id === selected.account_id ? { ...acc, ...data } : acc));
+      } catch (error) {
+        alert(error);
+      }
+    }
   };
 
   useEffect(() => {
     fetchDriverDetails();
-    fetchAllData();
   }, [driverId]);
 
+  useEffect(() => {
+    if (driverAccounts.length > 0) {
+      fetchAllData();
+    }
+  }, [driverId, driverAccounts]);
 
   if (loading) {
     return <Loading />;
@@ -163,7 +193,7 @@ const Driver: React.FC = () => {
 
   return (
     <div className="w-full">
-      <DriverLayout name={driver.name} status={driver.status} driverId={driver.driver_id} onDriverUpdate={setDriver} contactNumber={driver.contactNumber} />
+      <DriverLayout name={driver.name} status={driver.status} driverId={driver.driver_id} onDriverUpdate={() => router.refresh()} contactNumber={driver.contactNumber} />
       <div className="w-full h-full p-4">
         <div className="table-container">
           <table className="custom-table">
@@ -178,39 +208,37 @@ const Driver: React.FC = () => {
             </thead>
             <tbody>
               {accounts.map((account, index: number) => (
-                <tr key={index}>
+                <tr key={account._id}>
                   <td>{new Date(account.date).toLocaleDateString()}</td>
                   <td>{account.reason || account.expenseType || `Trip ${account.accountType} (from a trip)`}</td>
                   <td>{account.gave || (account.type === 'truck' && account.amount) || ''}</td>
                   <td>{account.got || (account.type !== 'truck' && account.amount) || ''}</td>
                   <td>
                     <div className='flex flex-row gap-2 items-center w-full'>
-                    <Button
-                      variant={'outline'}
-                      onClick={() => {
-                        if (account.expenseType) {
-                          setExpeneEdit(true)
-                          setSelected(account)
-                        }
-                        else if (account.accountType) {
-                          setPaymentEdit(true)
-                        }
-                        else {
-                          setAccountEdit(true)
-                      }}}
-                    >
-                      <MdEdit />
-                    </Button>
-                    <Button
-                      variant={'destructive'}
-                      onClick={() => {
-                        handleDelete(account);
-                      }}
-                    >
-                      <MdDelete />
-                    </Button>
+                      <Button
+                        variant={'outline'}
+                        onClick={() => {
+                          setSelected(account);
+                          if (account.expenseType) {
+                            setExpenseEdit(true);
+                          } else if (account.accountType) {
+                            setPaymentEdit(true);
+                          } else {
+                            setAccountEdit(true);
+                          }
+                        }}
+                      >
+                        <MdEdit />
+                      </Button>
+                      <Button
+                        variant={'destructive'}
+                        onClick={() => {
+                          handleDelete(account);
+                        }}
+                      >
+                        <MdDelete />
+                      </Button>
                     </div>
-                    
                   </td>
                 </tr>
               ))}
@@ -220,9 +248,24 @@ const Driver: React.FC = () => {
       </div>
       <ExpenseModal
         isOpen={expenseEdit}
-        onClose={() => setExpeneEdit(false)}
-        onSave={()=>{}}
+        onClose={() => setExpenseEdit(false)}
+        onSave={handleEditAccounts}
         driverId={selected.driver || ''}
+        selected={selected}
+      />
+      <Modal
+        isOpen={paymentEdit}
+        onClose={() => setPaymentEdit(false)}
+        onSave={handleEditAccounts}
+        modalTitle="Edit Item"
+        accountType={selected.accountType}
+        editData={selected}
+      />
+      <DriverModal
+        open={accountEdit}
+        onClose={() => setAccountEdit(false)}
+        onConfirm={handleEditAccounts}
+        type={selected.gave ? 'gave' : 'got'}
         selected={selected}
       />
     </div>

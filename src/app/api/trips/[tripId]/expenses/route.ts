@@ -20,7 +20,7 @@ export async function GET(req: Request, { params }: { params: { tripId: string }
 
   try {
     // Fetch the trip expenses from the database
-    const charges = await TripExpense.find({ user_id: user, trip_id: tripId });
+    const charges = await TripExpense.find({ user_id: user, trip_id: tripId }).lean();
 
     // Return a success response with the charges
     return NextResponse.json({ status: 200, charges });

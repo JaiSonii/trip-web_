@@ -17,7 +17,7 @@ export async function GET(req: Request, { params }: { params: { partyId: string 
     try {
       await connectToDatabase();
   
-      const party = await Party.findOne({ party_id : partyId, user_id : user }).exec();
+      const party = await Party.findOne({ party_id : partyId, user_id : user }).lean().exec();
   
       if (!party) {
         return NextResponse.json({ message: 'Party not found' }, { status: 404 });

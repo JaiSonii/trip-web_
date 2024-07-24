@@ -7,7 +7,7 @@ interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: {
-    id : string | undefined
+    id: string | undefined
     accountType: string;
     amount: number;
     paymentType: 'Cash' | 'Cheque' | 'Online Transfer';
@@ -42,9 +42,11 @@ const Modal: React.FC<ModalProps> = ({
       setPaymentType(editData.paymentType);
       setReceivedByDriver(editData.receivedByDriver as boolean);
       // Ensure editData.paymentDate is a Date object before calling toISOString()
-      const formattedDate = editData.paymentDate instanceof Date
+      const formattedDate = (editData.paymentDate instanceof Date)
         ? editData.paymentDate.toISOString().split('T')[0]
-        : new Date(editData.paymentDate).toISOString().split('T')[0];
+        : (editData.paymentDate && !isNaN(new Date(editData.paymentDate).getTime()))
+          ? new Date(editData.paymentDate).toISOString().split('T')[0]
+          : '';
       setPaymentDate(formattedDate);
       setNotes(editData.notes || '');
     } else {
@@ -59,7 +61,7 @@ const Modal: React.FC<ModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
-      id : editData?._id.toString(),
+      id: editData?._id.toString(),
       accountType,
       amount,
       paymentType,
@@ -86,8 +88,8 @@ const Modal: React.FC<ModalProps> = ({
                 value={amount}
                 onChange={(e) => setAmount(Number(e.target.value))}
                 className="mt-1 p-2 w-full border border-gray-300 rounded-md"
-                onFocus={(e)=> {
-                  if(e.target.value == '0'){
+                onFocus={(e) => {
+                  if (e.target.value == '0') {
                     e.target.value = ''
                   }
                 }}
@@ -111,10 +113,10 @@ const Modal: React.FC<ModalProps> = ({
               <input
                 type="checkbox"
                 checked={receivedByDriver as boolean}
-                onChange={(e) =>{
-                  console.log(typeof(receivedByDriver))
+                onChange={(e) => {
+                  console.log(typeof (receivedByDriver))
                   setReceivedByDriver(e.target.checked)
-                } }
+                }}
                 className="mr-2"
               />
               <label className="block text-sm font-medium text-gray-700">Received By Driver</label>

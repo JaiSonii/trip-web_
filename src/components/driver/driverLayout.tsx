@@ -111,7 +111,7 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onD
       }
 
       alert('Driver Removed Successfully');
-      router.push('/drivers');
+      router.push('/user/drivers');
     } catch (error: any) {
       console.error('Failed to delete driver:', error);
       alert(error.message); // Display an alert with the error message

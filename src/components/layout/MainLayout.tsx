@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { FaTruckMoving, FaSignOutAlt, FaBars, FaTimes } from "react-icons/fa";
@@ -12,14 +12,23 @@ const MainLayout = () => {
   const pathname = usePathname();
   const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [selected, setSelected] = useState('Parties')
+  const [selected, setSelected] = useState('');
+
+  useEffect(() => {
+    // Set the initial selected menu item based on the current pathname
+    const initialSelected = menuItems.find(item => pathname.startsWith(item.href));
+    if (initialSelected) {
+      setSelected(initialSelected.label);
+    }
+  }, [pathname]);
 
   const menuItems = [
     { href: `/user/parties`, label: 'Parties' },
     { href: `/user/trips`, label: 'Trips' },
     { href: `/user/drivers`, label: 'Drivers' },
     { href: `/user/trucks`, label: 'Trucks' },
-    { href: `/user/suppliers`, label: 'Suppliers'}
+    { href: `/user/suppliers`, label: 'Suppliers'},
+    { href: `/user/expenses`, label: 'Expenses'}
   ];
 
   const handleSignOut = async () => {
@@ -53,9 +62,12 @@ const MainLayout = () => {
         </div>
         <ul className="list-none p-0 m-0">
           {menuItems.map((item) => (
-            <li key={item.href} className="mb-2" onClick={()=>setSelected(item.label)}>
-              <Link href={item.href} >
-                <div className={`flex items-center p-4 text-lg font-semibold transition duration-300 ease-in-out rounded-md ${pathname === item.href ? 'bg-gray-600 text-gray-300' : 'hover:bg-gray-700 hover:text-gray-300'} ${selected === item.label ? 'bg-gray-600 text-gray-300' : 'hover:bg-gray-700 hover:text-gray-300'}`}>
+            <li key={item.href} className="mb-2">
+              <Link href={item.href}>
+                <div 
+                  className={`flex items-center p-4 text-lg font-semibold transition duration-300 ease-in-out rounded-md ${pathname.startsWith(item.href) || selected === item.label ? 'bg-gray-600 text-gray-300' : 'hover:bg-gray-700 hover:text-gray-300'}`}
+                  onClick={() => setSelected(item.label)}
+                >
                   {item.label}
                 </div>
               </Link>

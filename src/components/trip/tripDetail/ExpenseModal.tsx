@@ -45,7 +45,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
     partyAmount: 0,
     paymentMode: selected?.paymentMode || 'Cash',
     transactionId: selected?.transaction_id ||'',
-    driver: selected?.driver || ''
+    driver: driverId || ''
   });
 
   const [driverName, setDriverName] = useState('');

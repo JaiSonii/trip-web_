@@ -18,7 +18,7 @@ export async function GET(req : Request) {
   try {
     await connectToDatabase()
 
-    const parties = await Party.find({user_id : user}).exec();
+    const parties = await Party.find({user_id : user}).lean().exec();
     return NextResponse.json({ parties });
   } catch (err) {
     console.error(err);

@@ -15,7 +15,7 @@ export async function GET(req: Request) {
   try {
     await connectToDatabase()
 
-    const suppliers = await Supplier.find({ user_id: user }).exec();
+    const suppliers = await Supplier.find({ user_id: user }).lean().exec();
     return NextResponse.json({ suppliers }, { status: 200 });
   } catch (err) {
     console.error(err);

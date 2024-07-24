@@ -62,4 +62,33 @@ export const handleDelete = async (id: string, e? : React.MouseEvent ) => {
     }
     
   }
+
+  export const fetchTruckExpense = async (month : any, year : any) => {
+    try {
+        const res = await fetch(`/api/truckExpense?month=${month}&year=${year}`);
+        if (!res.ok) {
+            throw new Error('Failed to fetch truck expenses');
+        }
+        const data = await res.json();
+        return data.truckExpense;
+    } catch (error) {
+        console.error('Error fetching truck expenses:', error);
+        return [];
+    }
+};
+
+export const fetchTripExpense = async (month : any, year : any) => {
+  try {
+      const res = await fetch(`/api/tripExpense?month=${month}&year=${year}`);
+      if (!res.ok) {
+          throw new Error('Failed to fetch truck expenses');
+      }
+      const data = await res.json();
+      return data.tripExpense;
+  } catch (error) {
+      console.error('Error fetching truck expenses:', error);
+      return [];
+  }
+};
+
   

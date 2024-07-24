@@ -1,11 +1,11 @@
 import Image from "next/image"
-import notfound from '@/assets/not-found.webp'
+import notfound from '@/assets/truck.webp'
 
 export default function Loading() {
     // You can add any UI inside Loading, including a Skeleton.
     return (
         <div className="flex items-center min-h-screen justify-center  p-4">
-          <Image src={notfound} alt="Not Found" width={100} height={100} className="mx-auto rounded" />
+          <iframe src="https://lottie.host/embed/3d45f054-61ac-4d4e-837c-2fa3006e28cc/MeZ8JDXVB5.json"></iframe>
           
       </div>
     )

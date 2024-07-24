@@ -1,6 +1,5 @@
-// components/layout/TruckLayout.tsx
 'use client';
-import React, { useEffect, useState, useRef, Ref, RefObject, Reference } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { TruckModel } from '@/utils/interface';
 import Link from 'next/link';
@@ -39,7 +38,7 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
     const [modalOpen, setModalOpen] = useState(false);
     const [openOptions, setOpenOptions] = useState(false);
     const dropdownRef = useRef<any>(null);
-    const [edit, setEdit] = useState<boolean>(false)
+    const [edit, setEdit] = useState<boolean>(false);
 
     useEffect(() => {
         const handleClickOutside = (event: any) => {
@@ -58,6 +57,12 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
             document.removeEventListener('mousedown', handleClickOutside);
         };
     }, [openOptions]);
+
+    useEffect(() => {
+        tabs.forEach(tab => {
+            router.prefetch(tab.path);
+        });
+    }, [tabs, router]);
 
     const handleAddCharge = async (newCharge: any, id: string | undefined) => {
         const truckExpenseData = {
@@ -104,15 +109,14 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
         else if (maintenanceChargeTypes.has(truckExpenseData.expenseType)) router.push(`/user/trucks/${truckNo}/maintainence`);
     };
 
-    const handleEdit = async(fromdata : any) => {
-        // Handle edit logic
+    const handleEdit = async (formData: any) => {
         try {
             const response = await fetch(`/api/trucks/${truckNo}`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(fromdata)
+                body: JSON.stringify(formData),
             });
 
             if (!response.ok) {
@@ -123,15 +127,15 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
             console.error('Error updating truck:', error);
             setError('Failed to update truck. Please try again later.');
         }
-        router.push(`/user/trucks`)
-    }
+        router.push(`/user/trucks`);
+    };
 
     const handleDelete = async () => {
         const res = await fetch(`/api/trucks/${truckNo}`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-            }
+            },
         });
         if (!res.ok) {
             alert('Failed to delete truck');
@@ -143,7 +147,7 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
             return;
         }
         router.push('/user/trucks');
-    }
+    };
 
     useEffect(() => {
         const fetchTruckDetails = async () => {
@@ -204,7 +208,7 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
                                 <Button
                                     variant="ghost"
                                     onClick={() => {
-                                        setEdit(true)
+                                        setEdit(true);
                                         setOpenOptions(false);
                                     }}
                                     className="justify-start"
@@ -240,10 +244,12 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
                         <Link
                             key={tab.name}
                             href={tab.path}
-                            className={`px-4 py-2 transition duration-300 ease-in-out ${pathname === tab.path
-                                ? 'border-b-2 border-blue-500 text-blue-500'
-                                : 'border-transparent text-gray-600 hover:text-blue-500 hover:border-blue-500'
-                                }`}
+                            className={`px-4 py-2 transition duration-300 ease-in-out ${
+                                pathname === tab.path
+                                    ? 'border-b-2 border-blue-500 text-blue-500'
+                                    : 'border-transparent text-gray-600 hover:text-blue-500 hover:border-blue-500'
+                            }`}
+                            prefetch={true}
                         >
                             <div className="flex items-center space-x-2">
                                 {tab.logo}
@@ -253,9 +259,7 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
                     ))}
                 </div>
 
-                <div className="mt-4">
-                    {children}
-                </div>
+                <div className="mt-4">{children}</div>
             </div>
 
             <ExpenseModal
@@ -265,7 +269,7 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
                 driverId=""
                 truckPage={true}
             />
-            <EditTruckModal 
+            <EditTruckModal
                 truck={truck as TruckModel}
                 isOpen={edit}
                 onClose={() => setEdit(false)}

@@ -18,7 +18,7 @@ export async function GET(req: Request, { params }: { params: { tripId: string }
 
   try {
     // Fetch the trip expenses from the database
-    const charges = await TruckExpense.find({ user_id: user, trip: tripId });
+    const charges = await TruckExpense.find({ user_id: user, trip: tripId }).lean();
 
     // Return a success response with the charges
     return NextResponse.json({ status: 200, charges });

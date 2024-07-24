@@ -123,3 +123,13 @@ export interface ITruckExpense extends Document{
   date: Date;
   notes?: string;          // Optional
 }
+
+export interface ITripExpense extends Document{
+  user_id: string;
+  trip_id: string;
+  partyBill: boolean;
+  amount: number;
+  date: Date;
+  expenseType: string;
+  notes?: string; // Optional field
+}

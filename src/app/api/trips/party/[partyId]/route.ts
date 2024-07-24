@@ -16,7 +16,7 @@ export async function GET(request: Request, { params }: { params: { partyId: str
    await connectToDatabase()
 
     const { partyId } = params;
-    const trips = await Trip.find({user_id: user, party_id: partyId }).exec();
+    const trips = await Trip.find({user_id: user, party_id: partyId }).lean().exec();
     console.log(trips)
 
     return NextResponse.json({ trips });

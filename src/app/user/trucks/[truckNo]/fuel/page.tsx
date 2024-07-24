@@ -1,6 +1,7 @@
 'use client'
 import Loading from '@/app/loading'
 import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal'
+import TripRoute from '@/components/trip/TripRoute'
 import { Button } from '@/components/ui/button'
 import { fetchDriverName } from '@/helpers/driverOperations'
 import { ITruckExpense } from '@/utils/interface'
@@ -42,28 +43,6 @@ const TruckFuelBook = () => {
         }
         fetchFuel()
     }, [truckNo])
-
-    useEffect(() => {
-        const fetchTripDetails = async () => {
-            if (!fuelBook) return
-            const tripDetails: TripDetails = {}
-
-            for (const fuel of fuelBook) {
-                if (fuel.trip && !tripDetails[fuel.trip]) {
-                    const tripRes = await fetch(`/api/trips/${fuel.trip}`)
-                    const data = await tripRes.json()
-                    const trip = data.trip
-                    if (trip) {
-                        tripDetails[fuel.trip] = `${trip.route.origin.split(',')[0]} -> ${trip.route.destination.split(',')[0]}`
-                    }
-                }
-            }
-
-            setTripDetails(tripDetails)
-        }
-
-        fetchTripDetails()
-    }, [fuelBook])
 
 
     const handleDelete = async (id: string , e : React.FormEvent) => {
@@ -138,7 +117,7 @@ const TruckFuelBook = () => {
                                 <td>{fuel.paymentMode}</td>
                                 <td>{fuel.notes}</td>
                                 <td>{fetchDriverName(fuel.driver as string) || 'NA'}</td>
-                                <td>{tripDetails[fuel.trip] || 'NA'}</td>
+                                <td><TripRoute tripId={fuel.trip || ''} /></td>
                                 <td>
                                     <Button onClick={(e) => handleDelete(fuel._id as string,e)} variant={'destructive'} ><MdDelete /></Button>
                                 </td>

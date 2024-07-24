@@ -21,7 +21,7 @@ export async function GET(req: Request, params: { params: { supplierId: string }
     await connectToDatabase();
 
     // Find the supplier based on supplierId
-    const supplier = await Supplier.findOne({ user_id: user, supplier_id: supplierId });
+    const supplier = await Supplier.findOne({ user_id: user, supplier_id: supplierId }).lean();
 
     // Handle case where supplier is not found
     if (!supplier) {

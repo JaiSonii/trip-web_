@@ -21,7 +21,7 @@ export async function GET(req: Request, { params }: { params: { tripId: string }
   try {
     await connectToDatabase();
 
-    const trip = await Trip.findOne({ user_id: user, trip_id: tripId }).exec();
+    const trip = await Trip.findOne({ user_id: user, trip_id: tripId }).lean().exec();
 
     if (!trip) {
       return NextResponse.json({ message: 'Trip not found' }, { status: 404 });

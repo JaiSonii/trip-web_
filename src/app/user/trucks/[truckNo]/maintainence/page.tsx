@@ -1,6 +1,7 @@
 'use client'
 import Loading from '@/app/loading'
 import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal'
+import TripRoute from '@/components/trip/TripRoute'
 import { Button } from '@/components/ui/button'
 import { fetchDriverName } from '@/helpers/driverOperations'
 import { ITruckExpense } from '@/utils/interface'
@@ -13,7 +14,7 @@ const maintainenceExpenseTypes = new Set([
   'Showroom Service',
   'Regular Service',
   'Minor Repair',
-  'Gear Maintainence',
+  'Gear Maintenance',
   'Brake Oil Change',
   'Grease Oil Change',
   'Spare Parts Purchase',
@@ -34,7 +35,7 @@ const TruckMaintainenceBook = () => {
   const [error, setError] = useState<any>()
   const [loading, setLoading] = useState<boolean>(true)
   const [maintainenceBook, setMaintainenceBook] = useState<ITruckExpense[]>([])
-  const [tripDetails, setTripDetails] = useState<TripDetails>({})
+
   const [modelOpen, setModelOpen] = useState(false)
   const [selected, setSeclected] = useState<ITruckExpense>()
 
@@ -57,6 +58,7 @@ const TruckMaintainenceBook = () => {
         }
         const data = await res.json()
         const filteredData = data.filter((expense: ITruckExpense) => maintainenceExpenseTypes.has(expense.expenseType))
+
         setMaintainenceBook(filteredData)
       } catch (error) {
         console.log(error)
@@ -66,28 +68,6 @@ const TruckMaintainenceBook = () => {
     }
     getBook()
   }, [truckNo])
-
-  useEffect(() => {
-    const fetchTripDetails = async () => {
-      if (!maintainenceBook) return
-      const tripDetails: TripDetails = {}
-
-      for (const book of maintainenceBook) {
-        if (book.trip && !tripDetails[book.trip]) {
-          const tripRes = await fetch(`/api/trips/${book.trip}`)
-          const data = await tripRes.json()
-          const trip = data.trip
-          if (trip) {
-            tripDetails[book.trip] = `${trip.route.origin.split(',')[0]} -> ${trip.route.destination.split(',')[0]}`
-          }
-        }
-      }
-
-      setTripDetails(tripDetails)
-    }
-
-    fetchTripDetails()
-  }, [maintainenceBook])
 
 
   const handleDelete = async (id: string, e : React.FormEvent) => {
@@ -165,7 +145,7 @@ const TruckMaintainenceBook = () => {
                 <td>{fuel.paymentMode}</td>
                 <td>{fuel.notes}</td>
                 <td>{fetchDriverName(fuel.driver as string) || 'NA'}</td>
-                <td>{tripDetails[fuel.trip] || 'NA'}</td>
+                <td><TripRoute tripId={fuel.trip || ''}/></td>
                 <td>
                 <Button onClick={(e) => handleDelete(fuel._id as string, e)} variant={'destructive'} ><MdDelete /></Button>
                 </td>

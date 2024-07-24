@@ -17,7 +17,11 @@ const TruckHeader: React.FC<TruckHeaderProps> = ({ truck, driver }) => {
     const fetchDriver = async () => {
       try {
         const result = await fetchDriverName(driver);
-        setDriverName(result);
+        if(result.error){
+          setDriverName('NA')
+        }else{
+          setDriverName(result);
+        }
       } catch (err: any) {
         console.log(err.message);
       } finally {
@@ -50,9 +54,10 @@ const TruckHeader: React.FC<TruckHeaderProps> = ({ truck, driver }) => {
           ) : (
             <div className="flex items-center">
               <h1 className="text-2xl font-bold cursor-pointer transition duration-300 ease-in-out hover:text-gray-300 hover:scale-105">
-                <Link href={`/user/drivers/${driver}`}>
+                {driverName ? <Link href={`/user/drivers/${driver}`}>
                   <span>{driverName}</span>
-                </Link>
+                </Link> : 'NA'}
+                
               </h1>
             </div>
           )}

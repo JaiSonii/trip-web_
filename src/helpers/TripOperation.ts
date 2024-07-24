@@ -16,3 +16,37 @@ export const DeleteAccount = async (accountId: string, tripId: string) => {
     }
 
 }
+
+export const fetchTripRoute = async (tripId: string) => {
+    if (tripId != '') {
+        const tripRes = await fetch(`/api/trips/${tripId}`);
+        const data = await tripRes.json();
+        const trip = data.trip;
+        return trip.route;
+    }
+}
+
+export const handleEditAccount = async (editedItem: any, tripId : string) => {
+    try {
+      const res = await fetch(`/api/trips/${tripId}/accounts/${editedItem.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ account: editedItem }),
+      });
+      if (!res.ok) {
+        throw new Error('Failed to edit item');
+      }
+
+      const resData = await res.json();
+      if (resData.status == 400) {
+        alert(resData.message);
+        return;
+      }
+      return resData.trip
+    } catch (error) {
+      console.log(error);
+      return {error : error}
+    }
+  };
