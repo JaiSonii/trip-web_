@@ -4,12 +4,10 @@
 import React, { useEffect, useState } from 'react';
 import { IParty, ITrip, TripExpense } from '@/utils/interface';
 import { statuses } from '@/utils/schema';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Loading from '@/app/loading';
 import { fetchBalance } from '@/helpers/fetchTripBalance';
-import { useAuth } from '@/components/AuthProvider';
-import { fetchPartyName } from '@/helpers/fetchPartyName';
+import PartyName from '@/components/party/PartyName';
 
 const TripsPage = () => {
   const router = useRouter();
@@ -17,7 +15,6 @@ const TripsPage = () => {
   const [trips, setTrips] = useState<ITrip[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [parties, setParties] = useState<IParty[]>()
 
 
   useEffect(() => {
@@ -42,33 +39,6 @@ const TripsPage = () => {
         setLoading(false);
       }
     };
-
-    const fetchParties = async () => {
-      try {
-        const res = await fetch('/api/parties', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!res.ok) {
-          throw new Error('Failed to fetch parties');
-        }
-
-        const data = await res.json(); // Parse the response body as JSON
-        setParties(data.parties);
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        // Add a delay to improve UI experience even on fast networks
-        setTimeout(() => {
-          setLoading(false);
-        }, 1000);
-      }
-    };
-
-    fetchParties();
     
 
     fetchTrips();
@@ -107,7 +77,7 @@ const TripsPage = () => {
               <tr key={index} className="border-t hover:bg-slate-100 cursor-pointer" onClick={()=> router.push(`/user/trips/${trip.trip_id}`)}>
                 <td className="border p-2">{new Date(trip.startDate).toLocaleDateString()}</td>
                 <td className="border p-2">{trip.LR}</td>
-                <td className="border p-2">{fetchPartyName(trip.party)}</td>
+                <td className="border p-2"><PartyName partyId={trip.party} /></td>
 
                 <td className="border p-2">{trip.truck}</td>
                 <td className="border p-2">{trip.route.origin.split(',')[0]} -&gt; {trip.route.destination.split(',')[0]}</td>

@@ -14,6 +14,7 @@ const DriverName: React.FC<DriverNameProps> = ({ driverId }) => {
         const LoadDriverName = async () => {
             try {
                 const name = await fetchDriverName(driverId);
+                console.log(name)
                 if (!name) {
                     throw new Error('Name not found');
                 }

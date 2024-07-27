@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { PaymentBook } from '@/utils/interface';
-import { revalidatePath } from 'next/cache';
 import { Button } from '@/components/ui/button';
 
 interface ModalProps {
@@ -28,46 +27,49 @@ const Modal: React.FC<ModalProps> = ({
   accountType,
   editData,
 }) => {
-  const [amount, setAmount] = useState<number>(0);
-  const [paymentType, setPaymentType] = useState<'Cash' | 'Cheque' | 'Online Transfer'>('Cash');
-  const [receivedByDriver, setReceivedByDriver] = useState<boolean>(false);
-  const [paymentDate, setPaymentDate] = useState<string>(new Date().toISOString().split('T')[0]);
-  const [notes, setNotes] = useState<string>('');
-
-
+  const [formState, setFormState] = useState({
+    amount: editData?.amount || 0,
+    paymentType: editData?.paymentType || 'Cash' as 'Cash' | 'Cheque' | 'Online Transfer',
+    receivedByDriver: editData?.receivedByDriver || false,
+    paymentDate: new Date(editData?.paymentDate || Date.now()).toISOString().split('T')[0],
+    notes: editData?.notes || ''
+  });
 
   useEffect(() => {
     if (editData) {
-      setAmount(editData.amount);
-      setPaymentType(editData.paymentType);
-      setReceivedByDriver(editData.receivedByDriver as boolean);
-      // Ensure editData.paymentDate is a Date object before calling toISOString()
       const formattedDate = (editData.paymentDate instanceof Date)
         ? editData.paymentDate.toISOString().split('T')[0]
         : (editData.paymentDate && !isNaN(new Date(editData.paymentDate).getTime()))
           ? new Date(editData.paymentDate).toISOString().split('T')[0]
           : '';
-      setPaymentDate(formattedDate);
-      setNotes(editData.notes || '');
-    } else {
-      setAmount(0);
-      setPaymentType('Cash');
-      setReceivedByDriver(false);
-      setPaymentDate(new Date().toISOString().split('T')[0]); // Set current date in ISO format
-      setNotes('');
+      setFormState({
+        amount: editData.amount,
+        paymentType: editData.paymentType,
+        receivedByDriver: editData.receivedByDriver,
+        paymentDate: formattedDate,
+        notes: editData.notes || ''
+      });
     }
   }, [editData]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | any>) => {
+    const { name, value, type, checked } = e.target;
+    setFormState(prevState => ({
+      ...prevState,
+      [name]: type === 'checkbox' ? checked : value
+    }));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSave({
       id: editData?._id.toString(),
       accountType,
-      amount,
-      paymentType,
-      receivedByDriver,
-      paymentDate: new Date(paymentDate), // Convert paymentDate string to Date object
-      notes,
+      amount: formState.amount,
+      paymentType: formState.paymentType,
+      receivedByDriver: formState.receivedByDriver,
+      paymentDate: new Date(formState.paymentDate), // Convert paymentDate string to Date object
+      notes: formState.notes,
     });
     onClose();
   };
@@ -85,12 +87,13 @@ const Modal: React.FC<ModalProps> = ({
               <label className="block text-sm font-medium text-gray-700">Amount</label>
               <input
                 type="number"
-                value={amount}
-                onChange={(e) => setAmount(Number(e.target.value))}
+                name="amount"
+                value={formState.amount}
+                onChange={handleChange}
                 className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                 onFocus={(e) => {
-                  if (e.target.value == '0') {
-                    e.target.value = ''
+                  if (e.target.value === '0') {
+                    e.target.value = '';
                   }
                 }}
                 required
@@ -99,8 +102,9 @@ const Modal: React.FC<ModalProps> = ({
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">Payment Type</label>
               <select
-                value={paymentType}
-                onChange={(e) => setPaymentType(e.target.value as 'Cash' | 'Cheque' | 'Online Transfer')}
+                name="paymentType"
+                value={formState.paymentType}
+                onChange={handleChange}
                 className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                 required
               >
@@ -112,11 +116,9 @@ const Modal: React.FC<ModalProps> = ({
             <div className="mb-4 flex items-center">
               <input
                 type="checkbox"
-                checked={receivedByDriver as boolean}
-                onChange={(e) => {
-                  console.log(typeof (receivedByDriver))
-                  setReceivedByDriver(e.target.checked)
-                }}
+                name="receivedByDriver"
+                checked={formState.receivedByDriver}
+                onChange={handleChange}
                 className="mr-2"
               />
               <label className="block text-sm font-medium text-gray-700">Received By Driver</label>
@@ -125,8 +127,9 @@ const Modal: React.FC<ModalProps> = ({
               <label className="block text-sm font-medium text-gray-700">Payment Date</label>
               <input
                 type="date"
-                value={paymentDate}
-                onChange={(e) => setPaymentDate(e.target.value)}
+                name="paymentDate"
+                value={formState.paymentDate}
+                onChange={handleChange}
                 className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                 required
               />
@@ -134,21 +137,17 @@ const Modal: React.FC<ModalProps> = ({
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">Notes</label>
               <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                name="notes"
+                value={formState.notes}
+                onChange={handleChange}
                 className="mt-1 p-2 w-full border border-gray-300 rounded-md"
               />
             </div>
             <div className="flex justify-end space-x-4">
-              <Button variant='outline'
-                type="button"
-                onClick={onClose}
-              >
+              <Button variant='outline' type="button" onClick={onClose}>
                 Cancel
               </Button>
-              <Button
-                type="submit"
-              >
+              <Button type="submit">
                 Save
               </Button>
             </div>

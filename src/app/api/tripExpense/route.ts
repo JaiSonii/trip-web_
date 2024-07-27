@@ -1,30 +1,30 @@
-
 import { verifyToken } from "@/utils/auth";
-import { connectToDatabase, tripExpenseSchema } from "@/utils/schema";
+import { connectToDatabase, tripChargesSchema, ExpenseSchema } from "@/utils/schema";
 import { model, models } from "mongoose";
 import { NextResponse } from "next/server";
 
-const TripExpense = models.TripExpense || model('TripExpense', tripExpenseSchema)
+const TripCharges = models.TripCharges || model('TripCharges', tripChargesSchema);
+const Expense = models.Expense || model('Expense', ExpenseSchema);
 
 export async function GET(req: Request) {
     const { user, error } = await verifyToken(req);
     if (error) {
         return NextResponse.json({ error });
     }
-  
+
     const url = new URL(req.url);
     const month = url.searchParams.get('month');
     const year = url.searchParams.get('year');
     console.log(`${month} ${year}`);
-  
+
+    await connectToDatabase();
+
     if (!month || !year) {
-        await connectToDatabase();
-        const tripExpense = await TripExpense.find({ user_id: user });
+        const tripExpense = await Expense.find({ user_id: user }).lean();
         return NextResponse.json({ tripExpense, status: 200 });
     }
-  
-    // Map of month names to month numbers (0-indexed)
-    const monthMap : { [key: string]: number } = {
+
+    const monthMap: { [key: string]: number } = {
         January: 0,
         February: 1,
         March: 2,
@@ -38,29 +38,42 @@ export async function GET(req: Request) {
         November: 10,
         December: 11
     };
-  
+
     const monthNumber = monthMap[month];
     if (monthNumber === undefined) {
         return NextResponse.json({ error: 'Invalid month name', status: 400 });
     }
-  
-    const startDate = new Date(year as any, monthNumber, 1);
-    console.log('Start Date : ' + startDate)
-    const endDate = new Date(year as any, monthNumber + 1, 1); // Next month's start date
-    console.log('End Date : ' + endDate)
-  
+
+    const startDate = new Date(parseInt(year), monthNumber, 1);
+    console.log('Start Date : ' + startDate);
+    const endDate = new Date(parseInt(year), monthNumber + 1, 1);
+    console.log('End Date : ' + endDate);
+
     try {
-        await connectToDatabase();
-        const truckExpense = await TripExpense.find({
-            user_id: user,
-            date: {
-                $gte: startDate,
-                $lt: endDate
-            }
-        }).lean();
-        return NextResponse.json({ truckExpense, status: 200 });
+        const [tripExpense, truckExpense] = await Promise.all([
+            TripCharges.find({
+                user_id: user,
+                date: {
+                    $gte: startDate,
+                    $lt: endDate
+                },
+                partyBill: false
+            }).lean(),
+            Expense.find({
+                user_id: user,
+                date: {
+                    $gte: startDate,
+                    $lt: endDate
+                },
+                trip_id: { $exists: true, $ne: '' }
+            }).lean()
+        ]);
+
+        const combinedExpenses = [...tripExpense, ...truckExpense];
+
+        return NextResponse.json({ combinedExpenses, status: 200 });
     } catch (err: any) {
         console.log(err);
         return NextResponse.json({ message: err.message, status: 500 });
     }
-  }
+}

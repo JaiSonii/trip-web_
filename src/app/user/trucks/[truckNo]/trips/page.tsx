@@ -18,7 +18,7 @@ const TruckTripsPage = () => {
     useEffect(() => {
         const fetchTrips = async () => {
             try {
-                const res = await fetch('/api/trips', {
+                const res = await fetch(`/api/trips/truck/${truckNo}`, {
                     method: 'GET',
                     headers: {
                         'Content-Type': 'application/json',
@@ -30,7 +30,7 @@ const TruckTripsPage = () => {
                 }
 
                 const data = await res.json();
-                setTrips(data.trips.filter((trip: ITrip) => trip.truck === truckNo));
+                setTrips(data.trips);
             } catch (err) {
                 setError((err as Error).message);
             } finally {

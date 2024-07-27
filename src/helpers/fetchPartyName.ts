@@ -7,12 +7,12 @@ export const fetchPartyName = async (party : string) => {
         },
       });
       if (!partyRes.ok) {
-        throw new Error('Failed to fetch Party details');
+        return ''
       }
       const partyData = await partyRes.json();
       return partyData.party.name
     } catch (error) {
       console.log('Error fetching party name:', error);
-      return error
+      return ''
     }
   };

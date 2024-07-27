@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { ITrip, ITruckExpense } from '@/utils/interface';
+import { ITrip, IExpense } from '@/utils/interface';
 import { useParams } from 'next/navigation';
 import { statuses } from '@/utils/schema';
 import { fetchPartyName } from '@/helpers/fetchPartyName';
@@ -19,13 +19,13 @@ const TruckPage = () => {
   const [revenue, setRevenue] = useState(0);
   const [totalExpense, setTotalExpense] = useState(0);
   const [modelOpen, setModelOpen] = useState(false);
-  const [selected, setSelected] = useState<ITruckExpense>();
+  const [selected, setSelected] = useState<IExpense>();
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [expenseRes, tripRes] = await Promise.all([
           fetch(`/api/trucks/${truckNo}/expense`),
-          fetch(`/api/trips`),
+          fetch(`/api/trips/truck/${truckNo}`),
         ]);
 
         const [expenseData, tripData] = await Promise.all([
@@ -33,10 +33,9 @@ const TruckPage = () => {
           tripRes.ok ? tripRes.json() : [],
         ]);
 
-        const filteredTripData = tripData.trips.filter((trip: ITrip) => trip.truck === truckNo);
 
         const tripDataWithPartyNames = await Promise.all(
-          filteredTripData.map(async (trip: any) => {
+          tripData.trips.map(async (trip: any) => {
             const partyName = await fetchPartyName(trip.party);
             return { ...trip, partyName };
           })
@@ -112,7 +111,7 @@ const TruckPage = () => {
       return;
     }
     const data = await res.json()
-    setData((prev : ITruckExpense[])=> {
+    setData((prev : IExpense[])=> {
      const index =  prev.findIndex(item=> item._id == data.charge._id)
      prev[index] = data.charge
      return prev

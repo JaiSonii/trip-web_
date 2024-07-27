@@ -2,7 +2,7 @@
 import Loading from '@/app/loading';
 import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal';
 import { Button } from '@/components/ui/button';
-import { ITruckExpense } from '@/utils/interface';
+import { IExpense } from '@/utils/interface';
 import { useParams } from 'next/navigation';
 import React, { useEffect, useState, useCallback } from 'react';
 import { MdDelete } from 'react-icons/md';
@@ -15,9 +15,9 @@ const OtherExpense = () => {
   const { truckNo } = useParams();
   const [error, setError] = useState<any>();
   const [loading, setLoading] = useState<boolean>(true);
-  const [maintainenceBook, setMaintainenceBook] = useState<ITruckExpense[]>([]);
+  const [maintainenceBook, setMaintainenceBook] = useState<IExpense[]>([]);
   const [modelOpen, setModelOpen] = useState(false);
-  const [selected, setSelected] = useState<ITruckExpense | undefined>();
+  const [selected, setSelected] = useState<IExpense | undefined>();
 
   const getBook = useCallback(async () => {
     try {
@@ -32,7 +32,7 @@ const OtherExpense = () => {
         throw new Error('Failed to fetch expenses');
       }
       const data = await res.json();
-      const filteredData = data.filter((expense: ITruckExpense) => !maintenanceChargeTypes.has(expense.expenseType));
+      const filteredData = data.filter((expense: IExpense) => !maintenanceChargeTypes.has(expense.expenseType));
       setMaintainenceBook(filteredData);
     } catch (error) {
       setError(error);
@@ -106,7 +106,7 @@ const OtherExpense = () => {
                 <td>{fuel.paymentMode}</td>
                 <td>{fuel.notes}</td>
                 <td>{fetchDriverName(fuel.driver as string) || 'NA'}</td>
-                <td><TripRoute tripId={fuel.trip || ''} /></td>
+                <td><TripRoute tripId={fuel.trip_id || ''} /></td>
                 <td>
                   <Button onClick={(e) => handleDeleteExpense(fuel._id as string, e)} variant={'destructive'}>
                     <MdDelete />

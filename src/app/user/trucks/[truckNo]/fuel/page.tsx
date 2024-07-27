@@ -4,9 +4,7 @@ import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal'
 import TripRoute from '@/components/trip/TripRoute'
 import { Button } from '@/components/ui/button'
 import { fetchDriverName } from '@/helpers/driverOperations'
-import { ITruckExpense } from '@/utils/interface'
-import { connectToDatabase, tripExpenseSchema } from '@/utils/schema'
-import { model, models } from 'mongoose'
+import { IExpense } from '@/utils/interface'
 import { useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { MdDelete } from 'react-icons/md'
@@ -17,11 +15,11 @@ interface TripDetails {
 
 const TruckFuelBook = () => {
     const { truckNo } = useParams()
-    const [fuelBook, setFuelBook] = useState<ITruckExpense[]>([])
+    const [fuelBook, setFuelBook] = useState<IExpense[]>([])
     const [loading, setLoading] = useState(true)
     const [tripDetails, setTripDetails] = useState<TripDetails>({})
     const [modelOpen, setModelOpen] = useState(false)
-    const [selected, setSelected] = useState<ITruckExpense>()
+    const [selected, setSelected] = useState<IExpense>()
 
     useEffect(() => {
         const fetchFuel = async () => {
@@ -32,7 +30,7 @@ const TruckFuelBook = () => {
                     throw new Error('Failed to fetch fuel book')
                 }
                 const data = await res.json()
-                const fuels = data.filter((expense: ITruckExpense) => expense.expenseType == 'Fuel Expense')
+                const fuels = data.filter((expense: IExpense) => expense.expenseType == 'Fuel Expense')
                 setFuelBook(fuels)
             } catch (error: any) {
                 console.log(error)
@@ -82,7 +80,7 @@ const TruckFuelBook = () => {
             return;
         }
         const data = await res.json()
-        setFuelBook((prev: ITruckExpense[]) => {
+        setFuelBook((prev: IExpense[]) => {
             const index = prev.findIndex(item => item._id == data.charge._id)
             prev[index] = data.charge
             return prev
@@ -117,7 +115,7 @@ const TruckFuelBook = () => {
                                 <td>{fuel.paymentMode}</td>
                                 <td>{fuel.notes}</td>
                                 <td>{fetchDriverName(fuel.driver as string) || 'NA'}</td>
-                                <td><TripRoute tripId={fuel.trip || ''} /></td>
+                                <td><TripRoute tripId={fuel.trip_id || ''} /></td>
                                 <td>
                                     <Button onClick={(e) => handleDelete(fuel._id as string,e)} variant={'destructive'} ><MdDelete /></Button>
                                 </td>

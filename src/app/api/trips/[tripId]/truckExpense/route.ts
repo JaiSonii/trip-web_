@@ -1,9 +1,9 @@
 import { verifyToken } from "@/utils/auth";
-import { connectToDatabase, tripSchema, TruckExpenseSchema } from "@/utils/schema";
+import { connectToDatabase, tripSchema, ExpenseSchema } from "@/utils/schema";
 import { model, models } from "mongoose";
 import { NextResponse } from "next/server";
 
-const TruckExpense = models.TruckExpense || model('TruckExpense', TruckExpenseSchema)
+const Expense = models.Expense || model('Expense', ExpenseSchema)
 
 export async function GET(req: Request, { params }: { params: { tripId: string } }) {
   const { user, error } = await verifyToken(req);
@@ -18,7 +18,7 @@ export async function GET(req: Request, { params }: { params: { tripId: string }
 
   try {
     // Fetch the trip expenses from the database
-    const charges = await TruckExpense.find({ user_id: user, trip: tripId }).lean();
+    const charges = await Expense.find({ user_id: user, trip_id: tripId }).lean();
 
     // Return a success response with the charges
     return NextResponse.json({ status: 200, charges });
@@ -49,9 +49,9 @@ export async function POST(req: Request, { params }: { params: { tripId: string 
     }
 
     // Create a new instance of TripExpense with the parsed data and tripId
-    const charge = new TruckExpense({
+    const charge = new Expense({
       ...data,
-      trip: tripId,
+      trip_id: tripId,
       user_id: user
     });
 

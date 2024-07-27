@@ -1,6 +1,6 @@
 export const fetchDriverName = async (driver: string) => {
     try {
-        const response = await fetch(`/api/drivers/${driver}`, {
+        const response = await fetch(`/api/drivers/${driver}/name`, {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',

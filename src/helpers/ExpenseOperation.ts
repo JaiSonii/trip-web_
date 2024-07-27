@@ -1,4 +1,4 @@
-import { ITruckExpense } from "@/utils/interface";
+import { IExpense } from "@/utils/interface";
 
 export const handleDelete = async (id: string, e? : React.MouseEvent ) => {
     e?.stopPropagation(); // Prevent the row's click event from being triggered
@@ -54,7 +54,7 @@ export const handleDelete = async (id: string, e? : React.MouseEvent ) => {
             }
         })
         const data = await res.json()
-        const filteredData = data.truckExpense.filter((expense : ITruckExpense)=>expense.driver == driver)
+        const filteredData = data.expenses.filter((expense : IExpense)=>expense.driver == driver)
         return filteredData
     }catch(err){
         alert(err)
@@ -84,7 +84,7 @@ export const fetchTripExpense = async (month : any, year : any) => {
           throw new Error('Failed to fetch truck expenses');
       }
       const data = await res.json();
-      return data.tripExpense;
+      return data.combinedExpenses;
   } catch (error) {
       console.error('Error fetching truck expenses:', error);
       return [];

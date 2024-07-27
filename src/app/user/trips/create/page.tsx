@@ -21,9 +21,9 @@ const CreateTripPage: React.FC = () => {
       try {
         // Fetch parties, trucks, drivers
         const [partiesRes, trucksRes, driversRes, tripsRes] = await Promise.all([
-          fetch('/api/parties'),
-          fetch('/api/trucks'),
-          fetch('/api/drivers'),
+          fetch('/api/parties/create'),
+          fetch('/api/trucks/create'),
+          fetch('/api/drivers/create'),
           fetch('/api/trips')
         ]);
 

@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation'; // Import from 'next/router' instead of 'next/navigation'
 import { IDriver } from '@/utils/interface';
 import Loading from '@/app/loading';
-import { useAuth } from '@/components/AuthProvider';
 
 const DriversPage = () => {
 

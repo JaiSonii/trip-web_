@@ -1,11 +1,11 @@
 import { fetchBalanceBack } from "@/helpers/fetchTripBalance";
 import { verifyToken } from "@/utils/auth";
-import { connectToDatabase, tripExpenseSchema, tripSchema } from "@/utils/schema";
+import { connectToDatabase, tripChargesSchema, tripSchema } from "@/utils/schema";
 import { model, models } from "mongoose";
 import { NextRequest, NextResponse } from "next/server";
 
 // Initialize the TripExpense model
-const TripExpense = models.TripExpense || model('TripExpense', tripExpenseSchema);
+const TripCharges = models.TripCharges || model('TripCharges', tripChargesSchema);
 
 export async function GET(req: Request, { params }: { params: { tripId: string } }) {
   const { user, error } = await verifyToken(req);
@@ -20,7 +20,7 @@ export async function GET(req: Request, { params }: { params: { tripId: string }
 
   try {
     // Fetch the trip expenses from the database
-    const charges = await TripExpense.find({ user_id: user, trip_id: tripId }).lean();
+    const charges = await TripCharges.find({ user_id: user, trip_id: tripId }).lean();
 
     // Return a success response with the charges
     return NextResponse.json({ status: 200, charges });
@@ -49,7 +49,7 @@ export async function POST(req: Request, { params }: { params: { tripId: string 
     const data = await req.json();
 
     // Create a new instance of TripExpense with the parsed data and tripId
-    const newCharge = new TripExpense({
+    const newCharge = new TripCharges({
       ...data,
       trip_id: tripId,
       user_id: user
@@ -58,7 +58,7 @@ export async function POST(req: Request, { params }: { params: { tripId: string 
     const Trip = models.Trip || model('Trip', tripSchema)
     const trip = await Trip.findOne({user_id : user, trip_id : tripId})
 
-    const charges = await TripExpense.find({ user_id: user, trip_id: trip.trip_id })
+    const charges = await TripCharges.find({ user_id: user, trip_id: trip.trip_id })
     const pending = await fetchBalanceBack(trip, charges)
     if (pending < 0) {
       return NextResponse.json({ message: "Balance going negative", status: 400 })
@@ -87,7 +87,7 @@ export async function PATCH(req: Request, { params }: { params: { tripId: string
     if (error) {
       return NextResponse.json({ error });
     }
-    const expense = await TripExpense.findOneAndUpdate({user_id : user, _id : edited._id}, edited, { new: true });
+    const expense = await TripCharges.findOneAndUpdate({user_id : user, _id : edited._id}, edited, { new: true });
     if (!expense) {
       return NextResponse.json({ message: 'Expense not found' }, { status: 404 });
     }
@@ -106,7 +106,7 @@ export async function DELETE(req: Request, { params }: { params: { tripId: strin
     if (error) {
       return NextResponse.json({ error });
     }
-    const expense = await TripExpense.findOneAndDelete({user_id : user, _id : id});
+    const expense = await TripCharges.findOneAndDelete({user_id : user, _id : id});
     if (!expense) {
       return NextResponse.json({ message: 'Expense not found' }, { status: 404 });
     }

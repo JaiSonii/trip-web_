@@ -49,6 +49,7 @@ export async function POST(this: any, req: Request) {
       party: data.party,
       truck: data.truck,
       driver: data.driver,
+      supplier : data.supplierId,
       route: {
         origin: data.route.origin,
         destination: data.route.destination

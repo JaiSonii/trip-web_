@@ -2,7 +2,7 @@ import DriverModal from "@/components/driver/driverModal";
 import { fetchBalance, fetchBalanceBack } from "@/helpers/fetchTripBalance";
 import { verifyToken } from "@/utils/auth";
 import { ITrip, PaymentBook } from "@/utils/interface";
-import { connectToDatabase, driverSchema, partySchema, tripExpenseSchema, truckSchema } from "@/utils/schema";
+import { connectToDatabase, driverSchema, partySchema, tripChargesSchema, truckSchema } from "@/utils/schema";
 import { tripSchema } from "@/utils/schema";
 import { models, model } from 'mongoose'
 import { NextResponse } from "next/server";
@@ -64,7 +64,7 @@ export async function PATCH(req: Request, { params }: { params: { tripId: string
         account.paymentBook_id = 'payment' + uuidv4()
         trip.accounts.push(account);
       }
-      const TripExpense = models.TripExpense || model('TripExpense', tripExpenseSchema)
+      const TripExpense = models.TripExpense || model('TripExpense', tripChargesSchema)
       const charges = await TripExpense.find({ user_id: user, trip_id: trip.trip_id })
       const pending = await fetchBalanceBack(trip, charges)
       if (pending < 0) {
@@ -107,7 +107,7 @@ export async function PUT(req: Request, { params }: { params: { tripId: string }
     const Driver = models.Driver || model('Driver', driverSchema);
 
     const oldTrip = await Trip.findOne({ user_id: user, trip_id: tripId })
-    const TripExpense = models.TripExpense || model('TripExpense', tripExpenseSchema)
+    const TripExpense = models.TripExpense || model('TripExpense', tripChargesSchema)
     const charges = await TripExpense.find({ user_id: user, trip_id: oldTrip.trip_id })
     const pending = await fetchBalanceBack(oldTrip,charges)
     if (pending < 0) {

@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, usePathname, useRouter } from 'next/navigation';
 import { MdDelete, MdEdit } from "react-icons/md";
 import DriverLayout from '@/components/driver/driverLayout';
-import { IDriver, IDriverAccount, ITrip, ITruckExpense, PaymentBook } from '@/utils/interface';
+import { IDriver, IDriverAccount, ITrip, IExpense, PaymentBook } from '@/utils/interface';
 import Loading from '@/app/loading';
 import { ExpenseforDriver } from '@/helpers/ExpenseOperation';
 import { handleDelete as DeleteForExpense } from '@/helpers/ExpenseOperation';
@@ -23,7 +23,7 @@ const Driver: React.FC = () => {
   const [driver, setDriver] = useState<IDriver>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [accounts, setAccounts] = useState<ITruckExpense[] | PaymentBook[] | any[]>([]);
+  const [accounts, setAccounts] = useState<IExpense[] | PaymentBook[] | any[]>([]);
   const [driverAccounts, setDriverAccounts] = useState<IDriverAccount[]>([])
   const [expenseEdit, setExpenseEdit] = useState(false);
   const [paymentEdit, setPaymentEdit] = useState(false);
@@ -79,7 +79,7 @@ const Driver: React.FC = () => {
 
   const fetchTrips = async () => {
     try {
-      const res = await fetch('/api/trips', {
+      const res = await fetch(`/api/trips/driver/${driverId}/accounts`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -91,20 +91,10 @@ const Driver: React.FC = () => {
       }
 
       const data = await res.json();
-      const trips = data.trips.filter((trip: ITrip) => trip.driver === driverId);
-
-      const accountsData = trips.flatMap((trip: ITrip) =>
-        trip.accounts
-          .filter((acc: PaymentBook) => acc.receivedByDriver === true)
-          .map((acc: PaymentBook) => ({
-            ...acc,
-            tripId: trip.trip_id,
-          }))
-      );
-
-      return accountsData;
+      return data.accounts;
     } catch (err) {
       setError((err as Error).message);
+      console.log(err)
       return [];
     }
   };
@@ -112,7 +102,7 @@ const Driver: React.FC = () => {
   const fetchTruckExpenses = async () => {
     try {
       const truckExpense = await ExpenseforDriver(driverId as string);
-      const formattedTruckExpenses = truckExpense.map((expense: ITruckExpense) => ({
+      const formattedTruckExpenses = truckExpense.map((expense: IExpense) => ({
         ...expense,
         date: expense.date,
         type: 'truck',
@@ -152,13 +142,14 @@ const Driver: React.FC = () => {
 
     } else if (account.accountType) {
       // Handle payment edit logic
-      console.log(account)
+      // console.log(selected)
+      // console.log(account)
       const result = await handleEditAccount(account, selected.tripId)
       if(result.error){
         alert(error)
         return
       }
-      setAccounts(prev => prev.map((acc: any) => acc._id === selected._id ? { ...acc, ...result } : acc));
+      router.refresh()
     } else {
       try {
         const data = await EditDriverAccount(driverId as string, account, selected.account_id);
@@ -174,9 +165,7 @@ const Driver: React.FC = () => {
   }, [driverId]);
 
   useEffect(() => {
-    if (driverAccounts.length > 0) {
       fetchAllData();
-    }
   }, [driverId, driverAccounts]);
 
   if (loading) {
@@ -209,7 +198,7 @@ const Driver: React.FC = () => {
             <tbody>
               {accounts.map((account, index: number) => (
                 <tr key={account._id}>
-                  <td>{new Date(account.date).toLocaleDateString()}</td>
+                  <td>{new Date(account.date || account.paymentDate).toLocaleDateString()}</td>
                   <td>{account.reason || account.expenseType || `Trip ${account.accountType} (from a trip)`}</td>
                   <td>{account.gave || (account.type === 'truck' && account.amount) || ''}</td>
                   <td>{account.got || (account.type !== 'truck' && account.amount) || ''}</td>
@@ -253,14 +242,14 @@ const Driver: React.FC = () => {
         driverId={selected.driver || ''}
         selected={selected}
       />
-      <Modal
+      {selected != null && <Modal
         isOpen={paymentEdit}
         onClose={() => setPaymentEdit(false)}
         onSave={handleEditAccounts}
         modalTitle="Edit Item"
         accountType={selected.accountType}
         editData={selected}
-      />
+      />}
       <DriverModal
         open={accountEdit}
         onClose={() => setAccountEdit(false)}

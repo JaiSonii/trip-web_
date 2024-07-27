@@ -5,8 +5,8 @@ import { FaMapLocationDot } from "react-icons/fa6";
 import { FaTruckMoving } from "react-icons/fa";
 import Link from 'next/link';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { fetchTruckExpense } from '@/helpers/ExpenseOperation';
-import { ITruckExpense } from '@/utils/interface';
+import { fetchTripExpense, fetchTruckExpense } from '@/helpers/ExpenseOperation';
+import { IExpense } from '@/utils/interface';
 
 interface TruckLayoutProps {
     children: React.ReactNode;
@@ -37,16 +37,21 @@ const ExpenseLayout = ({ children }: TruckLayoutProps) => {
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const router = useRouter();
-    
+
     const [selectedMonthYear, setSelectedMonthYear] = useState(() => {
         const monthYear = searchParams.get('monthYear');
         return monthYear ? monthYear : '';
     });
+    const [truckExpense, setTruckExpense] = useState(0);
+    const [tripExpense, setTripExpense] = useState(0);
+
     const [monthYearOptions, setMonthYearOptions] = useState<string[]>([]);
     const [monthExpense, setMonthExpense] = useState(0);
 
     useEffect(() => {
         setMonthYearOptions(generateMonthYearOptions());
+
+
     }, []);
 
     const handleMonthYearChange = (value: string) => {
@@ -59,14 +64,17 @@ const ExpenseLayout = ({ children }: TruckLayoutProps) => {
     useEffect(() => {
         const calculateExpense = async () => {
             const [month, year] = selectedMonthYear.split(' ');
-            const truckExpenses = await fetchTruckExpense(month, year);
-            if (truckExpenses) {
-                setMonthExpense(truckExpenses.reduce((total: number, expense: ITruckExpense) => total + expense.amount, 0));
+            const [truckExpenses, tripExpenses] = await Promise.all([fetchTruckExpense(month, year), fetchTripExpense(month, year)]);
+            if (truckExpenses && tripExpenses) {
+                const totalTruckExpense = (truckExpenses || []).reduce((total: number, expense: IExpense) => total + expense.amount, 0);
+                const totalTripExpense = (tripExpenses || []).reduce((total: number, expense: IExpense) => total + expense.amount, 0);
+                setTruckExpense(totalTruckExpense);
+                setTripExpense(totalTripExpense);
+                setMonthExpense(totalTruckExpense + totalTripExpense);
             }
         };
-        if (selectedMonthYear) {
-            calculateExpense();
-        }
+        calculateExpense()
+
     }, [selectedMonthYear]);
 
     const tabs = [
@@ -95,9 +103,21 @@ const ExpenseLayout = ({ children }: TruckLayoutProps) => {
                 </Select>
             </div>
 
-            <div className='flex flex-col items-center border border-red-500 bg-red-50 p-4 rounded-md w-1/4 shadow-lg mb-6'>
-                <span className="text-lg font-semibold text-red-700">Month Expense: </span>
-                <span className="ml-2 text-lg text-red-900">{monthExpense}</span>
+            <div className='flex flex-row justify-start gap-4 mb-6'>
+                <div className="flex flex-col items-center border-2 border-red-500 bg-red-50 p-4 rounded-lg w-1/4 shadow-md transition-transform transform hover:scale-105">
+                    <span className="text-lg font-semibold text-red-700">Total Month Expense:</span>
+                    <span className="ml-2 text-2xl font-bold text-red-900">{monthExpense}</span>
+                </div>
+
+                <div className="flex flex-col items-center border-2 border-blue-500 bg-blue-50 p-4 rounded-lg w-1/4 shadow-md transition-transform transform hover:scale-105">
+                    <span className="text-lg font-semibold text-blue-700">Truck Expense:</span>
+                    <span className="ml-2 text-2xl font-bold text-blue-900">{truckExpense}</span>
+                </div>
+
+                <div className="flex flex-col items-center border-2 border-green-500 bg-green-50 p-4 rounded-lg w-1/4 shadow-md transition-transform transform hover:scale-105">
+                    <span className="text-lg font-semibold text-green-700">Trip Expense:</span>
+                    <span className="ml-2 text-2xl font-bold text-green-900">{tripExpense}</span>
+                </div>
             </div>
 
             <div className="flex space-x-4 border-b-2 border-gray-300 mb-4">
@@ -124,7 +144,9 @@ const ExpenseLayout = ({ children }: TruckLayoutProps) => {
 
             <div>{children}</div>
         </div>
+
     );
+
 };
 
 export default ExpenseLayout;

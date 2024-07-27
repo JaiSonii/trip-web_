@@ -1,9 +1,9 @@
 import { verifyToken } from "@/utils/auth";
-import { connectToDatabase, TruckExpenseSchema } from "@/utils/schema";
+import { connectToDatabase, ExpenseSchema } from "@/utils/schema";
 import { model, models } from "mongoose";
 import { NextResponse } from "next/server";
 
-const TruckExpense = models.TruckExpense || model('TruckExpense', TruckExpenseSchema)
+const Expense = models.Expense || model('Expense', ExpenseSchema)
 
 export async function PUT(req: Request, { params }: { params: { expenseId: string } }) {
   // Connect to the database
@@ -19,19 +19,19 @@ export async function PUT(req: Request, { params }: { params: { expenseId: strin
     }
     // Parse the request body as JSON
     let data = await req.json();
-    console.log(data)
+    console.log(expenseId)
 
     // Create a new instance of TripExpense with the parsed data and tripId
-    const charge = await TruckExpense.findById(expenseId)
+    const charge = await Expense.findByIdAndUpdate(expenseId, data)
     
-    charge.amount = data.amount
-    charge.date = data.date
-    charge.notes = data.notes
-    charge.expenseType = data.expenseType
-    charge.paymentMode = data.paymentMode
-    charge.transaction_id = data.transaction_id
-    charge.truck = data.truck
-    charge.driver = data.driver    
+    // charge.amount = data.amount
+    // charge.date = data.date
+    // charge.notes = data.notes
+    // charge.expenseType = data.expenseType
+    // charge.paymentMode = data.paymentMode
+    // charge.transaction_id = data.transaction_id
+    // charge.truck = data.truck
+    // charge.driver = data.driver    
 
     await charge.save()
 
@@ -55,7 +55,7 @@ export async function DELETE(req: Request, { params }: { params: { expenseId: st
 
   await connectToDatabase()
   try{
-    const charge = await TruckExpense.findByIdAndDelete(expenseId)
+    const charge = await Expense.findByIdAndDelete(expenseId)
     if(!charge){
       return NextResponse.json({ status: 404, message: "Charge Not Found" })
     }

@@ -1,66 +1,54 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { useParams, usePathname, useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { ITrip } from '@/utils/interface';
 import { statuses } from '@/utils/schema';
 import { fetchBalance } from '@/helpers/fetchTripBalance';
 
 const SinglePartyTrips = () => {
   const router = useRouter();
-
-  const pathname = usePathname()
-  const singleParty = pathname.split('/')[3]
+  const { singleparty } = useParams();
   const [trips, setTrips] = useState<ITrip[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [partyName, setPartyName] = useState<string>('');
 
   useEffect(() => {
+    if (singleparty) {
+      fetchPartyData(singleparty as string);
+    }
+  }, [singleparty]);
 
-    const fetchTrips = async () => {
-      try {
-        const res = await fetch(`/api/trips`);
-        if (!res.ok) {
-          throw new Error('Failed to fetch trips');
-        }
-        const data = await res.json();
-        const filterData = data.trips.filter((trip: ITrip) => trip.party === singleParty);
-        setTrips(filterData);
-      } catch (err: any) {
-        setError(err.message);
-      } 
-    };
+  const fetchPartyData = async (partyId: string) => {
+    setLoading(true);
+    try {
+      const [tripsResponse] = await Promise.all([
+        fetch(`/api/trips/party/${partyId}`),
+      ]);
 
-    const fetchPartyName = async () => {
-      console.log(singleParty)
-      try {
-        const res = await fetch(`/api/parties/${singleParty}`,{
-          method : 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        if (!res.ok) {
-          throw new Error('Failed to fetch party name');
-        }
-        const data = await res.json();
-        setPartyName(data.party.name);
-      } catch (err: any) {
-        setError(err.message);
+      if (!tripsResponse.ok) {
+        throw new Error('Failed to fetch data');
       }
-    };
 
-    fetchTrips();
-    fetchPartyName();
-    setLoading(false)
-  }, [singleParty]);
+      const tripsData = await tripsResponse.json();
+
+      setTrips(tripsData.trips);
+      // Assuming the party name is part of the response for demonstration purposes
+      setPartyName(tripsData.partyName);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
   if (trips.length === 0) return <div>No trips for {partyName}</div>;
 
   return (
-    <div className="table-container">
+    <div className="table-container flex flex-col justify-start gap-3">
+      <h1 className="text-2xl font-bold mb-4">Trips for {partyName}</h1>
       <table className="custom-table">
         <thead>
           <tr>
@@ -73,9 +61,9 @@ const SinglePartyTrips = () => {
           </tr>
         </thead>
         <tbody>
-          {trips.map((trip, index) => (
+          {trips.map((trip) => (
             <tr
-              key={index}
+              key={trip.trip_id}
               className="border-t hover:bg-slate-100 cursor-pointer"
               onClick={() => router.push(`/user/trips/${trip.trip_id}`)}
             >

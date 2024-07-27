@@ -68,21 +68,15 @@ const SuppliersPage = () => {
               <th>Contact Number</th>
               <th>Active Trips</th>
               <th>Supplier Balance</th>
-              <th>Action</th>
             </tr>
           </thead>
           <tbody>
             {suppliers.map((supplier, index) => (
-              <tr key={supplier.supplier_id as string} className="border-t">
+              <tr key={supplier.supplier_id as string} className="border-t" onClick={()=>router.push(`suppliers/${supplier.supplier_id}/trips`)}>
                 <td>{supplier.name}</td>
                 <td>{supplier.contactNumber}</td>
                 <td>{activeTrips}</td>
                 <td>{supplier.balance}</td>
-                <td>
-                  <Link href={`#`} className="text-blue-500 hover:underline cursor-pointer">
-                    Action
-                  </Link>
-                </td>
               </tr>
             ))}
           </tbody>

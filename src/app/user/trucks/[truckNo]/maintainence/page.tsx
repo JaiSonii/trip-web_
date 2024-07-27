@@ -4,7 +4,7 @@ import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal'
 import TripRoute from '@/components/trip/TripRoute'
 import { Button } from '@/components/ui/button'
 import { fetchDriverName } from '@/helpers/driverOperations'
-import { ITruckExpense } from '@/utils/interface'
+import { IExpense } from '@/utils/interface'
 import { useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import { MdDelete } from 'react-icons/md'
@@ -34,10 +34,10 @@ const TruckMaintainenceBook = () => {
   const { truckNo } = useParams()
   const [error, setError] = useState<any>()
   const [loading, setLoading] = useState<boolean>(true)
-  const [maintainenceBook, setMaintainenceBook] = useState<ITruckExpense[]>([])
+  const [maintainenceBook, setMaintainenceBook] = useState<IExpense[]>([])
 
   const [modelOpen, setModelOpen] = useState(false)
-  const [selected, setSeclected] = useState<ITruckExpense>()
+  const [selected, setSeclected] = useState<IExpense>()
 
 
 
@@ -57,7 +57,7 @@ const TruckMaintainenceBook = () => {
           alert("Please try again")
         }
         const data = await res.json()
-        const filteredData = data.filter((expense: ITruckExpense) => maintainenceExpenseTypes.has(expense.expenseType))
+        const filteredData = data.filter((expense: IExpense) => maintainenceExpenseTypes.has(expense.expenseType))
 
         setMaintainenceBook(filteredData)
       } catch (error) {
@@ -107,7 +107,7 @@ const TruckMaintainenceBook = () => {
       return;
     }
     const data = await res.json()
-    setMaintainenceBook((prev : ITruckExpense[])=> {
+    setMaintainenceBook((prev : IExpense[])=> {
      const index =  prev.findIndex(item=> item._id == data.charge._id)
      prev[index] = data.charge
      return prev
@@ -145,7 +145,7 @@ const TruckMaintainenceBook = () => {
                 <td>{fuel.paymentMode}</td>
                 <td>{fuel.notes}</td>
                 <td>{fetchDriverName(fuel.driver as string) || 'NA'}</td>
-                <td><TripRoute tripId={fuel.trip || ''}/></td>
+                <td><TripRoute tripId={fuel.trip_id || ''}/></td>
                 <td>
                 <Button onClick={(e) => handleDelete(fuel._id as string, e)} variant={'destructive'} ><MdDelete /></Button>
                 </td>

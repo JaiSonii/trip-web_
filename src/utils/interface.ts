@@ -53,6 +53,7 @@ export interface ITrip extends Document {
   party: string;
   truck: string;
   driver: string;
+  supplier : string
   route: Route;
   billingType: 'Fixed' | 'Per Tonne' | 'Per Kg' | 'Per Trip' | 'Per Day' | 'Per Hour' | 'Per Litre' | 'Per Bag';
   amount: number;
@@ -111,9 +112,9 @@ export interface ISupplier extends Document{
   balance : number
 }
 
-export interface ITruckExpense extends Document{
+export interface IExpense extends Document{
   user_id: string;
-  trip: string;
+  trip_id: string;
   truck: string;
   expenseType: string;
   paymentMode: string;
@@ -124,7 +125,7 @@ export interface ITruckExpense extends Document{
   notes?: string;          // Optional
 }
 
-export interface ITripExpense extends Document{
+export interface ITripCharges extends Document{
   user_id: string;
   trip_id: string;
   partyBill: boolean;
