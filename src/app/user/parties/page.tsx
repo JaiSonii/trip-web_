@@ -78,7 +78,7 @@ const PartiesPage = () => {
           </thead>
           <tbody>
             {parties.map((party, index) => (
-              <tr key={party._id as string} className="border-t w-full cursor-pointer" onClick={() => router.push(`/user/parties/${party.party_id}/trips`)}>
+              <tr key={party._id as string} className="border-t w-full cursor-pointer" onClick={() => router.push(`parties/${party.party_id}/trips`)}>
                 <td>{party.name}</td>
                 <td>{party.contactPerson}</td>
                 <td>{party.contactNumber}</td>

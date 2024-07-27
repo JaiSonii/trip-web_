@@ -11,20 +11,17 @@ const SinglePartyTrips = () => {
   const [trips, setTrips] = useState<ITrip[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [partyName, setPartyName] = useState<string>('');
 
   useEffect(() => {
     if (singleparty) {
-      fetchPartyData(singleparty as string);
+      fetchPartyTrips(singleparty as string);
     }
   }, [singleparty]);
 
-  const fetchPartyData = async (partyId: string) => {
+  const fetchPartyTrips = async (partyId: string) => {
     setLoading(true);
     try {
-      const [tripsResponse] = await Promise.all([
-        fetch(`/api/trips/party/${partyId}`),
-      ]);
+      const tripsResponse = await fetch(`/api/trips/party/${partyId}`);
 
       if (!tripsResponse.ok) {
         throw new Error('Failed to fetch data');
@@ -33,8 +30,6 @@ const SinglePartyTrips = () => {
       const tripsData = await tripsResponse.json();
 
       setTrips(tripsData.trips);
-      // Assuming the party name is part of the response for demonstration purposes
-      setPartyName(tripsData.partyName);
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -44,11 +39,10 @@ const SinglePartyTrips = () => {
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>Error: {error}</div>;
-  if (trips.length === 0) return <div>No trips for {partyName}</div>;
+  if (trips.length === 0) return <div>No trips for this party</div>;
 
   return (
     <div className="table-container flex flex-col justify-start gap-3">
-      <h1 className="text-2xl font-bold mb-4">Trips for {partyName}</h1>
       <table className="custom-table">
         <thead>
           <tr>
