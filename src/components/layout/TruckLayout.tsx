@@ -11,7 +11,7 @@ import Loading from '@/app/loading';
 import { Button } from '../ui/button';
 import ExpenseModal from '../trip/tripDetail/ExpenseModal';
 import { fuelAndDriverChargeTypes, maintenanceChargeTypes } from '@/utils/utilArray';
-import { MdDelete, MdEdit } from 'react-icons/md';
+import { MdDelete, MdEdit, MdExpandLess, MdExpandMore } from 'react-icons/md';
 import { SlOptionsVertical } from "react-icons/sl";
 import { IoCloseCircleOutline } from "react-icons/io5";
 import { IoAddCircle } from "react-icons/io5";
@@ -39,6 +39,10 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
     const [openOptions, setOpenOptions] = useState(false);
     const dropdownRef = useRef<any>(null);
     const [edit, setEdit] = useState<boolean>(false);
+
+    const [showDetails, setShowDetails] = useState(false);
+
+    const toggleDetails = () => setShowDetails(!showDetails);
 
     useEffect(() => {
         const handleClickOutside = (event: any) => {
@@ -176,20 +180,38 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
         <div className="w-full h-full p-4 bg-gray-50 rounded-lg shadow-sm">
             <div className="flex flex-col space-y-4">
                 <div className="flex items-center justify-between p-4 bg-gray-200">
-                    <div className="flex space-x-4">
+                    <div className="flex items-center space-x-4">
                         <Button
-                            variant="link"
+                            variant="outline"
                             className="text-2xl font-bold"
                             onClick={() => router.push(`/user/trucks/${truckNo}`)}
                         >
                             {truckNo}
                         </Button>
-                        <span className="text-2xl font-bold text-gray-700">{truck?.status}</span>
-                        <span className="text-2xl font-bold text-gray-700">
-                            {truck?.truckType} {truck?.model}
-                        </span>
-                        <span className="text-2xl font-bold text-gray-700">{truck?.ownership}</span>
+                        <Button
+                            variant="link"
+                            className="flex items-center font-bold p-1"
+                            onClick={toggleDetails}
+                        >
+                            {showDetails ? 'Hide Details' : 'Show Details'}
+                            {showDetails ? <MdExpandLess className="ml-2" /> : <MdExpandMore className="ml-2" />}
+                        </Button>
+                        <div className={`transition-all duration-500 ease-in-out transform ${showDetails ? 'max-h-screen opacity-100 scale-100' : 'max-h-0 opacity-0 scale-95 overflow-hidden'}`}>
+                            <div className="bg-gray-100 p-4 rounded-lg shadow-md">
+                                <div className="flex flex-row items-center space-x-4">
+                                    <span className="flex items-center space-x-2">
+                                        <span className={`h-3 w-3 rounded-full ${truck?.status === 'On Trip' ? 'bg-red-500' : 'bg-green-500'}`}></span>
+                                        <span className="text-xl font-semibold text-gray-800">{truck?.status}</span>
+                                    </span>
+                                    <span className="text-xl font-semibold text-gray-800">
+                                        {truck?.truckType} {truck?.model}
+                                    </span>
+                                    <span className="text-xl font-semibold text-gray-800">{truck?.ownership}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
+
                     <div className="relative" ref={dropdownRef}>
                         <Button onClick={() => setOpenOptions(!openOptions)}>
                             <SlOptionsVertical size={20} />
@@ -239,16 +261,17 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
                     </div>
                 </div>
 
+
+
                 <div className="flex space-x-4 border-b-2 border-gray-200">
                     {tabs.map((tab) => (
                         <Link
                             key={tab.name}
                             href={tab.path}
-                            className={`px-4 py-2 transition duration-300 ease-in-out ${
-                                pathname === tab.path
-                                    ? 'border-b-2 border-blue-500 text-blue-500'
-                                    : 'border-transparent text-gray-600 hover:text-blue-500 hover:border-blue-500'
-                            }`}
+                            className={`px-4 py-2 transition duration-300 ease-in-out ${pathname === tab.path
+                                ? 'border-b-2 border-blue-500 text-blue-500'
+                                : 'border-transparent text-gray-600 hover:text-blue-500 hover:border-blue-500'
+                                }`}
                             prefetch={true}
                         >
                             <div className="flex items-center space-x-2">
@@ -280,3 +303,5 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
 };
 
 export default TruckLayout;
+
+

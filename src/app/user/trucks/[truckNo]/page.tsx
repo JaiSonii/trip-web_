@@ -1,16 +1,15 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { ITrip, IExpense } from '@/utils/interface';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { statuses } from '@/utils/schema';
 import { fetchPartyName } from '@/helpers/fetchPartyName';
-import { fetchBalance } from '@/helpers/fetchTripBalance';
 import Loading from '@/app/loading';
 import { Button } from '@/components/ui/button';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import Link from 'next/link';
 import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal';
-import { useRouter } from 'next/navigation';
+import TripRevenue from '@/components/trip/tripDetail/Profit/TripRevenue';
 
 const TruckPage = () => {
   const [data, setData] = useState<any[]>([]);
@@ -20,17 +19,22 @@ const TruckPage = () => {
   const [totalExpense, setTotalExpense] = useState(0);
   const [modelOpen, setModelOpen] = useState(false);
   const [selected, setSelected] = useState<IExpense>();
+
+  const router = useRouter()
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [expenseRes, tripRes] = await Promise.all([
+        const [expenseRes, tripRes, profitRes] = await Promise.all([
           fetch(`/api/trucks/${truckNo}/expense`),
           fetch(`/api/trips/truck/${truckNo}`),
+          fetch(`/api/trucks/${truckNo}/summary`)
         ]);
 
-        const [expenseData, tripData] = await Promise.all([
+        const [expenseData, tripData, profitData] = await Promise.all([
           expenseRes.ok ? expenseRes.json() : [],
           tripRes.ok ? tripRes.json() : [],
+          profitRes.ok ? profitRes.json() : []
         ]);
 
 
@@ -46,19 +50,8 @@ const TruckPage = () => {
         );
         setData(combinedData);
 
-        let totalExpense = 0;
-        let totalRevenue = 0;
-
-        combinedData.forEach((item) => {
-          if (item.expenseType) {
-            totalExpense += item.amount;
-          } else {
-            totalRevenue += item.amount;
-          }
-        });
-
-        setTotalExpense(totalExpense);
-        setRevenue(totalRevenue);
+        setTotalExpense(profitData.truckExpense);
+        setRevenue(profitData.tripRevenue);
       } catch (error: any) {
         console.log(error);
         alert(error.message);
@@ -85,8 +78,7 @@ const TruckPage = () => {
     setData(data.filter((item) => item._id !== id));
     const deletedItem = data.find((item) => item._id === id);
     if (deletedItem) {
-      setTotalExpense(totalExpense - deletedItem.amount);
-      setRevenue(revenue + deletedItem.amount);
+      router.refresh()
     }
   };
 
@@ -99,24 +91,27 @@ const TruckPage = () => {
       notes: newCharge.notes || '',
     };
 
-    const res = await fetch(`/api/truckExpense/${id}`,{
-      method : 'PUT',
+    const res = await fetch(`/api/truckExpense/${id}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(truckExpenseData),
-    })
+    });
     if (!res.ok) {
       alert('Failed to add charge');
       return;
     }
-    const data = await res.json()
-    setData((prev : IExpense[])=> {
-     const index =  prev.findIndex(item=> item._id == data.charge._id)
-     prev[index] = data.charge
-     return prev
-    })
-    setTotalExpense(totalExpense as number - (selected?.amount as number) + newCharge.amount as number)
+    const data = await res.json();
+    setData((prev: IExpense[]) => {
+      const index = prev.findIndex(item => item._id == data.charge._id);
+      prev[index] = data.charge;
+      return prev;
+    });
+    if(data){
+      router.refresh()
+    }
+    
   };
 
   return (
@@ -147,7 +142,7 @@ const TruckPage = () => {
                     `${statuses[item.status]} ● ${item.partyName} ● ${item.route?.origin.split(',')[0]} -> ${item.route?.destination.split(',')[0]}`}
                 </td>
                 <td>{item.expenseType ? item.amount : ''}</td>
-                <td>{!item.expenseType ? fetchBalance(item) : ''}</td>
+                <td>{!item.expenseType ? <TripRevenue tripId={item.trip_id} amount={item.amount}/> : ''}</td>
                 <td>
                   {item.expenseType ?
                     <div className='flex flex-row justify-evenly items-center w-full p-1'>
@@ -169,7 +164,7 @@ const TruckPage = () => {
         isOpen={modelOpen}
         onClose={() => setModelOpen(false)}
         onSave={handleAddCharge}
-        driverId=''
+        driverId={selected?.driver || ''}
         selected={selected}
         truckPage={true}
       />

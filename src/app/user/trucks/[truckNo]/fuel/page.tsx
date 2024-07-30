@@ -21,27 +21,26 @@ const TruckFuelBook = () => {
     const [modelOpen, setModelOpen] = useState(false)
     const [selected, setSelected] = useState<IExpense>()
 
-    useEffect(() => {
-        const fetchFuel = async () => {
-            setLoading(true)
-            try {
-                const res = await fetch(`/api/trucks/${truckNo}/expense`)
-                if (!res.ok) {
-                    throw new Error('Failed to fetch fuel book')
-                }
-                const data = await res.json()
-                const fuels = data.filter((expense: IExpense) => expense.expenseType == 'Fuel Expense')
-                setFuelBook(fuels)
-            } catch (error: any) {
-                console.log(error)
-                alert(error.message)
-            } finally {
-                setLoading(false)
-            }
+    const fetchFuel = async () => {
+        setLoading(true);
+        try {
+          const res = await fetch(`/api/trucks/${truckNo}/expense?type=fuel`);
+          if (!res.ok) {
+            throw new Error('Failed to fetch fuel book');
+          }
+          const data = await res.json();
+          setFuelBook(data);
+        } catch (error: any) {
+          console.log(error);
+          alert(error.message);
+        } finally {
+          setLoading(false);
         }
-        fetchFuel()
-    }, [truckNo])
-
+      };
+      
+      useEffect(() => {
+        fetchFuel();
+      }, [truckNo]);
 
     const handleDelete = async (id: string , e : React.FormEvent) => {
         e.stopPropagation()

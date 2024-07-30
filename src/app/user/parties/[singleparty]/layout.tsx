@@ -10,33 +10,13 @@ interface PartyLayoutProps {
 
 const Layout: React.FC<PartyLayoutProps> = ({ children }) => {
   const {singleparty} = useParams();
-  const [partyName, setPartyName] = useState<string>('');
-
-  useEffect(() => {
-    if (!singleparty) return;
-
-    const fetchPartyName = async () => {
-      try {
-        const res = await fetch(`/api/parties/${singleparty}`);
-        if (!res.ok) {
-          throw new Error('Failed to fetch party name');
-        }
-        const data = await res.json();
-        setPartyName(data.party.name);
-      } catch (err: any) {
-        console.error(err);
-      }
-    };
-
-    fetchPartyName();
-  }, [singleparty]);
 
   if (!singleparty) {
     return <div>Loading...</div>;
   }
 
   return (
-    <PartyLayout partyId={singleparty as string} partyName={partyName}>
+    <PartyLayout partyId={singleparty as string}>
       {children}
     </PartyLayout>
   );

@@ -1,25 +1,42 @@
 import { verifyToken } from "@/utils/auth";
 import { connectToDatabase, ExpenseSchema } from "@/utils/schema";
-import { model, models } from "mongoose";
 import { NextResponse } from "next/server";
+import { maintenanceChargeTypes } from "@/utils/utilArray";
+import { model, models } from "mongoose";
 
-const Expense = models.Expense || model('Expense', ExpenseSchema);
+const Expense = models.Expense || model('Expense', ExpenseSchema)
 
 export async function GET(req: Request, { params }: { params: { truckNo: string } }) {
-    const { truckNo } = params;
-    const { user, error } = await verifyToken(req);
-    if (error) {
-        return NextResponse.json({ error });
+  const { truckNo } = params;
+  const url = new URL(req.url);
+  const expenseType = url.searchParams.get('type');
+  const { user, error } = await verifyToken(req);
+
+  if (error) {
+    return NextResponse.json({ error }, { status: 401 });
+  }
+
+  await connectToDatabase();
+
+  try {
+    let filter : any= { user_id: user, truck: truckNo };
+    
+    if (expenseType === 'fuel') {
+      filter = { ...filter, expenseType: 'Fuel Expense' };
+    } else if (expenseType === 'maintenance') {
+      filter = { ...filter, expenseType: { $in: Array.from(maintenanceChargeTypes) } };
+    } else if (expenseType === 'other') {
+      filter = { ...filter, expenseType: { $nin: Array.from(maintenanceChargeTypes) } };
     }
-    await connectToDatabase()
-    try {
-        const expenses = await Expense.find({ user_id: user, truck: truckNo }).sort({ date: -1 });
-        return NextResponse.json(expenses);
-    } catch (error: any) {
-        console.log(error);
-        return NextResponse.json({ message: error.message, status: 500 });
-    }
+
+    const expenses = await Expense.find(filter).sort({ date: -1 });
+    return NextResponse.json(expenses);
+  } catch (error: any) {
+    console.log(error);
+    return NextResponse.json({ message: error.message, status: 500 });
+  }
 }
+
 
 export async function POST(req: Request, { params }: { params: { truckNo: string } }) {
     // Connect to the database

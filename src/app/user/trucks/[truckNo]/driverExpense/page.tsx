@@ -15,42 +15,36 @@ const OtherExpense = () => {
   const { truckNo } = useParams();
   const [error, setError] = useState<any>();
   const [loading, setLoading] = useState<boolean>(true);
-  const [maintainenceBook, setMaintainenceBook] = useState<IExpense[]>([]);
+  const [otherExpenses, setOtherExpenses] = useState<IExpense[]>([]);
   const [modelOpen, setModelOpen] = useState(false);
   const [selected, setSelected] = useState<IExpense | undefined>();
 
-  const getBook = useCallback(async () => {
+  const fetchOther = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await fetch(`/api/trucks/${truckNo}/expense`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const res = await fetch(`/api/trucks/${truckNo}/expense?type=other`);
       if (!res.ok) {
-        throw new Error('Failed to fetch expenses');
+        throw new Error('Failed to fetch other expenses');
       }
       const data = await res.json();
-      const filteredData = data.filter((expense: IExpense) => !maintenanceChargeTypes.has(expense.expenseType));
-      setMaintainenceBook(filteredData);
-    } catch (error) {
-      setError(error);
-      console.error(error);
+      setOtherExpenses(data);
+    } catch (error: any) {
+      console.log(error);
+      alert(error.message);
     } finally {
       setLoading(false);
     }
-  }, [truckNo]);
-
+  };
+  
   useEffect(() => {
-    getBook();
-  }, [getBook]);
+    fetchOther();
+  }, [truckNo]);
 
   const handleDeleteExpense = useCallback(async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
     try {
       await handleDelete(id, e);
-      setMaintainenceBook((prev) => prev.filter((item) => item._id !== id));
+      setOtherExpenses((prev) => prev.filter((item) => item._id !== id));
     } catch (error) {
       console.error(error);
     }
@@ -60,7 +54,7 @@ const OtherExpense = () => {
     try {
       const data = await handleAddCharge(newCharge, id, truckNo as string);
 
-      setMaintainenceBook((prev) => {
+      setOtherExpenses((prev) => {
         if (id) {
           return prev.map((item) => (item._id === id ? data.charge : item));
         } else {
@@ -91,7 +85,7 @@ const OtherExpense = () => {
             </tr>
           </thead>
           <tbody>
-            {maintainenceBook.map((fuel, index) => (
+            {otherExpenses.map((fuel, index) => (
               <tr
                 key={index}
                 className="border-t hover:bg-slate-100"

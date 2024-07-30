@@ -11,6 +11,7 @@ import { fetchTripExpense, handleAddCharge, handleDelete } from '@/helpers/Expen
 import TripRoute from '@/components/trip/TripRoute';
 import DriverName from '@/components/driver/DriverName';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 
 const TripExpensePage: React.FC = () => {
@@ -108,14 +109,13 @@ const TripExpensePage: React.FC = () => {
                     onClick={(e) => {
                         setSelected(fuel);
                         if(fuel.partyBill === false){
-                          setChargeModal(true)
                         }else{
                           setModalOpen(true)
                           router.refresh()
                         }
                     }}
                   >
-                    <MdEdit />
+                    {fuel.partyBill === false ? <Link href={`/user/trips/${fuel.trip_id}`}>View Trip</Link> : <MdEdit />}
                   </Button>
                   <Button variant={'destructive'}
                     onClick={async (e) => {

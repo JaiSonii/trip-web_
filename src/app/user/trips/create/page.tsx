@@ -136,7 +136,7 @@ const CreateTripPage: React.FC = () => {
   return (
     <>
       {saving && (
-        <div className='absolute inset-0 bg-black bg-opacity-10 flex justify-center items-center z-50'>
+        <div className=''>
           <Loading /> {/* Ensure Loading component shows the GIF */}
         </div>
       )}

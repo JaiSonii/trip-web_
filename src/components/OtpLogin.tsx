@@ -16,7 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
-import '@/app/globals.css'
+import "@/app/globals.css";
 
 function OtpLogin() {
   const router = useRouter();
@@ -44,20 +44,19 @@ function OtpLogin() {
   }, [resendCountdown]);
 
   useEffect(() => {
-    const recaptchaVerifier = new RecaptchaVerifier(
-      auth,
+    const verifier = new RecaptchaVerifier(auth,
       "recaptcha-container",
       {
         size: "invisible",
       }
     );
 
-    setRecaptchaVerifier(recaptchaVerifier);
+    setRecaptchaVerifier(verifier);
 
     return () => {
-      recaptchaVerifier.clear();
+      verifier.clear();
     };
-  }, [auth]);
+  }, []);
 
   useEffect(() => {
     const hasEnteredAllDigits = otp.length === 6;
@@ -76,8 +75,8 @@ function OtpLogin() {
       }
 
       try {
-        const result = await confirmationResult?.confirm(otp);
-        console.log(result.user.getIdToken())
+        const result = await confirmationResult.confirm(otp);
+        console.log(result.user.getIdToken());
         router.replace(`/user/parties`);
       } catch (error) {
         console.log(error);
@@ -100,13 +99,10 @@ function OtpLogin() {
       }
 
       try {
-        const confirmationResult = await signInWithPhoneNumber(
-          auth,
-          phoneNumber,
-          recaptchaVerifier
-        );
-
-        setConfirmationResult(confirmationResult);
+        const confirmationResult = signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier)
+        console.log(confirmationResult)
+        const result = await confirmationResult
+        setConfirmationResult(result);
         setSuccess("OTP sent successfully.");
       } catch (err: any) {
         console.log(err);
@@ -158,6 +154,17 @@ function OtpLogin() {
           <p className="text-xs text-gray-400 mt-2">
             Please enter your number with the country code (i.e. +44 for UK)
           </p>
+          <Button
+            disabled={!phoneNumber || isPending || resendCountdown > 0}
+            type="submit"
+            className="mt-5"
+          >
+            {resendCountdown > 0
+              ? `Resend OTP in ${resendCountdown}`
+              : isPending
+              ? "Sending OTP"
+              : "Send OTP"}
+          </Button>
         </form>
       )}
 
@@ -177,26 +184,13 @@ function OtpLogin() {
         </InputOTP>
       )}
 
-      <Button
-        disabled={!phoneNumber || isPending || resendCountdown > 0}
-        onClick={() => requestOtp()}
-        className="mt-5"
-      >
-        {resendCountdown > 0
-          ? `Resend OTP in ${resendCountdown}`
-          : isPending
-          ? "Sending OTP"
-          : "Send OTP"}
-      </Button>
-
-      <div className="p-10 text-center">
+      <div className="p-10 text-center text-sm">
         {error && <p className="text-red-500">{error}</p>}
         {success && <p className="text-green-500">{success}</p>}
+        {isPending && loadingIndicator}
       </div>
 
-      <div id="recaptcha-container" />
-
-      {isPending && loadingIndicator}
+      <div id="recaptcha-container"></div>
     </div>
   );
 }

@@ -4,14 +4,14 @@ import React, { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../AuthProvider';
 import Link from 'next/link';
+import PartyName from '../party/PartyName';
 
 interface PartyLayoutProps {
   children: React.ReactNode;
-  partyName: string;
   partyId: string;
 }
 
-const PartyLayout = ({ children, partyName, partyId }: PartyLayoutProps) => {
+const PartyLayout = ({ children, partyId }: PartyLayoutProps) => {
   const router = useRouter();
   const pathname = usePathname();
   const { user, loading } = useAuth()
@@ -34,7 +34,7 @@ const PartyLayout = ({ children, partyName, partyId }: PartyLayoutProps) => {
     <div>
       {user ?
         <div className="w-full h-full p-4">
-          <h1 className="text-2xl font-bold mb-4">{partyName}</h1>
+          <h1 className="text-2xl font-bold mb-4"><PartyName partyId={partyId}/></h1>
           <div className="flex space-x-4 mb-4 border-b-2 border-gray-200">
             {tabs.map((tab) => (
               <div className='flex p-1' key={tab.name}>

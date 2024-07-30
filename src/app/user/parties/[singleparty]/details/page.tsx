@@ -157,17 +157,6 @@ const PartyDetails = () => {
               disabled={!isEditing}
             />
           </div>
-          <div>
-            <label className="block font-medium text-gray-700">Balance:</label>
-            <input
-              type="number"
-              name="balance"
-              value={party.balance}
-              onChange={handleInputChange}
-              className="border border-gray-300 rounded-md p-2"
-              disabled={!isEditing}
-            />
-          </div>
           <div className="flex justify-between col-span-2">
             <div className="mt-6 flex space-x-4">
               {isEditing ? (

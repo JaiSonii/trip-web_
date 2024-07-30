@@ -6,6 +6,7 @@ import { IParty } from '@/utils/interface';
 import { useRouter } from 'next/navigation';
 import Loading from '@/app/loading';
 import { useAuth } from '@/components/AuthProvider';
+import PartyBalance from '@/components/party/PartyBalance';
 
 const PartiesPage = () => {
   const router = useRouter();
@@ -78,13 +79,13 @@ const PartiesPage = () => {
           </thead>
           <tbody>
             {parties.map((party, index) => (
-              <tr key={party._id as string} className="border-t w-full cursor-pointer" onClick={() => router.push(`parties/${party.party_id}/trips`)}>
+              <tr key={party.party_id as string} className="border-t w-full cursor-pointer" onClick={() => router.push(`/user/parties/${party.party_id}/trips`)}>
                 <td>{party.name}</td>
                 <td>{party.contactPerson}</td>
                 <td>{party.contactNumber}</td>
                 <td>{party.address}</td>
                 <td>{party.gstNumber}</td>
-                <td>{party.balance}</td>
+                <td><PartyBalance partyId={party.party_id}/></td>
               </tr>
             ))}
           </tbody>

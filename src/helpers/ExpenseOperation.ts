@@ -21,7 +21,7 @@ export const handleDelete = async (id: string, e? : React.MouseEvent ) => {
       ...newCharge,
       truck: truckNo,
       transaction_id: newCharge.transactionId || '',
-      driver: newCharge.driver || '',
+      driver: newCharge.paymentMode == 'Paid By Driver' ? newCharge.driver : '',
       notes: newCharge.notes || '',
     };
 
@@ -47,15 +47,14 @@ export const handleDelete = async (id: string, e? : React.MouseEvent ) => {
 
   export const ExpenseforDriver = async(driver : string)=>{
     try{
-        const res = await fetch(`/api/truckExpense`,{
+        const res = await fetch(`/api/drivers/${driver}/expense`,{
             method : 'GET',
             headers : {
                 'Content-Type' : 'application/json',
             }
         })
         const data = await res.json()
-        const filteredData = data.expenses.filter((expense : IExpense)=>expense.driver == driver)
-        return filteredData
+        return data.driverExpenses
     }catch(err){
         alert(err)
         console.log(err)
@@ -89,6 +88,34 @@ export const fetchTripExpense = async (month : any, year : any) => {
       console.error('Error fetching truck expenses:', error);
       return [];
   }
+};
+
+export const calculateTruckExpense = async (month : any, year : any) => {
+  try {
+      const res = await fetch(`/api/truckExpense/calculate?month=${month}&year=${year}`);
+      if (!res.ok) {
+          throw new Error('Failed to fetch truck expenses');
+      }
+      const data = await res.json();
+      return data.totalExpense;
+  } catch (error) {
+      console.error('Error fetching truck expenses:', error);
+      return 0;
+  }
+};
+
+export const calculateTripExpense = async (month : any, year : any) => {
+try {
+    const res = await fetch(`/api/tripExpense/calculate?month=${month}&year=${year}`);
+    if (!res.ok) {
+        throw new Error('Failed to fetch truck expenses');
+    }
+    const data = await res.json();
+    return data.totalExpense;
+} catch (error) {
+    console.error('Error fetching truck expenses:', error);
+    return [];
+}
 };
 
   

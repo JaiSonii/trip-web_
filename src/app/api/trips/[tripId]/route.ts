@@ -2,7 +2,7 @@ import DriverModal from "@/components/driver/driverModal";
 import { fetchBalance, fetchBalanceBack } from "@/helpers/fetchTripBalance";
 import { verifyToken } from "@/utils/auth";
 import { ITrip, PaymentBook } from "@/utils/interface";
-import { connectToDatabase, driverSchema, partySchema, tripChargesSchema, truckSchema } from "@/utils/schema";
+import { connectToDatabase, driverSchema, ExpenseSchema, partySchema, tripChargesSchema, truckSchema } from "@/utils/schema";
 import { tripSchema } from "@/utils/schema";
 import { models, model } from 'mongoose'
 import { NextResponse } from "next/server";
@@ -10,6 +10,8 @@ import { v4 as uuidv4 } from "uuid";
 
 
 const Trip = models.Trip || model('Trip', tripSchema)
+const TripCharges = models.TripCharges || model('TripCharges', tripChargesSchema)
+const Expense = models.Expense || model('Expense', ExpenseSchema)
 
 export async function GET(req: Request, { params }: { params: { tripId: string } }) {
   const { user, error } = await verifyToken(req);
@@ -156,8 +158,10 @@ export async function DELETE(req: Request, { params }: { params: { tripId: strin
       return NextResponse.json({ message: 'Trip not found' }, { status: 404 });
     }
 
-    await Truck.findOneAndUpdate({ truckNo: trip.truck }, { status: 'Available' })
-    await Driver.findOneAndUpdate({ driver_id: trip.driver }, { status: 'Available' })
+    await Truck.findOneAndUpdate({user_id : user, truckNo: trip.truck }, { status: 'Available' })
+    await Driver.findOneAndUpdate({ user_id : user, driver_id: trip.driver }, { status: 'Available' })
+    await TripCharges.deleteMany({user_id : user, trip_id : tripId})
+    await Expense.deleteMany({user_id : user, trip_id : tripId})
 
     return NextResponse.json({ trip }, { status: 200 });
   } catch (err: any) {

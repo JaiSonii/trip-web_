@@ -42,32 +42,26 @@ const TruckMaintainenceBook = () => {
 
 
 
-  useEffect(() => {
-    const getBook = async () => {
-      try {
-        setLoading(true)
-        const res = await fetch(`/api/trucks/${truckNo}/expense`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        })
-        if (!res.ok) {
-          console.log(error)
-          alert("Please try again")
-        }
-        const data = await res.json()
-        const filteredData = data.filter((expense: IExpense) => maintainenceExpenseTypes.has(expense.expenseType))
-
-        setMaintainenceBook(filteredData)
-      } catch (error) {
-        console.log(error)
-      }finally{
-        setLoading(false)
+  const fetchMaintenance = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/trucks/${truckNo}/expense?type=maintenance`);
+      if (!res.ok) {
+        throw new Error('Failed to fetch maintenance book');
       }
+      const data = await res.json();
+      setMaintainenceBook(data);
+    } catch (error: any) {
+      console.log(error);
+      alert(error.message);
+    } finally {
+      setLoading(false);
     }
-    getBook()
-  }, [truckNo])
+  };
+  
+  useEffect(() => {
+    fetchMaintenance();
+  }, [truckNo]);
 
 
   const handleDelete = async (id: string, e : React.FormEvent) => {

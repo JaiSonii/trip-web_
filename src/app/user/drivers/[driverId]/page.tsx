@@ -158,6 +158,7 @@ const Driver: React.FC = () => {
         alert(error);
       }
     }
+    fetchAllData()
   };
 
   useEffect(() => {

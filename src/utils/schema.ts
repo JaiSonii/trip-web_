@@ -60,17 +60,17 @@ export const PaymentBookSchema = {
   },
 }
 
-export const accountSchema = new Schema({
-  tripId: { type: String, required: true },
-  driverId: { type: String, required: true },
-  partyId: { type: String, required: true },
-  userId: { type: String, required: true },
-  amount: { type: Number, required: true },
-  paymentType: { type: String, required: true },
-  receivedByDriver: { type: Boolean, required: true },
-  date: { type: Date, required: true },
-  notes: { type: String }
-});
+// export const accountSchema = new Schema({
+//   tripId: { type: String, required: true },
+//   driverId: { type: String, required: true },
+//   partyId: { type: String, required: true },
+//   userId: { type: String, required: true },
+//   amount: { type: Number, required: true },
+//   paymentType: { type: String, required: true },
+//   receivedByDriver: { type: Boolean, required: true },
+//   date: { type: Date, required: true },
+//   notes: { type: String }
+// });
 
 
 
@@ -223,9 +223,6 @@ export const supplierSchema: Schema = new Schema({
   contactNumber: {
     type: String
   },
-  tripCount: {
-    type: Number
-  },
   balance: {
     type: Number,
     default: 0
@@ -279,7 +276,8 @@ ExpenseSchema = new Schema({
   },
   truck : {
     type : String,
-    required : true
+    required : true,
+    default : ''
   },
   expenseType : {
     type : String,
@@ -300,6 +298,35 @@ ExpenseSchema = new Schema({
     required : true
   },
   notes : String
+})
+
+export const supplierAccountSchema = new Schema({
+  user_id : {
+    type : String,
+    required : true
+  },
+  trip_id :{
+    type : String,
+    required : true
+  },
+  supplier_id :{
+    type : String,
+    required : true
+  },
+  amount : {
+    type : Number,
+    required : true
+  },
+  paymentMode: {
+    type : String,
+    default : 'Cash'
+  },
+  date : {
+    type : Date,
+    required : true
+  },
+  notes : String,
+  refNo : String
 })
 
 const connectString: any = process.env.NEXT_PUBLIC_MONGO_URL

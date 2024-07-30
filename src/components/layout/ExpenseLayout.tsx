@@ -5,7 +5,7 @@ import { FaMapLocationDot } from "react-icons/fa6";
 import { FaTruckMoving } from "react-icons/fa";
 import Link from 'next/link';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { fetchTripExpense, fetchTruckExpense } from '@/helpers/ExpenseOperation';
+import { calculateTripExpense, calculateTruckExpense, fetchTripExpense, fetchTruckExpense } from '@/helpers/ExpenseOperation';
 import { IExpense } from '@/utils/interface';
 
 interface TruckLayoutProps {
@@ -64,15 +64,12 @@ const ExpenseLayout = ({ children }: TruckLayoutProps) => {
     useEffect(() => {
         const calculateExpense = async () => {
             const [month, year] = selectedMonthYear.split(' ');
-            const [truckExpenses, tripExpenses] = await Promise.all([fetchTruckExpense(month, year), fetchTripExpense(month, year)]);
-            if (truckExpenses && tripExpenses) {
-                const totalTruckExpense = (truckExpenses || []).reduce((total: number, expense: IExpense) => total + expense.amount, 0);
-                const totalTripExpense = (tripExpenses || []).reduce((total: number, expense: IExpense) => total + expense.amount, 0);
-                setTruckExpense(totalTruckExpense);
-                setTripExpense(totalTripExpense);
-                setMonthExpense(totalTruckExpense + totalTripExpense);
-            }
-        };
+            const [truckExpenses, tripExpenses] = await Promise.all([calculateTruckExpense(month, year), calculateTripExpense(month, year)]);
+
+                setTruckExpense(truckExpenses);
+                setTripExpense(tripExpenses);
+                setMonthExpense(truckExpenses + tripExpenses);
+        }
         calculateExpense()
 
     }, [selectedMonthYear]);

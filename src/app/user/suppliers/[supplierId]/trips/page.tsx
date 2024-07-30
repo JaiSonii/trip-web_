@@ -55,7 +55,7 @@ const SupplierDetailPage = () => {
 
                                 <td className="border p-2">{trip.truckHireCost}</td>
                                 <td className="border p-2">{statuses[trip.status as number]}</td>
-                                <td className="border p-2">{}</td>
+                                <td className="border p-2">{trip.truckHireCost}</td>
                                 <td><Link href={`/user/trips/${trip.trip_id}`}><Button variant='outline'>View Trip</Button></Link></td>
 
                             </tr>

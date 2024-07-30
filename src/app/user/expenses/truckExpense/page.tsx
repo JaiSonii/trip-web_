@@ -69,7 +69,7 @@ const TruckExpense: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {maintainenceBook.map((fuel, index) => (
+            {maintainenceBook && maintainenceBook.map((fuel, index) => (
               <tr key={index} className="border-t hover:bg-slate-100">
                 <td>{new Date(fuel.date).toLocaleDateString()}</td>
                 <td>{fuel.amount}</td>

@@ -7,6 +7,8 @@ import { ISupplier } from '@/utils/interface';
 import Loading from '@/app/loading';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/AuthProvider';
+import { supplierTripCount } from '@/helpers/SupplierOperation';
+import SupplierBalance from '@/components/supplier/SupplierBalance';
 
 const SuppliersPage = () => {
   const router = useRouter();
@@ -15,7 +17,6 @@ const SuppliersPage = () => {
   const [suppliers, setSuppliers] = useState<ISupplier[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [activeTrips, setActiveTrips] = useState(0)
 
   useEffect(() => {
     const fetchSuppliers = async () => {
@@ -75,8 +76,8 @@ const SuppliersPage = () => {
               <tr key={supplier.supplier_id as string} className="border-t" onClick={()=>router.push(`suppliers/${supplier.supplier_id}/trips`)}>
                 <td>{supplier.name}</td>
                 <td>{supplier.contactNumber}</td>
-                <td>{activeTrips}</td>
-                <td>{supplier.balance}</td>
+                <td>{supplierTripCount(supplier.supplier_id)}</td>
+                <td><SupplierBalance supplierId={supplier.supplier_id}/></td>
               </tr>
             ))}
           </tbody>

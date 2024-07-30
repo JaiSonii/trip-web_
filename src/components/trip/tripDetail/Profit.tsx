@@ -12,6 +12,7 @@ interface ProfitProps {
   tripId: string;
   driverId: string;
   truckNo: string;
+  truckCost?: number
 }
 
 interface Expense {
@@ -28,7 +29,7 @@ interface Expense {
   driver: string;
 }
 
-const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, driverId, truckNo }) => {
+const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, driverId, truckNo, truckCost }) => {
   const [showTotalCharges, setShowTotalCharges] = useState<boolean>(false);
   const [showTotalDeductions, setShowTotalDeductions] = useState<boolean>(false);
   const [showTruckExpenses, setShowTruckExpenses] = useState<boolean>(false);
@@ -80,7 +81,7 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
     const truckExpensesAmount = truckExpenses.reduce((total, expense) => total + expense.amount, 0);
     setExpenseAmount(truckExpensesAmount);
 
-    const profit = amount + totalChargesAmount - totalDeductionsAmount - truckExpensesAmount;
+    const profit = amount + totalChargesAmount - totalDeductionsAmount - truckExpensesAmount - (truckCost ? truckCost : 0);
     setNetProfit(profit);
   }, [charges, truckExpenses, amount]);
 
@@ -159,12 +160,21 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
       ))}
 
       <div className="py-4 border-b border-gray-200 cursor-pointer flex justify-between items-center" onClick={() => setShowTruckExpenses(!showTruckExpenses)}>
-        <span className="font-medium text-gray-700">Truck Expenses</span>
+        <span className="font-medium text-gray-700">Expenses</span>
         <span className="text-red-600 font-semibold">-{expenseAmount.toFixed(2)}</span>
       </div>
       {showTruckExpenses && truckExpenses.map((expense, index) => (
         <ProfitItem data={expense} index={index} key={expense._id as string} setOpen={setIsModalOpen} setSelectedExpense={setSelectedExpense} sign={'-'} />
       ))}
+
+
+      {truckCost &&
+        <div className="py-4 mt-4 flex justify-between items-center">
+          <span className="font-medium text-gray-800">Truck Hire Cost: </span>
+          <span className="text-red-600 font-bold">-{truckCost}</span>
+        </div>
+      }
+
 
       <hr />
       <div className="py-4 mt-4 flex justify-between items-center">

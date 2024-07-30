@@ -11,6 +11,7 @@ const SinglePartyTrips = () => {
   const [trips, setTrips] = useState<ITrip[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  console.log(singleparty)
 
   useEffect(() => {
     if (singleparty) {

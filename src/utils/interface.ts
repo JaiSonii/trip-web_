@@ -58,7 +58,7 @@ export interface ITrip extends Document {
   billingType: 'Fixed' | 'Per Tonne' | 'Per Kg' | 'Per Trip' | 'Per Day' | 'Per Hour' | 'Per Litre' | 'Per Bag';
   amount: number;
   startDate: Date;
-  truckHireCost?: number;
+  truckHireCost: number;
   LR: string;
   status?: 0 | 1 | 2 | 3 | 4;
   POD?: string;
@@ -107,8 +107,7 @@ export interface TruckModel extends Document {
 export interface ISupplier extends Document{
   supplier_id: string;
   name: string;
-  contactNumber: string,
-  tripCount : number
+  contactNumber: string
   balance : number
 }
 
@@ -133,4 +132,15 @@ export interface ITripCharges extends Document{
   date: Date;
   expenseType: string;
   notes?: string; // Optional field
+}
+
+export interface ISupplierAccount extends Document{
+  user_id : string
+  supplier_id: string;
+  trip_id : string
+  amount: number;
+  paymentMode : string
+  date : string
+  notes : string
+  refNo : string
 }

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation'; // Import from 'next/router' instead of 'next/navigation'
 import { IDriver } from '@/utils/interface';
 import Loading from '@/app/loading';
+import DriverBalance from '@/components/driver/DriverBalance';
 
 const DriversPage = () => {
 
@@ -75,7 +76,7 @@ const DriversPage = () => {
                 <td>{driver.name}</td>
                 <td>{driver.contactNumber || '-'}</td>
                 <td>{driver.status}</td>
-                <td>{driver.balance || 0}</td>
+                <td><DriverBalance driverId={driver.driver_id}/></td>
               </tr>
             ))}
           </tbody>

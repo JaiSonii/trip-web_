@@ -5,6 +5,7 @@ import { IDriver } from '@/utils/interface';
 import DropdownMenu from './dropdownMenu';
 import { useRouter } from 'next/navigation';
 import EditDriverModal from './editDriverModal';
+import DriverBalance from './DriverBalance';
 
 interface DriverLayoutProps {
   name: string;
@@ -120,29 +121,38 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onD
   };
 
   return (
-    <div className="flex items-center justify-between p-4 bg-gray-200">
-      <div className="flex items-center gap-2">
-        <h1 className="text-3xl font-bold mr-5 cursor-pointer" onClick={() => setShowContact(!showContact)}>
-          {name}
-        </h1>
-        {showContact && <span className="ml-2 text-lg text-gray-700">{contactNumber}</span>}
-        {status === 'Available' && (
-          <svg style={{ width: '20px', height: '20px' }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-            <path fill="#4caf50" d="M44,24c0,11-9,20-20,20S4,35,4,24S13,4,24,4S44,13,44,24z"></path>
-          </svg>
+    <div className='flex flex-col gap-2 justify-start'>
+      <div className="flex items-center justify-between p-4 bg-gray-200 rounded-sm">
+        <div className="flex items-center gap-2">
+          <h1 className="text-3xl font-bold mr-5 cursor-pointer" onClick={() => setShowContact(!showContact)}>
+            {name}
+          </h1>
+          {showContact && <span className="ml-2 text-lg text-gray-700">{contactNumber}</span>}
+          {status === 'Available' && (
+            <svg style={{ width: '20px', height: '20px' }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+              <path fill="#4caf50" d="M44,24c0,11-9,20-20,20S4,35,4,24S13,4,24,4S44,13,44,24z"></path>
+            </svg>
+          )}
+          {status}
+        </div>
+        <div className="flex items-center">
+          <DriverActions onGaveClick={() => openModal('gave')} onGotClick={() => openModal('got')} />
+          <DropdownMenu onEditClick={() => setEdit(true)} onDeleteClick={handleDeleteDriver} />
+        </div>
+
+        <DriverModal open={modalOpen} onClose={closeModal} type={modalType} onConfirm={handleConfirm} />
+        {error && <div className="text-red-500 mt-2">{error}</div>}
+        {edit && (
+          <EditDriverModal name={name} driverId={driverId} handleEdit={handleEditDriver} onCancel={() => setEdit(false)} contactNumber={contactNumber} />
         )}
-        {status}
       </div>
-      <div className="flex items-center">
-        <DriverActions onGaveClick={() => openModal('gave')} onGotClick={() => openModal('got')} />
-        <DropdownMenu onEditClick={() => setEdit(true)} onDeleteClick={handleDeleteDriver} />
+      <div>
+      <div className="flex items-center justify-between p-4 border border-b-gray-400 rounded-sm w-1/3">
+        <span className="text-2xl ">Driver Balance: <DriverBalance driverId={driverId}/></span> {/* Display balance */}
       </div>
-      <DriverModal open={modalOpen} onClose={closeModal} type={modalType} onConfirm={handleConfirm} />
-      {error && <div className="text-red-500 mt-2">{error}</div>}
-      {edit && (
-        <EditDriverModal name={name} driverId={driverId} handleEdit={handleEditDriver} onCancel={() => setEdit(false)} contactNumber={contactNumber} />
-      )}
+      </div>
     </div>
+
   );
 };
 
