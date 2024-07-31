@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { IParty, ITrip, TripExpense } from '@/utils/interface';
 import { statuses } from '@/utils/schema';
 import { useRouter } from 'next/navigation';
-import Loading from '@/app/loading';
+import Loading from '@/app/user/loading';
 import { fetchBalance } from '@/helpers/fetchTripBalance';
 import PartyName from '@/components/party/PartyName';
 
@@ -27,12 +27,14 @@ const TripsPage = () => {
           },
         });
 
+
         if (!res.ok) {
           throw new Error('Failed to fetch trips');
         }
 
         const data = await res.json();
         setTrips(data.trips);
+        setLoading(false)
       } catch (err) {
         setError((err as Error).message);
       } finally {

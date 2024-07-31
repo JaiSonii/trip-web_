@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { ISupplier, TruckModel } from '@/utils/interface';
 import SupplierSelect from '@/components/truck/SupplierSelect';
 import AdditionalDetails from '@/components/truck/AdditionalDetails';
-import Loading from '@/app/loading';
+import Loading from '@/app/user/loading';
 import { Button } from '../ui/button';
 
 type FormData = {

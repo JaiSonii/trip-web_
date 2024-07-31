@@ -8,7 +8,9 @@ import { useRouter } from 'next/navigation';
 import { ISupplier } from '@/utils/interface';
 import SupplierSelect from '@/components/truck/SupplierSelect';
 import AdditionalDetails from '@/components/truck/AdditionalDetails';
-import Loading from '@/app/loading';
+import Loading from '../../loading';
+import { truckTypesIcons } from '@/utils/utilArray';
+import { Select, SelectTrigger, SelectContent, SelectItem, SelectLabel, SelectValue } from '@/components/ui/select'; // Adjust the import path as necessary
 
 // Define the types
 type FormData = {
@@ -25,8 +27,6 @@ type FormData = {
 const CreateTruck: React.FC = () => {
     const router = useRouter();
     const [saving, setSaving] = useState(false)
-
-
 
     const [formdata, setFormdata] = useState<FormData>({
         truckNo: '',
@@ -73,6 +73,13 @@ const CreateTruck: React.FC = () => {
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
+        setFormdata({
+            ...formdata,
+            [name]: value
+        });
+    }
+
+    const handleSelectChange = (name: string, value: string) => {
         setFormdata({
             ...formdata,
             [name]: value
@@ -130,6 +137,11 @@ const CreateTruck: React.FC = () => {
                 supplier: ''
             });
             setShowDetails(false); // Optionally reset additional details state
+            const data = await response.json()
+            if (data.error){
+                alert(data.error)
+                return
+            }
 
             router.push('/user/trucks')
         } catch (error) {
@@ -154,7 +166,7 @@ const CreateTruck: React.FC = () => {
         }
     }
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return <Loading />;
     if (error) return <div>Error: {error}</div>;
 
     return (
@@ -163,7 +175,6 @@ const CreateTruck: React.FC = () => {
                 <div className='absolute inset-0 bg-black bg-opacity-10 flex justify-center items-center z-50'>
                     <Loading />
                 </div>
-
             )}
             <div className="bg-white text-black p-4 max-w-md mx-auto shadow-md rounded-md">
                 <form className="space-y-4" onSubmit={handleSubmit}>
@@ -176,27 +187,27 @@ const CreateTruck: React.FC = () => {
                         onChange={handleInputChange}
                         required
                     />
-                    <select
-                        className="w-full p-2 border border-gray-300 rounded-md"
-                        name='truckType'
-                        value={formdata.truckType}
-                        onChange={handleInputChange}
-                    >
-                        <option value='' disabled>Select Truck Type</option>
-                        {truckTypes.map((truckType, index) => (
-                            <option key={index} value={truckType}>{truckType}</option>
-                        ))}
-                    </select>
-                    <select
-                        className="w-full p-2 border border-gray-300 rounded-md"
-                        name='ownership'
-                        value={formdata.ownership}
-                        onChange={handleInputChange}
-                    >
-                        <option value='' disabled>Select Ownership</option>
-                        <option value='Self'>Self</option>
-                        <option value='Market'>Market</option>
-                    </select>
+                    <Select onValueChange={(value) => handleSelectChange('truckType', value)}>
+                        <SelectTrigger className="w-full p-2 border border-gray-300 rounded-md">
+                            <SelectValue placeholder="Select Truck Type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {truckTypesIcons.map(({ type, Icon }) => (
+                                <SelectItem key={type} value={type}>
+                                    <Icon className="inline-block mr-2" /> {type}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <Select onValueChange={(value) => handleSelectChange('ownership', value)}>
+                        <SelectTrigger className="w-full p-2 border border-gray-300 rounded-md">
+                            <SelectValue placeholder="Select Ownership" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value='Self'>Self</SelectItem>
+                            <SelectItem value='Market'>Market</SelectItem>
+                        </SelectContent>
+                    </Select>
                     {formdata.ownership === 'Market' && (
                         <SupplierSelect
                             suppliers={suppliers}
@@ -205,7 +216,7 @@ const CreateTruck: React.FC = () => {
                         />
                     )}
                     {
-                        formdata.truckType !== 'Other' && (
+                        formdata.truckType && !new Set(['Other','Tanker','Tipper']).has(formdata.truckType) &&(
                             <button
                                 className="w-full p-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50"
                                 type="button"
@@ -216,7 +227,7 @@ const CreateTruck: React.FC = () => {
                         )
                     }
 
-                    {showDetails && formdata.truckType !== 'Other' && (
+                    {showDetails && !new Set(['Other','Tanker','Tipper']).has(formdata.truckType) && (
                         <AdditionalDetails
                             formdata={formdata}
                             renderModelOptions={renderModelOptions}
@@ -232,7 +243,6 @@ const CreateTruck: React.FC = () => {
                 </form>
             </div>
         </>
-
     )
 }
 

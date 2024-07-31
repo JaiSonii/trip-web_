@@ -7,7 +7,7 @@ import { BsFillFuelPumpFill } from "react-icons/bs";
 import { FaTruckMoving } from "react-icons/fa6";
 import { IoMdSettings } from "react-icons/io";
 import { RiSteering2Fill } from "react-icons/ri";
-import Loading from '@/app/loading';
+import Loading from '@/app/user/loading';
 import { Button } from '../ui/button';
 import ExpenseModal from '../trip/tripDetail/ExpenseModal';
 import { fuelAndDriverChargeTypes, maintenanceChargeTypes } from '@/utils/utilArray';

@@ -1,15 +1,19 @@
 'use client';
-import Loading from '@/app/loading';
-import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import dynamic from 'next/dynamic';
+import Loading from '../loading';
 import { Button } from '@/components/ui/button';
 import { IExpense } from '@/utils/interface';
 import { useParams } from 'next/navigation';
-import React, { useEffect, useState, useCallback } from 'react';
 import { MdDelete } from 'react-icons/md';
-import { maintenanceChargeTypes } from '@/utils/utilArray';
 import { handleAddCharge, handleDelete } from '@/helpers/ExpenseOperation';
 import { fetchDriverName } from '@/helpers/driverOperations';
 import TripRoute from '@/components/trip/TripRoute';
+
+// Dynamically import ExpenseModal to split the code
+const ExpenseModal = dynamic(() => import('@/components/trip/tripDetail/ExpenseModal'), {
+  loading: () => <Loading />,
+});
 
 const OtherExpense = () => {
   const { truckNo } = useParams();
@@ -29,13 +33,13 @@ const OtherExpense = () => {
       const data = await res.json();
       setOtherExpenses(data);
     } catch (error: any) {
-      console.log(error);
+      console.error(error);
       alert(error.message);
     } finally {
       setLoading(false);
     }
   };
-  
+
   useEffect(() => {
     fetchOther();
   }, [truckNo]);
@@ -53,7 +57,6 @@ const OtherExpense = () => {
   const handleAddExpense = useCallback(async (newCharge: any, id?: string) => {
     try {
       const data = await handleAddCharge(newCharge, id, truckNo as string);
-
       setOtherExpenses((prev) => {
         if (id) {
           return prev.map((item) => (item._id === id ? data.charge : item));
@@ -65,6 +68,32 @@ const OtherExpense = () => {
       console.error(error);
     }
   }, [truckNo]);
+
+  const renderedExpenses = useMemo(() => (
+    otherExpenses.map((fuel, index) => (
+      <tr
+        key={index}
+        className="border-t hover:bg-slate-100"
+        onClick={() => {
+          setSelected(fuel);
+          setModelOpen(true);
+        }}
+      >
+        <td>{new Date(fuel.date).toLocaleDateString()}</td>
+        <td>{fuel.amount}</td>
+        <td>{fuel.expenseType}</td>
+        <td>{fuel.paymentMode}</td>
+        <td>{fuel.notes}</td>
+        <td>{fetchDriverName(fuel.driver as string) || 'NA'}</td>
+        <td><TripRoute tripId={fuel.trip_id || ''} /></td>
+        <td>
+          <Button onClick={(e) => handleDeleteExpense(fuel._id as string, e)} variant={'destructive'}>
+            <MdDelete />
+          </Button>
+        </td>
+      </tr>
+    ))
+  ), [otherExpenses, handleDeleteExpense]);
 
   if (loading) return <Loading />;
 
@@ -85,42 +114,22 @@ const OtherExpense = () => {
             </tr>
           </thead>
           <tbody>
-            {otherExpenses.map((fuel, index) => (
-              <tr
-                key={index}
-                className="border-t hover:bg-slate-100"
-                onClick={() => {
-                  setSelected(fuel);
-                  setModelOpen(true);
-                }}
-              >
-                <td>{new Date(fuel.date).toLocaleDateString()}</td>
-                <td>{fuel.amount}</td>
-                <td>{fuel.expenseType}</td>
-                <td>{fuel.paymentMode}</td>
-                <td>{fuel.notes}</td>
-                <td>{fetchDriverName(fuel.driver as string) || 'NA'}</td>
-                <td><TripRoute tripId={fuel.trip_id || ''} /></td>
-                <td>
-                  <Button onClick={(e) => handleDeleteExpense(fuel._id as string, e)} variant={'destructive'}>
-                    <MdDelete />
-                  </Button>
-                </td>
-              </tr>
-            ))}
+            {renderedExpenses}
           </tbody>
         </table>
       </div>
-      <ExpenseModal
-        isOpen={modelOpen}
-        onClose={() => setModelOpen(false)}
-        onSave={handleAddExpense}
-        driverId=''
-        selected={selected}
-        truckPage={true}
-      />
+      {modelOpen && (
+        <ExpenseModal
+          isOpen={modelOpen}
+          onClose={() => setModelOpen(false)}
+          onSave={handleAddExpense}
+          driverId=''
+          selected={selected}
+          truckPage={true}
+        />
+      )}
     </div>
   );
 };
 
-export default OtherExpense;
+export default React.memo(OtherExpense);

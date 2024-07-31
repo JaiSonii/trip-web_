@@ -1,5 +1,5 @@
 'use client'
-import Loading from '@/app/loading'
+import Loading from '../loading'
 import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal'
 import TripRoute from '@/components/trip/TripRoute'
 import { Button } from '@/components/ui/button'

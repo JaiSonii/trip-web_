@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import Loading from '@/app/loading';
+import Loading from '@/app/user/loading';
 import SupplierLayout from '@/components/layout/SupplierLayout';
 
 interface PartyLayoutProps {

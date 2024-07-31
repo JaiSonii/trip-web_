@@ -4,6 +4,8 @@ import { connectToDatabase, truckSchema } from '@/utils/schema';
 import { TruckModel } from '@/utils/interface';
 import { verifyToken } from '@/utils/auth';
 import {v4 as uuidv4} from 'uuid'
+import { validateTruckNo } from '@/utils/validate';
+
 
 const Truck = models.Truck || model('Truck', truckSchema);
 
@@ -33,6 +35,9 @@ export async function POST(req: Request) {
 
     // Parse incoming JSON data from request body
     const data = await req.json();
+    if(!validateTruckNo(data.truckNo)){
+      return NextResponse.json({error : 'Enter the Valid Truck No'})
+    }
 
     // Validate required fields
     if (!data.truckNo) {

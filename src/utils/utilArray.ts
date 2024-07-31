@@ -104,6 +104,22 @@ export const truckTypes = [
     'Other'
 ]
 
+
+import { FaTruckPickup, FaTruckLoading, FaTruckMoving, FaGasPump, FaEllipsisH } from "react-icons/fa";
+import { MdLocalShipping, MdOutlineLocalShipping, MdOutlineConstruction } from "react-icons/md";
+import { FaTrailer } from "react-icons/fa6"
+
+// Define the truck types and their corresponding icons
+export const truckTypesIcons = [
+  { type: 'Mini Truck / LCV', Icon: FaTruckPickup },
+  { type: 'Open Body Truck', Icon: MdOutlineLocalShipping },
+  { type: 'Closed Container', Icon: FaTruckMoving },
+  { type: 'Trailer', Icon: FaTrailer },
+  { type: 'Tanker', Icon: FaGasPump },
+  { type: 'Tipper', Icon: MdOutlineConstruction },
+  { type: 'Other', Icon: FaEllipsisH }
+];
+
 export const chargeType = [
     'Detention/Halting Charges',
     'Repair Expense',

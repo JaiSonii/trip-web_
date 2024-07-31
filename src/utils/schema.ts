@@ -230,8 +230,8 @@ export const supplierSchema: Schema = new Schema({
 })
 
 export const userSchema = new Schema({
-  uid: { type: String, required: true, unique: true },
-  phoneNumber: { type: String, required: true, unique: true },
+  user_id: { type: String, required: true, unique: true },
+  phone: { type: String, required: true, unique: true },
   createdAt: { type: Date, default: Date.now }
 });
 

@@ -4,14 +4,19 @@ import React, { useEffect, useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { IDriver, IParty, ITrip, TruckModel } from '@/utils/interface';
 import { useParams, useRouter } from 'next/navigation';
-import TripDetails from '@/components/trip/tripDetail/TripDetail';
-import Loading from '@/app/loading';
 import { MdEdit, MdDelete, MdClose } from 'react-icons/md';
 import { Button } from '@/components/ui/button';
 
-// Dynamically import EditTripForm
+// Dynamically import components
+const TripDetails = dynamic(() => import('@/components/trip/tripDetail/TripDetail'), {
+  loading: () => <Loading />,
+  ssr: false,
+});
 const EditTripForm = dynamic(() => import('@/components/trip/EditTripForm'), {
   loading: () => <Loading />,
+  ssr: false,
+});
+const Loading = dynamic(() => import('@/app/user/loading'), {
   ssr: false,
 });
 
@@ -34,7 +39,6 @@ const useFetchData = (tripId: string) => {
         if (!tripRes.ok) throw new Error('Failed to fetch trip details');
 
         const tripData = await tripRes.json();
-
         setTrip(tripData.trip);
       } catch (error: any) {
         console.error('Error fetching data:', error);
@@ -49,7 +53,7 @@ const useFetchData = (tripId: string) => {
     }
   }, [tripId]);
 
-  const handleEditClicked = async () => {
+  const handleEditClicked = useCallback(async () => {
     setLoading(true);
     try {
       const [partiesRes, trucksRes, driversRes] = await Promise.all([
@@ -77,7 +81,7 @@ const useFetchData = (tripId: string) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   return { trip, parties, trucks, drivers, loading, error, setTrip, handleEditClicked };
 };
@@ -85,7 +89,7 @@ const useFetchData = (tripId: string) => {
 const TripPage: React.FC = () => {
   const router = useRouter();
   const { tripId } = useParams();
-  const { trip, parties, trucks, drivers, loading, error, setTrip, handleEditClicked } = useFetchData(tripId as any);
+  const { trip, parties, trucks, drivers, loading, error, setTrip, handleEditClicked } = useFetchData(tripId as string);
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -122,7 +126,7 @@ const TripPage: React.FC = () => {
       if (!res.ok) throw new Error('Failed to edit trip');
 
       const newData = await res.json();
-      if (newData.status == 400) {
+      if (newData.status === 400) {
         alert(newData.message);
         setIsSubmitting(false);
         return;
@@ -134,7 +138,7 @@ const TripPage: React.FC = () => {
       console.error('Error editing trip:', error);
     } finally {
       setIsSubmitting(false);
-      setIsEditing(false)
+      setIsEditing(false);
     }
   }, [trip, tripId, router, setTrip]);
 
@@ -170,7 +174,7 @@ const TripPage: React.FC = () => {
       {!isEditing && (
         <div className="flex justify-end space-x-4 mb-4">
           <Button
-          variant={'outline'}
+            variant="outline"
             onClick={() => {
               handleEditClicked();
               setIsEditing(true);
@@ -180,7 +184,7 @@ const TripPage: React.FC = () => {
             <MdEdit className="mr-2" /> Edit
           </Button>
           <Button
-          variant={'destructive'}
+            variant="destructive"
             onClick={handleDelete}
             className="transition-all duration-300 ease-in-out transform hover:scale-105"
           >
@@ -192,7 +196,7 @@ const TripPage: React.FC = () => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg shadow-lg relative w-full max-w-2xl">
             <Button
-            variant={'ghost'}
+              variant="ghost"
               onClick={handleCancelEdit}
               className="absolute top-0 right-0 text-gray-600 hover:text-gray-900"
             >
@@ -201,14 +205,14 @@ const TripPage: React.FC = () => {
             <EditTripForm
               parties={parties}
               trucks={trucks}
-              trip={trip as any}
+              trip={trip as ITrip}
               drivers={drivers}
               onSubmit={handleEdit}
             />
           </div>
         </div>
       )}
-      <TripDetails trip={trip as any} setTrip={setTrip} />
+      <TripDetails trip={trip as ITrip} setTrip={setTrip} />
     </div>
   );
 };

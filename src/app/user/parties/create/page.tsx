@@ -6,7 +6,7 @@ import { IParty } from '@/utils/interface';
 import { useRouter } from 'next/navigation';
 import { isValidGSTNumber } from '@/utils/validate';
 import { isValidPhone } from '@/utils/validate';
-import Loading from '@/app/loading';
+import Loading from '@/app/user/loading';
 
 
 

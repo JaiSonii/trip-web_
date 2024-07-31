@@ -5,7 +5,7 @@ import SupplierForm from '@/components/createSupplier';
 import { ISupplier } from '@/utils/interface';
 import { useRouter } from 'next/navigation';
 import { isValidPhone } from '@/utils/validate';
-import Loading from '@/app/loading';
+import Loading from '@/app/user/loading';
 
 
 const CreateSupplierPage: React.FC = () => {

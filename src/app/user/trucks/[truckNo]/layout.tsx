@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import Loading from '@/app/loading';
+import Loading from '@/app/user/loading';
 import TruckLayout from '@/components/layout/TruckLayout';
 
 interface PartyLayoutProps {

@@ -2,11 +2,9 @@
 'use client'
 
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
 import { ISupplier } from '@/utils/interface';
-import Loading from '@/app/loading';
+import Loading from './loading';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/components/AuthProvider';
 import { supplierTripCount } from '@/helpers/SupplierOperation';
 import SupplierBalance from '@/components/supplier/SupplierBalance';
 

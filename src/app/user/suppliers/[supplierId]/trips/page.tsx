@@ -6,12 +6,14 @@ import { statuses } from '@/utils/schema'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
+import Loading from '../../loading'
 
 
 const SupplierDetailPage = () => {
 
     const { supplierId } = useParams()
     const [trips, setTrips] = useState<ITrip[]>([])
+    const [loading, setLoading] = useState(true)
 
     const fetchSupplierTrips = async (supplierId: string) => {
         const res = await fetch(`/api/trips/supplier/${supplierId}`, {
@@ -23,6 +25,7 @@ const SupplierDetailPage = () => {
         const data = await res.json()
         console.log(data)
         setTrips(data.trips)
+        setLoading(false)
     }
 
     useEffect(() => {
@@ -30,6 +33,10 @@ const SupplierDetailPage = () => {
             fetchSupplierTrips(supplierId as string)
         }
     }, [supplierId])
+
+    if(loading){
+        return <Loading />
+    }
     return (
         <div className="w-full h-full p-4">
             <h1 className="text-2xl font-bold mb-4">Trips</h1>

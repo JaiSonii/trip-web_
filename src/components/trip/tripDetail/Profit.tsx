@@ -4,6 +4,7 @@ import ExpenseModal from './ExpenseModal';
 import ProfitItem from './Profit/ProfitItem';
 import { handleAddCharge } from '@/helpers/ExpenseOperation';
 import { Button } from '@/components/ui/button';
+import { FaChevronUp, FaChevronDown } from 'react-icons/fa';
 
 interface ProfitProps {
   charges: TripExpense[];
@@ -143,32 +144,41 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
         <span className="text-md font-semibold text-blue-700">{amount.toFixed(2)}</span>
       </div>
 
-      <div className="py-4 border-b border-gray-200 cursor-pointer flex justify-between items-center" onClick={() => setShowTotalCharges(!showTotalCharges)}>
+      <div className="py-4 border-b border-gray-200 cursor-pointer flex justify-between items-center hover:bg-gray-100 transition-colors rounded-md" onClick={() => setShowTotalCharges(!showTotalCharges)}>
         <span className="font-medium text-gray-700">Total Charges</span>
-        <span className="text-green-600 font-semibold">+{chargesAmount.toFixed(2)}</span>
+        <span className="flex items-center text-green-600 font-semibold">
+          +{chargesAmount.toFixed(2)}
+          {showTotalCharges ? <FaChevronUp className="ml-2 transition-transform" /> : <FaChevronDown className="ml-2 transition-transform" />}
+        </span>
       </div>
       {showTotalCharges && totalCharges.map((charge: any, index: number) => (
         <ProfitItem data={charge} index={index} key={charge._id as string} disabled={true} sign={'+'} />
       ))}
 
-      <div className="py-4 border-b border-gray-200 cursor-pointer flex justify-between items-center" onClick={() => setShowTotalDeductions(!showTotalDeductions)}>
+      <div className="py-4 border-b border-gray-200 cursor-pointer flex justify-between items-center hover:bg-gray-100 transition-colors rounded-md" onClick={() => setShowTotalDeductions(!showTotalDeductions)}>
         <span className="font-medium text-gray-700">Total Deductions</span>
-        <span className="text-red-600 font-semibold">-{deduction.toFixed(2)}</span>
+        <span className="flex items-center text-red-600 font-semibold">
+          -{deduction.toFixed(2)}
+          {showTotalDeductions ? <FaChevronUp className="ml-2 transition-transform" /> : <FaChevronDown className="ml-2 transition-transform" />}
+        </span>
       </div>
       {showTotalDeductions && totalDeductions.map((charge: any, index: number) => (
         <ProfitItem data={charge} index={index} key={charge._id as string} disabled={true} sign={'-'} />
       ))}
 
-      <div className="py-4 border-b border-gray-200 cursor-pointer flex justify-between items-center" onClick={() => setShowTruckExpenses(!showTruckExpenses)}>
+      <div className="py-4 border-b border-gray-200 cursor-pointer flex justify-between items-center hover:bg-gray-100 transition-colors rounded-md" onClick={() => setShowTruckExpenses(!showTruckExpenses)}>
         <span className="font-medium text-gray-700">Expenses</span>
-        <span className="text-red-600 font-semibold">-{expenseAmount.toFixed(2)}</span>
+        <span className="flex items-center text-red-600 font-semibold">
+          -{expenseAmount.toFixed(2)}
+          {showTruckExpenses ? <FaChevronUp className="ml-2 transition-transform" /> : <FaChevronDown className="ml-2 transition-transform" />}
+        </span>
       </div>
       {showTruckExpenses && truckExpenses.map((expense, index) => (
         <ProfitItem data={expense} index={index} key={expense._id as string} setOpen={setIsModalOpen} setSelectedExpense={setSelectedExpense} sign={'-'} />
       ))}
 
 
-      {truckCost &&
+      {truckCost != 0 &&
         <div className="py-4 mt-4 flex justify-between items-center">
           <span className="font-medium text-gray-800">Truck Hire Cost: </span>
           <span className="text-red-600 font-bold">-{truckCost}</span>

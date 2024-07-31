@@ -38,7 +38,7 @@ interface TripExpense {
 const ChargeModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave }) => {
   const [formData, setFormData] = useState<TripExpense>({
     trip_id: '',
-    partyBill: true,
+    partyBill: false,
     amount: 0,
     date: new Date(),
     expenseType: '',

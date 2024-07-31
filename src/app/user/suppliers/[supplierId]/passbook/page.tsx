@@ -1,5 +1,5 @@
 'use client'
-import Loading from '@/app/loading'
+import Loading from '../../loading'
 import TripRoute from '@/components/trip/TripRoute'
 import { Button } from '@/components/ui/button'
 import { ISupplierAccount, ITrip } from '@/utils/interface'

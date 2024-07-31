@@ -3,10 +3,12 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { FaTruckMoving, FaSignOutAlt, FaBars, FaTimes } from "react-icons/fa";
+import { FaTruckMoving, FaSignOutAlt, FaBars, FaTimes, FaUserCircle, FaHome, FaTruck, FaUsers, FaClipboardList, FaFileInvoiceDollar, FaUser } from "react-icons/fa";
 import { signOut } from 'firebase/auth';
-import { auth } from '@/firebase/firbaseConfig'; // Adjust the path as needed
-import { FaTruckFast } from "react-icons/fa6";
+import { FaTruckFast, FaCircle } from "react-icons/fa6";
+import { FaRegUser } from "react-icons/fa";
+import { RiSteering2Fill } from "react-icons/ri";
+import { auth } from '@/firebase/firbaseConfig';
 
 const MainLayout = () => {
   const pathname = usePathname();
@@ -14,6 +16,16 @@ const MainLayout = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [selected, setSelected] = useState<any>();
   const [selectedMonthYear, setSelectedMonthYear] = useState('');
+  const [phone, setPhone] = useState<string | null>('')
+
+  useEffect(() => {
+    const fetchPhone = async () => {
+      const response = await fetch('/api/login');
+      const data = await response.json()
+      setPhone(data.user.phone)
+    }
+    fetchPhone()
+  }, [auth])
 
   useEffect(() => {
     // Set the initial selected menu item based on the current pathname
@@ -30,14 +42,14 @@ const MainLayout = () => {
   }, []);
 
   const menuItems = [
-    { href: `/user/parties`, label: 'Parties' },
-    { href: `/user/trips`, label: 'Trips' },
-    { href: `/user/drivers`, label: 'Drivers' },
-    { href: `/user/trucks`, label: 'Trucks' },
-    { href: `/user/suppliers`, label: 'Suppliers' },
-    { 
+    { href: `/user/parties`, label: 'Parties', icon: FaUsers },
+    { href: `/user/trips`, label: 'Trips', icon: FaClipboardList },
+    { href: `/user/drivers`, label: 'Drivers', icon: RiSteering2Fill },
+    { href: `/user/trucks`, label: 'Trucks', icon: FaTruck },
+    { href: `/user/suppliers`, label: 'Suppliers', icon: FaUser },
+    {
       href: `/user/expenses/truckExpense?monthYear=${encodeURIComponent(selectedMonthYear)}`,
-      label: 'Expenses'
+      label: 'Expenses', icon: FaFileInvoiceDollar
     }
   ];
 
@@ -55,22 +67,13 @@ const MainLayout = () => {
 
   return (
     <div>
-      <div className="md:hidden flex justify-between items-center p-4 bg-gray-800 text-white shadow-lg fixed top-0 left-0 right-0 z-50">
-        <div className="flex items-center">
-          <FaTruckMoving />
-          <span className="ml-3 text-2xl font-bold">Mo Verse Demo Project</span>
-        </div>
-        <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
-          {isMenuOpen ? <FaTimes /> : <FaBars />}
-        </button>
-      </div>
 
       <div className={`h-screen w-1/6 bg-gradient-to-b from-gray-800 via-gray-700 to-gray-600 text-white fixed top-0 left-0 md:flex flex-col shadow-lg transition-transform duration-300 ease-in-out ${isMenuOpen ? 'transform translate-x-0' : 'transform -translate-x-full'} md:translate-x-0 z-40`}>
-        <div className="flex items-center justify-center p-4 md:justify-start md:pl-4 border">
-          <FaTruckFast style={{ width: '80px', height: '80px' }} />
-          <span className="ml-3 text-2xl font-bold">Mo Verse Demo Project</span>
+        <div className="flex items-center justify-center p-4 md:justify-start md:pl-4 border-b">
+          <FaTruckFast style={{ width: '50px', height: '50px' }} />
+          <span className="ml-3 text-xl font-bold">Mo Verse</span>
         </div>
-        <ul className="list-none p-0 m-0">
+        <ul className="flex-grow list-none p-0 m-0">
           {menuItems.map((item) => (
             <li key={item.href} className="mb-2">
               <Link href={item.href}>
@@ -78,21 +81,24 @@ const MainLayout = () => {
                   className={`flex items-center p-4 text-lg font-semibold transition duration-300 ease-in-out rounded-md ${pathname.startsWith(item.href) || selected === item.label ? 'bg-gray-600 text-gray-300' : 'hover:bg-gray-700 hover:text-gray-300'}`}
                   onClick={() => setSelected(item.label)}
                 >
+                  <item.icon className="mr-3" />
                   {item.label}
                 </div>
               </Link>
             </li>
           ))}
-          <li>
-            <div
-              className={`flex items-center gap-2 p-4 text-lg font-semibold transition duration-300 ease-in-out rounded-md hover:bg-gray-700 hover:text-gray-300 cursor-pointer`}
-              onClick={handleSignOut}
-            >
-              <p>SignOut</p>
-              <FaSignOutAlt />
-            </div>
-          </li>
         </ul>
+        <div className="flex items-center justify-center p-4 border-t">
+          <FaRegUser style={{ width: '40px', height: '40px' }} />
+          <div className="ml-3">
+            <p className="text-lg font-semibold">{phone}</p>
+            <p className="text-sm"></p>
+          </div>
+        </div>
+        <div className="flex items-center justify-center p-4 cursor-pointer hover:bg-gray-700" onClick={handleSignOut}>
+          <FaSignOutAlt style={{ width: '24px', height: '24px' }} />
+          <span className="ml-3 text-lg font-semibold">Sign Out</span>
+        </div>
       </div>
     </div>
   );

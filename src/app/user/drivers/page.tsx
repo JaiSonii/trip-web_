@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation'; // Import from 'next/router' instead of 'next/navigation'
 import { IDriver } from '@/utils/interface';
-import Loading from '@/app/loading';
+import Loading from '@/app/user/loading';
 import DriverBalance from '@/components/driver/DriverBalance';
 
 const DriversPage = () => {

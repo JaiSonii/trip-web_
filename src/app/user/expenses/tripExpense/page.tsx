@@ -1,5 +1,5 @@
 'use client';
-import Loading from '@/app/loading';
+import Loading from '@/app/user/loading';
 import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal';
 import { Button } from '@/components/ui/button';
 import { ITripCharges, IExpense } from '@/utils/interface';

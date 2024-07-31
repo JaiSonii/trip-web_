@@ -76,7 +76,19 @@ function OtpLogin() {
 
       try {
         const result = await confirmationResult.confirm(otp);
-        console.log(result.user.getIdToken());
+      
+        console.log(result.user);
+        const res = await fetch(`/api/login`,{
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body : JSON.stringify({
+            user_id : result.user.uid,
+            phone : result.user.phoneNumber
+          })
+        })
+        const data = await res.json()
         router.replace(`/user/parties`);
       } catch (error) {
         console.log(error);
@@ -100,7 +112,6 @@ function OtpLogin() {
 
       try {
         const confirmationResult = signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier)
-        console.log(confirmationResult)
         const result = await confirmationResult
         setConfirmationResult(result);
         setSuccess("OTP sent successfully.");

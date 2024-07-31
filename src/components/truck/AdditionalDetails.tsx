@@ -1,6 +1,14 @@
 // AdditionalDetails.tsx
 
 import React from 'react';
+import {
+    Select,
+    SelectTrigger,
+    SelectContent,
+    SelectItem,
+    SelectLabel,
+    SelectValue
+} from '@/components/ui/select'; // Adjust the import path as necessary
 
 type Props = {
     formdata: {
@@ -15,17 +23,16 @@ type Props = {
 
 const AdditionalDetails: React.FC<Props> = ({ formdata, renderModelOptions, handleInputChange }) => (
     <>
-        <select
-            className="w-full p-2 border border-gray-300 rounded-md"
-            name="model"
-            value={formdata.model}
-            onChange={handleInputChange}
-        >
-            <option value='' disabled>Select Model</option>
-            {renderModelOptions().map((model, index) => (
-                <option key={index} value={model}>{model}</option>
-            ))}
-        </select>
+        <Select onValueChange={(value) => handleInputChange({ target: { name: 'model', value } } as React.ChangeEvent<HTMLSelectElement>)}>
+            <SelectTrigger className="w-full p-2 border border-gray-300 rounded-md">
+                <SelectValue placeholder="Select Model" />
+            </SelectTrigger>
+            <SelectContent>
+                {renderModelOptions().map((model, index) => (
+                    <SelectItem key={index} value={model}>{model}</SelectItem>
+                ))}
+            </SelectContent>
+        </Select>
         {formdata.truckType !== 'Tanker' && (
             <input
                 className="w-full p-2 border border-gray-300 rounded-md"

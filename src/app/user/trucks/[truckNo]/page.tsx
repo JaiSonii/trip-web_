@@ -1,26 +1,38 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { ITrip, IExpense } from '@/utils/interface';
 import { useParams, useRouter } from 'next/navigation';
 import { statuses } from '@/utils/schema';
 import { fetchPartyName } from '@/helpers/fetchPartyName';
-import Loading from '@/app/loading';
+import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import Link from 'next/link';
-import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal';
-import TripRevenue from '@/components/trip/tripDetail/Profit/TripRevenue';
+
+const Loading = dynamic(() => import('../[truckNo]/loading'), {
+  ssr: false,
+  loading: () => <div>Loading...</div>,
+});
+
+const ExpenseModal = dynamic(() => import('@/components/trip/tripDetail/ExpenseModal'), {
+  ssr: false,
+  loading: () => <Loading />,
+});
+
+const TripRevenue = dynamic(() => import('@/components/trip/tripDetail/Profit/TripRevenue'), {
+  ssr: false,
+  loading: () => <Loading />,
+});
 
 const TruckPage = () => {
-  const [data, setData] = useState<any[]>([]);
   const { truckNo } = useParams();
+  const router = useRouter();
+  const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [revenue, setRevenue] = useState(0);
   const [totalExpense, setTotalExpense] = useState(0);
   const [modelOpen, setModelOpen] = useState(false);
-  const [selected, setSelected] = useState<IExpense>();
-
-  const router = useRouter()
+  const [selected, setSelected] = useState<IExpense | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,7 +49,6 @@ const TruckPage = () => {
           profitRes.ok ? profitRes.json() : []
         ]);
 
-
         const tripDataWithPartyNames = await Promise.all(
           tripData.trips.map(async (trip: any) => {
             const partyName = await fetchPartyName(trip.party);
@@ -53,7 +64,7 @@ const TruckPage = () => {
         setTotalExpense(profitData.truckExpense);
         setRevenue(profitData.tripRevenue);
       } catch (error: any) {
-        console.log(error);
+        console.error('Error fetching data:', error);
         alert(error.message);
       } finally {
         setLoading(false);
@@ -62,57 +73,56 @@ const TruckPage = () => {
     fetchData();
   }, [truckNo]);
 
+  const handleDelete = useCallback(async (id: string) => {
+    try {
+      const res = await fetch(`/api/truckExpense/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (!res.ok) throw new Error('Failed to delete expense');
+      setData(prevData => prevData.filter((item) => item._id !== id));
+      router.refresh();
+    } catch (error: any) {
+      console.error('Error deleting expense:', error);
+      alert(error.message);
+    }
+  }, [router]);
+
+  const handleAddCharge = useCallback(async (newCharge: any, id?: string) => {
+    try {
+      const truckExpenseData = {
+        ...newCharge,
+        truck: truckNo,
+        transaction_id: newCharge.transactionId || '',
+        driver: newCharge.driver || '',
+        notes: newCharge.notes || '',
+      };
+
+      const res = await fetch(`/api/truckExpense/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(truckExpenseData),
+      });
+      if (!res.ok) throw new Error('Failed to add charge');
+
+      const data = await res.json();
+      setData(prev => {
+        const index = prev.findIndex(item => item._id === data.charge._id);
+        prev[index] = data.charge;
+        return [...prev];
+      });
+      router.refresh();
+    } catch (error: any) {
+      console.error('Error adding charge:', error);
+      alert(error.message);
+    }
+  }, [truckNo, router]);
+
   if (loading) return <Loading />;
-
-  const handleDelete = async (id: string) => {
-    const res = await fetch(`/api/truckExpense/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    if (!res.ok) {
-      alert('Failed to delete expense');
-      return;
-    }
-    setData(data.filter((item) => item._id !== id));
-    const deletedItem = data.find((item) => item._id === id);
-    if (deletedItem) {
-      router.refresh()
-    }
-  };
-
-  const handleAddCharge = async (newCharge: any, id?: string) => {
-    const truckExpenseData = {
-      ...newCharge,
-      truck: truckNo,
-      transaction_id: newCharge.transactionId || '',
-      driver: newCharge.driver || '',
-      notes: newCharge.notes || '',
-    };
-
-    const res = await fetch(`/api/truckExpense/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(truckExpenseData),
-    });
-    if (!res.ok) {
-      alert('Failed to add charge');
-      return;
-    }
-    const data = await res.json();
-    setData((prev: IExpense[]) => {
-      const index = prev.findIndex(item => item._id == data.charge._id);
-      prev[index] = data.charge;
-      return prev;
-    });
-    if(data){
-      router.refresh()
-    }
-    
-  };
 
   return (
     <div className="w-full h-full p-4">
