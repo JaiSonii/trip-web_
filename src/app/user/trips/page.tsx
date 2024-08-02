@@ -86,9 +86,12 @@ const TripsPage = () => {
                 className="border-t hover:bg-orange-100 cursor-pointer transition-colors"
                 onClick={() => router.push(`/user/trips/${trip.trip_id}`)}
               >
-                <td className="border p-4 flex items-center space-x-2">
-                  <FaCalendarAlt className="text-[rgb(247,132,50)]" />
-                  <span>{new Date(trip.startDate).toLocaleDateString()}</span>
+                <td className="border p-4 ">
+                  <div className='flex items-center space-x-2'>
+                    <FaCalendarAlt className="text-[rgb(247,132,50)]" />
+                    <span>{new Date(trip.startDate).toLocaleDateString()}</span>
+                  </div>
+
                 </td>
                 <td className="border p-4">{trip.LR}</td>
                 <td className="border p-4 ">
