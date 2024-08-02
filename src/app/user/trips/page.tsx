@@ -91,14 +91,19 @@ const TripsPage = () => {
                   <span>{new Date(trip.startDate).toLocaleDateString()}</span>
                 </td>
                 <td className="border p-4">{trip.LR}</td>
-                <td className="border p-4 flex items-center space-x-2">
-                  <FaTruck className="text-[rgb(247,132,50)]" />
-                  <span>{trip.truck}</span>
+                <td className="border p-4 ">
+                  <div className='flex items-center space-x-2'>
+                    <FaTruck className="text-[rgb(247,132,50)]" />
+                    <span>{trip.truck}</span>
+                  </div>
+
                 </td>
                 <td className="border p-4"><PartyName partyId={trip.party} /></td>
-                <td className="border p-4 flex items-center space-x-2">
-                  <FaRoute className="text-[rgb(247,132,50)]" />
-                  <span>{trip.route.origin.split(',')[0]} -&gt; {trip.route.destination.split(',')[0]}</span>
+                <td className="border p-4">
+                  <div className='flex items-center space-x-2'>
+                    <FaRoute className="text-[rgb(247,132,50)]" />
+                    <span>{trip.route.origin.split(',')[0]} -&gt; {trip.route.destination.split(',')[0]}</span>
+                  </div>
                 </td>
                 <td className="border p-4">
                   <div className="flex flex-col items-center space-x-2">

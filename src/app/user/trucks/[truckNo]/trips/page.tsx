@@ -64,14 +64,20 @@ const TruckTripsPage = () => {
         className="border-t hover:bg-orange-100 cursor-pointer transition-colors"
         onClick={() => router.push(`/user/trips/${trip.trip_id}`)}
       >
-        <td className="border p-4 flex items-center space-x-2">
-          <FaCalendarAlt className="text-[rgb(247,132,50)]" />
-          <span>{new Date(trip.startDate).toLocaleDateString()}</span>
+        <td className="border p-4 ">
+          <div className='flex items-center space-x-2'>
+
+
+            <FaCalendarAlt className="text-[rgb(247,132,50)]" />
+            <span>{new Date(trip.startDate).toLocaleDateString()}</span>
+          </div>
         </td>
         <td className="border p-4">{trip.LR}</td>
-        <td className="border p-4 flex items-center space-x-2">
-          <FaTruck className="text-[rgb(247,132,50)]" />
-          <span>{trip.truck}</span>
+        <td className="border p-4">
+          <div className='flex items-center space-x-2'>
+            <FaTruck className="text-[rgb(247,132,50)]" />
+            <span>{trip.truck}</span>
+          </div>
         </td>
         <td className="border p-4 ">
           <div className='flex items-center space-x-2'>
@@ -88,9 +94,11 @@ const TruckTripsPage = () => {
             </div>
           </div>
         </td>
-        <td className="border p-4 flex items-center space-x-2">
-          <FaFileInvoiceDollar className="text-[rgb(247,132,50)]" />
-          <span>{fetchBalance(trip)}</span>
+        <td className="border p-4">
+          <div className='flex items-center space-x-2'>
+            <FaFileInvoiceDollar className="text-[rgb(247,132,50)]" />
+            <span>{fetchBalance(trip)}</span>
+          </div>
         </td>
       </tr>
     ))

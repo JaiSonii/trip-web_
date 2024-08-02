@@ -56,18 +56,20 @@ const SupplierDetailPage = () => {
                     <tbody>
                         {trips.map((trip, index) => (
                             <tr key={index} className="border-t hover:bg-slate-100 cursor-pointer">
-                                <td className="border p-4 flex items-center space-x-2">
+                                <td className="border p-4">
+                                <div className='flex items-center space-x-2'>
                                     <FaCalendarAlt className="text-[rgb(247,132,50)]" />
                                     <span>{new Date(trip.startDate).toLocaleDateString()}</span>
+                                    </div>
                                 </td>
-                                <td className="border p-4 space-x-2">
+                                <td className="border p-4 ">
                                     <div className='flex items-center space-x-2'>
                                         <FaTruck className="text-[rgb(247,132,50)]" />
                                         <span>{trip.truck}</span>
                                     </div>
 
                                 </td>
-                                <td className="border p-4 flex items-center space-x-2">
+                                <td className="border p-4">
                                     <div className='flex items-center space-x-2'>
                                         <FaRoute className="text-[rgb(247,132,50)]" />
                                         <span>{trip.route.origin.split(',')[0]} -&gt; {trip.route.destination.split(',')[0]}</span>
