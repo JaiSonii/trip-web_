@@ -126,8 +126,7 @@ body {
 .custom-table th,
 .custom-table td {
   padding: 16px 24px; /* Improved padding */
-  text-align: left;
-  border: 1px solid #e2e8f0; /* Add border */
+  text-align: left; /* Add border */
   transition: background-color 0.3s ease; /* Smooth transition */
 }
 
