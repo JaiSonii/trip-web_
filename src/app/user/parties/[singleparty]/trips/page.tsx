@@ -93,9 +93,11 @@ const SinglePartyTrips = () => {
                   </div>
                 </div>
               </td>
-              <td className="border p-4 flex items-center space-x-2">
+              <td className="border p-4">
+              <div className='flex items-center space-x-2'>
                 <FaFileInvoiceDollar className="text-[rgb(247,132,50)]" />
                 <span>{fetchBalance(trip)}</span>
+                </div>
               </td>
             </tr>
           ))}
