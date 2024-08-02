@@ -190,7 +190,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
 
       {/* Right Side - Profit, Balance, and POD Viewer */}
       <div className="col-span-1 space-y-6">
-        <div className="bg-gradient-to-r p-4 from-gray-700 via-gray-600 to-gray-500 rounded-lg shadow-lg text-white">
+        <div className="bg-gradient-to-r p-4 from-bottomNavBarColor via-bottomNavBarColor to-lightOrange rounded-lg shadow-lg text-white">
           <h3 className="text-xl font-bold">Pending Balance</h3>
           <p className="text-2xl font-semibold mt-4">₹ {tripBalance}</p>
         </div>

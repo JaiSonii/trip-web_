@@ -147,8 +147,8 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onD
         )}
       </div>
       <div>
-      <div className="flex items-center justify-between p-4 border border-b-gray-400 rounded-sm w-1/3">
-        <span className="text-2xl ">Driver Balance: <DriverBalance driverId={driverId}/></span> {/* Display balance */}
+      <div className="flex items-center justify-between p-3 bg-gray-200 rounded-sm w-fit">
+        <span className="text-2xl">Driver Balance: <DriverBalance driverId={driverId}/></span> {/* Display balance */}
       </div>
       </div>
     </div>

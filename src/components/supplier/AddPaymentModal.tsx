@@ -103,6 +103,7 @@ const AddPaymentModal = ({ isOpen, onClose, onSave, supplierId }: AddPaymentModa
                             setAmount(value === '' ? '' : Number(value));
                         }}
                         className="mt-1 block w-full p-2 border rounded"
+                        placeholder='Amount'
                     />
                 </div>
                 <div className="mb-4">
@@ -133,6 +134,7 @@ const AddPaymentModal = ({ isOpen, onClose, onSave, supplierId }: AddPaymentModa
                         value={notes}
                         onChange={(e) => setNotes(e.target.value)}
                         className="mt-1 block w-full p-2 border rounded"
+                        placeholder='Notes'
                     />
                 </div>
                 {paymentMode !== 'cash' && (
@@ -159,18 +161,18 @@ const AddPaymentModal = ({ isOpen, onClose, onSave, supplierId }: AddPaymentModa
                                         type="number"
                                         value={tripAllocations[trip.trip_id] || ''}
                                         onChange={(e) => handleAllocationChange(trip.trip_id, Number(e.target.value))}
-                                        className="w-32 p-2 border rounded"
+                                        className="w-28 p-2 border rounded"
                                         placeholder="Amount"
                                         disabled={totalAllocatedAmount >= (amount as number)}
                                     />
-                                    <span className="text-gray-700">/{truckHireCosts[trip.trip_id]}</span>
+                                    <span className="text-gray-700 font-semibold ml-1">/{truckHireCosts[trip.trip_id]}</span>
                                 </div>
                             ))}
                         </div>
                     )}
                 </div>
                 <div className="flex justify-end space-x-2">
-                    <Button variant="ghost" onClick={onClose}>Cancel</Button>
+                    <Button variant="outline" onClick={onClose}>Cancel</Button>
                     <Button onClick={handleSave} disabled={(amount as number) > totalTruckHireCost}>Save</Button>
                 </div>
             </div>

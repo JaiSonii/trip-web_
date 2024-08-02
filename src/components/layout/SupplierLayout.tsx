@@ -161,10 +161,10 @@ const SupplierLayout = ({ children, supplierId }: TruckLayoutProps) => {
                         <Link
                             key={tab.name}
                             href={tab.path}
-                            className={`px-4 py-2 transition duration-300 ease-in-out ${
+                            className={`px-4 py-2 transition duration-300 ease-in-out font-semibold ${
                                 pathname === tab.path
-                                    ? 'border-b-2 border-blue-500 text-blue-500'
-                                    : 'border-transparent text-gray-600 hover:text-blue-500 hover:border-blue-500'
+                                    ? 'border-b-2 border-bottomNavBarColor text-bottomNavBarColor'
+                                    : 'border-transparent text-gray-600 hover:text-bottomNavBarColor hover:border-bottomNavBarColor'
                             }`}
                             prefetch={true}
                         >

@@ -4,7 +4,7 @@ import React from 'react';
 const ViewBillButton = () => {
   return (
     <div>
-      <Button variant={'secondary'}>
+      <Button variant={'outline'}>
         <span className="truncate">View Bill</span>
       </Button>
     </div>

@@ -5,10 +5,12 @@ import Loading from '../loading';
 import { Button } from '@/components/ui/button';
 import { IExpense } from '@/utils/interface';
 import { useParams } from 'next/navigation';
-import { MdDelete } from 'react-icons/md';
+import { MdDelete, MdEdit, MdLocalGasStation, MdPayment } from 'react-icons/md';
 import { handleAddCharge, handleDelete } from '@/helpers/ExpenseOperation';
 import { fetchDriverName } from '@/helpers/driverOperations';
 import TripRoute from '@/components/trip/TripRoute';
+import DriverName from '@/components/driver/DriverName';
+import { FaCalendarAlt } from 'react-icons/fa';
 
 // Dynamically import ExpenseModal to split the code
 const ExpenseModal = dynamic(() => import('@/components/trip/tripDetail/ExpenseModal'), {
@@ -70,26 +72,43 @@ const OtherExpense = () => {
   }, [truckNo]);
 
   const renderedExpenses = useMemo(() => (
-    otherExpenses.map((fuel, index) => (
+    otherExpenses.map((expense, index) => (
       <tr
         key={index}
         className="border-t hover:bg-slate-100"
-        onClick={() => {
-          setSelected(fuel);
-          setModelOpen(true);
-        }}
       >
-        <td>{new Date(fuel.date).toLocaleDateString()}</td>
-        <td>{fuel.amount}</td>
-        <td>{fuel.expenseType}</td>
-        <td>{fuel.paymentMode}</td>
-        <td>{fuel.notes}</td>
-        <td>{fetchDriverName(fuel.driver as string) || 'NA'}</td>
-        <td><TripRoute tripId={fuel.trip_id || ''} /></td>
+        <td className="border p-4">
+          <div className='flex items-center space-x-2'>
+            <FaCalendarAlt className='text-bottomNavBarColor'/>
+            <span>{new Date(expense.date).toLocaleDateString()}</span>
+          </div>
+          </td>
+        <td className="border p-4">{expense.amount}</td>
+        <td className="border p-4">
+          <div className="flex items-center space-x-2">
+            <MdLocalGasStation className="text-blue-500" />
+            <span>{expense.expenseType}</span>
+          </div>
+        </td>
+        <td className="border p-4">
+          <div className="flex items-center space-x-2">
+            <MdPayment className="text-green-500" />
+            <span>{expense.paymentMode}</span>
+          </div>
+        </td>
+        <td className="border p-4">{expense.notes || ''}</td>
+        <td className="border p-4">{expense.driver ? <DriverName driverId={expense.driver} /> : 'N/A'}</td>
+        <td className="border p-4">{expense.trip_id ? <TripRoute tripId={expense.trip_id} /> : 'N/A'}</td>
         <td>
-          <Button onClick={(e) => handleDeleteExpense(fuel._id as string, e)} variant={'destructive'}>
-            <MdDelete />
-          </Button>
+          <div className='flex items-center space-x-2'>
+            <Button variant="outline" onClick={() => { setSelected(expense); setModelOpen(true); }}>
+              <MdEdit />
+            </Button>
+            <Button variant="destructive" onClick={(e) => handleDelete(expense._id as string, e)}>
+              <MdDelete />
+            </Button>
+          </div>
+
         </td>
       </tr>
     ))

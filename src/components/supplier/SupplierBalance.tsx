@@ -28,7 +28,7 @@ const SupplierBalance: React.FC<DriverNameProps> = ({ supplierId }) => {
     if (loading) return <span>Loading...</span>;
     if (error || !balance) return <span>NA</span>;
 
-    return <span className={balance < 0 ? 'text-red-600 p-2' : 'text-green-600 p-2'}>{balance || ''}</span>;
+    return <span className={balance < 0 ? 'text-red-600 p-2 font-semibold' : 'text-green-600 p-2 font-semibold'}>{balance || ''}</span>;
 };
 
 export default SupplierBalance;

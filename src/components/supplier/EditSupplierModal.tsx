@@ -43,7 +43,7 @@ const EditSupplierModal = ({ supplier, isOpen, onClose, onSave }: EditSupplierMo
                     />
                 </div>
                 <div className="flex justify-end space-x-2">
-                    <Button variant={'ghost'} onClick={onClose}>Cancel</Button>
+                    <Button variant={'outline'} onClick={onClose}>Cancel</Button>
                     <Button  onClick={handleSave}>Save</Button>
                 </div>
             </div>

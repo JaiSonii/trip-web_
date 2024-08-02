@@ -28,7 +28,7 @@ const DriverBalance: React.FC<DriverNameProps> = ({ driverId }) => {
     if (loading) return <span>Loading...</span>;
     if (error || !balance) return <span>NA</span>;
 
-    return <span className={balance > 0 ? 'text-green-500 p-2' : 'text-red-500 p-2'}>{balance || ''}</span>;
+    return <span className={balance > 0 ? 'text-green-500 p-2 font-semibold' : 'text-red-500 p-2 font-semibold'}>{balance || ''}</span>;
 };
 
 export default DriverBalance;

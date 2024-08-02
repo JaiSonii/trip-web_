@@ -1,14 +1,13 @@
-import type { Config } from "tailwindcss"
+import { Config } from 'tailwindcss'
 
-const config = {
+const config: Config = {
   darkMode: ["class"],
   content: [
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
-	],
-  prefix: "",
+  ],
   theme: {
     container: {
       center: true,
@@ -19,6 +18,28 @@ const config = {
     },
     extend: {
       colors: {
+        white: '#ffffff',
+        gray: {
+          100: '#f5f5f5',
+        },
+        // Custom Colors
+        whiteColor: '#ffffff',
+        primaryColor: '0xffFF6A00',
+        backgroundColor: '0xFFFFFFFa',
+        primaryTextColor: '0xff000000',
+        secondaryTextColor: '#5a5a5a',
+        splashColor: 'rgba(255, 255, 255, 0.3)', // 0x4DFFFFFF in rgba
+        cardColor: '#ffffff',
+        cardSecondaryColor: '#cecece',
+        buttonColor: '#000000',
+        borderColor: '#c3c3c3',
+        bottomNavBarColor: 'rgb(247, 132, 50)', // Color.fromARGB(255, 247, 132, 50)
+        primaryOrange: '#ff6a00',
+        lightOrange: '#ffa666',
+        lightOrangeButtonColor: '#ffcaA4',
+        destructive : '#D95C2B',
+
+        // Existing HSL-based Colors
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
@@ -31,10 +52,6 @@ const config = {
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
-        },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
         },
         muted: {
           DEFAULT: "hsl(var(--muted))",
@@ -75,6 +92,10 @@ const config = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-} satisfies Config
+};
 
-export default config
+export default config;
+function rgba(arg0: number, arg1: number, arg2: number, arg3: number): string | import("tailwindcss/types/config").RecursiveKeyValuePair<string, string> {
+  throw new Error('Function not implemented.');
+}
+

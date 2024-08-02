@@ -17,14 +17,14 @@ const TripsLayout = ({ children }: { children: React.ReactNode }) => {
         <div className="flex items-center justify-between mb-4 border-b-2 border-gray-300 pb-2">
           <h1 className="text-3xl font-bold">Trips</h1>
           <div className="flex space-x-4">
-            <Button variant={'newyork'}>
+            <Button variant="newyork">
               <Link href="/user/trips/create">
                 Add Trip
               </Link>
             </Button>
           </div>
         </div>
-        <div className="flex-grow">
+        <div className="flex-grow ">
           {children}
         </div>
       </div>

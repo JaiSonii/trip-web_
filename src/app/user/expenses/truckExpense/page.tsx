@@ -3,25 +3,24 @@ import Loading from '@/app/user/loading';
 import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal';
 import { Button } from '@/components/ui/button';
 import { IExpense } from '@/utils/interface';
-import { useSearchParams } from 'next/navigation';
-import React, { useEffect, useState, useCallback } from 'react';
-import { MdDelete, MdEdit } from 'react-icons/md';
+import { useSearchParams, useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
+import { MdDelete, MdEdit, MdLocalGasStation, MdPayment } from 'react-icons/md';
 import { fetchTruckExpense, handleAddCharge, handleDelete } from '@/helpers/ExpenseOperation';
 import DriverName from '@/components/driver/DriverName';
-import { useRouter } from 'next/navigation';
 
 const TruckExpense: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [maintainenceBook, setMaintainenceBook] = useState<IExpense[]>([]);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
-  const [selected, setSelected] = useState<IExpense | undefined>();
+  const [selected, setSelected] = useState<IExpense | null>(null);
 
   const searchParams = useSearchParams();
   const monthYear = searchParams.get('monthYear')?.split(' ');
   const [month, year] = monthYear ? monthYear : [null, null];
 
-  const router = useRouter()
+  const router = useRouter();
 
   const getBook = async () => {
     try {
@@ -30,7 +29,6 @@ const TruckExpense: React.FC = () => {
       setMaintainenceBook(truckExpenses);
     } catch (error) {
       setError((error as Error).message);
-      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -38,10 +36,11 @@ const TruckExpense: React.FC = () => {
 
   const handleEditExpense = async (expense: IExpense) => {
     try {
-      const data = await handleAddCharge(expense, expense.id);
-      router.refresh()// Close the modal after saving
+      await handleAddCharge(expense, expense.id);
+      setModalOpen(false); // Close the modal after saving
+      getBook();
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -54,69 +53,75 @@ const TruckExpense: React.FC = () => {
 
   return (
     <div className="w-full h-full p-4">
-      <div className="table-container">
-        <table className="custom-table">
+      <h1 className="text-2xl font-bold mb-4">Truck Expenses</h1>
+      <div className="table-container overflow-auto bg-white shadow rounded-lg">
+        <table className="custom-table w-full border-collapse table-auto">
           <thead>
-            <tr>
-              <th>Date</th>
-              <th>Amount</th>
-              <th>Expense Type</th>
-              <th>Payment Mode</th>
-              <th>Notes</th>
-              <th>Truck</th>
-              <th>Driver</th>
-              <th>Action</th>
+            <tr className="bg-indigo-600 text-white">
+              <th className="border p-4 text-left">Date</th>
+              <th className="border p-4 text-left">Amount</th>
+              <th className="border p-4 text-left">Expense Type</th>
+              <th className="border p-4 text-left">Payment Mode</th>
+              <th className="border p-4 text-left">Notes</th>
+              <th className="border p-4 text-left">Truck</th>
+              <th className="border p-4 text-left">Driver</th>
+              <th className="border p-4 text-left">Action</th>
             </tr>
           </thead>
           <tbody>
-            {maintainenceBook && maintainenceBook.map((fuel, index) => (
-              <tr key={index} className="border-t hover:bg-slate-100">
-                <td>{new Date(fuel.date).toLocaleDateString()}</td>
-                <td>{fuel.amount}</td>
-                <td>{fuel.expenseType}</td>
-                <td>{fuel.paymentMode}</td>
-                <td>{fuel.notes}</td>
-                <td>{fuel.truck}</td>
-                <td>{fuel.driver ? <DriverName driverId={fuel.driver as string} /> : ''}</td>
-                <td>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant={'outline'}
-                      onClick={() => {
-                        setSelected(fuel);
-                        setModalOpen(true);
-                      }}
-                    >
-                      <MdEdit />
-                    </Button>
-                    <Button
-                      variant={'destructive'}
-                      onClick={async (e) => {
-                        e.stopPropagation();
-                        await handleDelete(fuel._id as string);
-                        setMaintainenceBook((prev) =>
-                          prev.filter((item) => item._id !== fuel._id)
-                        );
-                        router.refresh()
-                      }}
-                    >
-                      <MdDelete />
-                    </Button>
-                  </div>
-                </td>
+            {maintainenceBook.length > 0 ? (
+              maintainenceBook.map((expense, index) => (
+                <tr key={index} className="border-t hover:bg-indigo-100 cursor-pointer transition-colors">
+                  <td className="border p-4">{new Date(expense.date).toLocaleDateString()}</td>
+                  <td className="border p-4">{expense.amount}</td>
+                  <td className="border p-4">
+                    <div className="flex items-center space-x-2">
+                      <MdLocalGasStation className="text-blue-500" />
+                      <span>{expense.expenseType}</span>
+                    </div>
+                  </td>
+                  <td className="border p-4">
+                    <div className="flex items-center space-x-2">
+                      <MdPayment className="text-green-500" />
+                      <span>{expense.paymentMode}</span>
+                    </div>
+                  </td>
+                  <td className="border p-4">{expense.notes || 'N/A'}</td>
+                  <td className="border p-4">{expense.truck || 'N/A'}</td>
+                  <td className="border p-4">{expense.driver ? <DriverName driverId={expense.driver as string} /> : 'N/A'}</td>
+                  <td className="border p-4">
+                    <div className="flex items-center space-x-2">
+                      <Button variant="outline" onClick={() => { setSelected(expense); setModalOpen(true); }}>
+                        <MdEdit />
+                      </Button>
+                      <Button variant="destructive" onClick={async () => {
+                        await handleDelete(expense._id as string);
+                        setMaintainenceBook((prev) => prev.filter((item) => item._id !== expense._id));
+                      }}>
+                        <MdDelete />
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={8} className="text-center p-4 text-gray-500">No expenses found</td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>
-      <ExpenseModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        onSave={handleEditExpense}
-        driverId={selected?.driver || ''}
-        selected={selected}
-        truckPage={true}
-      />
+      {selected && (
+        <ExpenseModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onSave={handleEditExpense}
+          driverId={selected.driver as string}
+          selected={selected}
+          truckPage={true}
+        />
+      )}
     </div>
   );
 };

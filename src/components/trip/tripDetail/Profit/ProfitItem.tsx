@@ -55,14 +55,14 @@ const ProfitItem: React.FC<ProfitItemProps> = ({ data, index, setOpen, setSelect
 
   return (
     <div
-      className={`flex items-center justify-between py-2 px-4 bg-red-50 rounded-lg my-2 cursor-pointer w-full relative transition-transform duration-200 ease-in-out transform ${!disabled ? 'hover:scale-105' : ''} ${isHovered ? 'bg-black bg-opacity-40' : ''}`}
+      className={`flex items-center justify-between py-2 px-4 bg-lightOrangeButtonColor rounded-lg my-2 cursor-pointer w-full relative transition-transform duration-200 ease-in-out transform ${!disabled ? 'hover:scale-105' : ''} ${isHovered ? 'bg-lightOrange bg-opacity-70' : ''}`}
       onMouseEnter={() => !disabled && setIsHovered(true)}
       onMouseLeave={() => !disabled && setIsHovered(false)}
     >
       <div className='flex flex-row items-center justify-between w-full'>
-        <div className="flex flex-col">
+        <div className="flex flex-row justify-between w-full">
           <p className="text-sm font-medium text-gray-900">{data.expenseType}</p>
-          <p className="text-xs text-gray-600">{sign}{data.amount.toFixed(2)}</p>
+          <p className="text-sm font-semibold text-gray-600">{sign}{data.amount.toFixed(2)}</p>
         </div>
         {isHovered && (
           <div className="flex space-x-2 transition-opacity duration-200 ease-in-out opacity-100">
@@ -78,7 +78,7 @@ const ProfitItem: React.FC<ProfitItemProps> = ({ data, index, setOpen, setSelect
             </Button>
             <Button
               onClick={handleDelete}
-              className="p-2 bg-red-500 text-white rounded-full transition-colors duration-200 ease-in-out hover:bg-red-600"
+              className="p-2 bg-destructive text-white rounded-full transition-colors duration-200 ease-in-out hover:bg-red-600"
             >
               <MdDelete size={20} />
             </Button>

@@ -76,9 +76,9 @@ const TrucksPage = () => {
                   onClick={() => router.push(`/user/trucks/${truck.truckNo}`)}
                 >
                   <td className="border p-2 text-gray-800 font-medium">{truck.truckNo}</td>
-                  <td className="border p-2 flex items-center space-x-2">
+                  <td className="border p-2 flex items-center space-x-2 justify-between">
                     <span>{truck.truckType}</span>
-                    {Icon && <Icon className="inline-block ml-2 h-6 w-6 text-blue-500" />}
+                    {Icon && <Icon className="inline-block ml-2 h-6 w-6 text-bottomNavBarColor" />}
                   </td>
                   <td className="border p-2 text-gray-700">{truck.ownership}</td>
                   <td className="border p-2">

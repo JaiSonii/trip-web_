@@ -14,13 +14,13 @@ interface PartyLayoutProps {
 const PartyLayout = ({ children, partyId }: PartyLayoutProps) => {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, loading } = useAuth()
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login');
-    }// Log the user's Firebase ID token for debugging purposes. This is not necessary for the functionality of the app.
-  }, [loading, user, router])
+    }
+  }, [loading, user, router]);
 
   const tabs = [
     { name: 'Trips', path: `/user/parties/${partyId}/trips` },
@@ -29,37 +29,33 @@ const PartyLayout = ({ children, partyId }: PartyLayoutProps) => {
     { name: 'Party Details', path: `/user/parties/${partyId}/details` },
   ];
 
-
   return (
-    <div>
-      {user ?
+    <div className="min-h-screen bg-gray-100 rounded-md">
+      {user && (
         <div className="w-full h-full p-4">
-          <h1 className="text-2xl font-bold mb-4"><PartyName partyId={partyId}/></h1>
-          <div className="flex space-x-4 mb-4 border-b-2 border-gray-200">
+          <header className="mb-6">
+            <h1 className="text-3xl font-bold text-gray-800"><PartyName partyId={partyId} /></h1>
+          </header>
+          <nav className="flex space-x-4 mb-6 border-b-2 border-gray-200">
             {tabs.map((tab) => (
-              <div className='flex p-1' key={tab.name}>
-                <Link
-                  key={tab.name}
-                  href={tab.path}
-                  className={`px-4 py-2 transition duration-300 ease-in-out ${pathname === tab.path
-                      ? 'border-b-2 border-blue-500 text-blue-500'
-                      : 'border-transparent text-gray-600 hover:text-blue-500 hover:border-blue-500'
-                    }`}
-                >
-                  {tab.name}
-                </Link>
-              </div>
-
+              <Link
+                key={tab.name}
+                href={tab.path}
+                className={`px-4 py-2 transition duration-300 ease-in-out font-semibold text-sm md:text-base ${pathname === tab.path
+                  ? 'border-b-2 border-[rgb(247,132,50)] text-[rgb(247,132,50)]'
+                  : 'border-transparent text-gray-600 hover:text-[rgb(247,132,50)] hover:border-[rgb(247,132,50)]'
+                  }`}
+              >
+                {tab.name}
+              </Link>
             ))}
-          </div>
-          <div className="mt-4">
+          </nav>
+          <main className="bg-white shadow-md rounded-lg p-6">
             {children}
-          </div>
-        </div> : null
-      }
+          </main>
+        </div>
+      )}
     </div>
-
-
   );
 };
 

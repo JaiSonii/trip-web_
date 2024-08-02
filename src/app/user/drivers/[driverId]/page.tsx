@@ -15,6 +15,7 @@ import Modal from '@/components/trip/tripDetail/Modal';
 import DriverModal from '@/components/driver/driverModal';
 import { handleEditAccount } from '@/helpers/TripOperation';
 import { handleAddCharge as EditExpense } from '@/helpers/ExpenseOperation';
+import { FaCalendarAlt } from 'react-icons/fa';
 
 const Driver: React.FC = () => {
   const router = useRouter();
@@ -199,10 +200,16 @@ const Driver: React.FC = () => {
             <tbody>
               {accounts.map((account, index: number) => (
                 <tr key={account._id}>
-                  <td>{new Date(account.date || account.paymentDate).toLocaleDateString()}</td>
-                  <td>{account.reason || account.expenseType || `Trip ${account.accountType} (from a trip)`}</td>
-                  <td>{account.gave || (account.type === 'truck' && account.amount) || ''}</td>
-                  <td>{account.got || (account.type !== 'truck' && account.amount) || ''}</td>
+                  <td>
+                    <div className='flex items-center space-x-2'>
+                      <FaCalendarAlt className='text-bottomNavBarColor' />
+                      <span>{new Date(account.date || account.paymentDate).toLocaleDateString()}</span>
+                    </div>
+                    </td>
+                  <td className=''>
+                    {account.reason || account.expenseType || `Trip ${account.accountType} (from a trip)`}</td>
+                  <td><span className='text-red-600 font-semibold'>{account.gave || (account.type === 'truck' && account.amount) || ''}</span></td>
+                  <td ><span className='text-green-600 font-semibold'>{account.got || (account.type !== 'truck' && account.amount) || ''}</span></td>
                   <td>
                     <div className='flex flex-row gap-2 items-center w-full'>
                       <Button

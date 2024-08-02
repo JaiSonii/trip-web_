@@ -2,6 +2,7 @@
 import { Button } from '@/components/ui/button';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
+import Loading from '../loading';
 
 interface Party {
   address: string;
@@ -94,7 +95,7 @@ const PartyDetails = () => {
     }
   }, [singleparty]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <Loading />;
   if (error) return <div>Error: {error}</div>;
 
   return (
@@ -165,7 +166,7 @@ const PartyDetails = () => {
                   <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
                 </>
               ) : (
-                <Button type="button" variant="secondary" onClick={() => setIsEditing(true)}>Edit</Button>
+                <Button type="button" variant="outline" onClick={() => setIsEditing(true)}>Edit</Button>
               )}
               <Button type="button" onClick={() => router.push('/user/parties')}>Back to Parties List</Button>
             </div>

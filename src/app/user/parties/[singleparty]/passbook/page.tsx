@@ -3,6 +3,8 @@
 import TripRevenue from '@/components/trip/tripDetail/Profit/TripRevenue';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
+import { FaCalendarAlt, FaRoute, FaTruck } from 'react-icons/fa';
+import Loading from '../loading';
 
 interface ITrip {
   trip_id: string;
@@ -66,7 +68,7 @@ const SinglePartyPassbook = () => {
     }
   }, [singleparty]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <Loading />;
   if (error) return <div>Error: {error}</div>;
   if (partyAccount.length === 0) return <div>No transactions or trips for this party</div>;
 
@@ -88,10 +90,37 @@ const SinglePartyPassbook = () => {
               className="border-t hover:bg-slate-100 cursor-pointer"
               onClick={() => router.push(`/user/trips/${acc.trip_id}`)}
             >
-              <td>{new Date(acc.startDate || acc.paymentDate).toLocaleDateString()}</td>
-              <td>{acc.accountType || `${acc.truck} - ${acc.route.origin.split(',')[0]} -> ${acc.route.destination.split(',')[1]}`}</td>
+              <td>
+                <div className='flex items-center space-x-2'>
+                <FaCalendarAlt className='text-bottomNavBarColor' />
+                <span>{new Date(acc.startDate || acc.paymentDate).toLocaleDateString()}</span>
+                </div>
+                
+              </td>
+              <td className="p-4">
+                {acc.accountType ? (
+                  <span className="text-lg font-semibold">{acc.accountType}</span>
+                ) : (
+                  <div className="flex flex-col justify-between h-full">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <FaTruck className="text-[rgb(247,132,50)]" />
+                      <span className="ml-1 text-lg font-medium">{acc.truck}</span>
+                    </div>
+                    <hr className="border-gray-300 my-1" />
+                    <div className="flex items-center space-x-2 mt-2">
+                      <FaRoute className="text-[rgb(247,132,50)]" />
+                      <span className="text-gray-600 text-md">
+                        {acc.route.origin.split(',')[0]} &rarr; {acc.route.destination.split(',')[0]}
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </td>
+
+
+
               <td>{acc.accountType ? acc.amount : ''}</td>
-              <td>{acc.accountType ? '' : (<TripRevenue tripId={acc.trip_id} amount={acc.amount}/>)}</td>
+              <td>{acc.accountType ? '' : (<TripRevenue tripId={acc.trip_id} amount={acc.amount} />)}</td>
             </tr>
           ))}
         </tbody>

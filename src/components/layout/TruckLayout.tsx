@@ -177,7 +177,7 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
     if (error) return <div className="text-red-500 text-center my-4">Error: {error}</div>;
 
     return (
-        <div className="w-full h-full p-4 bg-gray-50 rounded-lg shadow-sm">
+        <div className="w-full h-full p-4 bg-gray-50 rounded-lg shadow-sm min-h-screen">
             <div className="flex flex-col space-y-4">
                 <div className="flex items-center justify-between p-4 bg-gray-200">
                     <div className="flex items-center space-x-4">
@@ -268,9 +268,9 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
                         <Link
                             key={tab.name}
                             href={tab.path}
-                            className={`px-4 py-2 transition duration-300 ease-in-out ${pathname === tab.path
-                                ? 'border-b-2 border-blue-500 text-blue-500'
-                                : 'border-transparent text-gray-600 hover:text-blue-500 hover:border-blue-500'
+                            className={`px-4 py-2 transition duration-300 ease-in-out font-semibold ${pathname === tab.path
+                                ? 'border-b-2 border-bottomNavBarColor text-bottomNavBarColor'
+                                : 'border-transparent text-gray-600 hover:bottomNavBarColor hover:border-bottomNavBarColor'
                                 }`}
                             prefetch={true}
                         >
