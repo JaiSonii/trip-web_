@@ -33,7 +33,7 @@ const config: Config = {
         cardSecondaryColor: '#cecece',
         buttonColor: '#000000',
         borderColor: '#c3c3c3',
-        bottomNavBarColor: 'rgb(247, 132, 50)', // Color.fromARGB(255, 247, 132, 50)
+        bottomNavBarColor: '#CC5500', // Color.fromARGB(255, 247, 132, 50)
         primaryOrange: '#ff6a00',
         lightOrange: '#ffa666',
         lightOrangeButtonColor: '#ffcaA4',
