@@ -20,7 +20,7 @@ const UserProfile: React.FC = () => {
   });
   const [accessibleAccounts, setAccessibleAccounts] = useState<any[]>([]);
   const [accountsGivenAccess, setAccountsGivenAccess] = useState<
-    { phone: string; permissions: Permissions }[]
+    { phone: string; permissions: Permissions; user_id : string }[]
   >([]);
 
   useEffect(() => {

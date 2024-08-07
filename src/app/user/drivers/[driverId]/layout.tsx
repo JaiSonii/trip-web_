@@ -17,10 +17,6 @@ const Layout: React.FC<PartyLayoutProps> = ({ children }) => {
   const [error, setError] = useState<any>()
   const router = useRouter()
 
-  if (!driverId) {
-    return <Loading />
-  }
-
   const fetchDriverDetails = async () => {
     try {
       const response = await fetch(`/api/drivers/${driverId}`, {
