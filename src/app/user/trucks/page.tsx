@@ -31,10 +31,7 @@ const TrucksPage = () => {
       } catch (err) {
         setError((err as Error).message);
       } finally {
-        // Add a delay to improve UI experience even on fast networks
-        setTimeout(() => {
           setLoading(false);
-        }, 1000);
       }
     };
 
@@ -55,7 +52,6 @@ const TrucksPage = () => {
 
   return (
     <div className="w-full h-full p-4">
-      <h1 className="text-2xl font-bold mb-4">Trucks</h1>
       <div className="table-container">
         <table className="custom-table w-full border-collapse">
           <thead>

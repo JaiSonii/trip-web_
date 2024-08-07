@@ -9,6 +9,7 @@ import Loading from './loading';
 import { fetchBalance } from '@/helpers/fetchTripBalance';
 import PartyName from '@/components/party/PartyName';
 import { FaTruck, FaRoute, FaCalendarAlt, FaFileInvoiceDollar } from 'react-icons/fa';
+import { GoOrganization } from 'react-icons/go';
 
 const TripsPage = () => {
   const router = useRouter();
@@ -88,7 +89,7 @@ const TripsPage = () => {
               >
                 <td className="border p-4 ">
                   <div className='flex items-center space-x-2'>
-                    <FaCalendarAlt className="text-[rgb(247,132,50)]" />
+                    <FaCalendarAlt className="text-bottomNavBarColor" />
                     <span>{new Date(trip.startDate).toLocaleDateString()}</span>
                   </div>
 
@@ -96,15 +97,20 @@ const TripsPage = () => {
                 <td className="border p-4">{trip.LR}</td>
                 <td className="border p-4 ">
                   <div className='flex items-center space-x-2'>
-                    <FaTruck className="text-[rgb(247,132,50)]" />
+                    <FaTruck className="text-bottomNavBarColor" />
                     <span>{trip.truck}</span>
                   </div>
 
                 </td>
-                <td className="border p-4"><PartyName partyId={trip.party} /></td>
                 <td className="border p-4">
                   <div className='flex items-center space-x-2'>
-                    <FaRoute className="text-[rgb(247,132,50)]" />
+                    <GoOrganization className="text-bottomNavBarColor" />
+                    <span><PartyName partyId={trip.party} /></span>
+                  </div>
+                </td>
+                <td className="border p-4">
+                  <div className='flex items-center space-x-2'>
+                    <FaRoute className="text-bottomNavBarColor" />
                     <span>{trip.route.origin.split(',')[0]} -&gt; {trip.route.destination.split(',')[0]}</span>
                   </div>
                 </td>
@@ -117,9 +123,9 @@ const TripsPage = () => {
                   </div>
                 </td>
                 <td className="border p-4 ">
-                <div className='flex items-center space-x-2'>
-                  <FaFileInvoiceDollar className="text-[rgb(247,132,50)]" />
-                  <span>{fetchBalance(trip)}</span>
+                  <div className='flex items-center space-x-2'>
+                    <FaFileInvoiceDollar className="text-bottomNavBarColor" />
+                    <span>{fetchBalance(trip)}</span>
                   </div>
                 </td>
               </tr>

@@ -70,7 +70,7 @@ const SupplierPassbook = () => {
             {accounts && accounts.map((acc: ISupplierAccount, index: number) => (
               <tr key={index} className="border-t hover:bg-slate-100 cursor-pointer">
                 <td className="border p-4 flex items-center space-x-2">
-                  <FaCalendarAlt className="text-[rgb(247,132,50)]" />
+                  <FaCalendarAlt className="text-bottomNavBarColor" />
                   <span>{new Date(acc.date).toLocaleDateString()}</span>
                 </td>
                 <td className="border p-2">
@@ -96,7 +96,7 @@ const SupplierPassbook = () => {
             {trips && trips.map((trip: ITrip, index: number) => (
               <tr key={index} className="border-t hover:bg-slate-100 cursor-pointer">
                 <td className="border p-4 flex items-center space-x-2">
-                  <FaCalendarAlt className="text-[rgb(247,132,50)]" />
+                  <FaCalendarAlt className="text-bottomNavBarColor" />
                   <span>{new Date(trip.startDate).toLocaleDateString()}</span>
                 </td>
                 <td className="border p-2">

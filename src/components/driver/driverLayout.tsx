@@ -3,9 +3,11 @@ import DriverActions from './driverActions';
 import DriverModal from './driverModal';
 import { IDriver } from '@/utils/interface';
 import DropdownMenu from './dropdownMenu';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import EditDriverModal from './editDriverModal';
 import DriverBalance from './DriverBalance';
+import Link from 'next/link';
+import { FaTruckMoving, FaMapMarkerAlt } from 'react-icons/fa';
 
 interface DriverLayoutProps {
   name: string;
@@ -13,9 +15,10 @@ interface DriverLayoutProps {
   driverId: string;
   onDriverUpdate: (driver: IDriver) => void;
   contactNumber: string;
+  children : React.ReactNode
 }
 
-const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onDriverUpdate, contactNumber }) => {
+const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onDriverUpdate, contactNumber, children }) => {
   const router = useRouter();
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -23,6 +26,13 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onD
   const [error, setError] = useState<string | null>(null);
   const [edit, setEdit] = useState<boolean>(false);
   const [showContact, setShowContact] = useState<boolean>(false);
+
+  const tabs = [
+    { logo: <FaTruckMoving />, name: 'Driver Accounts', path: `/user/drivers/${driverId}` },
+    { logo: <FaMapMarkerAlt />, name: 'Trips', path: `/user/drivers/${driverId}/trips` },
+  ];
+
+  const pathname = usePathname()
 
   const openModal = (type: 'gave' | 'got') => {
     setModalType(type);
@@ -150,6 +160,24 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onD
       <div className="flex items-center justify-between p-3 bg-gray-200 rounded-sm w-fit">
         <span className="text-2xl">Driver Balance: <DriverBalance driverId={driverId}/></span> {/* Display balance */}
       </div>
+      <div className="flex space-x-4 border-b-2 border-gray-300 mb-4 mt-2">
+        {tabs.map((tab) => (
+          <Link
+            key={tab.name}
+            href={tab.path}
+            className={`px-4 py-2 transition duration-300 ease-in-out font-semibold ${pathname === tab.path
+              ? 'border-b-2 border-bottomNavBarColor text-bottomNavBarColor'
+              : 'border-transparent text-gray-600 hover:text-bottomNavBarColor hover:border-bottomNavBarColor'
+              }`}
+          >
+            <div className="flex items-center space-x-2">
+              {tab.logo}
+              <span>{tab.name}</span>
+            </div>
+          </Link>
+        ))}
+      </div>
+      <div className="mt-4">{children}</div>
       </div>
     </div>
 

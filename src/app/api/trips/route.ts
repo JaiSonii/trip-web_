@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import mongoose, { model, models } from 'mongoose';
-import { tripSchema } from '@/utils/schema';
+import { driverSchema, supplierSchema, tripSchema, truckSchema } from '@/utils/schema';
 import { connectToDatabase } from '@/utils/schema';
 import { ITrip } from '@/utils/interface';
 import {v4 as uuidv4} from 'uuid'
@@ -9,6 +9,9 @@ import { verifyToken } from '@/utils/auth';
 
 const Trip = models.Trip || model('Trip', tripSchema);
 const Party = models.Party || model('Party', partySchema)
+const Supplier = models.Supplier || model('Supplier', supplierSchema)
+const Driver = models.Driver || model('Driver', driverSchema)
+const Truck = models.Truck || model('Truck', truckSchema)
 
 
 export async function GET(req : Request) {
@@ -72,6 +75,9 @@ export async function POST(this: any, req: Request) {
     const party = await Party.findOne({party_id : data.party})
     party.balance = parseFloat(party.balance) + newTrip.amount
     await party.save()
+
+    await Driver.findOneAndUpdate({user_id : user, driver_id : data.driver}, {status : 'On Trip'})
+    await Truck.findOneAndUpdate({user_id : user, truckNo : data.truck}, {status : 'On Trip'})
 
     // Return success response
     return NextResponse.json({ message: 'Saved Successfully', data: savedTrip }, { status: 200 });

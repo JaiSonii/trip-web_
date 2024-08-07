@@ -96,29 +96,29 @@ const CreateTripPage: React.FC = () => {
       }
 
       // Update driver status
-      const driverRes = await fetch(`/api/drivers/${trip.driver}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: 'On Trip' }), // Assuming your PATCH route can handle this
-      });
+      // const driverRes = await fetch(`/api/drivers/${trip.driver}`, {
+      //   method: 'PATCH',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({ status: 'On Trip' }), // Assuming your PATCH route can handle this
+      // });
 
-      if (!driverRes.ok) {
-        throw new Error('Failed to update driver status');
-      }
+      // if (!driverRes.ok) {
+      //   throw new Error('Failed to update driver status');
+      // }
 
-      const truckRes = await fetch(`/api/trucks/${trip.truck}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ status: 'On Trip' }), // Assuming your PATCH route can handle this
-      });
+      // const truckRes = await fetch(`/api/trucks/${trip.truck}`, {
+      //   method: 'PATCH',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({ status: 'On Trip' }), // Assuming your PATCH route can handle this
+      // });
 
-      if (!truckRes.ok) {
-        throw new Error('Failed to update driver status');
-      }
+      // if (!truckRes.ok) {
+      //   throw new Error('Failed to update driver status');
+      // }
 
       const data = await tripRes.json();
       router.push('/user/trips');

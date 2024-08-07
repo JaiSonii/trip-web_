@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { IDriver } from '@/utils/interface';
 import { v4 as uuidv4 } from 'uuid';
+import { Button } from './ui/button';
 
 interface Props {
   onSubmit: (driver: IDriver) => void;
@@ -89,9 +90,9 @@ const DriverForm: React.FC<Props> = ({ onSubmit }) => {
         />
       </label>
       <label className="block mb-2 opacity-75 text-sm">Optional</label>
-      <button className="px-4 py-2 bg-gray-700 text-gray-200 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50" type="submit">
+      <Button type="submit">
         Submit
-      </button>
+      </Button>
     </form>
   );
 };

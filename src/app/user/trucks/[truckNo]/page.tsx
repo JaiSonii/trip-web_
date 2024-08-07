@@ -156,7 +156,7 @@ const TruckPage = () => {
                 <td>
                   {item.expenseType ?
                     <div className='flex flex-row justify-evenly items-center w-full p-1'>
-                      <Button onClick={() => {
+                      <Button variant="outline" onClick={() => {
                         setSelected(item);
                         setModelOpen(true);
                       }}><MdEdit /></Button>

@@ -11,6 +11,7 @@ import AdditionalDetails from '@/components/truck/AdditionalDetails';
 import Loading from '../../loading';
 import { truckTypesIcons } from '@/utils/utilArray';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectLabel, SelectValue } from '@/components/ui/select'; // Adjust the import path as necessary
+import { Button } from '@/components/ui/button';
 
 // Define the types
 type FormData = {
@@ -234,12 +235,12 @@ const CreateTruck: React.FC = () => {
                             handleInputChange={handleInputChange}
                         />
                     )}
-                    <button
-                        className="w-full p-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50"
+                    <Button
+                        
                         type="submit"
                     >
                         Submit
-                    </button>
+                    </Button>
                 </form>
             </div>
         </>

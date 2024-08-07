@@ -103,12 +103,12 @@ const SinglePartyPassbook = () => {
                 ) : (
                   <div className="flex flex-col justify-between h-full">
                     <div className="flex items-center space-x-2 mb-2">
-                      <FaTruck className="text-[rgb(247,132,50)]" />
+                      <FaTruck className="text-bottomNavBarColor" />
                       <span className="ml-1 text-lg font-medium">{acc.truck}</span>
                     </div>
                     <hr className="border-gray-300 my-1" />
                     <div className="flex items-center space-x-2 mt-2">
-                      <FaRoute className="text-[rgb(247,132,50)]" />
+                      <FaRoute className="text-bottomNavBarColor" />
                       <span className="text-gray-600 text-md">
                         {acc.route.origin.split(',')[0]} &rarr; {acc.route.destination.split(',')[0]}
                       </span>

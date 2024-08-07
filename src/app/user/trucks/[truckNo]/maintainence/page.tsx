@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { MdDelete, MdEdit, MdLocalGasStation, MdPayment } from 'react-icons/md';
 import DriverName from '@/components/driver/DriverName';
 import { FaCalendarAlt } from 'react-icons/fa';
+import { IconKey, icons } from '@/utils/icons';
 
 const TruckMaintainenceBook = () => {
   const { truckNo } = useParams();
@@ -124,7 +125,7 @@ const TruckMaintainenceBook = () => {
                 <td className="border p-4">{expense.amount}</td>
                 <td className="border p-4">
                   <div className="flex items-center space-x-2">
-                    <MdLocalGasStation className="text-blue-500" />
+                    {icons[expense.expenseType as IconKey]}
                     <span>{expense.expenseType}</span>
                   </div>
                 </td>

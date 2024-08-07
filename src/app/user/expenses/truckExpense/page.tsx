@@ -8,6 +8,8 @@ import React, { useEffect, useState } from 'react';
 import { MdDelete, MdEdit, MdLocalGasStation, MdPayment } from 'react-icons/md';
 import { fetchTruckExpense, handleAddCharge, handleDelete } from '@/helpers/ExpenseOperation';
 import DriverName from '@/components/driver/DriverName';
+import { icons, IconKey } from '@/utils/icons';
+import { FaCalendarAlt, FaTruck } from 'react-icons/fa';
 
 const TruckExpense: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
@@ -72,11 +74,16 @@ const TruckExpense: React.FC = () => {
             {maintainenceBook.length > 0 ? (
               maintainenceBook.map((expense, index) => (
                 <tr key={index} className="border-t hover:bg-indigo-100 cursor-pointer transition-colors">
-                  <td className="border p-4">{new Date(expense.date).toLocaleDateString()}</td>
+                  <td className="border p-4">
+                    <div className='flex items-center space-x-2'>
+                      <FaCalendarAlt className='text-bottomNavBarColor' />
+                      <span>{new Date(expense.date).toLocaleDateString()}</span>
+                    </div>
+                  </td>
                   <td className="border p-4">{expense.amount}</td>
                   <td className="border p-4">
                     <div className="flex items-center space-x-2">
-                      <MdLocalGasStation className="text-blue-500" />
+                      {icons[expense.expenseType as IconKey]}
                       <span>{expense.expenseType}</span>
                     </div>
                   </td>
@@ -87,17 +94,23 @@ const TruckExpense: React.FC = () => {
                     </div>
                   </td>
                   <td className="border p-4">{expense.notes || 'N/A'}</td>
-                  <td className="border p-4">{expense.truck || 'N/A'}</td>
+
+                  <td className="border p-4">
+                    <div className='flex items-center space-x-2'>
+                      <FaTruck className='text-bottomNavBarColor' />
+                      <span>{expense.truck || ''}</span>
+                    </div>
+                  </td>
                   <td className="border p-4">{expense.driver ? <DriverName driverId={expense.driver as string} /> : 'N/A'}</td>
                   <td className="border p-4">
                     <div className="flex items-center space-x-2">
-                      <Button variant="outline" onClick={() => { setSelected(expense); setModalOpen(true); }}>
+                      <Button variant="outline" onClick={() => { setSelected(expense); setModalOpen(true); } } size="sm">
                         <MdEdit />
                       </Button>
                       <Button variant="destructive" onClick={async () => {
                         await handleDelete(expense._id as string);
                         setMaintainenceBook((prev) => prev.filter((item) => item._id !== expense._id));
-                      }}>
+                      }} size={"sm"}>
                         <MdDelete />
                       </Button>
                     </div>

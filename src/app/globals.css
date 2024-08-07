@@ -27,7 +27,7 @@
     --splash: rgba(255, 255, 255, 0.3);
     --light-orange: #ffa666;
     --light-orange-button: #ffcaa4;
-    --bottom-nav-bar: rgba(247, 132, 50, 1);
+    --bottom-nav-bar: #CC5500;
   }
 
   .dark {
@@ -145,7 +145,9 @@ body {
 
 .custom-table tbody td {
   color: #2d3748;
-  vertical-align: top; /* Align the text to the top */
+  vertical-align: top;
+  @apply border p-4 text-left
+  /* Align the text to the top */
 }
 
 .custom-table tbody tr:active {

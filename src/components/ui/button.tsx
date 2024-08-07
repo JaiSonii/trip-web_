@@ -29,7 +29,7 @@ const buttonVariants = cva(
     },
     defaultVariants: {
       variant: "newyork",
-      size: "default",
+      size: "sm",
     },
   }
 );

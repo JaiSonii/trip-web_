@@ -28,7 +28,7 @@ const PartyBalance: React.FC<DriverNameProps> = ({ partyId }) => {
     if (loading) return <span>Loading...</span>;
     if (error || !balance) return <span>NA</span>;
 
-    return <span>{balance || ''}</span>;
+    return <span className='text-green-600 font-semibold'>{balance || ''}</span>;
 };
 
 export default PartyBalance;

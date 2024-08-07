@@ -232,6 +232,26 @@ export const supplierSchema: Schema = new Schema({
 export const userSchema = new Schema({
   user_id: { type: String, required: true, unique: true },
   phone: { type: String, required: true, unique: true },
+  accessGiven: {
+    type: [{
+      user_id: { type: String },
+      permissions: {
+        edit: Boolean,
+        view: Boolean
+      }
+    }],
+    default: []
+  },
+  haveAccess: {
+    type: [{
+      user_id: { type: String },
+      permissions: {
+        edit: Boolean,
+        view: Boolean
+      }
+    }],
+    default: []
+  },
   createdAt: { type: Date, default: Date.now }
 });
 

@@ -144,7 +144,7 @@ export const chargeType = [
     'Detention',
     'Driver bhatta',
     'Driver payment',
-    'Loading charges',
+    'Loading Charges',
     'Fuel Expense',
     'Other',
     'Police Expense',
@@ -170,3 +170,5 @@ export const chargeType = [
     'Tyre Purchase',
     'Roof Top Repair'
   ]);
+
+  

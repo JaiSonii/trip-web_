@@ -58,20 +58,20 @@ const SupplierDetailPage = () => {
                             <tr key={index} className="border-t hover:bg-slate-100 cursor-pointer">
                                 <td className="border p-4">
                                 <div className='flex items-center space-x-2'>
-                                    <FaCalendarAlt className="text-[rgb(247,132,50)]" />
+                                    <FaCalendarAlt className="text-bottomNavBarColor" />
                                     <span>{new Date(trip.startDate).toLocaleDateString()}</span>
                                     </div>
                                 </td>
                                 <td className="border p-4 ">
                                     <div className='flex items-center space-x-2'>
-                                        <FaTruck className="text-[rgb(247,132,50)]" />
+                                        <FaTruck className="text-bottomNavBarColor" />
                                         <span>{trip.truck}</span>
                                     </div>
 
                                 </td>
                                 <td className="border p-4">
                                     <div className='flex items-center space-x-2'>
-                                        <FaRoute className="text-[rgb(247,132,50)]" />
+                                        <FaRoute className="text-bottomNavBarColor" />
                                         <span>{trip.route.origin.split(',')[0]} -&gt; {trip.route.destination.split(',')[0]}</span>
                                     </div>
 

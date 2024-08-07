@@ -11,6 +11,7 @@ import TripRoute from '@/components/trip/TripRoute';
 import DriverName from '@/components/driver/DriverName';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { icons,IconKey } from '@/utils/icons';
 
 const TripExpensePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
@@ -81,13 +82,13 @@ const TripExpensePage: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {maintainenceBook && maintainenceBook.map((fuel : any, index : number) => (
+            {maintainenceBook && maintainenceBook.map((fuel: any, index: number) => (
               <tr key={index} className="border-t hover:bg-indigo-100 cursor-pointer transition-colors">
                 <td className="border p-4">{new Date(fuel.date).toLocaleDateString()}</td>
                 <td className="border p-4">{fuel.amount}</td>
                 <td className="border p-4">
                   <div className="flex items-center space-x-2">
-                    <MdLocalGasStation className="text-blue-500" />
+                    {icons[fuel.expenseType as IconKey]} {/* Default icon if not found */}
                     <span>{fuel.expenseType}</span>
                   </div>
                 </td>

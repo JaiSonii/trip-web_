@@ -1,8 +1,9 @@
 // utils/auth.ts
 import { auth } from '@/firebase/firebaseAdmin';
+import { NextRequest } from 'next/server';
 
 export async function verifyToken(req: Request) {
-  const tokenResult = fetchCookie(req)
+  const tokenResult = fetchCookie(req as NextRequest)
   const token = tokenResult.token
   if (!token) {
     return { error: 'Unauthorized: No token provided' };
@@ -17,9 +18,11 @@ export async function verifyToken(req: Request) {
 }
 
 
-export function fetchCookie(req : Request) {
-  const cookie = req.headers.get('cookie')
-  const token = cookie?.split('auth_token=')[1]
+export function fetchCookie(req : NextRequest) {
+  const token = req.cookies.get('auth_token')
+  console.log(token)
+  const user = req.cookies.get('cur_user')
+  console.log(user)
   if (!token) {
     return {
       token: null,
@@ -27,7 +30,7 @@ export function fetchCookie(req : Request) {
   }
   else{
     return {
-      token : token
+      token : token.value
     }
   }
 }

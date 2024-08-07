@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { ISupplier } from '@/utils/interface';
 import { v4 as uuidv4 } from 'uuid';
+import { Button } from './ui/button';
 
 interface Props {
   onSubmit: (supplier: ISupplier) => void;
@@ -68,9 +69,9 @@ const SupplierForm: React.FC<Props> = ({ onSubmit }) => {
           className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
         />
       </label>
-      <button className="px-4 py-2 bg-gray-700 text-gray-200 rounded-md hover:bg-gray-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50" type="submit">
+      <Button type="submit">
         Submit
-      </button>
+      </Button>
     </form>
   );
 };

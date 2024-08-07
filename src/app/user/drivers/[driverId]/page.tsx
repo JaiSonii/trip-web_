@@ -16,6 +16,7 @@ import DriverModal from '@/components/driver/driverModal';
 import { handleEditAccount } from '@/helpers/TripOperation';
 import { handleAddCharge as EditExpense } from '@/helpers/ExpenseOperation';
 import { FaCalendarAlt } from 'react-icons/fa';
+import Link from 'next/link';
 
 const Driver: React.FC = () => {
   const router = useRouter();
@@ -134,7 +135,7 @@ const Driver: React.FC = () => {
       // Handle expense edit logic
       console.log(account)
       const result = await EditExpense(account, selected._id, selected.truck)
-      if(result.error){
+      if (result.error) {
         alert(error)
         return
       }
@@ -146,7 +147,7 @@ const Driver: React.FC = () => {
       // console.log(selected)
       // console.log(account)
       const result = await handleEditAccount(account, selected.tripId)
-      if(result.error){
+      if (result.error) {
         alert(error)
         return
       }
@@ -167,7 +168,7 @@ const Driver: React.FC = () => {
   }, [driverId]);
 
   useEffect(() => {
-      fetchAllData();
+    fetchAllData();
   }, [driverId, driverAccounts]);
 
   if (loading) {
@@ -184,7 +185,7 @@ const Driver: React.FC = () => {
 
   return (
     <div className="w-full">
-      <DriverLayout name={driver.name} status={driver.status} driverId={driver.driver_id} onDriverUpdate={() => router.refresh()} contactNumber={driver.contactNumber} />
+      
       <div className="w-full h-full p-4">
         <div className="table-container">
           <table className="custom-table">
@@ -205,9 +206,13 @@ const Driver: React.FC = () => {
                       <FaCalendarAlt className='text-bottomNavBarColor' />
                       <span>{new Date(account.date || account.paymentDate).toLocaleDateString()}</span>
                     </div>
-                    </td>
-                  <td className=''>
-                    {account.reason || account.expenseType || `Trip ${account.accountType} (from a trip)`}</td>
+                  </td>
+                  <td >
+                    <div className='flex items-center space-x-2 '>
+                      <span>{account.reason || account.expenseType || `Trip ${account.accountType} `}</span>
+                      {account.trip_id && <Button variant={"link"} className='text-red-500 pt-1 rounded-lg'><Link href={`/user/trips/${account.trip_id}`}>from a trip</Link></Button>}
+                    </div>
+                  </td>
                   <td><span className='text-red-600 font-semibold'>{account.gave || (account.type === 'truck' && account.amount) || ''}</span></td>
                   <td ><span className='text-green-600 font-semibold'>{account.got || (account.type !== 'truck' && account.amount) || ''}</span></td>
                   <td>

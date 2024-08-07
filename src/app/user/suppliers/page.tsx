@@ -66,7 +66,6 @@ const SuppliersPage = () => {
 
   return (
     <div className="w-full h-full p-4">
-      <h1 className="text-2xl font-bold mb-4">Suppliers</h1>
       <div className="table-container overflow-auto bg-white shadow rounded-lg">
         <table className="custom-table w-full border-collapse table-auto">
           <thead>

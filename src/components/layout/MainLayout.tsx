@@ -9,6 +9,7 @@ import { FaTruckFast, FaCircle } from "react-icons/fa6";
 import { FaRegUser } from "react-icons/fa";
 import { RiSteering2Fill } from "react-icons/ri";
 import { auth } from '@/firebase/firbaseConfig';
+import { Button } from '../ui/button';
 
 const MainLayout = () => {
   const pathname = usePathname();
@@ -17,11 +18,14 @@ const MainLayout = () => {
   const [selected, setSelected] = useState<any>();
   const [selectedMonthYear, setSelectedMonthYear] = useState('');
   const [phone, setPhone] = useState<string | null>('');
+  const [user, setUser] = useState<any>()
 
   useEffect(() => {
     const fetchPhone = async () => {
       const response = await fetch('/api/login');
       const data = await response.json();
+      setUser(data.user)
+      console.log(data.user)
       setPhone(data.user.phone);
     };
     fetchPhone();
@@ -64,7 +68,7 @@ const MainLayout = () => {
 
   return (
     <div>
-      <div className={`h-screen w-1/6 bg-gradient-to-bl from-bottomNavBarColor via-bottomNavBarColor to-lightOrange text-white fixed top-0 left-0 md:flex flex-col shadow-lg transition-transform duration-300 ease-in-out ${isMenuOpen ? 'transform translate-x-0' : 'transform -translate-x-full'} md:translate-x-0 z-40`}>
+      <div className={`h-screen w-1/6 bg-gradient-to-bl from-bottomNavBarColor via-bottomNavBarColor to-orange-500 text-white fixed top-0 left-0 md:flex flex-col shadow-lg transition-transform duration-300 ease-in-out ${isMenuOpen ? 'transform translate-x-0' : 'transform -translate-x-full'} md:translate-x-0 z-40`}>
         <div className="flex items-center justify-center p-4 md:justify-start md:pl-4 border-b border-borderColor">
           <FaTruckFast style={{ width: '50px', height: '50px' }} />
           <span className="ml-3 text-xl font-bold">MoVerse</span>
@@ -87,8 +91,17 @@ const MainLayout = () => {
         <div className="flex items-center justify-center p-4 border-t border-borderColor">
           <FaRegUser style={{ width: '40px', height: '40px' }} />
           <div className="ml-3">
+            <Button variant={'link'}><Link href={{
+              pathname : `/user/profile`,
+              query : {
+                phone : phone,
+                user_id : user?.user_id
+              }
+            }}>
             <p className="text-lg font-semibold">{phone}</p>
             <p className="text-sm"></p>
+            </Link>
+            </Button>
           </div>
         </div>
         <div className="flex items-center justify-center p-4 cursor-pointer hover:bg-lightOrange" onClick={handleSignOut}>
