@@ -47,7 +47,7 @@ const Layout: React.FC<PartyLayoutProps> = ({ children }) => {
     if(driverId){
         fetchDriverDetails()
     }
-  })
+  },[driverId])
 
   if(loading) return <Loading />
 
