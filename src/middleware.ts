@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server'
-import { NextRequest } from 'next/server'
+import { NextRequest, userAgent } from 'next/server'
  
 // This function can be marked `async` if using `await` inside
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const token = request.cookies.get('auth_token')?.value
+
+  const {device} = userAgent(request)
+  console.log('device',device)
 
   const loggedInUserNotAccessPaths = request.nextUrl.pathname === '/login' || request.nextUrl.pathname == '/'
   
@@ -26,6 +29,7 @@ export const config = {
   matcher : [
     '/',
     '/login',
+    '/user/parties',
     '/user/:path',
     '/user/:path*',
     '/user/parties/:path/party-details',

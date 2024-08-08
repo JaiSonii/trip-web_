@@ -20,7 +20,6 @@ export async function verifyToken(req: Request) {
 
 export function fetchCookie(req : NextRequest) {
   const token = req.cookies.get('auth_token')
-  console.log(token)
   const user = req.cookies.get('cur_user')
   console.log(user)
   if (!token) {
