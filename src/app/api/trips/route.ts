@@ -72,9 +72,9 @@ export async function POST(this: any, req: Request) {
     // Save the new trip document
     const savedTrip = await newTrip.save();
 
-    const party = await Party.findOne({party_id : data.party})
-    party.balance = parseFloat(party.balance) + newTrip.amount
-    await party.save()
+    // const party = await Party.findOne({party_id : data.party})
+    // party.balance = parseFloat(party.balance) + newTrip.amount
+    // await party.save()
 
     await Driver.findOneAndUpdate({user_id : user, driver_id : data.driver}, {status : 'On Trip'})
     await Truck.findOneAndUpdate({user_id : user, truckNo : data.truck}, {status : 'On Trip'})
