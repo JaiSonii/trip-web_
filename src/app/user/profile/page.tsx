@@ -1,65 +1,108 @@
-'use client';
+"use client";
 
-import { Button } from '@/components/ui/button';
-import { useSearchParams } from 'next/navigation';
-import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
+import { useSearchParams } from "next/navigation";
+import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import { auth } from "@/firebase/firbaseConfig";
+import { RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
-interface Permissions {
-  view: boolean;
-  edit: boolean;
+interface RolePermissions {
+  role: 'driver' | 'accountant';
 }
 
 const UserProfile: React.FC = () => {
+  const router = useRouter();
   const params = useSearchParams();
   const userId = params.get('user_id');
   const [userPhone, setUserPhone] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
-  const [permissions, setPermissions] = useState<Permissions>({
-    view: false,
-    edit: false,
-  });
-  const [accessibleAccounts, setAccessibleAccounts] = useState<any[]>([]);
-  const [accountsGivenAccess, setAccountsGivenAccess] = useState<
-    { phone: string; permissions: Permissions; user_id : string }[]
-  >([]);
+  const [otp, setOtp] = useState<string>('');
+  const [otpSent, setOtpSent] = useState<boolean>(false);
+  const [otpVerified, setOtpVerified] = useState<boolean>(false);
+  const [role, setRole] = useState<'driver' | 'accountant'>('driver'); // default role
+
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState("");
+  const [resendCountdown, setResendCountdown] = useState(0);
+  const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null);
 
   useEffect(() => {
-    const fetchUserPhone = async () => {
-      const response = await fetch(`/api/login`);
-      const data = await response.json();
-      setUserPhone(data.user.phone);
-    };
+    let timer: NodeJS.Timeout;
+    if (resendCountdown > 0) {
+      timer = setTimeout(() => setResendCountdown(resendCountdown - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [resendCountdown]);
 
-    const fetchAccessibleAccounts = async () => {
-      const response = await fetch(`/api/users/accessible-accounts`);
-      const data = await response.json();
-      setAccessibleAccounts(data.accounts.haveAccess);
-    };
+  useEffect(() => {
+    const verifier = new RecaptchaVerifier(auth, "recaptcha-container", { size: "invisible" });
+    setRecaptchaVerifier(verifier);
 
-    const fetchAccountsGivenAccess = async () => {
-      const response = await fetch(`/api/users/accounts-given-access`);
-      const data = await response.json();
-      setAccountsGivenAccess(data.accounts.accessGiven);
-      console.log(data)
-    };
+    return () => verifier.clear();
+  }, []);
 
+  const fetchUserPhone = async () => {
+    const response = await fetch(`/api/login`);
+    const data = await response.json();
+    setUserPhone(data.user.phone);
+  };
+
+  useEffect(() => {
     if (userId) {
       fetchUserPhone();
-      fetchAccessibleAccounts();
-      fetchAccountsGivenAccess();
     }
   }, [userId]);
 
-  const handlePermissionChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, checked } = e.target;
-    setPermissions((prev) => ({
-      ...prev,
-      [name]: checked
-    }));
+  const handleRoleChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    setRole(e.target.value as 'driver' | 'accountant');
+  };
+
+  const handleRequestOtp = async () => {
+    setError("");
+    setResendCountdown(60);
+
+    if (!recaptchaVerifier) {
+      setError("RecaptchaVerifier is not initialized.");
+      return;
+    }
+
+    try {
+      const confirmation = await signInWithPhoneNumber(auth, phone, recaptchaVerifier);
+      setConfirmationResult(confirmation);
+      setOtpSent(true);
+      setSuccess("OTP sent successfully.");
+    } catch (err) {
+      console.error(err);
+      setResendCountdown(0);
+      setError("Failed to send OTP. Please try again.");
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!confirmationResult) {
+      setError("Please request OTP first.");
+      return;
+    }
+
+    try {
+      const result = await confirmationResult.confirm(otp);
+      setOtpVerified(true);
+      setSuccess("OTP verified successfully.");
+    } catch (error) {
+      console.error(error);
+      setError("Failed to verify OTP. Please check the OTP.");
+    }
   };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!otpVerified) {
+      alert('Please verify OTP first.');
+      return;
+    }
+
     const response = await fetch('/api/users/grant-access', {
       method: 'POST',
       headers: {
@@ -68,16 +111,17 @@ const UserProfile: React.FC = () => {
       body: JSON.stringify({
         userId,
         phone,
-        permissions,
+        role,
       }),
     });
 
     if (response.ok) {
       alert('Access granted successfully');
       setPhone('');
-      setPermissions({ view: false, edit: false});
-      // Fetch the updated accounts given access
-    //   fetchAccountsGivenAccess();
+      setOtp('');
+      setOtpSent(false);
+      setOtpVerified(false);
+      setRole('driver'); // Reset to default role
     } else {
       alert('Failed to grant access');
     }
@@ -105,73 +149,57 @@ const UserProfile: React.FC = () => {
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
             required
           />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700">
-            Permissions
+          <label htmlFor="role" className="block text-sm font-medium text-gray-700 mt-4">
+            Role
           </label>
-          <div className="flex items-center mt-2">
-            <input
-              id="view"
-              name="view"
-              type="checkbox"
-              checked={permissions.view}
-              onChange={handlePermissionChange}
-              className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-            />
-            <label htmlFor="view" className="ml-2 block text-sm text-gray-700">
-              View
-            </label>
-          </div>
-          <div className="flex items-center mt-2">
-            <input
-              id="edit"
-              name="edit"
-              type="checkbox"
-              checked={permissions.edit}
-              onChange={handlePermissionChange}
-              className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-            />
-            <label htmlFor="edit" className="ml-2 block text-sm text-gray-700">
-              Edit
-            </label>
-          </div>
+          <select
+            id="role"
+            value={role}
+            onChange={handleRoleChange}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+          >
+            <option value="driver">Driver</option>
+            <option value="accountant">Accountant</option>
+          </select>
+
+          {!otpSent && (
+            <Button onClick={handleRequestOtp} className="mt-4">
+              Request OTP
+            </Button>
+          )}
         </div>
 
-        <Button type="submit">
-          Grant Access
-        </Button>
+        {otpSent && (
+          <div>
+            <label htmlFor="otp" className="block text-sm font-medium text-gray-700">
+              Enter OTP
+            </label>
+            <input
+              id="otp"
+              type="text"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+              required
+            />
+            <Button onClick={handleVerifyOtp} disabled={otpVerified} className="mt-4">
+              Verify OTP
+            </Button>
+          </div>
+        )}
+
+        {otpVerified && (
+          <Button type="submit" className="mt-6">
+            Grant Access
+          </Button>
+        )}
       </form>
 
-      <div className="mt-10">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Accessible Accounts</h2>
-        <ul className="list-disc list-inside pl-4">
-          {accessibleAccounts?.map((account,index) => (
-            <li key={index} className="text-lg text-gray-700">{account.user_id}</li>
-          ))}
-        </ul>
-      </div>
+      <div id="recaptcha-container"></div>
 
-      <div className="mt-10">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Accounts Given Access</h2>
-        <ul className="space-y-4">
-          {accountsGivenAccess?.map(({user_id, phone, permissions }, index) => (
-            <li key={index} className="text-lg text-gray-700">
-                <div>
-                <span className="font-medium">id:</span> {user_id}
-              </div>
-              <div>
-                <span className="font-medium">Phone:</span> {phone}
-              </div>
-              <div>
-                <span className="font-medium">Permissions:</span> 
-                {permissions?.view && ' View'}
-                {permissions?.edit && ' Edit'}
-              </div>
-            </li>
-          ))}
-        </ul>
+      <div className="p-10 text-center text-sm">
+        {error && <p className="text-red-500">{error}</p>}
+        {success && <p className="text-green-500">{success}</p>}
       </div>
     </div>
   );

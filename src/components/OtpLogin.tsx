@@ -76,16 +76,16 @@ function OtpLogin() {
 
       try {
         const result = await confirmationResult.confirm(otp);
-      
+
         console.log(result.user);
-        const res = await fetch(`/api/login`,{
+        const res = await fetch(`/api/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body : JSON.stringify({
-            user_id : result.user.uid,
-            phone : result.user.phoneNumber
+          body: JSON.stringify({
+            user_id: result.user.uid,
+            phone: result.user.phoneNumber
           })
         })
         const data = await res.json()
@@ -172,8 +172,8 @@ function OtpLogin() {
           >
             {resendCountdown > 0
               ? `Resend OTP in ${resendCountdown}`
-              : isPending
-              ? "Sending OTP"
+            : isPending
+            ? "Sending OTP"
               : "Send OTP"}
           </Button>
         </form>

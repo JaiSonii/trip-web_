@@ -8,6 +8,8 @@ import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import Link from 'next/link';
+import { FaCalendarAlt, FaRoute } from 'react-icons/fa';
+import { GoOrganization } from 'react-icons/go';
 
 const Loading = dynamic(() => import('../[truckNo]/loading'), {
   ssr: false,
@@ -146,23 +148,76 @@ const TruckPage = () => {
           <tbody>
             {data.map((item, index) => (
               <tr key={index}>
-                <td>{new Date(item.date || item.dates?.[0]).toLocaleDateString()}</td>
                 <td>
-                  {item.expenseType ||
-                    `${statuses[item.status]} ● ${item.partyName} ● ${item.route?.origin.split(',')[0]} -> ${item.route?.destination.split(',')[0]}`}
+                  <div className='flex items-center space-x-2'>
+                    <FaCalendarAlt className='text-bottomNavBarColor' />
+                    <span>{new Date(item.date || item.dates?.[0]).toLocaleDateString()}</span>
+                  </div>
                 </td>
-                <td>{item.expenseType ? item.amount : ''}</td>
-                <td>{!item.expenseType ? <TripRevenue tripId={item.trip_id} amount={item.amount}/> : ''}</td>
+                <td>
+                  {item.expenseType ? (
+                    <div className="flex items-center space-x-2 p-2">
+                      <span className="font-semibold text-lg text-gray-800">{item.expenseType}</span>
+                      {item.trip_id && (
+                        <Button variant={"link"} className="text-red-500 pt-1 rounded-lg">
+                          <Link href={`/user/trips/${item.trip_id}`}>from a trip</Link>
+                        </Button>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col space-y-4 p-2 bg-gray-50 rounded-lg shadow-sm">
+                      <div className="flex flex-col space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <FaRoute className="text-bottomNavBarColor" />
+                          <span className="font-semibold text-lg text-gray-800">{item.route?.origin.split(',')[0]} &rarr; {item.route?.destination.split(',')[0]}</span>
+                        </div>
+                      </div>
+                      <hr className="border-t border-gray-200" />
+                      <div className="flex items-center space-x-2">
+                        <GoOrganization className="text-bottomNavBarColor" />
+                        <span className="text-sm text-gray-600">{item.partyName}</span>
+                      </div>
+                      <hr className="border-t border-gray-200" />
+                      <div className="flex justify-between items-center space-x-2">
+                        <span className="font-semibold text-gray-600">{statuses[item.status as number]}</span>
+                        <div className="relative w-full bg-gray-300 h-2 rounded overflow-hidden">
+                          <div
+                            className={`absolute top-0 left-0 h-full transition-width duration-500 rounded ${item.status === 0
+                              ? "bg-red-500"
+                              : item.status === 1
+                                ? "bg-yellow-500"
+                                : item.status === 2
+                                  ? "bg-blue-500"
+                                  : item.status === 3
+                                    ? "bg-green-500"
+                                    : "bg-green-800"
+                              }`}
+                            style={{ width: `${(item.status as number / 4) * 100}%` }}
+                          ></div>
+                        </div>
+                      </div>
+
+                    </div>
+                  )}
+                </td>
+
+                <td>
+                  <span className='text-red-500 font-semibold'>{item.expenseType ? item.amount : ''}</span>
+                </td>
+                <td>{!item.expenseType ? <TripRevenue tripId={item.trip_id} amount={item.amount} /> : ''}</td>
                 <td>
                   {item.expenseType ?
-                    <div className='flex flex-row justify-evenly items-center w-full p-1'>
+                    <div className='flex space-x-2 justify-center items-center w-full p-1'>
                       <Button variant="outline" onClick={() => {
                         setSelected(item);
                         setModelOpen(true);
                       }}><MdEdit /></Button>
                       <Button onClick={() => handleDelete(item._id)} variant={'destructive'} ><MdDelete /></Button>
                     </div> :
-                    <Link href={`/user/trips/${item.trip_id}`}><Button variant={'outline'} >View Trip</Button></Link>
+                    <div className='flex items-center justify-center'>
+                      <Link href={`/user/trips/${item.trip_id}`}><Button variant={'outline'} >View Trip</Button></Link>
+                    </div>
+                    
                   }
                 </td>
               </tr>
