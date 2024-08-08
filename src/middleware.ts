@@ -5,8 +5,12 @@ import { NextRequest, userAgent } from 'next/server'
 export async function middleware(request: NextRequest) {
   const token = request.cookies.get('auth_token')?.value
 
-  const {device} = userAgent(request)
-  console.log('device',device)
+  const {device,os} = userAgent(request)
+
+  if(request.nextUrl.pathname != '/' && device.type == 'mobile'){
+    return NextResponse.redirect(new URL('/', request.url))
+  }
+  
 
   const loggedInUserNotAccessPaths = request.nextUrl.pathname === '/login' || request.nextUrl.pathname == '/'
   
