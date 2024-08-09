@@ -1,11 +1,11 @@
 'use client'
 import React, { useEffect, useState } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'; // Adjust import path as per your project
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { fuelAndDriverChargeTypes } from '@/utils/utilArray';
-import { maintenanceChargeTypes } from '@/utils/utilArray';
+import { fuelAndDriverChargeTypes, maintenanceChargeTypes } from '@/utils/utilArray';
 import { IDriver } from '@/utils/interface';
 import DriverSelect from '../DriverSelect';
+import { motion } from 'framer-motion';
 
 interface ChargeModalProps {
   isOpen: boolean;
@@ -13,10 +13,8 @@ interface ChargeModalProps {
   onSave: any;
   driverId: string;
   selected?: any;
-  truckPage?: boolean
+  truckPage?: boolean;
 }
-
-
 
 interface TripExpense {
   id?: string;
@@ -33,7 +31,6 @@ interface TripExpense {
 }
 
 const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, driverId, selected, truckPage }) => {
-
   const [formData, setFormData] = useState<TripExpense>({
     id: selected?._id || undefined,
     trip: selected?.trip_id || '',
@@ -44,32 +41,30 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
     notes: selected?.notes || '',
     partyAmount: 0,
     paymentMode: selected?.paymentMode || 'Cash',
-    transactionId: selected?.transaction_id ||'',
+    transactionId: selected?.transaction_id || '',
     driver: driverId || ''
   });
 
   const [driverName, setDriverName] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Fuel & Driver');
-  const [drivers, setDrivers] = useState<IDriver[]>([])
+  const [drivers, setDrivers] = useState<IDriver[]>([]);
 
   useEffect(() => {
     if (!selected) return;
-    setFormData(() => {
-      return {
-        id: selected?._id || undefined,
-        trip: selected?.trip_id || '',
-        partyBill: false,
-        amount: selected?.amount || 0,
-        date: selected?.date ? new Date(selected.date) : new Date(),
-        expenseType: selected?.expenseType || '',
-        notes: selected?.notes || '',
-        partyAmount: 0,
-        paymentMode: selected?.paymentMode || 'Cash',
-        transactionId: selected?.transaction_id ||  '',
-        driver: selected?.driver ||''
-      }
-    })
-  }, [selected])
+    setFormData({
+      id: selected?._id || undefined,
+      trip: selected?.trip_id || '',
+      partyBill: false,
+      amount: selected?.amount || 0,
+      date: selected?.date ? new Date(selected.date) : new Date(),
+      expenseType: selected?.expenseType || '',
+      notes: selected?.notes || '',
+      partyAmount: 0,
+      paymentMode: selected?.paymentMode || 'Cash',
+      transactionId: selected?.transaction_id || '',
+      driver: selected?.driver || ''
+    });
+  }, [selected]);
 
   useEffect(() => {
     const fetchDriverName = async () => {
@@ -85,13 +80,12 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
     if (formData.paymentMode === 'Paid By Driver') fetchDriverName();
 
     const fetchDrivers = async () => {
-      const res = await fetch(`/api/drivers`)
+      const res = await fetch(`/api/drivers`);
       const data = await res.json();
       setDrivers(data.drivers);
-    }
+    };
 
-    fetchDrivers()
-
+    fetchDrivers();
   }, [formData.paymentMode, driverId]);
 
   const handleSelectChange = (value: string) => {
@@ -108,7 +102,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
       setFormData((prev) => ({ ...prev, driver: driverId }));
     }
     if (selected) {
-      onSave(formData, selected._id)
+      onSave(formData, selected._id);
     } else {
       onSave(formData);
     }
@@ -127,15 +121,24 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
   if (!isOpen) return null;
 
   return (
-    <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 z-40"
+    >
       <div className="fixed inset-0 flex items-center justify-center z-50">
-        <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{
+            duration: 0.5,
+            ease: [0, 0.71, 0.2, 1.01]
+          }}
+          className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl"
+        >
           <h2 className="text-xl font-semibold mb-4">Add New Charge</h2>
 
           <div className="flex space-x-4 mb-4 border-b-2 border-gray-200">
             <Button
-              variant={'link'}
+              variant="link"
               onClick={() => setSelectedCategory('Fuel & Driver')}
               className={`px-4 py-2 transition duration-300 ease-in-out ${selectedCategory === 'Fuel & Driver'
                 ? 'border-b-2 border-blue-500 text-blue-500'
@@ -144,9 +147,9 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
             >
               Fuel & Driver
             </Button>
-            {truckPage &&
+            {truckPage && (
               <Button
-                variant={'link'}
+                variant="link"
                 onClick={() => setSelectedCategory('Maintenance')}
                 className={`px-4 py-2 transition duration-300 ease-in-out ${selectedCategory === 'Maintenance'
                   ? 'border-b-2 border-blue-500 text-blue-500'
@@ -155,8 +158,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
               >
                 Maintenance
               </Button>
-            }
-
+            )}
           </div>
 
           <div className="mb-4">
@@ -210,22 +212,24 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
             ))}
           </div>
 
-          {formData.paymentMode === 'Paid By Driver' && !truckPage &&
+          {formData.paymentMode === 'Paid By Driver' && !truckPage && (
             <div className="mb-4">
               <button disabled className="block text-sm font-medium text-gray-700 border border-black rounded-md p-2 w-1/3">
                 {driverName}
               </button>
             </div>
-          }
+          )}
 
-          {formData.paymentMode === 'Paid By Driver' && truckPage &&
-            <DriverSelect 
-            drivers={drivers}
-            formData={formData}
-            handleChange={handleChange} setFormData={setFormData}            />
-          }
+          {formData.paymentMode === 'Paid By Driver' && truckPage && (
+            <DriverSelect
+              drivers={drivers}
+              formData={formData}
+              handleChange={handleChange}
+              setFormData={setFormData}
+            />
+          )}
 
-          {formData.paymentMode === 'Online' &&
+          {formData.paymentMode === 'Online' && (
             <div className="mb-4">
               <input
                 type="text"
@@ -233,12 +237,12 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
                 value={formData.transactionId}
                 onChange={handleChange}
                 className="w-full p-2 border border-gray-300 rounded-md"
-                placeholder='Transaction ID'
+                placeholder="Transaction ID"
               />
             </div>
-          }
+          )}
 
-          {(formData.expenseType !== 'Fuel Expense' && !selected && !truckPage) &&
+          {(formData.expenseType !== 'Fuel Expense' && !selected && !truckPage) && (
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">Add to Party Bill</label>
               <input
@@ -249,9 +253,9 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
                 className="p-2 border border-gray-300 rounded-md"
               />
             </div>
-          }
+          )}
 
-          {formData.partyBill &&
+          {formData.partyBill && (
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">Party Amount</label>
               <input
@@ -263,7 +267,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
                 className="w-full p-2 border border-gray-300 rounded-md"
               />
             </div>
-          }
+          )}
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Notes</label>
@@ -283,9 +287,9 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
               Save
             </Button>
           </div>
-        </div>
+        </motion.div>
       </div>
-    </>
+    </div>
   );
 };
 

@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import "@/app/globals.css";
+import Cookies from "js-cookie";
 
 function OtpLogin() {
   const router = useRouter();
@@ -89,6 +90,7 @@ function OtpLogin() {
           })
         })
         const data = await res.json()
+        Cookies.set('selectedRole','carrier')
         router.replace(`/user/parties`);
       } catch (error) {
         console.log(error);

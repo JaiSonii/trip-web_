@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { PaymentBook } from '@/utils/interface';
 import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 
 interface ModalProps {
   isOpen: boolean;
@@ -79,7 +80,13 @@ const Modal: React.FC<ModalProps> = ({
   return (
     <>
       <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{
+          duration: 0.5,
+          ease: [0, 0.71, 0.2, 1.01]
+        }} className="fixed inset-0 z-50 flex items-center justify-center">
         <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
           <h3 className="text-lg font-semibold mb-4">{modalTitle}</h3>
           <form onSubmit={handleSubmit}>
@@ -153,7 +160,7 @@ const Modal: React.FC<ModalProps> = ({
             </div>
           </form>
         </div>
-      </div>
+      </motion.div>
     </>
   );
 };

@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 import React, { useState } from 'react';
 
 interface ChargeModalProps {
@@ -70,7 +71,13 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave }) =>
   return (
     <>
     <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
-    <div className="fixed inset-0 flex items-center justify-center z-50">
+    <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{
+            duration: 0.5,
+            ease: [0, 0.71, 0.2, 1.01]
+          }} className="fixed inset-0 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
         <h2 className="text-xl font-semibold mb-4">Add New Charge</h2>
         <div className="mb-4">
@@ -155,7 +162,7 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave }) =>
           </Button>
         </div>
       </div>
-    </div>
+    </motion.div>
     </>
   );
 };

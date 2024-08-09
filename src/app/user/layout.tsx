@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import "@/app/globals.css";
-import MainLayout from "@/components/layout/MainLayout";
+import dynamic from 'next/dynamic';
+
+const MainLayout = dynamic(() => import('@/components/layout/MainLayout'), { ssr: false });
+
 import { Inter as FontSans } from "next/font/google"
 import { AuthProvider } from "@/components/AuthProvider";
 

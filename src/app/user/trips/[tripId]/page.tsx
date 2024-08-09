@@ -6,6 +6,7 @@ import { IDriver, IParty, ITrip, TruckModel } from '@/utils/interface';
 import { useParams, useRouter } from 'next/navigation';
 import { MdEdit, MdDelete, MdClose } from 'react-icons/md';
 import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 
 // Dynamically import components
 const TripDetails = dynamic(() => import('@/components/trip/tripDetail/TripDetail'), {
@@ -194,7 +195,13 @@ const TripPage: React.FC = () => {
       )}
       {isEditing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg relative w-full max-w-2xl">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{
+              duration: 0.5,
+              ease: [0, 0.71, 0.2, 1.01]
+            }} className="bg-white p-6 rounded-lg shadow-lg relative w-full max-w-2xl">
             <Button
               variant="ghost"
               onClick={handleCancelEdit}
@@ -209,7 +216,7 @@ const TripPage: React.FC = () => {
               drivers={drivers}
               onSubmit={handleEdit}
             />
-          </div>
+          </motion.div>
         </div>
       )}
       <TripDetails trip={trip as ITrip} setTrip={setTrip} />

@@ -65,9 +65,9 @@ const EditTripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, tri
 
     const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
         if (e.target.value === '0') {
-          handleChange({ target: { name: e.target.name, value: '' } } as React.ChangeEvent<HTMLInputElement>);
+            handleChange({ target: { name: e.target.name, value: '' } } as React.ChangeEvent<HTMLInputElement>);
         }
-      };
+    };
 
     return (
         <div className="bg-white text-black p-4 max-w-3xl mx-auto shadow-md rounded-md">

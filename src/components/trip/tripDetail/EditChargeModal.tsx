@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { TripExpense } from '@/utils/interface';
 import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 
 interface EditChargeModalProps {
   isOpen: boolean;
@@ -43,7 +44,7 @@ const EditChargeModal: React.FC<EditChargeModalProps> = ({ isOpen, onClose, onSa
     const { name, value, type } = e.target;
 
     if (type === 'checkbox') {
-      setEditedCharge({ ...editedCharge, [name]: !editedCharge.partyBill } ); // Toggle the boolean value
+      setEditedCharge({ ...editedCharge, [name]: !editedCharge.partyBill }); // Toggle the boolean value
     } else {
       setEditedCharge({ ...editedCharge, [name]: value });
     }
@@ -56,7 +57,13 @@ const EditChargeModal: React.FC<EditChargeModalProps> = ({ isOpen, onClose, onSa
   if (!isOpen) return null;
 
   return (
-    <><div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div><div className="fixed inset-0 flex items-center justify-center z-50">
+    <><div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div><motion.div
+      initial={{ opacity: 0, scale: 0.5 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{
+        duration: 0.5,
+        ease: [0, 0.71, 0.2, 1.01]
+      }} className="fixed inset-0 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl">
         <h2 className="text-xl font-semibold mb-4">Edit Charge</h2>
         <div className="mb-4">
@@ -140,7 +147,7 @@ const EditChargeModal: React.FC<EditChargeModalProps> = ({ isOpen, onClose, onSa
           </Button>
         </div>
       </div>
-    </div></>
+    </motion.div></>
   );
 };
 
