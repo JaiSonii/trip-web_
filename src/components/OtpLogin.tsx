@@ -18,6 +18,9 @@ import { Button } from "./ui/button";
 import { useRouter } from "next/navigation";
 import "@/app/globals.css";
 import Cookies from "js-cookie";
+import { countryCodes } from "@/utils/CountryCodes";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { motion } from "framer-motion";
 
 function OtpLogin() {
   const router = useRouter();
@@ -146,30 +149,57 @@ function OtpLogin() {
   );
 
   return (
-    <div className="flex flex-col justify-center items-center p-6 bg-bottomNavBarColor shadow-md rounded-lg max-w-md mx-auto ">
-      <h2 className="text-2xl font-semibold mb-4 text-white">Login with OTP</h2>
+    <motion.div
+      className="flex flex-col justify-center items-center p-6 bg-bottomNavBarColor shadow-md rounded-lg max-w-md mx-auto"
+      initial={{ opacity: 0, y: -50 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
+      <motion.h2
+        className="text-2xl font-semibold mb-4 text-white"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2 }}
+      >
+        Login with OTP
+      </motion.h2>
 
       {!confirmationResult && (
-        <form onSubmit={requestOtp} className="w-full">
-          <div className="mb-4">
-            <label htmlFor="countryCode" className="block text-white font-medium mb-2">
+        <motion.form
+          onSubmit={requestOtp}
+          className="w-full"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          <motion.div className="mb-4">
+            <label
+              htmlFor="countryCode"
+              className="block text-white font-medium mb-2"
+            >
               Country Code
             </label>
-            <select
-              id="countryCode"
-              value={countryCode}
-              onChange={(e) => setCountryCode(e.target.value)}
-              className="w-full border border-gray-300 p-2 rounded-lg"
-            >
-              <option value="+1">+1 (US)</option>
-              <option value="+44">+44 (UK)</option>
-              <option value="+91">+91 (India)</option>
-              {/* Add more country codes as needed */}
-            </select>
-          </div>
+            <Select value={countryCode} onValueChange={setCountryCode}>
+              <SelectTrigger id="countryCode" aria-label="Country Code">
+                <SelectValue placeholder="Select country code" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {countryCodes.map((code) => (
+                    <SelectItem key={code.dial_code} value={code.dial_code}>
+                      {code.dial_code} - {code.name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </motion.div>
 
-          <div className="mb-4">
-            <label htmlFor="phoneNumber" className="block text-white font-medium mb-2">
+          <motion.div className="mb-4">
+            <label
+              htmlFor="phoneNumber"
+              className="block text-white font-medium mb-2"
+            >
               Phone Number
             </label>
             <Input
@@ -181,25 +211,37 @@ function OtpLogin() {
               placeholder="Enter phone number"
             />
             <p className="text-xs text-gray-200 mt-2">
-              Please enter your number with the country code (e.g., +44 for UK)
+              Please enter your number without the country code
             </p>
-          </div>
+          </motion.div>
 
-          <Button
-            disabled={!phoneNumber || isPending || resendCountdown > 0}
-            type="submit"
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
           >
-            {resendCountdown > 0
-              ? `Resend OTP in ${resendCountdown}`
-              : isPending
-              ? "Sending OTP..."
-              : "Send OTP"}
-          </Button>
-        </form>
+            <Button
+              disabled={!phoneNumber || isPending || resendCountdown > 0}
+              type="submit"
+              className="w-full"
+            >
+              {resendCountdown > 0
+                ? `Resend OTP in ${resendCountdown}`
+                : isPending
+                  ? "Sending OTP..."
+                  : "Send OTP"}
+            </Button>
+          </motion.div>
+        </motion.form>
       )}
 
       {confirmationResult && (
-        <div className="w-full mt-6">
+        <motion.div
+          className="w-full mt-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8 }}
+        >
           <label className="block text-gray-100 font-medium mb-2">
             Enter OTP
           </label>
@@ -221,18 +263,28 @@ function OtpLogin() {
               <InputOTPSlot index={5} />
             </InputOTPGroup>
           </InputOTP>
-        </div>
+        </motion.div>
       )}
 
-      <div className="p-4 text-center text-sm mt-4">
+      <motion.div
+        className="p-4 text-center text-sm mt-4"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1 }}
+      >
         {error && <p className="text-red-900">{error}</p>}
         {success && <p className="text-green-500">{success}</p>}
         {isPending && loadingIndicator}
-      </div>
+      </motion.div>
 
-      <div id="recaptcha-container"></div>
-    </div>
+      <motion.div
+        id="recaptcha-container"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.2 }}
+      />
+    </motion.div>
   );
-}
+};
 
 export default OtpLogin;
