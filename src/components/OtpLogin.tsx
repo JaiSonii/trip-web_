@@ -21,19 +21,14 @@ import Cookies from "js-cookie";
 
 function OtpLogin() {
   const router = useRouter();
-
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [countryCode, setCountryCode] = useState("+91"); // Default to US
   const [otp, setOtp] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState("");
   const [resendCountdown, setResendCountdown] = useState(0);
-
-  const [recaptchaVerifier, setRecaptchaVerifier] =
-    useState<RecaptchaVerifier | null>(null);
-
-  const [confirmationResult, setConfirmationResult] =
-    useState<ConfirmationResult | null>(null);
-
+  const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null);
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -45,12 +40,9 @@ function OtpLogin() {
   }, [resendCountdown]);
 
   useEffect(() => {
-    const verifier = new RecaptchaVerifier(auth,
-      "recaptcha-container",
-      {
-        size: "invisible",
-      }
-    );
+    const verifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+      size: "invisible",
+    });
 
     setRecaptchaVerifier(verifier);
 
@@ -60,8 +52,7 @@ function OtpLogin() {
   }, []);
 
   useEffect(() => {
-    const hasEnteredAllDigits = otp.length === 6;
-    if (hasEnteredAllDigits) {
+    if (otp.length === 6) {
       verifyOtp();
     }
   }, [otp]);
@@ -77,24 +68,21 @@ function OtpLogin() {
 
       try {
         const result = await confirmationResult.confirm(otp);
-
-        console.log(result.user);
         const res = await fetch(`/api/login`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             user_id: result.user.uid,
-            phone: result.user.phoneNumber
-          })
-        })
-        const data = await res.json()
-        Cookies.set('selectedRole','carrier')
+            phone: result.user.phoneNumber,
+          }),
+        });
+        const data = await res.json();
+        Cookies.set("selectedRole", "carrier");
         router.replace(`/user/parties`);
       } catch (error) {
         console.log(error);
-
         setError("Failed to verify OTP. Please check the OTP.");
       }
     });
@@ -102,7 +90,6 @@ function OtpLogin() {
 
   const requestOtp = async (e?: FormEvent<HTMLFormElement>) => {
     e?.preventDefault();
-
     setResendCountdown(60);
 
     startTransition(async () => {
@@ -113,8 +100,12 @@ function OtpLogin() {
       }
 
       try {
-        const confirmationResult = signInWithPhoneNumber(auth, phoneNumber, recaptchaVerifier)
-        const result = await confirmationResult
+        const confirmationResult = signInWithPhoneNumber(
+          auth,
+          `${countryCode}${phoneNumber}`,
+          recaptchaVerifier
+        );
+        const result = await confirmationResult;
         setConfirmationResult(result);
         setSuccess("OTP sent successfully.");
       } catch (err: any) {
@@ -155,50 +146,86 @@ function OtpLogin() {
   );
 
   return (
-    <div className="flex flex-col justify-center items-center">
+    <div className="flex flex-col justify-center items-center p-6 bg-bottomNavBarColor shadow-md rounded-lg max-w-md mx-auto ">
+      <h2 className="text-2xl font-semibold mb-4 text-white">Login with OTP</h2>
+
       {!confirmationResult && (
-        <form onSubmit={requestOtp}>
-          <Input
-            className="text-black"
-            type="tel"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-          />
-          <p className="text-xs text-gray-400 mt-2">
-            Please enter your number with the country code (i.e. +44 for UK)
-          </p>
+        <form onSubmit={requestOtp} className="w-full">
+          <div className="mb-4">
+            <label htmlFor="countryCode" className="block text-white font-medium mb-2">
+              Country Code
+            </label>
+            <select
+              id="countryCode"
+              value={countryCode}
+              onChange={(e) => setCountryCode(e.target.value)}
+              className="w-full border border-gray-300 p-2 rounded-lg"
+            >
+              <option value="+1">+1 (US)</option>
+              <option value="+44">+44 (UK)</option>
+              <option value="+91">+91 (India)</option>
+              {/* Add more country codes as needed */}
+            </select>
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="phoneNumber" className="block text-white font-medium mb-2">
+              Phone Number
+            </label>
+            <Input
+              id="phoneNumber"
+              className="w-full border border-gray-300 p-2 rounded-lg"
+              type="tel"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              placeholder="Enter phone number"
+            />
+            <p className="text-xs text-gray-200 mt-2">
+              Please enter your number with the country code (e.g., +44 for UK)
+            </p>
+          </div>
+
           <Button
             disabled={!phoneNumber || isPending || resendCountdown > 0}
             type="submit"
-            className="mt-5"
           >
             {resendCountdown > 0
               ? `Resend OTP in ${resendCountdown}`
-            : isPending
-            ? "Sending OTP"
+              : isPending
+              ? "Sending OTP..."
               : "Send OTP"}
           </Button>
         </form>
       )}
 
       {confirmationResult && (
-        <InputOTP maxLength={6} value={otp} onChange={(value) => setOtp(value)}>
-          <InputOTPGroup>
-            <InputOTPSlot index={0} />
-            <InputOTPSlot index={1} />
-            <InputOTPSlot index={2} />
-          </InputOTPGroup>
-          <InputOTPSeparator />
-          <InputOTPGroup>
-            <InputOTPSlot index={3} />
-            <InputOTPSlot index={4} />
-            <InputOTPSlot index={5} />
-          </InputOTPGroup>
-        </InputOTP>
+        <div className="w-full mt-6">
+          <label className="block text-gray-100 font-medium mb-2">
+            Enter OTP
+          </label>
+          <InputOTP
+            maxLength={6}
+            value={otp}
+            onChange={(value) => setOtp(value)}
+            className="otp-input"
+          >
+            <InputOTPGroup>
+              <InputOTPSlot index={0} />
+              <InputOTPSlot index={1} />
+              <InputOTPSlot index={2} />
+            </InputOTPGroup>
+            <InputOTPSeparator />
+            <InputOTPGroup>
+              <InputOTPSlot index={3} />
+              <InputOTPSlot index={4} />
+              <InputOTPSlot index={5} />
+            </InputOTPGroup>
+          </InputOTP>
+        </div>
       )}
 
-      <div className="p-10 text-center text-sm">
-        {error && <p className="text-red-500">{error}</p>}
+      <div className="p-4 text-center text-sm mt-4">
+        {error && <p className="text-red-900">{error}</p>}
         {success && <p className="text-green-500">{success}</p>}
         {isPending && loadingIndicator}
       </div>

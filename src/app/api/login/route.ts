@@ -1,7 +1,20 @@
 import { verifyToken } from "@/utils/auth";
+import { decryptData, encryptData } from "@/utils/encryption";
 import { connectToDatabase, userSchema } from "@/utils/schema";
 import { model, models } from "mongoose";
 import { NextResponse } from "next/server";
+
+userSchema.pre('save', function (next) {
+    if (this.isModified('phone')) {
+        this.phone = encryptData(this.phone);
+    }
+    next();
+  });
+  
+  // Decrypt the phone after retrieving
+  userSchema.methods.decryptPhone = function () {
+    return decryptData(decryptData(this.phone));
+  };
 
 const User = models.User || model('User', userSchema);
 
@@ -42,7 +55,11 @@ export async function GET(req: Request) {
             return NextResponse.json({ message: "User not found", status: 404 });
         }
 
-        return NextResponse.json({ user: curUser, status: 200 });
+        // Decrypt the phone before sending it to the frontend
+        curUser.phone = curUser.decryptPhone();
+        console.log(curUser.phone)
+
+        return NextResponse.json({ user: curUser.toObject(), status: 200 });
     } catch (error) {
         console.error('GET /api/user error:', error);
         return NextResponse.json({ error: 'Internal Server Error', status: 500 });

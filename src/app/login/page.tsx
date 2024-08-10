@@ -4,10 +4,7 @@ function LoginPage() {
 
 
   return (
-    <div className="flex flex-col items-center">
-      <h1 className="font-bold text-center mb-5">
-        Mo Verse Trip Mangement Login
-      </h1>
+    <div className="flex flex-col items-center justify-center min-h-screen">
 
       <OtpLogin />
     </div>

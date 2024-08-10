@@ -1,5 +1,6 @@
 import mongoose, { ConnectOptions } from "mongoose";
 import { Schema } from "mongoose";
+import { decryptData, encryptData } from "./encryption";
 
 export const partySchema = new Schema({
   user_id: {
@@ -237,6 +238,18 @@ export const userSchema = new Schema({
   accountant : {type : String, default : null},
   createdAt: { type: Date, default: Date.now }
 });
+
+userSchema.pre('save', function (next) {
+  if (this.isModified('phone')) {
+      this.phone = encryptData(this.phone);
+  }
+  next();
+});
+
+// Decrypt the phone after retrieving
+userSchema.methods.decryptPhone = function () {
+  return decryptData(this.phone);
+};
 
 export const tripChargesSchema = new Schema({
   user_id: {

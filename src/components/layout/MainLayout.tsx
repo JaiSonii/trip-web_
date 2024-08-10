@@ -13,6 +13,7 @@ import { Button } from '../ui/button';
 import { signOut } from 'firebase/auth';
 import { MdArrowDropDown } from "react-icons/md";
 import { motion } from 'framer-motion';
+import { decryptData } from '@/utils/encryption';
 
 const MainLayout = () => {
   const pathname = usePathname();
@@ -92,8 +93,7 @@ const MainLayout = () => {
       document.cookie = `userId=${user[role]}; path=/;`;
 
     }
-
-    window.location.reload()
+    pathname != `/user/parties` ? router.push(`/user/parties`) :  window.location.reload()
   };
 
   return (

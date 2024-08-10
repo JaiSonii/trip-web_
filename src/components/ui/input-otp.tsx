@@ -13,10 +13,11 @@ const InputOTP = React.forwardRef<
   <OTPInput
     ref={ref}
     containerClassName={cn(
-      "flex items-center gap-2 has-[:disabled]:opacity-50",
+      "flex items-center gap-2",
+      "disabled:opacity-50 disabled:cursor-not-allowed",
       containerClassName
     )}
-    className={cn("disabled:cursor-not-allowed", className)}
+    className={cn("outline-none", className)}
     {...props}
   />
 ))
@@ -26,7 +27,15 @@ const InputOTPGroup = React.forwardRef<
   React.ElementRef<"div">,
   React.ComponentPropsWithoutRef<"div">
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("flex items-center", className)} {...props} />
+  <div
+    ref={ref}
+    className={cn(
+      "flex items-center justify-center",
+      "gap-2",
+      className
+    )}
+    {...props}
+  />
 ))
 InputOTPGroup.displayName = "InputOTPGroup"
 
@@ -41,18 +50,23 @@ const InputOTPSlot = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "relative flex h-10 w-10 items-center justify-center border-y border-r border-input text-sm transition-all first:rounded-l-md first:border-l last:rounded-r-md",
-        isActive && "z-10 ring-2 ring-ring ring-offset-background",
+        "relative flex h-12 w-12 items-center justify-center",
+        "border border-lightOrange rounded-md",
+        "bg-white text-lg font-medium text-center text-foreground",
+        "transition-all duration-200 ease-in-out",
+        isActive ? "ring-2 ring-lightOrange ring-offset-2" : "border-gray-300",
+        "focus:ring-lightOrange focus:border-lightOrange",
+        "hover:bg-gray-50",
         className
       )}
+      aria-label={`OTP Slot ${index + 1}`}
       {...props}
     >
-      {char}
-      {hasFakeCaret && (
+      {char || (hasFakeCaret && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="h-4 w-px animate-caret-blink bg-foreground duration-1000" />
+          <div className="h-6 w-px bg-blue-500 animate-blink" />
         </div>
-      )}
+      ))}
     </div>
   )
 })
@@ -61,8 +75,14 @@ InputOTPSlot.displayName = "InputOTPSlot"
 const InputOTPSeparator = React.forwardRef<
   React.ElementRef<"div">,
   React.ComponentPropsWithoutRef<"div">
->(({ ...props }, ref) => (
-  <div ref={ref} role="separator" {...props}>
+>(({ className, ...props }, ref) => (
+  <div
+    ref={ref}
+    role="separator"
+    aria-hidden="true"
+    className={cn("flex items-center justify-center text-gray-500", className)}
+    {...props}
+  >
     <Dot />
   </div>
 ))
