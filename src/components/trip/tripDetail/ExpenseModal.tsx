@@ -3,9 +3,11 @@ import React, { useEffect, useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { fuelAndDriverChargeTypes, maintenanceChargeTypes } from '@/utils/utilArray';
-import { IDriver } from '@/utils/interface';
+import { IDriver, IExpense, ITrip, TruckModel } from '@/utils/interface';
 import DriverSelect from '../DriverSelect';
 import { motion } from 'framer-motion';
+import { usePathname } from 'next/navigation';
+import { statuses } from '@/utils/schema';
 
 interface ChargeModalProps {
   isOpen: boolean;
@@ -28,6 +30,7 @@ interface TripExpense {
   paymentMode: string;
   transactionId: string;
   driver: string;
+  truck?: string
 }
 
 const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, driverId, selected, truckPage }) => {
@@ -42,12 +45,17 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
     partyAmount: 0,
     paymentMode: selected?.paymentMode || 'Cash',
     transactionId: selected?.transaction_id || '',
-    driver: driverId || ''
+    driver: driverId || '',
+    truck: ''
   });
+
+  const pathname = usePathname()
 
   const [driverName, setDriverName] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Fuel & Driver');
   const [drivers, setDrivers] = useState<IDriver[]>([]);
+  const [trucks, setTrucks] = useState<TruckModel[]>([])
+  const [trips, setTrips] = useState<ITrip[]>([])
 
   useEffect(() => {
     if (!selected) return;
@@ -62,7 +70,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
       partyAmount: 0,
       paymentMode: selected?.paymentMode || 'Cash',
       transactionId: selected?.transaction_id || '',
-      driver: selected?.driver || ''
+      driver: selected?.driver || '',
     });
   }, [selected]);
 
@@ -88,9 +96,47 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
     fetchDrivers();
   }, [formData.paymentMode, driverId]);
 
-  const handleSelectChange = (value: string) => {
-    setFormData({ ...formData, expenseType: value });
+  const fetchTripsTrucks = async () => {
+    try {
+      const [tripRes, truckRes] = await Promise.all([
+        fetch(`/api/trips/expenses`),
+        fetch(`/api/trucks/create`)
+      ])
+
+      const [tripData, truckData] = await Promise.all([
+        tripRes.ok ? tripRes.json() : [],
+        truckRes.ok ? truckRes.json() : []
+      ])
+      setTrips(tripData.trips)
+      setTrucks(truckData.trucks)
+
+    } catch (error: any) {
+      console.error('Error fetching data:', error);
+      alert(error.message);
+    }
+  }
+
+  useEffect(() => {
+    if (pathname.includes('/expenses')) {
+      fetchTripsTrucks()
+    }
+  }, [pathname])
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData((prevData) => {
+      let updatedData = { ...prevData, [name]: value };
+
+      if (name === 'trip') {
+        const selectedTrip = trips.find(trip => trip.trip_id === value);
+        if (selectedTrip) {
+          updatedData = { ...updatedData, truck: selectedTrip.truck };
+        }
+      }
+
+      return updatedData;
+    });
   };
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -141,19 +187,19 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
               variant="link"
               onClick={() => setSelectedCategory('Fuel & Driver')}
               className={`px-4 py-2 transition duration-300 ease-in-out ${selectedCategory === 'Fuel & Driver'
-                ? 'border-b-2 border-blue-500 text-blue-500'
-                : 'border-transparent text-gray-600 hover:text-blue-500 hover:border-blue-500'
+                ? 'border-b-2 border-bottomNavBarColor text-bottomNavBarColor'
+                : 'border-transparent text-gray-600 hover:text-bottomNavBarColor hover:border-bottomNavBarColor'
                 }`}
             >
               Fuel & Driver
             </Button>
-            {truckPage && (
+            {truckPage || pathname.includes('/expenses') && (
               <Button
                 variant="link"
                 onClick={() => setSelectedCategory('Maintenance')}
                 className={`px-4 py-2 transition duration-300 ease-in-out ${selectedCategory === 'Maintenance'
-                  ? 'border-b-2 border-blue-500 text-blue-500'
-                  : 'border-transparent text-gray-600 hover:text-blue-500 hover:border-blue-500'
+                  ? 'border-b-2 border-bottomNavBarColor text-bottomNavBarColor'
+                  : 'border-transparent text-gray-600 hover:text-bottomNavBarColor hover:border-bottomNavBarColor'
                   }`}
               >
                 Maintenance
@@ -163,7 +209,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Expense Type</label>
-            <Select value={formData.expenseType} onValueChange={handleSelectChange}>
+            <Select value={formData.expenseType} onValueChange={(value) => handleSelectChange('expenseType', value)}>
               <SelectTrigger className="w-full">
                 <SelectValue>{formData.expenseType || 'Select Expense Type'}</SelectValue>
               </SelectTrigger>
@@ -174,29 +220,80 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
               </SelectContent>
             </Select>
           </div>
+          <div className='flex items-center space-x-2 '>
+            <div className="mb-4 w-1/2">
+              <label className="block text-sm font-medium text-gray-700">Amount</label>
+              <input
+                type="number"
+                name="amount"
+                value={formData.amount}
+                onChange={handleChange}
+                onFocus={handleFocus}
+                className="w-full p-2 border border-gray-300 rounded-md"
+              />
+            </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Amount</label>
-            <input
-              type="number"
-              name="amount"
-              value={formData.amount}
-              onChange={handleChange}
-              onFocus={handleFocus}
-              className="w-full p-2 border border-gray-300 rounded-md"
-            />
+            <div className="mb-4 w-1/2">
+              <label className="block text-sm font-medium text-gray-700">Date</label>
+              <input
+                type="date"
+                name="date"
+                value={formData.date.toISOString().split('T')[0]}
+                onChange={handleChange}
+                className="w-full p-2 border border-gray-300 rounded-md"
+              />
+            </div>
           </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700">Date</label>
-            <input
-              type="date"
-              name="date"
-              value={formData.date.toISOString().split('T')[0]}
-              onChange={handleChange}
-              className="w-full p-2 border border-gray-300 rounded-md"
-            />
-          </div>
+          {pathname.includes('/expenses') && !selected && <div className='flex items-center space-x-2 '>
+            <div className="mb-4 w-1/2">
+              <label className="block text-sm font-medium text-gray-700">Select Trip</label>
+              <Select value={formData.trip} onValueChange={(value) => handleSelectChange('trip', value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder='Select Trip' />
+                </SelectTrigger>
+                <SelectContent>
+                  {trips.map((trip: ITrip) => (
+                    <SelectItem key={trip.trip_id} value={trip.trip_id}>
+                      <div className='flex items-center space-x-2 w-full'>
+                        <span className='font-semibold w-1/2'>{trip.route.origin.split(',')[0]} &rarr; {trip.route.destination.split(',')[0]}</span>
+                        <div className="flex flex-col items-center space-x-2 w-1/2">
+                          <span>{statuses[trip.status as number]}</span>
+                          <div className="relative w-full bg-gray-200 h-1 rounded">
+                            <div
+                              className={`absolute top-0 left-0 h-1 rounded transition-width duration-500 ${trip.status === 0 ? 'bg-red-500' : trip.status === 1 ? 'bg-yellow-500' : trip.status === 2 ? 'bg-blue-500' : trip.status === 3 ? 'bg-green-500' : 'bg-green-800'}`}
+                              style={{ width: `${(trip.status as number / 4) * 100}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="mb-4 w-1/2">
+              <label className="block text-sm font-medium text-gray-700">Select Truck</label>
+              <Select value={formData.truck} onValueChange={(value) => handleSelectChange('truck', value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder='Select Truck' />
+                </SelectTrigger>
+                <SelectContent>
+                  {trucks.map((truck) => (
+                    <SelectItem key={truck.truckNo} value={truck.truckNo}>
+                      <span>{truck.truckNo}</span>
+                      <span
+                        className={`ml-2 p-1 rounded ${truck.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+                      >
+                        {truck.status}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>}
 
           <label className="block text-sm font-medium text-gray-700">Payment Mode</label>
           <div className="flex flex-row w-full justify-start gap-3 mb-3">
@@ -204,7 +301,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
               <button
                 key={type}
                 type="button"
-                className={`p-2 rounded-md ${formData.paymentMode === type ? 'bg-gray-700 text-white' : 'bg-gray-200 text-black'}`}
+                className={`p-2 rounded-md ${formData.paymentMode === type ? 'bg-bottomNavBarColor text-white' : 'bg-lightOrangeButtonColor text-black'}`}
                 onClick={() => handleChange({ target: { name: 'paymentMode', value: type } } as React.ChangeEvent<HTMLInputElement | HTMLSelectElement>)}
               >
                 {type}
@@ -242,7 +339,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
             </div>
           )}
 
-          {(formData.expenseType !== 'Fuel Expense' && !selected && !truckPage) && (
+          {(formData.expenseType !== 'Fuel Expense' && !selected && !truckPage && !pathname.includes('expenses')) && (
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700">Add to Party Bill</label>
               <input

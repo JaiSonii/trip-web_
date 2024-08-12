@@ -38,6 +38,7 @@ const config: Config = {
         lightOrange: '#ffa666',
         lightOrangeButtonColor: '#ffcaA4',
         destructive : '#D95C2B',
+        buttonTextColor : '#6F2718 ',
 
         // Existing HSL-based Colors
         border: "hsl(var(--border))",

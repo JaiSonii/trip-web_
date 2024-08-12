@@ -5,9 +5,9 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { FaTruckMoving, FaSignOutAlt, FaBars, FaTimes, FaUserCircle, FaHome, FaTruck, FaUsers, FaClipboardList, FaFileInvoiceDollar, FaUser, FaCheckCircle } from "react-icons/fa";
 import Cookies from 'js-cookie';
-import { FaTruckFast, FaCircle } from "react-icons/fa6";
+import { FaTruckFast, FaCircle, FaShop } from "react-icons/fa6";
 import { FaRegUser } from "react-icons/fa";
-import { RiSteering2Fill } from "react-icons/ri";
+import { RiSteering2Fill, RiTruckLine } from "react-icons/ri";
 import { auth } from '@/firebase/firbaseConfig';
 import { Button } from '../ui/button';
 import { signOut } from 'firebase/auth';
@@ -65,7 +65,8 @@ const MainLayout = () => {
     {
       href: `/user/expenses/truckExpense?monthYear=${encodeURIComponent(selectedMonthYear)}`,
       label: 'Expenses', icon: FaFileInvoiceDollar
-    }
+    },
+    { href : `/user/shops`, label: 'Shop Khata', icon : FaShop},
   ];
 
   const handleSignOut = async () => {
@@ -102,12 +103,12 @@ const MainLayout = () => {
 
         {/* Logo and Title */}
         <div className="flex items-center justify-center p-4 md:justify-start md:pl-4 border-b border-borderColor">
-          <FaTruckFast style={{ width: '50px', height: '50px' }} />
-          <span className="ml-3 text-xl font-bold">MoVerse</span>
+          <RiTruckLine style={{ width: '50px', height: '50px' }} />
+          <span className="ml-3 text-3xl font-bold">Awajahi</span>
         </div>
 
         {/* Menu Items */}
-        <ul className="flex-grow list-none p-0 m-0">
+        <ul className="flex-grow list-none p-0 m-0 overflow-y-auto">
           {menuItems.map((item) => (
             <li key={item.href} className="mb-2">
               <Link href={item.href}>

@@ -55,6 +55,7 @@ export async function POST(req: Request, { params }: { params: { truckNo: string
   
       // Create a new instance of TripExpense with the parsed data and tripId
       const newCharge = new Expense({
+        truck: truckNo,
         ...data,
         user_id: user
       });

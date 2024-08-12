@@ -4,8 +4,15 @@ import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { FaMapMarkerAlt, FaTruckMoving } from 'react-icons/fa';
 import Link from 'next/link';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { calculateTripExpense, calculateTruckExpense } from '@/helpers/ExpenseOperation';
+import { calculateTripExpense, calculateTruckExpense, handleAddCharge } from '@/helpers/ExpenseOperation';
 import { IExpense } from '@/utils/interface';
+import { Button } from '../ui/button';
+import dynamic from 'next/dynamic';
+import { IoAddCircle } from 'react-icons/io5';
+import { RiHomeOfficeFill } from 'react-icons/ri';
+import { FaRoute } from 'react-icons/fa6';
+
+const ExpenseModal = dynamic(() => import('@/components/trip/tripDetail/ExpenseModal'))
 
 interface TruckLayoutProps {
   children: React.ReactNode;
@@ -39,6 +46,34 @@ const ExpenseLayout: React.FC<TruckLayoutProps> = ({ children }) => {
   const [truckExpense, setTruckExpense] = useState(0);
   const [tripExpense, setTripExpense] = useState(0);
   const [monthExpense, setMonthExpense] = useState(0);
+  const [modalOpen, setModalOpen] = useState(false)
+
+  const handleSave = async (data: any) => {
+    if (!data.trip && !data.truck) {
+      alert('Trip and Truck Not Specified')
+      return
+    }
+    try {
+      if (data.trip != '') {
+        await fetch(`/api/trips/${data.trip}/truckExpense`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        })
+      } else {
+        await handleAddCharge(data, '', data.truck)
+      }
+    } catch (error: any) {
+      alert(error.message)
+      console.log(error)
+    } finally {
+      router.refresh()
+    }
+
+  }
+
 
   useEffect(() => {
     const fetchExpenses = async (value: string) => {
@@ -63,12 +98,23 @@ const ExpenseLayout: React.FC<TruckLayoutProps> = ({ children }) => {
 
   const tabs = [
     { logo: <FaTruckMoving />, name: 'Truck Expense', path: `/user/expenses/truckExpense` },
-    { logo: <FaMapMarkerAlt />, name: 'Trip Expense', path: `/user/expenses/tripExpense` },
+    { logo: <FaRoute />, name: 'Trip Expense', path: `/user/expenses/tripExpense` },
+    {logo: <RiHomeOfficeFill />, name: 'Office Expense', path: `/user/expenses/OfficeExpense`}
   ];
 
   return (
     <div className="w-full h-full p-4 bg-gray-50">
-      <h1 className="text-2xl font-bold mb-4 text-gray-800">Expenses</h1>
+      <div className='flex items-center justify-between'>
+        <h1 className="text-2xl font-bold mb-4 text-bottomNavBarColor">Expenses</h1>
+        <Button onClick={() => setModalOpen(true)}>
+          <div className='flex items-center space-x-1 justify-center min-h-full'>
+            <span>Add Expense</span>
+            <IoAddCircle />
+          </div>
+
+        </Button>
+      </div>
+
 
       <div className="flex flex-col md:flex-row md:items-center md:space-x-4 mb-4">
         <Select name="monthYear" value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
@@ -102,14 +148,14 @@ const ExpenseLayout: React.FC<TruckLayoutProps> = ({ children }) => {
         </div>
       </div>
 
-      <div className="flex space-x-4 border-b-2 border-gray-300 mb-4">
+      <div className="flex border-b-2 border-lightOrange mb-4">
         {tabs.map((tab) => (
           <Link
             key={tab.name}
             href={{ pathname: tab.path, query: { monthYear: selectedMonthYear } }}
-            className={`px-4 py-2 transition duration-300 ease-in-out font-semibold ${pathname === tab.path
-              ? 'border-b-2 border-bottomNavBarColor text-bottomNavBarColor'
-              : 'border-transparent text-gray-600 hover:text-bottomNavBarColor hover:border-bottomNavBarColor'
+            className={`px-4 py-2 transition duration-300 ease-in-out font-semibold rounded-t-md hover:bg-lightOrangeButtonColor ${pathname === tab.path
+              ? 'border-b-2 border-lightOrange text-buttonTextColor bg-lightOrange'
+              : 'border-transparent text-buttonTextColor hover:bottomNavBarColor hover:border-bottomNavBarColor'
               }`}
           >
             <div className="flex items-center space-x-2">
@@ -121,6 +167,7 @@ const ExpenseLayout: React.FC<TruckLayoutProps> = ({ children }) => {
       </div>
 
       <div>{children}</div>
+      <ExpenseModal isOpen={modalOpen} onClose={() => setModalOpen(false)} onSave={handleSave} driverId='' />
     </div>
   );
 };

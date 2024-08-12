@@ -292,7 +292,6 @@ ExpenseSchema = new Schema({
   },
   truck : {
     type : String,
-    required : true,
     default : ''
   },
   expenseType : {

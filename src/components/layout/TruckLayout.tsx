@@ -16,6 +16,7 @@ import { SlOptionsVertical } from "react-icons/sl";
 import { IoCloseCircleOutline } from "react-icons/io5";
 import { IoAddCircle } from "react-icons/io5";
 import EditTruckModal from '../truck/EditTruckModal';
+import { motion } from 'framer-motion';
 
 interface TruckLayoutProps {
     children: React.ReactNode;
@@ -179,7 +180,7 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
     return (
         <div className="w-full h-full p-4 bg-gray-50 rounded-lg shadow-sm min-h-screen">
             <div className="flex flex-col space-y-4">
-                <div className="flex items-center justify-between p-4 bg-gray-200">
+                <div className="flex items-center justify-between p-4 bg-lightOrange rounded-sm text-buttonTextColor">
                     <div className="flex items-center space-x-4">
                         <Button
                             variant="outline"
@@ -217,7 +218,10 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
                             <SlOptionsVertical size={20} />
                         </Button>
                         {openOptions && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md flex flex-col gap-2 p-2 z-10">
+                            <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.2 }} className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md flex flex-col gap-2 p-2 z-10">
                                 <Button
                                     onClick={() => {
                                         setModalOpen(true);
@@ -256,21 +260,21 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
                                 >
                                     <IoCloseCircleOutline className="mr-2" /> Close
                                 </Button>
-                            </div>
+                            </motion.div>
                         )}
                     </div>
                 </div>
 
 
 
-                <div className="flex space-x-4 border-b-2 border-gray-200">
+                <div className="flex border-b-2 border-lightOrange">
                     {tabs.map((tab) => (
                         <Link
                             key={tab.name}
                             href={tab.path}
-                            className={`px-4 py-2 transition duration-300 ease-in-out font-semibold ${pathname === tab.path
-                                ? 'border-b-2 border-bottomNavBarColor text-bottomNavBarColor'
-                                : 'border-transparent text-gray-600 hover:bottomNavBarColor hover:border-bottomNavBarColor'
+                            className={`px-4 py-2 transition duration-300 ease-in-out font-semibold rounded-t-md hover:bg-lightOrangeButtonColor ${pathname === tab.path
+                                ? 'border-b-2 border-lightOrange text-buttonTextColor bg-lightOrange'
+                                : 'border-transparent text-buttonTextColor hover:bottomNavBarColor hover:border-bottomNavBarColor'
                                 }`}
                             prefetch={true}
                         >

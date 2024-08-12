@@ -171,6 +171,22 @@ export const chargeType = [
     'Roof Top Repair'
   ]);
 
+  export const officeExpenseTypes = [
+    'Audit Fees',
+    'Courier Expenses',
+    'Electricity',
+    'Rent',
+    'Labour',
+    'Legal Expenses',
+    'Mess Expenses',
+    'Telephone Expenses',
+    'Pooja Expenses',
+    'Salary and Wages',
+    'Stationary Expenses',
+    'Tea Expenses',
+    'Travelling Expenses'
+  ]
+
   
 
   
