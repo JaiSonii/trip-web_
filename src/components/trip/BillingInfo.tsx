@@ -33,7 +33,7 @@ export const BillingInfo: React.FC<BillingInfoProps> = ({ formData, handleChange
           <button
             key={type}
             type="button"
-            className={`p-2 rounded-md ${formData.billingType === type ? 'bg-gray-700 text-white' : 'bg-gray-200 text-black'}`}
+            className={`p-2 rounded-md ${formData.billingType === type ? 'bg-bottomNavBarColor text-white' : 'bg-lightOrange text-buttonTextColor'}`}
             onClick={() => handleChange({ target: { name: 'billingType', value: type } } as React.ChangeEvent<HTMLInputElement | HTMLSelectElement>)}
           >
             {type}

@@ -1,9 +1,8 @@
 import { verifyToken } from "@/utils/auth";
-import { decryptData, encryptData } from "@/utils/encryption";
+import { encryptData, decryptData } from "@/utils/encryption";
 import { connectToDatabase, userSchema } from "@/utils/schema";
 import { model, models } from "mongoose";
 import { NextResponse } from "next/server";
-
 userSchema.pre('save', function (next) {
     if (this.isModified('phone')) {
         this.phone = encryptData(this.phone);
@@ -13,10 +12,11 @@ userSchema.pre('save', function (next) {
   
   // Decrypt the phone after retrieving
   userSchema.methods.decryptPhone = function () {
-    return decryptData(decryptData(this.phone));
+    return decryptData(this.phone);
   };
 
 const User = models.User || model('User', userSchema);
+
 
 export async function POST(req: Request) {
     try {
@@ -57,7 +57,6 @@ export async function GET(req: Request) {
 
         // Decrypt the phone before sending it to the frontend
         curUser.phone = curUser.decryptPhone();
-        console.log(curUser.phone)
 
         return NextResponse.json({ user: curUser.toObject(), status: 200 });
     } catch (error) {

@@ -239,17 +239,7 @@ export const userSchema = new Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
-userSchema.pre('save', function (next) {
-  if (this.isModified('phone')) {
-      this.phone = encryptData(this.phone);
-  }
-  next();
-});
 
-// Decrypt the phone after retrieving
-userSchema.methods.decryptPhone = function () {
-  return decryptData(this.phone);
-};
 
 export const tripChargesSchema = new Schema({
   user_id: {

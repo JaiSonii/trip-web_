@@ -14,21 +14,34 @@ const Driver = models.Driver || model('Driver', driverSchema)
 const Truck = models.Truck || model('Truck', truckSchema)
 
 
-export async function GET(req : Request) {
+export async function GET(req: Request) {
   const { user, error } = await verifyToken(req);
   if (error) {
     return NextResponse.json({ error });
   }
+
   try {
     await connectToDatabase();
 
-    const trips = await Trip.find({user_id : user}).lean().sort({ 'dates.0': -1 }).exec();
+    const url = new URL(req.url);
+    const statuses = url.searchParams.get('statuses')?.split(',').map(Number);
+
+    const query: any = { user_id: user };
+
+    // If statuses are provided, use the $in operator to match any of the statuses
+    if (statuses && statuses.length > 0) {
+      query.status = { $in: statuses };
+    }
+
+    const trips = await Trip.find(query).lean().sort({ 'dates.0': -1 }).exec();
+
     return NextResponse.json({ trips });
   } catch (err) {
     console.error(err);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
 
 
 
