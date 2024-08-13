@@ -1,9 +1,12 @@
 import { NextResponse } from 'next/server'
 import { NextRequest, userAgent } from 'next/server'
+import { verifyToken } from './utils/auth'
  
 // This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
   const token = request.cookies.get('auth_token')?.value
+
+  
 
   const {device,os} = userAgent(request)
 

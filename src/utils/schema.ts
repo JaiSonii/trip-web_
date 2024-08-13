@@ -344,6 +344,28 @@ export const supplierAccountSchema = new Schema({
   refNo : String
 })
 
+export const OfficeExpenseSchema = new Schema({
+  user_id : {
+    type : String,
+    required : true
+  },
+  expenseType : {
+    type : String,
+    required : true
+  },
+  amount : {
+    type : Number,
+    required : true
+  },
+  paymentMode : String,
+  date : {
+    type : Date,
+    required : true
+  },
+  transactionId : String,
+  notes : String
+})
+
 const connectString: any = process.env.NEXT_PUBLIC_MONGO_URL
 
 export async function connectToDatabase() {

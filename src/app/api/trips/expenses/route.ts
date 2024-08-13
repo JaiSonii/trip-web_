@@ -13,7 +13,7 @@ export async function GET(req : Request) {
     try {
       await connectToDatabase();
   
-      const trips = await Trip.find({user_id : user}).select(['trip_id', 'route','status', 'truck']).lean().sort({ 'dates.0': -1 }).exec();
+      const trips = await Trip.find({user_id : user}).select(['trip_id', 'route','status', 'truck','driver']).lean().sort({ 'dates.0': -1 }).exec();
       return NextResponse.json({ trips });
     } catch (err) {
       console.error(err);

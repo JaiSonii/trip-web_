@@ -56,6 +56,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
   const [drivers, setDrivers] = useState<IDriver[]>([]);
   const [trucks, setTrucks] = useState<TruckModel[]>([])
   const [trips, setTrips] = useState<ITrip[]>([])
+  const [trip, setTrip] = useState<ITrip>()
 
   useEffect(() => {
     if (!selected) return;
@@ -76,7 +77,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
 
   useEffect(() => {
     const fetchDriverName = async () => {
-      const result = await fetch(`/api/drivers/${driverId}`, {
+      const result = await fetch(`/api/drivers/${driverId || trip?.driver}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -122,6 +123,12 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
     }
   }, [pathname])
 
+  useEffect(()=>{
+    if(formData.paymentMode === 'Paid By Driver' && trip){
+      setFormData((prevData) => ({...prevData, driver: trip.driver }));
+    }
+  },[trip,formData.paymentMode])
+
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prevData) => {
       let updatedData = { ...prevData, [name]: value };
@@ -129,6 +136,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
       if (name === 'trip') {
         const selectedTrip = trips.find(trip => trip.trip_id === value);
         if (selectedTrip) {
+          setTrip(selectedTrip)
           updatedData = { ...updatedData, truck: selectedTrip.truck };
         }
       }

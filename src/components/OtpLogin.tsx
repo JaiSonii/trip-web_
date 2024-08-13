@@ -179,7 +179,7 @@ function OtpLogin() {
             >
               Country Code
             </label>
-            <Select value={countryCode} onValueChange={setCountryCode}>
+            <Select value={countryCode} onValueChange={setCountryCode} >
               <SelectTrigger id="countryCode" aria-label="Country Code">
                 <SelectValue placeholder="Select country code" />
               </SelectTrigger>
@@ -187,7 +187,7 @@ function OtpLogin() {
                 <SelectGroup>
                   {countryCodes.map((code) => (
                     <SelectItem key={code.dial_code} value={code.dial_code}>
-                      {code.dial_code} - {code.name}
+                      {code.dial_code} - {code.code}
                     </SelectItem>
                   ))}
                 </SelectGroup>

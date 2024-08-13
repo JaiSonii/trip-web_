@@ -99,7 +99,7 @@ const ExpenseLayout: React.FC<TruckLayoutProps> = ({ children }) => {
   const tabs = [
     { logo: <FaTruckMoving />, name: 'Truck Expense', path: `/user/expenses/truckExpense` },
     { logo: <FaRoute />, name: 'Trip Expense', path: `/user/expenses/tripExpense` },
-    {logo: <RiHomeOfficeFill />, name: 'Office Expense', path: `/user/expenses/OfficeExpense`}
+    {logo: <RiHomeOfficeFill />, name: 'Office Expense', path: `/user/expenses/officeExpense`}
   ];
 
   return (
@@ -108,7 +108,7 @@ const ExpenseLayout: React.FC<TruckLayoutProps> = ({ children }) => {
         <h1 className="text-2xl font-bold mb-4 text-bottomNavBarColor">Expenses</h1>
         <Button onClick={() => setModalOpen(true)}>
           <div className='flex items-center space-x-1 justify-center min-h-full'>
-            <span>Add Expense</span>
+            <span>Trip/Truck</span>
             <IoAddCircle />
           </div>
 
