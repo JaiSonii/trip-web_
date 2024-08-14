@@ -14,6 +14,7 @@ import { signOut } from 'firebase/auth';
 import { MdArrowDropDown } from "react-icons/md";
 import { motion } from 'framer-motion';
 import { decryptData } from '@/utils/encryption';
+import { SearchIcon } from 'lucide-react';
 
 const MainLayout = () => {
   const pathname = usePathname();
@@ -66,7 +67,8 @@ const MainLayout = () => {
       href: `/user/expenses/truckExpense?monthYear=${encodeURIComponent(selectedMonthYear)}`,
       label: 'Expenses', icon: FaFileInvoiceDollar
     },
-    { href : `/user/shops`, label: 'Shop Khata', icon : FaShop},
+    { href: `/user/shops`, label: 'Shop Khata', icon: FaShop },
+    { href: `/user/search`, label: 'Search', icon: SearchIcon }
   ];
 
   const handleSignOut = async () => {
@@ -94,7 +96,7 @@ const MainLayout = () => {
       document.cookie = `userId=${user[role]}; path=/;`;
 
     }
-    pathname != `/user/parties` ? router.push(`/user/parties`) :  window.location.reload()
+    pathname != `/user/parties` ? router.push(`/user/parties`) : window.location.reload()
   };
 
   return (
@@ -108,11 +110,14 @@ const MainLayout = () => {
         </div>
 
         {/* Menu Items */}
-        <ul className="flex-grow list-none p-0 m-0 overflow-y-auto">
+        <ul className="flex-grow list-none p-0 m-0 h-auto">
           {menuItems.map((item) => (
             <li key={item.href} className="mb-2">
               <Link href={item.href}>
-                <div className={`flex items-center p-4 text-lg font-semibold transition duration-300 ease-in-out rounded-md ${pathname.startsWith(item.href) || selected === item.label ? 'bg-primaryOrange text-whiteColor' : 'hover:bg-lightOrange hover:text-whiteColor'}`}
+                <div
+                  className={`flex items-center p-4 text-lg font-semibold transition duration-300 ease-in-out rounded-md 
+          ${pathname.startsWith(item.href) || selected === item.label ? 'bg-primaryOrange text-whiteColor' : 'hover:bg-lightOrange hover:text-whiteColor'}
+          lg:p-3 lg:text-base md:p-2 md:text-sm sm:p-1 sm:text-xs`}
                   onClick={() => setSelected(item.label)}
                 >
                   <item.icon className="mr-3" />
@@ -122,6 +127,7 @@ const MainLayout = () => {
             </li>
           ))}
         </ul>
+
 
         {/* User Profile and Switch Account */}
         <div className="flex flex-col items-center p-6 border-t border-borderColor">
@@ -140,14 +146,14 @@ const MainLayout = () => {
 
 
 
-            
+
           </div>
           <Button variant={'outline'} onClick={() => setIsSwitchBoxOpen(!isSwitchBoxOpen)} >
-              <div className='flex items-center space-x-1'>
-                <span>{selectedRole}</span>
-                <MdArrowDropDown className='text-white' />
-              </div>
-            </Button>
+            <div className='flex items-center space-x-1'>
+              <span className='text-white'>{selectedRole}</span>
+              <MdArrowDropDown className='text-white' />
+            </div>
+          </Button>
         </div>
         {/* Switch Account Box */}
         {isSwitchBoxOpen && (

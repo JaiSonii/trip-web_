@@ -15,7 +15,7 @@ interface DriverLayoutProps {
   driverId: string;
   onDriverUpdate: (driver: IDriver) => void;
   contactNumber: string;
-  children : React.ReactNode
+  children: React.ReactNode
 }
 
 const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onDriverUpdate, contactNumber, children }) => {
@@ -157,27 +157,27 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onD
         )}
       </div>
       <div>
-      <div className="flex items-center justify-between p-3 bg-gray-200 rounded-sm w-fit">
-        <span className="text-2xl">Driver Balance: <DriverBalance driverId={driverId}/></span> {/* Display balance */}
-      </div>
-      <div className="flex space-x-4 border-b-2 border-gray-300 mb-4 mt-2">
-        {tabs.map((tab) => (
-          <Link
-            key={tab.name}
-            href={tab.path}
-            className={`px-4 py-2 transition duration-300 ease-in-out font-semibold ${pathname === tab.path
-              ? 'border-b-2 border-bottomNavBarColor text-bottomNavBarColor'
-              : 'border-transparent text-gray-600 hover:text-bottomNavBarColor hover:border-bottomNavBarColor'
-              }`}
-          >
-            <div className="flex items-center space-x-2">
-              {tab.logo}
-              <span>{tab.name}</span>
-            </div>
-          </Link>
-        ))}
-      </div>
-      <div className="mt-4">{children}</div>
+        <div className="flex items-center justify-between p-3 bg-gray-200 rounded-sm w-fit">
+          <span className="text-2xl">Driver Balance: <DriverBalance driverId={driverId} /></span> {/* Display balance */}
+        </div>
+        <div className="flex border-b-2 border-lightOrange mb-4 mt-2">
+          {tabs.map((tab) => (
+            <Link
+              key={tab.name}
+              href={tab.path}
+              className={`px-4 py-2 transition duration-300 ease-in-out font-semibold rounded-t-md hover:bg-lightOrangeButtonColor ${pathname === tab.path
+                ? 'border-b-2 border-lightOrange text-buttonTextColor bg-lightOrange'
+                : 'border-transparent text-buttonTextColor hover:bottomNavBarColor hover:border-bottomNavBarColor'
+                }`}
+            >
+              <div className="flex items-center space-x-2">
+                {tab.logo}
+                <span>{tab.name}</span>
+              </div>
+            </Link>
+          ))}
+        </div>
+        <div className="mt-4">{children}</div>
       </div>
     </div>
 

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { IDriver } from '@/utils/interface';
 import { isValidPhone } from '@/utils/validate';
+import { Button } from '../ui/button';
 
 interface EditDriverModalProps {
   name: string;
@@ -33,7 +34,6 @@ const EditDriverModal: React.FC<EditDriverModalProps> = ({ name, driverId, handl
             <label className="block text-gray-700">Name</label>
             <input
               type="text"
-              className="w-full p-2 border border-gray-300 rounded"
               value={driverName}
               onChange={(e) => setDriverName(e.target.value)}
             />
@@ -42,27 +42,25 @@ const EditDriverModal: React.FC<EditDriverModalProps> = ({ name, driverId, handl
             <label className="block text-gray-700">Mobile Number</label>
             <input
               type="text"
-              className="w-full p-2 border border-gray-300 rounded"
               value={mobileNumber}
               onChange={(e) => setMobileNumber(e.target.value)}
             />
           </div>
-          <div className="flex justify-end">
-            <button
+          <div className="flex justify-end space-x-2">
+            <Button
               type="button"
-              className="px-4 py-2 bg-gray-300 rounded mr-2"
+              variant={'outline'}
               onClick={() => {setDriverName(name)
                 onCancel()
               }} // Reset name field to original value on cancel
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              className="px-4 py-2 bg-blue-500 text-white rounded"
             >
               Save
-            </button>
+            </Button>
           </div>
         </form>
       </div>

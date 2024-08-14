@@ -197,3 +197,8 @@ body {
 .custom-table caption a:hover {
   text-decoration: underline;
 }
+
+input {
+ @apply w-full px-3 py-2 border border-lightOrange rounded-lg focus:outline-none focus:ring focus:ring-lightOrange
+}
+

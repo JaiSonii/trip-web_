@@ -1,6 +1,7 @@
 import React from 'react';
 import { MdDeleteForever, MdEdit } from "react-icons/md";
 import { Button } from '../ui/button';
+import { motion } from 'framer-motion';
 
 interface DropdownMenuProps {
   onEditClick: () => void;
@@ -13,7 +14,6 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ onEditClick, onDeleteClick 
   return (
     <div className="relative">
       <Button
-        className="px-4 py-2 text-white bg-buttonColor rounded-md focus:outline-none border-none"
         onClick={() => setDropdownOpen(!dropdownOpen)}
       >
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -25,9 +25,12 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ onEditClick, onDeleteClick 
         </svg>
       </Button>
       {dropdownOpen && (
-        <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow-lg flex flex-col">
+        <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }} className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md flex flex-col gap-2 p-2 z-10">
           <Button
-            variant={'secondary'}
+            variant={'ghost'}
             onClick={onEditClick}
           >
             <MdEdit style={{ width: '20px', height: '20px' }} /> Edit
@@ -38,7 +41,7 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ onEditClick, onDeleteClick 
           >
             <MdDeleteForever style={{ width: '20px', height: '20px' }} /> Delete
           </Button>
-        </div>
+        </motion.div>
       )}
     </div>
   );

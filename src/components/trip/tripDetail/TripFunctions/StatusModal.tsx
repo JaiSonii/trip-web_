@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { statuses } from '@/utils/schema';
+import { Button } from '@/components/ui/button';
 
 interface StatusModalProps {
   status: number;
@@ -71,13 +72,12 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-500 bg-opacity-75">
       <div className="bg-white rounded-lg shadow-md overflow-hidden" style={{ maxWidth: '600px', width: '90%' }}>
         <div className="p-6">
-          <h2 className="text-lg font-bold mb-4">Trip {statuses[status + 1]}</h2>
+          <h2 className="text-lg font-bold mb-4 text-bottomNavBarColor">Trip {statuses[status + 1]}</h2>
           {statuses[status] === 'Started' && (
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
               <input
                 type="date"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-blue-500"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
               />
@@ -89,7 +89,6 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
                 <label className="block text-sm font-medium text-gray-700 mb-1">POD Received Date</label>
                 <input
                   type="date"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-blue-500"
                   value={podReceivedDate}
                   onChange={(e) => setPodReceivedDate(e.target.value)}
                 />
@@ -99,7 +98,6 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
                 <input
                   type="file"
                   accept="image/*"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-blue-500"
                   onChange={handleFileChange}
                 />
               </div>
@@ -110,7 +108,6 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
               <label className="block text-sm font-medium text-gray-700 mb-1">POD Submitted Date</label>
               <input
                 type="date"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-blue-500"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
               />
@@ -122,7 +119,6 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
                 <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
                 <input
                   type="number"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-blue-500"
                   value={amount}
                   disabled
                 />
@@ -130,7 +126,7 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Payment Type</label>
                 <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-lightOrange rounded-lg focus:outline-none focus:ring focus:ring-lightOrange focus:border-lightOrange"
                   value={paymentType}
                   onChange={(e) => setPaymentType(e.target.value)}
                 >
@@ -144,10 +140,9 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
                 </select>
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Settlement Date</label>
+                <label className="block text-sm font-medium text-bottomNavBarColor mb-1">Settlement Date</label>
                 <input
                   type="date"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-blue-500"
                   value={settlementDate}
                   onChange={(e) => setSettlementDate(e.target.value)}
                 />
@@ -156,7 +151,7 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
                 <label className="flex items-center">
                   <input
                     type="checkbox"
-                    className="form-checkbox h-4 w-4 text-blue-500 focus:ring-blue-400"
+                    className="form-checkbox h-4 w-4 text-lightOrange focus:ring-bottomNavBarColor"
                     checked={receivedByDriver}
                     onChange={(e) => setReceivedByDriver(e.target.checked)}
                   />
@@ -166,7 +161,7 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
                 <textarea
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-lightOrange rounded-lg focus:outline-none focus:ring focus:ring-lightOrange focus:border-bottomNavBarColor"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
                 />
@@ -177,13 +172,13 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
 
             </>
           )}
-          <div className="mt-4 flex justify-end">
-            <button className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg mr-2" onClick={saveChanges}>
+          <div className="mt-4 flex justify-end space-x-2">
+            <Button onClick={saveChanges}>
               Save
-            </button>
-            <button className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-lg" onClick={onClose}>
+            </Button>
+            <Button variant={'outline'} onClick={onClose}>
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       </div>

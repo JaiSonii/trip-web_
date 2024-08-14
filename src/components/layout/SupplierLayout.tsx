@@ -156,16 +156,15 @@ const SupplierLayout = ({ children, supplierId }: TruckLayoutProps) => {
                     </div>
                 </div>
 
-                <div className="flex space-x-4 border-b-2 border-gray-200 mt-4">
+                <div className="flex border-b-2 border-lightOrange mt-4">
                     {tabs.map((tab) => (
                         <Link
                             key={tab.name}
                             href={tab.path}
-                            className={`px-4 py-2 transition duration-300 ease-in-out font-semibold ${
-                                pathname === tab.path
-                                    ? 'border-b-2 border-bottomNavBarColor text-bottomNavBarColor'
-                                    : 'border-transparent text-gray-600 hover:text-bottomNavBarColor hover:border-bottomNavBarColor'
-                            }`}
+                            className={`px-4 py-2 transition duration-300 ease-in-out font-semibold rounded-t-md hover:bg-lightOrangeButtonColor ${pathname === tab.path
+                                ? 'border-b-2 border-lightOrange text-buttonTextColor bg-lightOrange'
+                                : 'border-transparent text-buttonTextColor hover:bottomNavBarColor hover:border-bottomNavBarColor'
+                                }`}
                             prefetch={true}
                         >
                             <div className="flex items-center space-x-2">
