@@ -139,8 +139,7 @@ body {
 }
 
 .custom-table tbody tr:hover {
-  background-color: #edf2f7; /* Slightly darker grey on hover */
-  cursor: pointer; /* Pointer cursor on hover */
+  @apply hover:bg-orange-100 cursor-pointer /* Pointer cursor on hover */
 }
 
 .custom-table tbody td {
@@ -198,7 +197,18 @@ body {
   text-decoration: underline;
 }
 
-input {
- @apply w-full px-3 py-2 border border-lightOrange rounded-lg focus:outline-none focus:ring focus:ring-lightOrange
+input:not([type="checkbox"]) {
+  @apply w-full px-3 py-2 border border-lightOrange rounded-lg focus:outline-none focus:ring focus:ring-lightOrange;
+}
+
+textarea {
+  @apply w-full px-3 py-2 border border-lightOrange rounded-lg focus:outline-none focus:ring focus:ring-lightOrange;
+}
+tr{
+  @apply hover:bg-orange-100 cursor-pointer
+}
+
+td{
+  @apply border p-4
 }
 

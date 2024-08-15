@@ -145,7 +145,29 @@ const TripsPage = () => {
               {trips.map((trip, index) => (
                 <tr
                   key={index}
-                  className="border-t hover:bg-orange-100 cursor-pointer transition-colors"
+                  className="
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  
+                  "
                   onClick={() => router.push(`/user/trips/${trip.trip_id}`)}
                 >
                   <td className="border p-4">

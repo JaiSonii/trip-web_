@@ -11,6 +11,7 @@ import DataList from './DataList';
 import Charges from './Charges'; // Import the Charges component
 import { fetchBalance } from '@/helpers/fetchTripBalance';
 import { fetchPartyName } from '@/helpers/fetchPartyName';
+import EWayBillUpload from './EwayBillUpload';
 
 interface TripDetailsProps {
   trip: ITrip;
@@ -22,6 +23,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
   const [accounts, setAccounts] = useState<PaymentBook[]>(trip.accounts);
   const [tripBalance, setBalance] = useState(0);
   const [charges, setCharges] = useState<TripExpense[]>([])
+  const [ewayBillUrl, setEwayBillUrl] = useState(trip.ewayBill)
 
   useEffect(() => {
     const balance = async () => {
@@ -195,6 +197,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
           <p className="text-2xl font-semibold mt-4">₹ {tripBalance}</p>
         </div>
         <Profit charges={charges} truckCost={trip.truckHireCost && trip.truckHireCost} amount={trip.amount} setCharges={setCharges} tripId={trip.trip_id} driverId={trip.driver} truckNo={trip.truck} />
+        <EWayBillUpload tripId={trip.trip_id} ewayBillUrl={ewayBillUrl} setEwayBillUrl={setEwayBillUrl} />
         <PODViewer podUrl={podUrl} />
       </div>
     </div>

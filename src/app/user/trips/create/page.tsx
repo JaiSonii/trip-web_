@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import TripForm from '@/components/trip/TripForm';
 import { IDriver, TruckModel, IParty, ITrip } from '@/utils/interface';
 import { useRouter } from 'next/navigation';
-import Loading from '@/app/user/loading'; // Ensure the Loading component shows a GIF
+import Loading from '../loading'; // Ensure the Loading component shows a GIF
 
 const CreateTripPage: React.FC = () => {
   const router = useRouter();

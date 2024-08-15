@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { FaCalendarAlt, FaRoute } from 'react-icons/fa';
 import { GoOrganization } from 'react-icons/go';
 
-const Loading = dynamic(() => import('../[truckNo]/loading'), {
+const Loading = dynamic(() => import('./loading'), {
   ssr: false,
   loading: () => <div>Loading...</div>,
 });

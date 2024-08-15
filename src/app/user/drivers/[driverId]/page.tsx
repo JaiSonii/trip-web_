@@ -4,7 +4,7 @@ import { useParams, usePathname, useRouter } from 'next/navigation';
 import { MdDelete, MdEdit } from "react-icons/md";
 import DriverLayout from '@/components/driver/driverLayout';
 import { IDriver, IDriverAccount, ITrip, IExpense, PaymentBook } from '@/utils/interface';
-import Loading from '@/app/user/loading';
+import Loading from '../loading';
 import { ExpenseforDriver } from '@/helpers/ExpenseOperation';
 import { handleDelete as DeleteForExpense } from '@/helpers/ExpenseOperation';
 import { DeleteAccount } from '@/helpers/TripOperation';

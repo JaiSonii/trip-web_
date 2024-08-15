@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from 'react';
 import { IParty } from '@/utils/interface';
 import { useRouter } from 'next/navigation';
-import Loading from '@/app/user/loading';
+import Loading from './loading';
 import { useAuth } from '@/components/AuthProvider';
 import PartyBalance from '@/components/party/PartyBalance';
 import { FaPhone, FaUserTie } from 'react-icons/fa6';

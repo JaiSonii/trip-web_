@@ -108,7 +108,7 @@ const ExpenseLayout: React.FC<TruckLayoutProps> = ({ children }) => {
         <h1 className="text-2xl font-bold mb-4 text-bottomNavBarColor">Expenses</h1>
         <Button onClick={() => setModalOpen(true)}>
           <div className='flex items-center space-x-1 justify-center min-h-full'>
-            <span>Trip/Truck</span>
+            <span>Trip/Truck Expense</span>
             <IoAddCircle />
           </div>
 

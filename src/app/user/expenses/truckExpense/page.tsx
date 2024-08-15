@@ -1,10 +1,10 @@
 'use client';
-import Loading from '@/app/user/loading';
+import Loading from '../loading';
 import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal';
 import { Button } from '@/components/ui/button';
 import { IExpense } from '@/utils/interface';
 import { useSearchParams, useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import { MdDelete, MdEdit, MdPayment } from 'react-icons/md';
 import { fetchTruckExpense, handleAddCharge, handleDelete } from '@/helpers/ExpenseOperation';
 import DriverName from '@/components/driver/DriverName';
@@ -218,4 +218,13 @@ const TruckExpense: React.FC = () => {
   );
 };
 
-export default TruckExpense;
+const TruckExpenseWrapper: React.FC = () => {
+  return (
+    <Suspense fallback={<Loading />}>
+      <TruckExpense />
+    </Suspense>
+  )
+
+}
+
+export default TruckExpenseWrapper;

@@ -66,6 +66,7 @@ export interface ITrip extends Document {
   material?: string;
   notes?: string;
   accounts : PaymentBook[]
+  ewayBill : string
 }
 
 

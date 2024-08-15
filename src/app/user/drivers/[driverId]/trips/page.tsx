@@ -5,7 +5,7 @@ import { ITrip } from '@/utils/interface';
 import { statuses } from '@/utils/schema';
 import { fetchBalance } from '@/helpers/fetchTripBalance';
 import { FaCalendarAlt, FaTruck, FaRoute, FaFileInvoiceDollar, FaUser } from 'react-icons/fa';
-import Loading from '@/app/user/loading';
+import Loading from '../loading';
 import PartyName from '@/components/party/PartyName';
 import { GoOrganization } from 'react-icons/go';
 

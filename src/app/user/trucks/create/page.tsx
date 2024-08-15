@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import { ISupplier } from '@/utils/interface';
 import SupplierSelect from '@/components/truck/SupplierSelect';
 import AdditionalDetails from '@/components/truck/AdditionalDetails';
-import Loading from '../../loading';
+import Loading from '../loading';
 import { truckTypesIcons } from '@/utils/utilArray';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectLabel, SelectValue } from '@/components/ui/select'; // Adjust the import path as necessary
 import { Button } from '@/components/ui/button';

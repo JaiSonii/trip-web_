@@ -133,6 +133,14 @@ export const tripSchema = new Schema({
   POD: {
     type: String,
   },
+  ewayBill:{
+    type : String,
+    default : ''
+  },
+  EWBValidity :{
+    from : Date,
+    to : Date
+  },
   dates: [
     Date
   ],

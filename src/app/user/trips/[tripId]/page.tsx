@@ -7,6 +7,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { MdEdit, MdDelete, MdClose } from 'react-icons/md';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import Loading from '../loading';
 
 // Dynamically import components
 const TripDetails = dynamic(() => import('@/components/trip/tripDetail/TripDetail'), {
@@ -17,9 +18,7 @@ const EditTripForm = dynamic(() => import('@/components/trip/EditTripForm'), {
   loading: () => <Loading />,
   ssr: false,
 });
-const Loading = dynamic(() => import('@/app/user/loading'), {
-  ssr: false,
-});
+
 
 const useFetchData = (tripId: string) => {
   const [trip, setTrip] = useState<ITrip | null>(null);

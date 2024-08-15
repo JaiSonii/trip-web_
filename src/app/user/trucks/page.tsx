@@ -1,7 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react';
 import { TruckModel } from '@/utils/interface';
-import Loading from '@/app/user/loading';
+import Loading from './loading';
 import { useRouter } from 'next/navigation';
 import { truckTypesIcons } from '@/utils/utilArray';
 

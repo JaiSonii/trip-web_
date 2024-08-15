@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import DriverForm from '@/components/createDriver';
 import { IDriver } from '@/utils/interface';
 import { useRouter } from 'next/navigation';
-import Loading from '@/app/user/loading';
+import Loading from '../loading';
 
 
 const isValidPhone = (phone: string): boolean => {

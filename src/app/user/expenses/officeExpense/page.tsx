@@ -1,17 +1,15 @@
 'use client';
-import Loading from '@/app/user/loading';
-import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal';
+
+import Loading from '../loading';
 import { Button } from '@/components/ui/button';
 import { IExpense } from '@/utils/interface';
-import { useSearchParams, useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
-import { MdDelete, MdEdit, MdLocalGasStation, MdPayment } from 'react-icons/md';
-import { fetchTruckExpense, handleAddCharge, handleDelete } from '@/helpers/ExpenseOperation';
-import DriverName from '@/components/driver/DriverName';
-import { icons, IconKey } from '@/utils/icons';
-import { FaCalendarAlt, FaTruck } from 'react-icons/fa';
+import { useSearchParams } from 'next/navigation';
+import React, { useEffect, useState, Suspense } from 'react';
+import { MdDelete, MdEdit, MdPayment } from 'react-icons/md';
+import { FaCalendarAlt } from 'react-icons/fa';
 import { IoAddCircle } from 'react-icons/io5';
 import OfficeExpenseModal from '@/components/OfficeExpenseModal';
+import { icons, IconKey } from '@/utils/icons';
 
 const OfficeExpense: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
@@ -24,13 +22,13 @@ const OfficeExpense: React.FC = () => {
     const monthYear = searchParams.get('monthYear')?.split(' ');
     const [month, year] = monthYear ? monthYear : [null, null];
 
-
     const getBook = async () => {
         try {
             setLoading(true);
             const res = await fetch(`/api/officeExpense`);
-            const data = res.ok ? await res.json() : alert('Error fetching Expense');
-            setMaintainenceBook(data.expenses);
+            if (!res.ok) throw new Error('Error fetching expenses');
+            const data = await res.json();
+            setMaintainenceBook(data.expenses || []);
         } catch (error) {
             setError((error as Error).message);
         } finally {
@@ -46,18 +44,15 @@ const OfficeExpense: React.FC = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(expense),
-            })
+            });
             if (!res.ok) {
-                alert('Error Editing Data')
+                alert('Error Editing Data');
+                return;
             }
-            const data = await res.json()
-            console.log(data)
-            getBook()
+            getBook();
         } catch (error: any) {
-            console.log(error)
             alert(error.message);
         }
-
     };
 
     const handleSave = async (expense: any) => {
@@ -68,45 +63,35 @@ const OfficeExpense: React.FC = () => {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(expense),
-            })
+            });
             if (!res.ok) {
                 alert('Error saving data');
+                return;
             }
-            const data = await res.json()
-            setMaintainenceBook((prev) => {
-                return [
-                    ...prev,
-                    data.expense
-                ]
-            })
+            const data = await res.json();
+            setMaintainenceBook((prev) => [...prev, data.expense]);
         } catch (error: any) {
-            alert(error.message)
-            console.log(error)
+            alert(error.message);
         }
-    }
+    };
 
-    const handleDelete = async (expenseId : string)=>{
+    const handleDelete = async (expenseId: string) => {
         try {
-            const res = await fetch(`/api/officeExpense/${expenseId}`,{
-                method : 'DELETE',
+            const res = await fetch(`/api/officeExpense/${expenseId}`, {
+                method: 'DELETE',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-            })
+            });
             if (!res.ok) {
-                alert('Failed to delete expense')
-                return
+                alert('Failed to delete expense');
+                return;
             }
-            const data = await res.json()
-            setMaintainenceBook((prev) => {
-                return prev.filter((item)=> item._id === expenseId)
-            })
+            setMaintainenceBook((prev) => prev.filter((item) => item._id !== expenseId));
         } catch (error: any) {
-            console.log(error)
             alert(error.message);
         }
-
-    }
+    };
 
     useEffect(() => {
         if (month && year) getBook();
@@ -171,7 +156,6 @@ const OfficeExpense: React.FC = () => {
                                             </Button>
                                             <Button variant="destructive" onClick={async () => {
                                                 await handleDelete(expense._id as string);
-                                                setMaintainenceBook((prev) => prev.filter((item) => item._id !== expense._id));
                                             }} size={"sm"}>
                                                 <MdDelete />
                                             </Button>
@@ -187,16 +171,23 @@ const OfficeExpense: React.FC = () => {
                     </tbody>
                 </table>
             </div>
-            {(
-                <OfficeExpenseModal
-                    isOpen={modalOpen}
-                    onClose={() => setModalOpen(false)}
-                    onSave={selected ? handleEditExpense : handleSave}
-                    selected={selected}
-                />
-            )}
+            <OfficeExpenseModal
+                isOpen={modalOpen}
+                onClose={() => {
+                    setModalOpen(false);
+                    setSelected(null);
+                }}
+                onSave={selected ? handleEditExpense : handleSave}
+                selected={selected}
+            />
         </div>
     );
 };
 
-export default OfficeExpense;
+const OfficeExpenseWrapper: React.FC = () => (
+    <Suspense fallback={<Loading />}>
+        <OfficeExpense />
+    </Suspense>
+);
+
+export default OfficeExpenseWrapper;

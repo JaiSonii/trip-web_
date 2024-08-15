@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IDriver } from '@/utils/interface';
-import Loading from '@/app/user/loading';
+import Loading from './loading';
 import DriverBalance from '@/components/driver/DriverBalance';
 import { FaUser, FaPhone, FaCircle } from 'react-icons/fa';
 
