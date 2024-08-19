@@ -1,11 +1,5 @@
 "use client";
 
-import { auth } from "@/firebase/firbaseConfig";
-import {
-  ConfirmationResult,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-} from "firebase/auth";
 import React, { FormEvent, useEffect, useState, useTransition } from "react";
 import {
   InputOTP,
@@ -25,13 +19,12 @@ import { motion } from "framer-motion";
 function OtpLogin() {
   const router = useRouter();
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [countryCode, setCountryCode] = useState("+91"); // Default to US
+  const [countryCode, setCountryCode] = useState("+91");
   const [otp, setOtp] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState("");
   const [resendCountdown, setResendCountdown] = useState(0);
-  const [recaptchaVerifier, setRecaptchaVerifier] = useState<RecaptchaVerifier | null>(null);
-  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
+  const [session, setSession] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
   useEffect(() => {
@@ -43,18 +36,6 @@ function OtpLogin() {
   }, [resendCountdown]);
 
   useEffect(() => {
-    const verifier = new RecaptchaVerifier(auth, "recaptcha-container", {
-      size: "invisible",
-    });
-
-    setRecaptchaVerifier(verifier);
-
-    return () => {
-      verifier.clear();
-    };
-  }, []);
-
-  useEffect(() => {
     if (otp.length === 6) {
       verifyOtp();
     }
@@ -64,26 +45,27 @@ function OtpLogin() {
     startTransition(async () => {
       setError("");
 
-      if (!confirmationResult) {
-        setError("Please request OTP first.");
-        return;
-      }
-
       try {
-        const result = await confirmationResult.confirm(otp);
-        const res = await fetch(`/api/login`, {
+        const res = await fetch(`/api/login/verifyOtp`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            user_id: result.user.uid,
-            phone: result.user.phoneNumber,
+            otp: otp,
+            session: session,
+            phone: phoneNumber,
           }),
         });
-        const data = await res.json();
-        Cookies.set("selectedRole", "carrier");
-        router.replace(`/user/parties`);
+
+        const result = await res.json();
+
+        if (result.status === 200) {
+          Cookies.set("selectedRole", "carrier");
+          router.replace(`/user/parties`);
+        } else {
+          setError("Failed to verify OTP. Please check the OTP.");
+        }
       } catch (error) {
         console.log(error);
         setError("Failed to verify OTP. Please check the OTP.");
@@ -98,30 +80,30 @@ function OtpLogin() {
     startTransition(async () => {
       setError("");
 
-      if (!recaptchaVerifier) {
-        return setError("RecaptchaVerifier is not initialized.");
-      }
-
       try {
-        const confirmationResult = signInWithPhoneNumber(
-          auth,
-          `${countryCode}${phoneNumber}`,
-          recaptchaVerifier
-        );
-        const result = await confirmationResult;
-        setConfirmationResult(result);
-        setSuccess("OTP sent successfully.");
-      } catch (err: any) {
-        console.log(err);
-        setResendCountdown(0);
+        const res = await fetch("/api/login/sendOtp", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            phone: `${countryCode}${phoneNumber}`,
+          }),
+        });
 
-        if (err.code === "auth/invalid-phone-number") {
-          setError("Invalid phone number. Please check the number.");
-        } else if (err.code === "auth/too-many-requests") {
-          setError("Too many requests. Please try again later.");
+        const { data } = await res.json();
+        console.log(data)
+
+        if (data.Status === "Success") {
+          setSuccess("OTP sent successfully.");
+          setSession(data.Details);
         } else {
           setError("Failed to send OTP. Please try again.");
         }
+      } catch (err) {
+        console.log(err);
+        setResendCountdown(0);
+        setError("Failed to send OTP. Please try again.");
       }
     });
   };
@@ -164,127 +146,146 @@ function OtpLogin() {
         Login with OTP
       </motion.h2>
 
-      {!confirmationResult && (
-        <motion.form
-          onSubmit={requestOtp}
-          className="w-full"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-        >
-          <motion.div className="mb-4">
-            <label
-              htmlFor="countryCode"
-              className="block text-white font-medium mb-2"
-            >
-              Country Code
-            </label>
-            <Select value={countryCode} onValueChange={setCountryCode} >
-              <SelectTrigger id="countryCode" aria-label="Country Code">
-                <SelectValue placeholder="Select country code" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {countryCodes.map((code) => (
-                    <SelectItem key={code.dial_code} value={code.dial_code}>
-                      {code.dial_code} - {code.code}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </motion.div>
+      {!session && <motion.form
+        onSubmit={requestOtp}
+        className="w-full"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+      >
+        <motion.div className="mb-4">
+          <label
+            htmlFor="countryCode"
+            className="block text-white font-medium mb-2"
+          >
+            Country Code
+          </label>
+          <Select value={countryCode} onValueChange={setCountryCode}>
+            <SelectTrigger id="countryCode" aria-label="Country Code">
+              <SelectValue placeholder="Select country code" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {countryCodes.map((code) => (
+                  <SelectItem key={code.dial_code} value={code.dial_code}>
+                    {code.dial_code} - {code.code}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </motion.div>
 
-          <motion.div className="mb-4">
-            <label
-              htmlFor="phoneNumber"
-              className="block text-white font-medium mb-2"
-            >
-              Phone Number
+        <motion.div className="mb-4">
+          <label
+            htmlFor="phoneNumber"
+            className="block text-white font-medium mb-2"
+          >
+            Phone Number
+          </label>
+          <Input
+            id="phoneNumber"
+            className="w-full border border-gray-300 p-2 rounded-lg"
+            type="tel"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
+            placeholder="Enter phone number"
+          />
+          <p className="text-xs text-gray-200 mt-2">
+            Please enter your number without the country code
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
+        >
+          <Button
+            type="submit"
+            disabled={resendCountdown > 0 || isPending}
+            className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isPending || resendCountdown > 0
+              ? `Resend OTP in ${resendCountdown}s`
+              : "Request OTP"}
+          </Button>
+        </motion.div>
+      </motion.form>}
+
+      {session && (
+        <>
+          <motion.div
+            className="mt-6 w-full"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8 }}
+          >
+            <label htmlFor="otp" className="block text-white font-medium mb-2">
+              Enter OTP
             </label>
-            <Input
-              id="phoneNumber"
-              className="w-full border border-gray-300 p-2 rounded-lg"
-              type="tel"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              placeholder="Enter phone number"
-            />
-            <p className="text-xs text-gray-200 mt-2">
-              Please enter your number without the country code
-            </p>
+            <InputOTP
+              maxLength={6}
+              value={otp}
+              onChange={(value) => setOtp(value)}
+              className="otp-input"
+            >
+              <InputOTPGroup>
+                <InputOTPSlot index={0} />
+                <InputOTPSlot index={1} />
+                <InputOTPSlot index={2} />
+              </InputOTPGroup>
+              <InputOTPSeparator />
+              <InputOTPGroup>
+                <InputOTPSlot index={3} />
+                <InputOTPSlot index={4} />
+                <InputOTPSlot index={5} />
+              </InputOTPGroup>
+            </InputOTP>
           </motion.div>
 
           <motion.div
+            className="mt-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
+            transition={{ delay: 1 }}
           >
-            <Button
-              disabled={!phoneNumber || isPending || resendCountdown > 0}
-              type="submit"
-              className="w-full"
+            {/* <Button
+              type="button"
+              onClick={verifyOtp}
+              className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600"
             >
-              {resendCountdown > 0
-                ? `Resend OTP in ${resendCountdown}`
-                : isPending
-                  ? "Sending OTP..."
-                  : "Send OTP"}
-            </Button>
+              Verify OTP
+            </Button> */}
           </motion.div>
-        </motion.form>
+        </>
       )}
 
-      {confirmationResult && (
-        <motion.div
-          className="w-full mt-6"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
+      {error && (
+        <motion.p
+          className="mt-4 text-red-600 text-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
         >
-          <label className="block text-gray-100 font-medium mb-2">
-            Enter OTP
-          </label>
-          <InputOTP
-            maxLength={6}
-            value={otp}
-            onChange={(value) => setOtp(value)}
-            className="otp-input"
-          >
-            <InputOTPGroup>
-              <InputOTPSlot index={0} />
-              <InputOTPSlot index={1} />
-              <InputOTPSlot index={2} />
-            </InputOTPGroup>
-            <InputOTPSeparator />
-            <InputOTPGroup>
-              <InputOTPSlot index={3} />
-              <InputOTPSlot index={4} />
-              <InputOTPSlot index={5} />
-            </InputOTPGroup>
-          </InputOTP>
-        </motion.div>
+          {error}
+        </motion.p>
       )}
 
-      <motion.div
-        className="p-4 text-center text-sm mt-4"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
-      >
-        {error && <p className="text-red-900">{error}</p>}
-        {success && <p className="text-green-500">{success}</p>}
-        {isPending && loadingIndicator}
-      </motion.div>
+      {success && (
+        <motion.p
+          className="mt-4 text-green-600 text-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+        >
+          {success}
+        </motion.p>
+      )}
 
-      <motion.div
-        id="recaptcha-container"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
-      />
+      {isPending && loadingIndicator}
     </motion.div>
   );
-};
+}
 
 export default OtpLogin;

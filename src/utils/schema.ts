@@ -137,9 +137,8 @@ export const tripSchema = new Schema({
     type : String,
     default : ''
   },
-  EWBValidity :{
-    from : Date,
-    to : Date
+  ewbValidityDate :{
+    type : Date
   },
   dates: [
     Date
@@ -363,6 +362,11 @@ export const OfficeExpenseSchema = new Schema({
   transactionId : String,
   notes : String
 })
+
+export const TokenBlacklistSchema = new Schema({
+  token: { type: String, required: true },
+  expiresAt: { type: Date, required: true },
+});
 
 const connectString: any = process.env.NEXT_PUBLIC_MONGO_URL
 

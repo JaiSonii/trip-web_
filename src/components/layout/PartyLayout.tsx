@@ -2,7 +2,6 @@
 'use client'
 import React, { useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useAuth } from '../AuthProvider';
 import Link from 'next/link';
 import PartyName from '../party/PartyName';
 
@@ -14,13 +13,8 @@ interface PartyLayoutProps {
 const PartyLayout = ({ children, partyId }: PartyLayoutProps) => {
   const router = useRouter();
   const pathname = usePathname();
-  const { user, loading } = useAuth();
 
-  useEffect(() => {
-    if (!loading && !user) {
-      router.push('/login');
-    }
-  }, [loading, user, router]);
+
 
   const tabs = [
     { name: 'Trips', path: `/user/parties/${partyId}/trips` },
@@ -31,7 +25,6 @@ const PartyLayout = ({ children, partyId }: PartyLayoutProps) => {
 
   return (
     <div className="min-h-screen bg-gray-100 rounded-md">
-      {user && (
         <div className="w-full h-full p-4">
           <header className="mb-6">
             <h1 className="text-3xl font-bold text-gray-800"><PartyName partyId={partyId} /></h1>
@@ -54,7 +47,6 @@ const PartyLayout = ({ children, partyId }: PartyLayoutProps) => {
             {children}
           </main>
         </div>
-      )}
     </div>
   );
 };

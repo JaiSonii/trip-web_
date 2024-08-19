@@ -67,6 +67,7 @@ export interface ITrip extends Document {
   notes?: string;
   accounts : PaymentBook[]
   ewayBill : string
+  ewbValidityDate : Date
 }
 
 

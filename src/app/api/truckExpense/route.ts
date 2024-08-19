@@ -1,4 +1,4 @@
-import { useAuth } from "@/components/AuthProvider";
+
 import { verifyToken } from "@/utils/auth";
 import { connectToDatabase, ExpenseSchema } from "@/utils/schema";
 import { model, models } from "mongoose";

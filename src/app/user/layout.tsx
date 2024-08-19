@@ -5,8 +5,6 @@ import dynamic from 'next/dynamic';
 const MainLayout = dynamic(() => import('@/components/layout/MainLayout'), { ssr: false });
 
 import { Inter as FontSans } from "next/font/google"
-import { AuthProvider } from "@/components/AuthProvider";
-
 const fontSans = FontSans({
   subsets: ["latin"],
   variable: "--font-sans",
@@ -26,7 +24,6 @@ export default function RootLayout({
   
 
   return (
-    <AuthProvider>
         <div className="flex flex-row">
           <div className="w-1/6">
           <MainLayout/>
@@ -35,7 +32,6 @@ export default function RootLayout({
           {children}
           </div>
         </div>
-        </AuthProvider>
   );
 }
 

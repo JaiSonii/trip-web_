@@ -15,6 +15,7 @@ import { MdArrowDropDown } from "react-icons/md";
 import { motion } from 'framer-motion';
 import { decryptData } from '@/utils/encryption';
 import { SearchIcon } from 'lucide-react';
+import jwt from 'jsonwebtoken'
 
 const MainLayout = () => {
   const pathname = usePathname();
@@ -73,7 +74,7 @@ const MainLayout = () => {
 
   const handleSignOut = async () => {
     try {
-      await signOut(auth);
+      await fetch(`/api/logout`)
       Cookies.remove('auth_token')
       Cookies.remove('selectedRole')
       Cookies.remove('userId')

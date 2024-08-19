@@ -1,4 +1,4 @@
-import { AuthProvider } from "@/components/AuthProvider";
+
 import type { Metadata } from "next";
 import { Inter as FontSans } from "next/font/google"
 import '@/app/globals.css'
@@ -20,12 +20,10 @@ export default function RootLayout({
 }>) {
 
   return (
-    <AuthProvider>
       <div>
       {children}
       </div>
       
-    </AuthProvider>
         
         
   );

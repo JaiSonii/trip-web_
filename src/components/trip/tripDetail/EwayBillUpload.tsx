@@ -1,43 +1,68 @@
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import React, { useState, useRef } from 'react';
+import Link from 'next/link';
+import React, { useState, useRef, useEffect } from 'react';
+import { Page, Text, View, Document, StyleSheet } from '@react-pdf/renderer';
 
 interface EWayBillUploadProps {
   tripId: string;
   ewayBillUrl?: string;
+  validity?: Date | null;
   setEwayBillUrl: (url: string) => void;
 }
 
-const EWayBillUpload: React.FC<EWayBillUploadProps> = ({ tripId, ewayBillUrl, setEwayBillUrl }) => {
+const EWayBillUpload: React.FC<EWayBillUploadProps> = ({ tripId, ewayBillUrl, setEwayBillUrl, validity }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [ewbValidityDate, setEwbValidityDate] = useState<string | null>(null);
+  const [showManualDateInput, setShowManualDateInput] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (validity) {
+      setEwbValidityDate(new Date(validity).toISOString().split('T')[0]);
+    }
+  }, [validity]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file);
+      setShowManualDateInput(false); // Reset manual date input if a new file is selected
     }
   };
 
-  const handleFileUpload = async () => {
-    if (selectedFile) {
+  const handleSubmit = async () => {
+    if (selectedFile || ewbValidityDate) {
       setIsUploading(true);
       try {
-        // Upload the file to S3 or your server here
         const formData = new FormData();
-        formData.append('file', selectedFile);
-        formData.append('tripId', tripId); // Append the tripId
+        if (selectedFile) {
+          formData.append('file', selectedFile);
+        }
+        formData.append('tripId', tripId);
+        if (ewbValidityDate) {
+          formData.append('ewbValidityDate', ewbValidityDate);
+        }
 
         const response = await fetch(`/api/s3Upload`, {
           method: 'POST',
           body: formData,
         });
 
+        const data = await response.json();
+
         if (response.ok) {
-          const data = await response.json();
-          setEwayBillUrl(data.fileUrl); // Set the uploaded file URL
+          setEwayBillUrl(data.fileUrl);
+
+          if (data.ewbValidityDate) {
+            setEwbValidityDate(data.ewbValidityDate);
+            setShowManualDateInput(false); // No need for manual input if date is extracted
+          } else if (!ewbValidityDate) {
+            setShowManualDateInput(true);
+            alert(data.message || 'Failed to extract validity date. Please enter it manually.');
+          }
         } else {
           alert('Failed to upload e-way bill');
         }
@@ -46,7 +71,7 @@ const EWayBillUpload: React.FC<EWayBillUploadProps> = ({ tripId, ewayBillUrl, se
         alert('Error uploading e-way bill');
       } finally {
         setIsUploading(false);
-        setSelectedFile(null); // Clear the selected file
+        setSelectedFile(null);
       }
     }
   };
@@ -65,15 +90,18 @@ const EWayBillUpload: React.FC<EWayBillUploadProps> = ({ tripId, ewayBillUrl, se
       {ewayBillUrl ? (
         <div className="mt-4">
           <div className="relative flex-col space-y-2">
-            <Image
-              src={ewayBillUrl}
-              alt="e-way bill"
-              height={100}
-              width={100}
-              className="cursor-pointer transition-transform transform duration-300 ease-out hover:scale-105"
-              onClick={handleImageClick}
-            />
-            {/* File input for re-uploading */}
+            {ewayBillUrl.endsWith('.pdf') ?
+              <Link href={ewayBillUrl.split('.pdf')[0]} >View</Link> :
+              <>
+                <Image
+                  src={ewayBillUrl}
+                  alt="e-way bill"
+                  height={100}
+                  width={100}
+                  className="cursor-pointer transition-transform transform duration-300 ease-out hover:scale-105"
+                  onClick={handleImageClick}
+                />
+              </>}
             <input
               type="file"
               accept=".pdf,.jpg,.png"
@@ -81,41 +109,63 @@ const EWayBillUpload: React.FC<EWayBillUploadProps> = ({ tripId, ewayBillUrl, se
               disabled={isUploading}
               className="w-full text-sm text-gray-700 file:bg-lightOrangeButtonColor file:border-none file:rounded-lg file:px-4 file:py-2 file:cursor-pointer hover:file:bg-darkOrangeButtonColor mt-2"
             />
-            {/* Submit button to trigger file upload */}
-            <Button
-              onClick={handleFileUpload}
-              disabled={isUploading || !selectedFile}
-              
-            >
-              {isUploading ? 'Uploading...' : 'Submit E-Way Bill'}
-            </Button>
+
+
+
           </div>
         </div>
       ) : (
         <div className="mt-4">
-          {/* File input for uploading */}
           <input
             type="file"
             accept=".pdf,.jpg,.png"
             onChange={handleFileChange}
             disabled={isUploading}
-            
           />
-          {/* Submit button to trigger file upload */}
-          <Button
-            onClick={handleFileUpload}
-            disabled={isUploading || !selectedFile}
-          >
-            {isUploading ? 'Uploading...' : 'Upload E-Way Bill'}
-          </Button>
-          {isUploading && <p className="text-sm text-gray-500 mt-2">Uploading...</p>}
         </div>
       )}
 
-      {/* Modal for displaying larger image */}
+      {ewbValidityDate && !showManualDateInput && (
+        <div className="mt-4">
+          <label htmlFor="ewbValidityDate" className="block text-sm font-medium text-gray-700">
+            Validity Date:
+          </label>
+          <input
+            type="text"
+            id="ewbValidityDate"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            value={ewbValidityDate}
+            readOnly
+          />
+        </div>
+      )}
+
+      {showManualDateInput && (
+        <div className="mt-4">
+          <label htmlFor="ewbValidityDate" className="block text-sm font-medium text-gray-700">
+            Enter Validity Date (YYYY-MM-DD):
+          </label>
+          <input
+            type="date"
+            id="ewbValidityDate"
+            className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            value={ewbValidityDate || ''}
+            onChange={(e) => setEwbValidityDate(e.target.value)}
+          />
+        </div>
+      )}
+      <Button
+        onClick={handleSubmit}
+        disabled={isUploading || (!selectedFile && !ewbValidityDate)}
+        className="mt-4"
+      >
+        {isUploading ? 'Uploading...' : 'Submit E-Way Bill'}
+      </Button>
+
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
-          <div className=" p-4 rounded-lg shadow-lg flex-col space-y-1 bg-lightOrangeButtonColor">
+          <div className="p-4 rounded-lg shadow-lg flex-col space-y-1 bg-lightOrangeButtonColor">
+
             <Image
               src={ewayBillUrl || ""}
               alt="E-Way Bill Large View"
