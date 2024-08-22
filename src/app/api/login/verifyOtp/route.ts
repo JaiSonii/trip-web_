@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
       );
 
       // Set the auth token in cookies
-      const response = NextResponse.json({ message: 'User logged in', status: 200 });
+      const response = NextResponse.json({ message: 'User logged in', status: 200 , token});
       response.cookies.set('auth_token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
 
       return response;
