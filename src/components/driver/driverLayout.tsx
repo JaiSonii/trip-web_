@@ -8,6 +8,7 @@ import EditDriverModal from './editDriverModal';
 import DriverBalance from './DriverBalance';
 import Link from 'next/link';
 import { FaTruckMoving, FaMapMarkerAlt } from 'react-icons/fa';
+import { IoDocuments } from 'react-icons/io5';
 
 interface DriverLayoutProps {
   name: string;
@@ -30,6 +31,7 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onD
   const tabs = [
     { logo: <FaTruckMoving />, name: 'Driver Accounts', path: `/user/drivers/${driverId}` },
     { logo: <FaMapMarkerAlt />, name: 'Trips', path: `/user/drivers/${driverId}/trips` },
+    { logo: <IoDocuments />, name: 'Documents', path: `/user/drivers/${driverId}/documents` },
   ];
 
   const pathname = usePathname()

@@ -113,18 +113,7 @@ const PartyForm: React.FC<Props> = ({ onSubmit }) => {
           className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
         />
       </label>
-      <label className="block mb-2">
-        Balance:
-        <input
-          type="number"
-          name="balance"
-          value={formData.balance}
-          onChange={handleChange}
-          onFocus={handleFocus}
-          className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
-        />
-      </label>
-      <Button type="submit">
+      <Button type="submit" className='mt-2 w-full'>
         Submit
       </Button>
     </form>

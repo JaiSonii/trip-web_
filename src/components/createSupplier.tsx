@@ -69,7 +69,7 @@ const SupplierForm: React.FC<Props> = ({ onSubmit }) => {
           className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
         />
       </label>
-      <Button type="submit">
+      <Button type="submit" className='w-full'>
         Submit
       </Button>
     </form>

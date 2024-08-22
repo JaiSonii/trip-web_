@@ -46,7 +46,6 @@ const CreateSupplierPage: React.FC = () => {
 
             const data = await res.json();
             console.log(data);
-            alert('Supplier added Successfully');
             router.push('/user/suppliers');
         } catch (error) {
             console.error('Error saving supplier:', error);

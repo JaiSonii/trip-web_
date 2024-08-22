@@ -125,7 +125,7 @@ export async function POST(request: Request) {
 
     // Upload the file to S3
     const s3FileName = await uploadFileToS3(fileBuffer, fileName, contentType);
-    const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3FileName}`;
+    const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3FileName}${contentType==='application/pdf' ? '.pdf' : ''}`;
 
     // Update the Trip document with the E-Way Bill URL and validity date
     const trip = await Trip.findOneAndUpdate(

@@ -78,19 +78,7 @@ const DriverForm: React.FC<Props> = ({ onSubmit }) => {
           className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
         />
       </label>
-      <label className="block mb-2">
-        Opening Balance:
-        <input
-          type="number"
-          name="balance"
-          value={formData.balance}
-          onChange={handleChange}
-          onFocus={handleFocus}
-          className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
-        />
-      </label>
-      <label className="block mb-2 opacity-75 text-sm">Optional</label>
-      <Button type="submit">
+      <Button type="submit" className='w-full'>
         Submit
       </Button>
     </form>

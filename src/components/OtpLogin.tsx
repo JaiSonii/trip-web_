@@ -15,6 +15,10 @@ import Cookies from "js-cookie";
 import { countryCodes } from "@/utils/CountryCodes";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { motion } from "framer-motion";
+import Image from "next/image";
+import whiteLogo from '@/assets/awajahi-white-logo.png';
+import logo from '@/assets/awajahi logo.png'
+import otpPic from '@/assets/otp-pic.png';
 
 function OtpLogin() {
   const router = useRouter();
@@ -35,11 +39,7 @@ function OtpLogin() {
     return () => clearTimeout(timer);
   }, [resendCountdown]);
 
-  useEffect(() => {
-    if (otp.length === 6) {
-      verifyOtp();
-    }
-  }, [otp]);
+
 
   const verifyOtp = async () => {
     startTransition(async () => {
@@ -73,6 +73,11 @@ function OtpLogin() {
     });
   };
 
+  useEffect(() => {
+    if (otp.length === 6) {
+      verifyOtp();
+    }
+  }, [otp]);
   const requestOtp = async (e?: FormEvent<HTMLFormElement>) => {
     e?.preventDefault();
     setResendCountdown(60);
@@ -131,160 +136,132 @@ function OtpLogin() {
   );
 
   return (
-    <motion.div
-      className="flex flex-col justify-center items-center p-6 bg-bottomNavBarColor shadow-md rounded-lg max-w-md mx-auto"
-      initial={{ opacity: 0, y: -50 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.6 }}
-    >
-      <motion.h2
-        className="text-2xl font-semibold mb-4 text-white"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2 }}
-      >
-        Login with OTP
-      </motion.h2>
+    <div className="grid grid-cols-5 min-h-screen">
+      <div className="col-span-2 bg-[#FF8833] p-8">
+        <div className="flex flex-col items-center justify-center p-6 gap-4">
+          <Image src={whiteLogo} alt="logo" width={207} height={220} />
+          <h2 className="text-white text-2xl">Awajahi</h2>
+          <h1 className="text-[#FFFFFF] mt-10 text-3xl font-semibold">TRUSTED. RELIABLE. EFFICIENT</h1>
 
-      {!session && <motion.form
-        onSubmit={requestOtp}
-        className="w-full"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.4 }}
-      >
-        <motion.div className="mb-4">
-          <label
-            htmlFor="countryCode"
-            className="block text-white font-medium mb-2"
-          >
-            Country Code
-          </label>
-          <Select value={countryCode} onValueChange={setCountryCode}>
-            <SelectTrigger id="countryCode" aria-label="Country Code">
-              <SelectValue placeholder="Select country code" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {countryCodes.map((code) => (
-                  <SelectItem key={code.dial_code} value={code.dial_code}>
-                    {code.dial_code} - {code.code}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </motion.div>
-
-        <motion.div className="mb-4">
-          <label
-            htmlFor="phoneNumber"
-            className="block text-white font-medium mb-2"
-          >
-            Phone Number
-          </label>
-          <Input
-            id="phoneNumber"
-            className="w-full border border-gray-300 p-2 rounded-lg"
-            type="tel"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            placeholder="Enter phone number"
-          />
-          <p className="text-xs text-gray-200 mt-2">
-            Please enter your number without the country code
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-        >
-          <Button
-            type="submit"
-            disabled={resendCountdown > 0 || isPending}
-            className="w-full bg-green-500 text-white py-2 rounded-lg hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isPending || resendCountdown > 0
-              ? `Resend OTP in ${resendCountdown}s`
-              : "Request OTP"}
-          </Button>
-        </motion.div>
-      </motion.form>}
-
-      {session && (
-        <>
-          <motion.div
-            className="mt-6 w-full"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8 }}
-          >
-            <label htmlFor="otp" className="block text-white font-medium mb-2">
-              Enter OTP
-            </label>
-            <InputOTP
-              maxLength={6}
-              value={otp}
-              onChange={(value) => setOtp(value)}
-              className="otp-input"
+        </div>
+      </div>
+      <div className="col-span-3 flex justify-center items-center">
+        <div className="flex flex-col gap-2 w-full max-w-md p-8">
+          <div className="flex items-center mb-6">
+            <Image src={logo} alt="logo" width={60} height={64} priority />
+            <h3 className="text-black font-semibold text-2xl ml-2">Awajahi</h3>
+          </div>
+          <div>
+            {session ? <Image src={otpPic} width={398} height={398} alt="otp img" /> :
+              <h3 className="text-black font-semibold text-3xl mb-5">Hey! Welcome to Awajahi</h3>}
+          </div>
+          <div className="relative">
+            {!session && (
+              <motion.form
+                onSubmit={requestOtp}
+                className="w-full"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+              >
+                <motion.div className="mb-4">
+                  <Select value={countryCode} onValueChange={setCountryCode}>
+                    <SelectTrigger id="countryCode" aria-label="Country Code">
+                      <SelectValue placeholder="Select country code" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {countryCodes.map((code) => (
+                          <SelectItem key={code.dial_code} value={code.dial_code}>
+                            {code.code} {code.name} ({code.dial_code})
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </Select>
+                </motion.div>
+                <motion.div className="mb-4">
+                  <label htmlFor="phoneNumber" className="text-[#000000] font-medium mb-2">
+                    Mobile no.
+                  </label>
+                  <Input
+                    id="phoneNumber"
+                    type="text"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    className="rounded-full"
+                  />
+                </motion.div>
+                <motion.div>
+                  <Button
+                    type="submit"
+                    className="w-full text-center bg-[#FF8833] text-white rounded-full"
+                    disabled={isPending}
+                  >
+                    {isPending ? loadingIndicator : "Send OTP"}
+                  </Button>
+                </motion.div>
+              </motion.form>
+            )}
+          </div>
+          <div className="relative">
+            {session && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.4 }}
+              >
+                <label className="text-[#7A7A7A]">Otp Sent to XXXXXXX{phoneNumber.slice(-4)}</label>
+                <InputOTP
+                  maxLength={6}
+                  value={otp}
+                  onChange={(value) => setOtp(value)}
+                  className="otp-input size-full flex items-center justify-between"
+                >
+                  <InputOTPGroup>
+                    <InputOTPSlot index={0} />
+                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={2} />
+                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={4} />
+                    <InputOTPSlot index={5} />
+                  </InputOTPGroup>
+                </InputOTP>
+                <span className="text-[#7A7A7A]">
+                  Didn&apos;t recieve OTP? <Button variant={'link'} type="submit" disabled={resendCountdown > 0 || isPending} className="text-[#FF6A00]">Resend OTP</Button> {resendCountdown > 0 && `in ${resendCountdown}s`}
+                </span>
+                <Button
+                  onClick={verifyOtp}
+                  className="w-full text-center bg-[#FF8833] text-white mt-4 rounded-full text-md"
+                  disabled={isPending}
+                >
+                  {isPending ? loadingIndicator : "Verify OTP"}
+                </Button>
+                {/* <Button
+                  type="submit"
+                  className="w-full text-center mt-4"
+                  disabled={resendCountdown > 0 || isPending}
+                >
+                  Resend OTP 
+                </Button> */}
+              </motion.div>
+            )}
+          </div>
+          {error && (
+            <motion.div
+              className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-6"
+              role="alert"
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
             >
-              <InputOTPGroup>
-                <InputOTPSlot index={0} />
-                <InputOTPSlot index={1} />
-                <InputOTPSlot index={2} />
-              </InputOTPGroup>
-              <InputOTPSeparator />
-              <InputOTPGroup>
-                <InputOTPSlot index={3} />
-                <InputOTPSlot index={4} />
-                <InputOTPSlot index={5} />
-              </InputOTPGroup>
-            </InputOTP>
-          </motion.div>
+              <span className="block sm:inline">{error}</span>
+            </motion.div>
+          )}
 
-          <motion.div
-            className="mt-4"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1 }}
-          >
-            {/* <Button
-              type="button"
-              onClick={verifyOtp}
-              className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600"
-            >
-              Verify OTP
-            </Button> */}
-          </motion.div>
-        </>
-      )}
-
-      {error && (
-        <motion.p
-          className="mt-4 text-red-600 text-sm"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2 }}
-        >
-          {error}
-        </motion.p>
-      )}
-
-      {success && (
-        <motion.p
-          className="mt-4 text-green-600 text-sm"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2 }}
-        >
-          {success}
-        </motion.p>
-      )}
-
-      {isPending && loadingIndicator}
-    </motion.div>
+        </div>
+      </div>
+    </div>
   );
 }
 

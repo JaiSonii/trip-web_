@@ -27,9 +27,6 @@ export const partySchema = new Schema({
   gstNumber: {
     type: String,
   },
-  balance: {
-    type: Number,
-  },
 });
 
 
@@ -175,7 +172,6 @@ export const driverSchema = new mongoose.Schema({
   },
   name: {
     type: String,
-    unique: true,
     required: true
   },
   contactNumber: {
@@ -186,12 +182,15 @@ export const driverSchema = new mongoose.Schema({
     enum: ['Available', 'On Trip'],
     default: 'Active'
   },
-  balance: {
-    type: Number
-  },
   accounts: [{
     type: driverAccountSchema
-  }]
+  }],
+  documents: {
+    License: String,
+    Aadhar: String,
+    PAN: String,
+    PoliceVerification: String
+  }
 });
 
 
@@ -211,7 +210,12 @@ export const truckSchema: Schema = new Schema({
   supplier: { type: String },
   status: { type: String, enum: ['Available', 'On Trip'] },
   trip_id: { type: String, default: '' },
-  documents: [{ document_name: String, document_link: String }],
+  documents : {
+    RC : String,
+    Pollution : String,
+    Permit : String,
+    Insurance : String
+  },
   updatedAt: { type: Date, default: Date.now }
 });
 

@@ -22,6 +22,7 @@ import fbIcon from '@/assets/fb-icon.png'
 import linkedinIcon from '@/assets/linkedin-icon.png'
 import instaIcon from '@/assets/insta-icon.png'
 import commingSoon from '@/assets/comming-soon.png'
+import loginIcon from '@/assets/login icon.png'
 
 
 
@@ -30,7 +31,7 @@ export default function Home() {
   return (
     <div className="min-w-screen w-screen">
       {/* Navigation Section */}
-      <section className="bg-gradient-to-l from-[#FFC499] to-[#FFFFFF]  px-16">
+      <section className="bg-[radial-gradient(ellipse_at_80%_50%,_#FFC499_0%,_#FFFFFF_80%)] px-16">
         {/* Top Section: Logo and Navigation */}
         <div className="flex flex-wrap justify-between items-center w-full p-6">
           {/* Logo Section */}
@@ -40,16 +41,16 @@ export default function Home() {
           </div>
 
           {/* Navigation Links Section */}
-          <ul className="flex items-center space-x-10 text-lg font-bold text-[#333333]">
+          <ul className="flex items-center space-x-16 text-2xl font-semibold text-[#333333]">
             <li>
               <Link href="/" className="hover:text-[#FF6A00] transition-colors duration-300">About Us</Link>
             </li>
             <li>
-              <Link href="/login" className="hover:text-[#FF6A00] transition-colors duration-300">Login</Link>
+              <Link href="/login" className="hover:text-[#FF6A00] transition-colors duration-300 flex items-center"><span>Login</span> <Image src={loginIcon} width={32} height={32} alt="login" /></Link>
             </li>
             <li>
               <Link href="/login">
-                <Button className="rounded-full bg-[#CC5500] text-white px-6 font-bold">
+                <Button className="rounded-full bg-[#CC5500] text-white px-6 font-bold text-lg">
                   Sign Up
                 </Button>
               </Link>
@@ -90,6 +91,7 @@ export default function Home() {
 
 
 
+
       {/* Hero Section */}
       <section className="p-8">
         <div className="flex flex-wrap items-center justify-between p-6 mt-10">
@@ -107,7 +109,7 @@ export default function Home() {
       </section>
 
       {/* Additional Sections */}
-      <section className="p-16" style={{ background: 'linear-gradient(122.95deg, #FFFFFF 34%, #FFC499 91.19%)' }}>
+      <section className="p-16 bg-[radial-gradient(ellipse_at_right,_#FFC499_0%,_#FFFFFF_80%)]" >
         {/* Section Content */}
         <div className="flex flex-col gap-16">
           <div>
@@ -255,9 +257,9 @@ export default function Home() {
           <div className="flex flex-col gap-4">
             <div>
               <h3 className="text-lg font-bold mb-4">Get in Touch</h3>
-              <div className="flex space-x-4">
+              <div className="flex space-x-4 items-center ">
                 <Link href="#">
-                  <Image src={instaIcon} alt="Instagram" width={30} height={30} />
+                  <Image src={instaIcon} alt="Instagram" width={27} height={27} />
                 </Link>
                 <Link href="#">
                   <Image src={linkedinIcon} alt="LinkedIn" width={30} height={30} />

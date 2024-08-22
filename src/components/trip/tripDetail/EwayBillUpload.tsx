@@ -91,7 +91,7 @@ const EWayBillUpload: React.FC<EWayBillUploadProps> = ({ tripId, ewayBillUrl, se
         <div className="mt-4">
           <div className="relative flex-col space-y-2">
             {ewayBillUrl.endsWith('.pdf') ?
-              <Link href={ewayBillUrl.split('.pdf')[0]} >View</Link> :
+              <Button variant={'link'}><Link href={ewayBillUrl.split('.pdf')[0]} >View PDF</Link></Button> :
               <>
                 <Image
                   src={ewayBillUrl}

@@ -13,7 +13,7 @@ import ExpenseModal from '../trip/tripDetail/ExpenseModal';
 import { fuelAndDriverChargeTypes, maintenanceChargeTypes } from '@/utils/utilArray';
 import { MdDelete, MdEdit, MdExpandLess, MdExpandMore } from 'react-icons/md';
 import { SlOptionsVertical } from "react-icons/sl";
-import { IoCloseCircleOutline } from "react-icons/io5";
+import { IoCloseCircleOutline, IoDocuments } from "react-icons/io5";
 import { IoAddCircle } from "react-icons/io5";
 import EditTruckModal from '../truck/EditTruckModal';
 import { motion } from 'framer-motion';
@@ -31,6 +31,7 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
         { logo: <BsFillFuelPumpFill />, name: 'Fuel Book', path: `/user/trucks/${truckNo}/fuel` },
         { logo: <IoMdSettings />, name: 'Maintenance Book', path: `/user/trucks/${truckNo}/maintainence` },
         { logo: <RiSteering2Fill />, name: 'Driver and Other Expenses', path: `/user/trucks/${truckNo}/driverExpense` },
+        { logo: <IoDocuments />, name: 'Documents', path: `/user/trucks/${truckNo}/documents` },
     ];
 
     const [truck, setTruck] = useState<TruckModel | null>(null);

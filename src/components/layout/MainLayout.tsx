@@ -15,7 +15,8 @@ import { MdArrowDropDown } from "react-icons/md";
 import { motion } from 'framer-motion';
 import { decryptData } from '@/utils/encryption';
 import { SearchIcon } from 'lucide-react';
-import jwt from 'jsonwebtoken'
+import whiteLogo from '@/assets/awajahi-white-logo.png'
+import Image from 'next/image';
 
 const MainLayout = () => {
   const pathname = usePathname();
@@ -106,7 +107,7 @@ const MainLayout = () => {
 
         {/* Logo and Title */}
         <div className="flex items-center justify-center p-4 md:justify-start md:pl-4 border-b border-borderColor">
-          <RiTruckLine style={{ width: '50px', height: '50px' }} />
+          <Image src={whiteLogo} alt='logo' width={50} height={50} priority />
           <span className="ml-3 text-3xl font-bold">Awajahi</span>
         </div>
 
