@@ -136,7 +136,7 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
   };
 
   return (
-    <div className="p-6 border rounded-lg  shadow-lg bg-white w-full hover:shadow-xl transition-shadow duration-300 relative">
+    <div className="p-6 border rounded-lg border-lightOrange shadow-lg bg-white w-full hover:shadow-lightOrangeButtonColor transition-shadow duration-300 relative">
       <h3 className="text-2xl font-semibold mb-6 text-center text-gray-800">Profit Summary (Rs)</h3>
 
       <div className="flex flex-row w-full items-center justify-between">

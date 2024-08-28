@@ -13,7 +13,7 @@ const TruckHeader: React.FC<TruckHeaderProps> = ({ truck, driver }) => {
   const [truckName, setTruckName] = useState(truck);
 
   return (
-    <div className="flex justify-between items-center p-7 bg-gradient-to-r from-orange-500 via-bottomNavBarColor to-bottomNavBarColor rounded-lg shadow-lg text-white">
+    <div className="flex justify-between items-center p-4 bg-gradient-to-r from-orange-500 via-bottomNavBarColor to-bottomNavBarColor rounded-lg shadow-lg text-white">
       <div className="flex items-center">
         <div className="bg-white p-2 rounded-full text-gray-800 shadow-md">
           <span className="text-4xl">🚛</span>

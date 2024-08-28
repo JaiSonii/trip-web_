@@ -85,7 +85,7 @@ const EWayBillUpload: React.FC<EWayBillUploadProps> = ({ tripId, ewayBillUrl, se
   };
 
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md">
+    <div className="p-6 border rounded-lg border-lightOrange shadow-lg bg-white w-full hover:shadow-lightOrangeButtonColor transition-shadow duration-300 relative">
       <h3 className="text-lg font-semibold">E-Way Bill</h3>
       {ewayBillUrl ? (
         <div className="mt-4">

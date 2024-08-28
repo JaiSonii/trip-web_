@@ -41,7 +41,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
       try {
         const name = await fetchPartyName(trip.party)
         setPartyName(name);
-      } catch (error : any) {
+      } catch (error: any) {
         console.log('Error fetching party name:', error);
         alert(error.message)
       }
@@ -154,16 +154,16 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
       <div className="col-span-2 pr-4">
         <TruckHeader truck={trip.truck} driver={trip.driver} />
 
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
           <TripInfo label="Party Name" value={partyName || '----'} />
           <div className="flex flex-col md:flex-row md:gap-6">
             <TripInfo label="LR Number" value={trip.LR || '----'} />
             <TripInfo label="Material" value={trip.material || '----'} />
+            <TripInfo label="Billing Type" value={trip.billingType || '----'} />
           </div>
-          <TripInfo label="Route" value={`${trip.route.origin} → ${trip.route.destination}`} />
-          <TripInfo label="Billing Type" value={trip.billingType || '----'} />
+          
         </div>
-
+        <TripInfo label="Route" value={`${trip.route.origin} → ${trip.route.destination}`} />
         <div className="mt-6 w-full">
           <TripStatus status={trip.status as number} dates={trip.dates} />
         </div>
@@ -175,12 +175,13 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="mt-6 flex items-center justify-between gap-6 py-4">
           <TripInfo label="Freight Amount" value={`₹ ${trip.amount.toLocaleString()}`} />
           <TripInfo label="Start Date" value={new Date(trip.startDate).toLocaleDateString()} />
           <TripInfo label="End Date" value={trip.dates[1] ? new Date(trip.dates[1]).toLocaleDateString() : '----'} />
-          <TripInfo label="Notes" value={trip.notes || 'No notes available'} tripId={trip.trip_id} />
+          
         </div>
+        <TripInfo label="Notes" value={trip.notes || 'No notes available'} tripId={trip.trip_id} />
 
         {/* Reusable Components */}
         <DataList data={accounts} label="Advances" modalTitle="Add Advance" trip={trip} setData={setAccounts} setBalance={setBalance} setTrip={setTrip} />
@@ -192,13 +193,13 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
 
       {/* Right Side - Profit, Balance, and POD Viewer */}
       <div className="col-span-1 space-y-6">
-        <div className="bg-gradient-to-r p-4 from-orange-500 via-bottomNavBarColor to-bottomNavBarColor rounded-lg shadow-lg text-white">
+        <div className="flex items-center justify-between bg-gradient-to-r p-4 from-orange-500 via-bottomNavBarColor to-bottomNavBarColor rounded-lg shadow-lg text-white">
           <h3 className="text-xl font-bold">Pending Balance</h3>
-          <p className="text-2xl font-semibold mt-4">₹ {tripBalance}</p>
+          <p className="text-xl font-semibold ">₹ {tripBalance}</p>
         </div>
         <Profit charges={charges} truckCost={trip.truckHireCost && trip.truckHireCost} amount={trip.amount} setCharges={setCharges} tripId={trip.trip_id} driverId={trip.driver} truckNo={trip.truck} />
         <EWayBillUpload validity={trip.ewbValidityDate ? trip.ewbValidityDate : null} tripId={trip.trip_id} ewayBillUrl={ewayBillUrl} setEwayBillUrl={setEwayBillUrl} />
-        <PODViewer podUrl={podUrl} />
+        {trip.POD ? <PODViewer podUrl={trip.POD} /> : null}
       </div>
     </div>
   );

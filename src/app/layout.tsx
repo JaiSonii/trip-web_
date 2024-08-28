@@ -11,7 +11,8 @@ const fontSans = FontSans({
 });
 
 export const metadata: Metadata = {
-  title: "Awajahi",
+  title: "Awajahi Web",
+  description : 'Moving India One Mile at a time'
 };
 
 export default function RootLayout({

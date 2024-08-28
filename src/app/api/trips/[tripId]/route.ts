@@ -1,5 +1,6 @@
 import DriverModal from "@/components/driver/driverModal";
 import { fetchBalance, fetchBalanceBack } from "@/helpers/fetchTripBalance";
+import { uploadFileToS3 } from "@/helpers/S3Operation";
 import { verifyToken } from "@/utils/auth";
 import { ITrip, PaymentBook } from "@/utils/interface";
 import { connectToDatabase, driverSchema, ExpenseSchema, partySchema, supplierAccountSchema, tripChargesSchema, truckSchema } from "@/utils/schema";
@@ -45,7 +46,7 @@ export async function PATCH(req: Request, { params }: { params: { tripId: string
   try {
     const { tripId } = params;
     const { data } = await req.json();
-    const { amount, POD, status, dates, account, notes } = data;
+    const { amount, podImage, status, dates, account, notes } = data;
     await connectToDatabase();
 
     const trip = await Trip.findOne({ user_id: user, trip_id: tripId });
@@ -78,11 +79,28 @@ export async function PATCH(req: Request, { params }: { params: { tripId: string
 
     if (status && dates) {
       trip.status = status;
+    
+      if (status === 2 && podImage) {
+        // Extract the MIME type and remove the Base64 prefix
+        const base64String = podImage;
+        const contentType = base64String.match(/^data:(.+);base64,/)[1];
+        const base64Data = base64String.replace(/^data:.+;base64,/, '');
+    
+        // Convert the Base64 string to a Buffer
+        const fileBuffer = Buffer.from(base64Data, 'base64');
+    
+        // Define the S3 file name
+        const fileName = `trips/pod-${trip.trip_id}`;
+    
+        // Upload the file to S3
+        const s3FileName = await uploadFileToS3(fileBuffer, fileName, contentType);
+        const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3FileName}${contentType==='application/pdf' ? '.pdf' : ''}`
+        trip.POD = fileUrl
+      }
+    
       trip.dates = dates;
     }
-
-
-    trip.POD = POD || "";
+    
 
     await trip.save();
     return NextResponse.json({ trip: trip }, { status: 200 });

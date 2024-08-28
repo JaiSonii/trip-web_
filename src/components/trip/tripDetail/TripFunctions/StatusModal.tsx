@@ -35,18 +35,39 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
   };
 
 
-  const saveChanges = () => {
-    let data: any = {};
+ const saveChanges = () => {
+  let data: any = {};
 
+  const convertFileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onloadend = () => {
+        if (reader.result) {
+          resolve(reader.result.toString());
+        } else {
+          reject('Failed to convert file to Base64');
+        }
+      };
+      reader.onerror = () => reject('Error reading file');
+    });
+  };
+
+  const updateData = async () => {
     if (statuses[status] === 'Started') {
       dates[1] = new Date(startDate);
       data = { dates: dates, status: status + 1 };
     } else if (statuses[status] === 'Completed') {
       dates[2] = new Date(podReceivedDate);
-      // Simulating storage of the image path (mocking for demo purposes)
-      const imagePath = `/pod/${podImage?.name}`;
-      localStorage.setItem('podImagePath', imagePath);
-      data = { dates: dates, status: status + 1, POD: imagePath };
+
+      if (podImage) {
+        try {
+          const base64PodImage = await convertFileToBase64(podImage);
+          data = { dates: dates, status: status + 1, podImage: base64PodImage };
+        } catch (error) {
+          console.error('Error converting file to Base64:', error);
+        }
+      }
     } else if (statuses[status] === 'POD Recieved') {
       dates[3] = new Date(startDate);
       data = { dates: dates, status: status + 1 };
@@ -62,9 +83,17 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
       };
     }
 
-    onSave(data);
-    onClose();
+    onSave(data)
+    onClose()
+    // You can now use the `data` object to send the request or perform further actions
+    // Example: sending data to the server
+    // await fetch('/api/update-status', { method: 'POST', body: JSON.stringify(data) });
   };
+
+  updateData();
+  
+};
+
 
   if (!isOpen) return null;
 
