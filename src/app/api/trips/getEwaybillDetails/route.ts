@@ -75,7 +75,7 @@ async function extractValidityDate(text: string) {
             `;
 
     // Send the prompt and extracted text to the Gemini API
-    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyBjoDkmSnVmat5f29iEZnRCfG6jvDldEr0`, {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -142,7 +142,6 @@ async function extractTextFromImage(buffer: Buffer): Promise<string> {
         oem: 3,  // Use the best OCR Engine mode
         tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/:', // Whitelist for known characters
     });
-    console.log(extractTripDetails(text))
     return text;
 }
 

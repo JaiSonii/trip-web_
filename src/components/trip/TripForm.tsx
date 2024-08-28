@@ -67,8 +67,7 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr }) =
                 })
                 const resData = await res.json()
                 const tripData = resData.ewbValidityDate
-                console.log(tripData)
-                setFormData((prev) => {
+                tripData ? setFormData((prev) => {
                     const newFormData = {
                         ...prev,
                         startDate: new Date(tripData.startDate),
@@ -81,7 +80,7 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr }) =
                     };
                     console.log("Updated Form Data:", newFormData); // Debugging line
                     return newFormData;
-                });
+                }) : submitEwayBill();
             } catch (error: any) {
                 alert(error.message)
                 console.log(error)
