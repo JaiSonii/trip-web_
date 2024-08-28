@@ -110,6 +110,20 @@ export async function DELETE(req: Request, { params }: { params: { truckNo: stri
       return NextResponse.json({message : "Truck currently on Trip", status : 400})
     }
 
+    const trips = await Trip.find({ user_id: user, truck: truckNo });
+
+    if (trips.length > 0) {
+      const tripDetails = trips.map((trip) => {
+        const origin = trip.route.origin;
+        const destination = trip.route.destination;
+        return `${origin} -> ${destination} ${new Date(trip.startDate).toISOString().split('T')[0]}`;
+      }).join(', ');
+    
+      return NextResponse.json({
+        message: `Truck is associated with trips:\n ${tripDetails}`,
+        status: 400
+      });
+    }
     const truck = await Truck.findOneAndDelete({user_id : user, truckNo: truckNo });
 
     if (!truck) {

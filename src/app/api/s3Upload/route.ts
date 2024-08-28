@@ -16,6 +16,35 @@ const s3Client = new S3Client({
 
 const Trip = models.Trip || model('Trip', tripSchema);
 
+
+function extractTripDetails(text: string) {
+  const originRegex = /From\s+.*Pincode:-\s*(\d{6})/;
+  const destinationRegex = /To\s+.*Pincode:-\s*(\d{6})/;
+  const startDateRegex = /Generated Date:(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}\s+\w{2})/;
+  const freightAmountRegex = /Total Inv\.Amt\s*(\d+\.\d{2})/;
+  const truckNumberRegex = /Vehicle\s*\/\s*Trans\s*Doc\s*No\s*&\s*Dt\.\s*.*\nRoad([A-Z]{2}\d{2}[A-Z]{1,2}\d{4})/;
+
+  const originMatch = text.match(originRegex);
+  const destinationMatch = text.match(destinationRegex);
+  const startDateMatch = text.match(startDateRegex);
+  const freightAmountMatch = text.match(freightAmountRegex);
+  const truckNumberMatch = text.match(truckNumberRegex);
+
+  const origin = originMatch ? originMatch[1] : null;
+  const destination = destinationMatch ? destinationMatch[1] : null;
+  const startDate = startDateMatch ? startDateMatch[1] : null;
+  const freightAmount = freightAmountMatch ? freightAmountMatch[1] : null;
+  const truckNumber = truckNumberMatch ? truckNumberMatch[1] : null;
+
+  return {
+      origin,
+      destination,
+      startDate,
+      freightAmount,
+      truckNumber
+  };
+}
+
 async function uploadFileToS3(fileBuffer: Buffer, fileName: string, contentType: string): Promise<string> {
   const params = {
     Bucket: process.env.AWS_S3_BUCKET_NAME!,
@@ -46,6 +75,7 @@ async function extractValidityDate(text: string): Promise<Date | null> {
 async function extractTextFromPdf(buffer: Buffer): Promise<string> {
   try {
     const data = await pdf(buffer);
+    console.log(extractTripDetails(data.text))
     return data.text;
   } catch (error) {
     console.error("Error extracting text from PDF:", error);
@@ -83,7 +113,7 @@ async function extractTextFromImage(buffer: Buffer): Promise<string> {
     oem: 3,  // Use the best OCR Engine mode
     tessedit_char_whitelist: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789/:', // Whitelist for known characters
   });
-  console.log(text)
+  console.log(extractTripDetails(text))
   return text;
 }
 

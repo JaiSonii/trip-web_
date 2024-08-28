@@ -65,22 +65,51 @@ const CreateTripPage: React.FC = () => {
 
   const handleTripSubmit = async (trip: any) => {
     setSaving(true); // Show loading overlay
+    console.log(trip)
 
     try {
-      // Create the trip
+      // Create a new FormData object
+      const formData = new FormData();
+
+      // Append all trip data to the formData object
+      formData.append('party', trip.party);
+      formData.append('truck', trip.truck);
+      formData.append('driver', trip.driver);
+      formData.append('supplierId', trip.supplierId);
+      formData.append('origin', trip.route.origin);
+      formData.append('destination', trip.route.destination);
+      formData.append('billingType', trip.billingType);
+      formData.append('perUnit', trip.perUnit.toString());
+      formData.append('totalUnits', trip.totalUnits.toString());
+      formData.append('amount', trip.amount.toString());
+      formData.append('startDate', trip.startDate.toISOString());
+      formData.append('truckHireCost', trip.truckHireCost.toString());
+      formData.append('LR', trip.LR);
+      formData.append('material', trip.material);
+      formData.append('notes', trip.notes);
+      formData.append('validity', trip.ewbValidity)
+
+      // Append the file to formData if it exists
+      if (trip.file) {
+        formData.append('file', trip.file);
+      }
+
+      // Append the EWB validity date if it exists
+      if (trip.ewbValidity) {
+        formData.append('ewbValidity', trip.ewbValidity);
+      }
+
+      // Make the request to create the trip
       const tripRes = await fetch('/api/trips', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(trip),
+        body: formData, // Send formData as the body
       });
 
       if (!tripRes.ok) {
         throw new Error('Failed to create trip');
       }
 
-      // Update supplier truck hire cost
+      // Update supplier truck hire cost if needed
       if (trip.supplierId) {
         const supplierRes = await fetch(`/api/suppliers/${trip.supplierId}`, {
           method: 'PATCH',
@@ -95,31 +124,6 @@ const CreateTripPage: React.FC = () => {
         }
       }
 
-      // Update driver status
-      // const driverRes = await fetch(`/api/drivers/${trip.driver}`, {
-      //   method: 'PATCH',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({ status: 'On Trip' }), // Assuming your PATCH route can handle this
-      // });
-
-      // if (!driverRes.ok) {
-      //   throw new Error('Failed to update driver status');
-      // }
-
-      // const truckRes = await fetch(`/api/trucks/${trip.truck}`, {
-      //   method: 'PATCH',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({ status: 'On Trip' }), // Assuming your PATCH route can handle this
-      // });
-
-      // if (!truckRes.ok) {
-      //   throw new Error('Failed to update driver status');
-      // }
-
       const data = await tripRes.json();
       router.push('/user/trips');
     } catch (error) {
@@ -129,6 +133,7 @@ const CreateTripPage: React.FC = () => {
       setSaving(false); // Hide loading overlay
     }
   };
+
 
   if (loading) return <Loading />;
   if (error) return <div>Error: {error}</div>;
@@ -142,7 +147,6 @@ const CreateTripPage: React.FC = () => {
       )}
       <div className="w-full h-full relative">
 
-        <h1 className="text-2xl font-bold text-center mb-4">Add a New Trip</h1>
         <TripForm parties={parties} trucks={trucks} drivers={drivers} onSubmit={handleTripSubmit} lr={latestLR} />
       </div>
     </>

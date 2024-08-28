@@ -34,8 +34,7 @@ const DriverSelect: React.FC<Props> = ({ drivers, formData, handleChange }) => {
 
   return (
     <div>
-      <label className="block w-full">
-        <span className="text-gray-700">Driver</span>
+      <label className="block text-sm text-gray-700">Driver</label>
         <Select name="driver" value={formData.driver} onValueChange={handleOptionSelect}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select Driver" />
@@ -66,7 +65,6 @@ const DriverSelect: React.FC<Props> = ({ drivers, formData, handleChange }) => {
             )}
           </SelectContent>
         </Select>
-      </label>
     </div>
   );
 };

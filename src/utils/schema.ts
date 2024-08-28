@@ -210,6 +210,7 @@ export const truckSchema: Schema = new Schema({
   supplier: { type: String },
   status: { type: String, enum: ['Available', 'On Trip'] },
   trip_id: { type: String, default: '' },
+  driver_id : {type : String, default : ''},
   documents : {
     RC : String,
     Pollution : String,

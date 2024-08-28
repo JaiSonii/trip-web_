@@ -25,7 +25,7 @@ const OfficeExpense: React.FC = () => {
     const getBook = async () => {
         try {
             setLoading(true);
-            const res = await fetch(`/api/officeExpense`);
+            const res = await fetch(`/api/officeExpense?month=${month}&year=${year}`);
             if (!res.ok) throw new Error('Error fetching expenses');
             const data = await res.json();
             setMaintainenceBook(data.expenses || []);

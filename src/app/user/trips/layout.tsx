@@ -10,11 +10,17 @@ const inter = Inter({ subsets: ["latin"] });
 
 const TripsLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname()
+
+  const headings: any = {
+    '/user/trips': 'Trips',
+    '/user/trips/create' : 'Create New Trip'
+  }
+
   return (
     <div className={`${inter.className} bg-gray-100 min-h-screen flex flex-col`}>
       <div className="container mx-auto p-4 flex flex-col bg-white shadow-md rounded-md">
         <div className="flex items-center justify-between mb-4 border-b-2 border-gray-300 pb-2">
-          <h1 className="text-3xl font-bold text-bottomNavBarColor">Trips</h1>
+          <h1 className="text-2xl font-bold text-bottomNavBarColor">{headings[pathname]}</h1>
           <div className="flex space-x-4">
             {!pathname.includes('create') &&
               <Button variant="newyork">

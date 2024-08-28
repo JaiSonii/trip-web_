@@ -27,7 +27,7 @@ export const BillingInfo: React.FC<BillingInfoProps> = ({ formData, handleChange
 
   return (
     <div className="billing-info">
-      <h2 className="text-xl font-bold mb-2">Billing Information</h2>
+      <h2 className="text-md font-semibold mb-2">Billing Information</h2>
       <div className="flex flex-wrap gap-2 mb-4">
         {['Fixed', 'Per Tonne', 'Per Kg', 'Per Trip', 'Per Day', 'Per Hour', 'Per Litre', 'Per Bag'].map((type) => (
           <button
@@ -42,7 +42,7 @@ export const BillingInfo: React.FC<BillingInfoProps> = ({ formData, handleChange
       </div>
       {formData.billingType === 'Fixed' ? (
         <label className="block">
-          <span className="text-gray-700">Freight Amount</span>
+          <span className="text-gray-700 text-sm">Freight Amount</span>
           <input
             className="w-full p-2 border border-gray-300 rounded-md mb-4"
             type="number"
@@ -85,7 +85,7 @@ export const BillingInfo: React.FC<BillingInfoProps> = ({ formData, handleChange
             </label>
           </div>
           <label className="block">
-            <span className="text-gray-700">Freight Amount</span>
+            <span className="text-gray-700 text-sm">Freight Amount</span>
             <input
               className="w-full p-2 border border-gray-300 rounded-md mb-4"
               type="number"

@@ -11,6 +11,8 @@ import DriverName from '@/components/driver/DriverName';
 import { icons, IconKey } from '@/utils/icons';
 import { FaCalendarAlt, FaTruck } from 'react-icons/fa';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { IoAddCircle } from 'react-icons/io5';
+import TruckExpenseModal from '@/components/TruckExpenseModal';
 
 const TruckExpense: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +52,7 @@ const TruckExpense: React.FC = () => {
 
   const handleEditExpense = async (expense: IExpense) => {
     try {
-      await handleAddCharge(expense, expense.id);
+      selected ? await handleAddCharge(expense, expense.id) : handleAddCharge(expense, '',expense.truck);
       setModalOpen(false); // Close the modal after saving
       getBook();
     } catch (error) {
@@ -91,7 +93,7 @@ const TruckExpense: React.FC = () => {
       <div className='flex items-center justify-between'>
         <h1 className="text-2xl font-bold mb-4 text-bottomNavBarColor">Truck Expenses</h1>
 
-        <div className="mb-4">
+        <div className="mb-4 flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger>
               <Button variant="outline">Select Columns</Button>
@@ -121,7 +123,11 @@ const TruckExpense: React.FC = () => {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+          <Button onClick={()=>setModalOpen(true)}>
+          Truck Expense     <IoAddCircle className='mt-1'/>
+        </Button>
         </div>
+       
       </div>
 
 
@@ -204,16 +210,16 @@ const TruckExpense: React.FC = () => {
         </table>
       </div>
 
-      {selected && (
-        <ExpenseModal
+      
+        <TruckExpenseModal
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           onSave={handleEditExpense}
-          driverId={selected.driver as string}
+          driverId={selected?.driver as string}
           selected={selected}
           truckPage={true}
         />
-      )}
+      
     </div>
   );
 };

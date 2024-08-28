@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { PartySelect } from './PartySelect';
-import TruckSelect  from './TruckSelect';
+import TruckSelect from './TruckSelect';
 import DriverSelect from './DriverSelect';
 import RouteInputs from './RouteInputs';
 import { BillingInfo } from './BillingInfo';
-import {DateInputs} from './DateInputs';
+import { DateInputs } from './DateInputs';
 import { IDriver, IParty, TruckModel } from '@/utils/interface';
 import { Button } from '../ui/button';
 type Props = {
@@ -15,7 +15,7 @@ type Props = {
     onSubmit: (trip: any) => void;
 };
 
-const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr}) => {
+const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr }) => {
     const [formData, setFormData] = useState({
         party: '',
         truck: '',
@@ -33,16 +33,74 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr}) =>
         truckHireCost: 0,
         LR: lr,
         material: '',
-        notes: ''
+        notes: '',
+        file: null,
+        ewbValidity: null
     });
+
+    const [file, setFile] = useState<File | null>(null)
 
     const [showDetails, setShowDetails] = useState(false);
     const [selectedTruck, setSelectedTruck] = useState<TruckModel | undefined>(undefined);
     const [hasSupplier, setHasSupplier] = useState(false);
+    const [fileLoading, setFileLoading] = useState(false)
+
+    const handleFileChange = async (e: any) => {
+        const uplaodedFile = e.target.files[0];
+        setFile(uplaodedFile);
+        setFormData((prev) => ({
+            ...prev,
+            file: uplaodedFile
+        }))
+
+    };
+
+    const submitEwayBill = async () => {
+        if (file) {
+            try {
+                setFileLoading(true)
+                const data = new FormData()
+                data.append('file', file)
+                const res = await fetch(`/api/trips/getEwaybillDetails`, {
+                    method: 'POST',
+                    body: data
+                })
+                const resData = await res.json()
+                const tripData = resData.ewbValidityDate
+                console.log(tripData)
+                setFormData((prev) => {
+                    const newFormData = {
+                        ...prev,
+                        startDate: new Date(tripData.startDate),
+                        route: {
+                            origin: tripData.origin.split('\n')[0],
+                            destination: tripData.destination.split('\n')[0],
+                        },
+                        truck: tripData.truckNo,
+                        ewbValidity: tripData.validity
+                    };
+                    console.log("Updated Form Data:", newFormData); // Debugging line
+                    return newFormData;
+                });
+            } catch (error: any) {
+                alert(error.message)
+                console.log(error)
+            } finally {
+                setFileLoading(false)
+            }
+        } else {
+            alert('No file selected')
+        }
+
+    }
 
     useEffect(() => {
         const updatedTruck = trucks.find(truck => truck.truckNo === formData.truck);
         setSelectedTruck(updatedTruck);
+        setFormData((prev) => ({
+            ...prev,
+            driver: updatedTruck?.driver_id ? updatedTruck?.driver_id : ''
+        }))
         setHasSupplier(!!updatedTruck?.supplier);
     }, [formData.truck, trucks]);
 
@@ -83,7 +141,24 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr}) =>
 
     return (
         <div className="bg-white text-black p-4 max-w-3xl mx-auto shadow-md rounded-md">
+            <div className='flex items-center gap-3 mb-4'>
+                <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleFileChange}
+                    className=""
+                />
+                <Button onClick={submitEwayBill} >
+                    {fileLoading ? 'Loading...' : 'Upload'}
+                </Button>
+            </div>
+
             <form className="space-y-4" onSubmit={handleSubmit}>
+                <BillingInfo
+                    formData={formData}
+                    handleChange={handleChange}
+                    setFormData={setFormData}
+                />
                 <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                     <PartySelect
                         parties={parties}
@@ -99,29 +174,30 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr}) =>
                         setFormData={setFormData}
                     />
                 </div>
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
 
-                <DriverSelect
-                    drivers={drivers}
-                    formData={formData}
-                    handleChange={handleChange}
-                    setFormData={setFormData}
-                />
-                <div className='z-50 '>
-                <RouteInputs
-                    formData={formData}
-                    handleChange={handleChange}
-                />
+
+
+                    <DriverSelect
+                        drivers={drivers}
+                        formData={formData}
+                        handleChange={handleChange}
+                        setFormData={setFormData}
+                    />
+                    <DateInputs
+                        formData={formData}
+                        handleChange={handleChange}
+                    />
                 </div>
-                
-                <BillingInfo
-                    formData={formData}
-                    handleChange={handleChange}
-                    setFormData={setFormData}
-                />
-                <DateInputs
-                    formData={formData}
-                    handleChange={handleChange}
-                />
+                <div className='z-50 '>
+                    <RouteInputs
+                        formData={formData}
+                        handleChange={handleChange}
+                    />
+                </div>
+
+
+
 
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700">LR No</label>
@@ -186,7 +262,7 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr}) =>
                         />
                     </div>
                 )}
-    
+
                 <Button
                     className='w-full'
                     type="submit"

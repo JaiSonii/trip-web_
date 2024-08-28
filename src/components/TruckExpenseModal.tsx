@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { fuelAndDriverChargeTypes, maintenanceChargeTypes } from '@/utils/utilArray';
 import { IDriver, IExpense, ITrip, TruckModel } from '@/utils/interface';
-import DriverSelect from '../DriverSelect';
+import DriverSelect from './trip/DriverSelect';
 import { motion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import { statuses } from '@/utils/schema';
@@ -20,7 +20,6 @@ interface ChargeModalProps {
 
 interface TripExpense {
   id?: string;
-  trip: string;
   partyBill: boolean;
   amount: number;
   date: Date;
@@ -33,10 +32,9 @@ interface TripExpense {
   truck?: string
 }
 
-const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, driverId, selected, truckPage }) => {
+const TruckExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, driverId, selected, truckPage }) => {
   const [formData, setFormData] = useState<TripExpense>({
     id: selected?._id || undefined,
-    trip: selected?.trip_id || '',
     partyBill: false,
     amount: selected?.amount || 0,
     date: selected?.date ? new Date(selected.date) : new Date(),
@@ -55,14 +53,11 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
   const [selectedCategory, setSelectedCategory] = useState('Fuel & Driver');
   const [drivers, setDrivers] = useState<IDriver[]>([]);
   const [trucks, setTrucks] = useState<TruckModel[]>([])
-  const [trips, setTrips] = useState<ITrip[]>([])
-  const [trip, setTrip] = useState<ITrip>()
 
   useEffect(() => {
     if (!selected) return;
     setFormData({
       id: selected?._id || undefined,
-      trip: selected?.trip_id || '',
       partyBill: false,
       amount: selected?.amount || 0,
       date: selected?.date ? new Date(selected.date) : new Date(),
@@ -76,41 +71,21 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
     });
   }, [selected]);
 
-  useEffect(() => {
-    const fetchDriverName = async () => {
-      const result = await fetch(`/api/drivers/${driverId || trip?.driver}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      const data = await result.json();
-      setDriverName(data.name || 'Driver Not Found');
-    };
-    if (formData.paymentMode === 'Paid By Driver') fetchDriverName();
 
-    const fetchDrivers = async () => {
-      const res = await fetch(`/api/drivers`);
-      const data = await res.json();
-      setDrivers(data.drivers);
-    };
-
-    fetchDrivers();
-  }, [formData.paymentMode, driverId]);
 
   const fetchTripsTrucks = async () => {
     try {
-      const [tripRes, truckRes] = await Promise.all([
-        fetch(`/api/trips/expenses`),
-        fetch(`/api/trucks/create`)
+      const [truckRes, driverRes] = await Promise.all([
+        fetch(`/api/trucks/create`),
+        fetch(`/api/drivers/create`)
       ])
 
-      const [tripData, truckData] = await Promise.all([
-        tripRes.ok ? tripRes.json() : [],
-        truckRes.ok ? truckRes.json() : []
+      const [ truckData, driverData] = await Promise.all([
+        truckRes.ok ? truckRes.json() : [],
+        driverRes.ok ? driverRes.json() : []
       ])
-      setTrips(tripData.trips)
       setTrucks(truckData.trucks)
+      setDrivers(driverData.drivers)
 
     } catch (error: any) {
       console.error('Error fetching data:', error);
@@ -124,23 +99,11 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
     }
   }, [pathname])
 
-  useEffect(()=>{
-    if(formData.paymentMode === 'Paid By Driver' && trip){
-      setFormData((prevData) => ({...prevData, driver: trip.driver }));
-    }
-  },[trip,formData.paymentMode])
+
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prevData) => {
       let updatedData = { ...prevData, [name]: value };
-
-      if (name === 'trip') {
-        const selectedTrip = trips.find(trip => trip.trip_id === value);
-        if (selectedTrip) {
-          setTrip(selectedTrip)
-          updatedData = { ...updatedData, truck: selectedTrip.truck };
-        }
-      }
 
       return updatedData;
     });
@@ -149,7 +112,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
-    setFormData({ ...formData, [name]: type === 'checkbox' ? !formData.partyBill : value });
+    setFormData({ ...formData, [name]: value });
   };
 
   const handleSave = () => {
@@ -189,7 +152,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
           }}
           className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl"
         >
-          <h2 className="text-xl font-semibold mb-4">Add New Charge</h2>
+          <h2 className="text-xl font-semibold mb-4">Truck Expense</h2>
 
           <div className="flex space-x-4 mb-4 border-b-2 border-gray-200">
             <Button
@@ -202,7 +165,6 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
             >
               Fuel & Driver
             </Button>
-            {truckPage || pathname.includes('/expenses') && (
               <Button
                 variant="link"
                 onClick={() => setSelectedCategory('Maintenance')}
@@ -213,7 +175,6 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
               >
                 Maintenance
               </Button>
-            )}
           </div>
 
           <div className="mb-4">
@@ -254,33 +215,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
             </div>
           </div>
 
-          {pathname.includes('/expenses') && !selected && <div className='flex items-center space-x-2 '>
-            <div className="mb-4 w-1/2">
-              <label className="block text-sm font-medium text-gray-700">Select Trip</label>
-              <Select value={formData.trip} onValueChange={(value) => handleSelectChange('trip', value)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder='Select Trip' />
-                </SelectTrigger>
-                <SelectContent>
-                  {trips.map((trip: ITrip) => (
-                    <SelectItem key={trip.trip_id} value={trip.trip_id}>
-                      <div className='flex items-center space-x-2 w-full'>
-                        <span className='font-semibold w-1/2'>{trip.route.origin.split(',')[0]} &rarr; {trip.route.destination.split(',')[0]}</span>
-                        <div className="flex flex-col items-center space-x-2 w-1/2">
-                          <span>{statuses[trip.status as number]}</span>
-                          <div className="relative w-full bg-gray-200 h-1 rounded">
-                            <div
-                              className={`absolute top-0 left-0 h-1 rounded transition-width duration-500 ${trip.status === 0 ? 'bg-red-500' : trip.status === 1 ? 'bg-yellow-500' : trip.status === 2 ? 'bg-blue-500' : trip.status === 3 ? 'bg-green-500' : 'bg-green-800'}`}
-                              style={{ width: `${(trip.status as number / 4) * 100}%` }}
-                            ></div>
-                          </div>
-                        </div>
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          
 
             <div className="mb-4 w-1/2">
               <label className="block text-sm font-medium text-gray-700">Select Truck</label>
@@ -302,7 +237,6 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
                 </SelectContent>
               </Select>
             </div>
-          </div>}
 
           <label className="block text-sm font-medium text-gray-700">Payment Mode</label>
           <div className="flex flex-row w-full justify-start gap-3 mb-3">
@@ -399,4 +333,4 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
   );
 };
 
-export default ExpenseModal;
+export default TruckExpenseModal;

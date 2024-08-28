@@ -24,7 +24,7 @@ type Props = {
 const AdditionalDetails: React.FC<Props> = ({ formdata, renderModelOptions, handleInputChange }) => (
     <>
         <Select onValueChange={(value) => handleInputChange({ target: { name: 'model', value } } as React.ChangeEvent<HTMLSelectElement>)}>
-            <SelectTrigger className="w-full p-2 border border-gray-300 rounded-md">
+            <SelectTrigger >
                 <SelectValue placeholder="Select Model" />
             </SelectTrigger>
             <SelectContent>

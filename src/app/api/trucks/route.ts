@@ -64,7 +64,8 @@ export async function POST(req: Request) {
       status: 'Available',
       trip_id: '',
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
+      driver_id : data.driver
     });
 
     // Save the new truck instance to the database

@@ -5,13 +5,14 @@ import React, { useState, useEffect } from 'react';
 import { minitruck, openBody, closedContainer, trailer, truckTypes } from '@/utils/utilArray';
 import { validateTruckNo } from '@/utils/validate';
 import { useRouter } from 'next/navigation';
-import { ISupplier } from '@/utils/interface';
+import { IDriver, ISupplier, TruckModel } from '@/utils/interface';
 import SupplierSelect from '@/components/truck/SupplierSelect';
 import AdditionalDetails from '@/components/truck/AdditionalDetails';
 import Loading from '../loading';
 import { truckTypesIcons } from '@/utils/utilArray';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectLabel, SelectValue } from '@/components/ui/select'; // Adjust the import path as necessary
 import { Button } from '@/components/ui/button';
+import DriverSelect from '@/components/trip/DriverSelect';
 
 // Define the types
 type FormData = {
@@ -22,6 +23,7 @@ type FormData = {
     bodyLength: number | null;
     ownership: string;
     supplier: string;
+    driver : string;
 }
 
 // Main CreateTruck component
@@ -36,31 +38,26 @@ const CreateTruck: React.FC = () => {
         capacity: '',
         bodyLength: null,
         ownership: '',
-        supplier: ''
+        supplier: '',
+        driver : ''
     });
 
     const [showDetails, setShowDetails] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [suppliers, setSuppliers] = useState<ISupplier[]>([]);
     const [loading, setLoading] = useState(true);
+    const [drivers, setDrivers] = useState<IDriver[]>([])
 
     useEffect(() => {
         setSaving(true)
-        const fetchSuppliers = async () => {
+        const fetchSuppliersAndDriver = async () => {
             try {
-                const res = await fetch('/api/suppliers', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
+                const [supplierRes, truckRes] = await Promise.all([fetch('/api/suppliers'), fetch(`/api/drivers`) ])
 
-                if (!res.ok) {
-                    throw new Error('Failed to fetch suppliers');
-                }
-
-                const data = await res.json(); // Parse the response body as JSON
-                setSuppliers(data.suppliers);
+                const [supplierData, driverData] : any= await Promise.all([supplierRes.ok ? supplierRes.json() : alert('Failed to fetch Suppliers'), truckRes.ok ? truckRes.json() : alert('Failed to fetch Trucks')]) // Parse the response body as JSON
+                console.log(driverData)
+                setSuppliers(supplierData.suppliers);
+                setDrivers(driverData.drivers)
             } catch (err) {
                 setError((err as Error).message);
             } finally {
@@ -69,7 +66,7 @@ const CreateTruck: React.FC = () => {
             }
         };
 
-        fetchSuppliers();
+        fetchSuppliersAndDriver();
     }, []);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -135,7 +132,8 @@ const CreateTruck: React.FC = () => {
                 capacity: '',
                 bodyLength: null,
                 ownership: '',
-                supplier: ''
+                supplier: '',
+                driver : ''
             });
             setShowDetails(false); // Optionally reset additional details state
             const data = await response.json()
@@ -180,7 +178,6 @@ const CreateTruck: React.FC = () => {
             <div className="bg-white text-black p-4 max-w-md mx-auto shadow-md rounded-md">
                 <form className="space-y-4" onSubmit={handleSubmit}>
                     <input
-                        className="w-full p-2 border border-gray-300 rounded-md"
                         type='text'
                         name='truckNo'
                         value={formdata.truckNo}
@@ -189,7 +186,7 @@ const CreateTruck: React.FC = () => {
                         required
                     />
                     <Select onValueChange={(value) => handleSelectChange('truckType', value)}>
-                        <SelectTrigger className="w-full p-2 border border-gray-300 rounded-md">
+                        <SelectTrigger>
                             <SelectValue placeholder="Select Truck Type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -201,14 +198,15 @@ const CreateTruck: React.FC = () => {
                         </SelectContent>
                     </Select>
                     <Select onValueChange={(value) => handleSelectChange('ownership', value)}>
-                        <SelectTrigger className="w-full p-2 border border-gray-300 rounded-md">
-                            <SelectValue placeholder="Select Ownership" />
+                        <SelectTrigger >
+                            <SelectValue placeholder="Select Ownership*" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value='Self'>Self</SelectItem>
                             <SelectItem value='Market'>Market</SelectItem>
                         </SelectContent>
                     </Select>
+                    {drivers && <DriverSelect drivers={drivers} formData={formdata} setFormData={setFormdata} handleChange={handleInputChange} />}
                     {formdata.ownership === 'Market' && (
                         <SupplierSelect
                             suppliers={suppliers}
@@ -218,13 +216,13 @@ const CreateTruck: React.FC = () => {
                     )}
                     {
                         formdata.truckType && !new Set(['Other','Tanker','Tipper']).has(formdata.truckType) &&(
-                            <button
-                                className="w-full p-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50"
+                            <Button
+                                className='rounded-full w-full'
                                 type="button"
                                 onClick={() => setShowDetails(true)}
                             >
                                 Add More Details
-                            </button>
+                            </Button>
                         )
                     }
 

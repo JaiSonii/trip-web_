@@ -6,6 +6,7 @@ import { ITrip } from '@/utils/interface';
 import {v4 as uuidv4} from 'uuid'
 import { partySchema } from '@/utils/schema';
 import { verifyToken } from '@/utils/auth';
+import { uploadFileToS3 } from '@/helpers/S3Operation';
 
 const Trip = models.Trip || model('Trip', tripSchema);
 const Party = models.Party || model('Party', partySchema)
@@ -50,47 +51,59 @@ export async function POST(this: any, req: Request) {
   if (error) {
     return NextResponse.json({ error });
   }
+
   try {
     await connectToDatabase(); // Establish database connection
 
-    const data = await req.json(); // Parse JSON data from request body
+    const formData = await req.formData();
+    const tripId = 'trip' + uuidv4();
 
-    // Basic validation (you can implement your own validation logic here if needed)
-    const datearr = [new Date(data.startDate), null, null, null, null]
+    // Handle file upload if a file is provided
+    const file = formData.get('file') as File | null;
+    let fileUrl = '';
 
-    // Create a new Trip instance based on ITrip interface
+    if (file) {
+      const fileBuffer = Buffer.from(await file.arrayBuffer());
+      const fileName = `trips/ewaybill-${tripId}`;
+      const contentType = file.type;
+      const s3FileName = await uploadFileToS3(fileBuffer, fileName, contentType);
+      fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3FileName}${contentType === 'application/pdf' ? '.pdf' : ''}`;
+    }
+
+    console.log('validity', formData.get('validity'))
+
+    // Prepare trip data
     const newTrip: ITrip = new Trip({
-      user_id : user,
-      trip_id: 'trip' + uuidv4(),
-      party: data.party,
-      truck: data.truck,
-      driver: data.driver,
-      supplier : data.supplierId,
+      user_id: user,
+      trip_id: tripId,
+      party: formData.get('party'),
+      truck: formData.get('truck'),
+      driver: formData.get('driver'),
+      supplier: formData.get('supplierId'),
       route: {
-        origin: data.route.origin,
-        destination: data.route.destination
+        origin: formData.get('origin'),
+        destination: formData.get('destination'),
       },
-      billingType: data.billingType,
-      amount: data.amount,
-      balance: data.amount,
-      dates: datearr, // Assuming startDate is passed as string and needs conversion
-      truckHireCost: data.truckHireCost || 0,
-      LR: data.LR,
-      status : 0,
-      material: data.material || '',
-      notes: data.notes || '',
-      accounts : []
+      billingType: formData.get('billingType'),
+      amount: parseFloat(formData.get('amount') as string),
+      balance: parseFloat(formData.get('amount') as string),
+      dates: [new Date(formData.get('startDate') as string), null, null, null, null],
+      truckHireCost: parseFloat(formData.get('truckHireCost') as string) || 0,
+      LR: formData.get('LR'),
+      status: 0,
+      material: formData.get('material') || '',
+      notes: formData.get('notes') || '',
+      accounts: [],
+      ewbValidityDate: formData.get('validity') ? new Date(formData.get('validity') as string) : null,
+      ewayBill: fileUrl,
     });
 
     // Save the new trip document
     const savedTrip = await newTrip.save();
 
-    // const party = await Party.findOne({party_id : data.party})
-    // party.balance = parseFloat(party.balance) + newTrip.amount
-    // await party.save()
-
-    await Driver.findOneAndUpdate({user_id : user, driver_id : data.driver}, {status : 'On Trip'})
-    await Truck.findOneAndUpdate({user_id : user, truckNo : data.truck}, {status : 'On Trip'})
+    // Update related records
+    await Driver.findOneAndUpdate({ user_id: user, driver_id: formData.get('driver') }, { status: 'On Trip' });
+    await Truck.findOneAndUpdate({ user_id: user, truckNo: formData.get('truck') }, { status: 'On Trip' });
 
     // Return success response
     return NextResponse.json({ message: 'Saved Successfully', data: savedTrip }, { status: 200 });
@@ -98,13 +111,18 @@ export async function POST(this: any, req: Request) {
   } catch (error: any) {
     console.error('Error saving trip:', error);
 
-    // Handle different types of errors
+    let errorMessage = 'Internal Server Error';
+    let statusCode = 500;
+
     if (error.name === 'ValidationError') {
-      return NextResponse.json({ message: 'Validation Error', details: error.message }, { status: 400 });
+      errorMessage = 'Validation Error';
+      statusCode = 400;
     } else if (error.name === 'MongoError' && error.code === 11000) {
-      return NextResponse.json({ message: 'Duplicate Key Error', details: error.message }, { status: 409 });
-    } else {
-      return NextResponse.json({ message: 'Internal Server Error', details: error.message }, { status: 500 });
+      errorMessage = 'Duplicate Key Error';
+      statusCode = 409;
     }
+
+    return NextResponse.json({ message: errorMessage, details: error.message }, { status: statusCode });
   }
 }
+

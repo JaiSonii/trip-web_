@@ -104,6 +104,7 @@ export interface TruckModel extends Document {
   documents : []
   createdAt: Date;
   updatedAt: Date;
+  driver_id : string
 }
 
 export interface ISupplier extends Document{

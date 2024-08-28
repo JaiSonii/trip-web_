@@ -1,3 +1,4 @@
+import { BsFillPauseCircleFill } from 'react-icons/bs';
 import {
     FaTools, // for maintenance and repair
     FaTruckLoading, // for loading
@@ -42,6 +43,8 @@ import {
     'Grease Oil Change': <FaTools className="text-bottomNavBarColor"/>,
     'Spare Parts Purchase': <FaTools className="text-bottomNavBarColor"/>,
     'Air Filter Change': <FaTools className="text-bottomNavBarColor"/>,
+    'Detention' : <BsFillPauseCircleFill className="text-bottomNavBarColor"/>, // for detention
+
   };
   
 

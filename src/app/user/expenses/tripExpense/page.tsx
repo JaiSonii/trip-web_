@@ -14,6 +14,8 @@ import Link from 'next/link';
 import { icons, IconKey } from '@/utils/icons';
 import { DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { DropdownMenu } from '@/components/ui/dropdown-menu';
+import TripExpenseModal from '@/components/TripExpenseModal';
+import { IoAddCircle } from 'react-icons/io5';
 
 const TripExpensePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
@@ -51,9 +53,12 @@ const TripExpensePage: React.FC = () => {
     }
   };
 
-  const handleEditExpense = async (expense: IExpense) => {
+  const handleEditExpense = async (expense: IExpense | any) => {
     try {
-      await handleAddCharge(expense, expense.id);
+      selected ? await handleAddCharge(expense, expense.id) : await fetch(`/api/trips/${expense.trip}/truckExpense`, {
+        method : 'POST',
+        body : JSON.stringify(expense)
+      }).then((res)=>res.ok ? null : alert('Failed to add Expense'));
       setModalOpen(false);
       getBook();
     } catch (error) {
@@ -96,6 +101,7 @@ const TripExpensePage: React.FC = () => {
       <div className="w-full h-full p-4">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-2xl font-bold text-bottomNavBarColor">Trip Expenses</h1>
+          <div className='flex items-center gap-2'>
           <DropdownMenu>
             <DropdownMenuTrigger>
               <Button variant="outline">Select Columns</Button>
@@ -115,6 +121,11 @@ const TripExpensePage: React.FC = () => {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+          <Button onClick={()=>setModalOpen(true)}>
+            Trip Expense <IoAddCircle className='mt-1'/>
+          </Button>
+          </div>
+         
         </div>
 
         <div className="table-container overflow-auto bg-white shadow rounded-lg">
@@ -179,7 +190,7 @@ const TripExpensePage: React.FC = () => {
           </table>
         </div>
 
-        <ExpenseModal
+        <TripExpenseModal
           isOpen={modalOpen}
           onClose={() => setModalOpen(false)}
           onSave={handleEditExpense}

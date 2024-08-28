@@ -13,7 +13,7 @@ export async function GET(req: Request) {
   try {
     await connectToDatabase()
 
-    const trucks = await Truck.find({ user_id: user }).select(['truckNo','status','supplier']).exec();
+    const trucks = await Truck.find({ user_id: user }).select(['truckNo','status','supplier','driver_id']).exec();
     return NextResponse.json({ trucks });
   } catch (err) {
     console.error(err);

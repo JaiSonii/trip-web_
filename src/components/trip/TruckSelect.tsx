@@ -54,10 +54,12 @@ const TruckSelect: React.FC<Props> = ({ trucks, formData, handleChange, setFormD
   }, [trucks, formData.truck, setFormData]);
 
   const handleOptionSelect = (value: string) => {
-    const truck = trucks.find(truck => truck.truckNo === value);
+    const truck : TruckModel | undefined= trucks.find(truck => truck.truckNo === value);
+    console.log(truck)
     setFormData((prev: any) => ({
       ...prev,
-      truck: value
+      truck: value,
+      driver : truck?.driver_id ? truck.driver_id : ''
     }));
   };
 
@@ -68,7 +70,7 @@ const TruckSelect: React.FC<Props> = ({ trucks, formData, handleChange, setFormD
   return (
     <div>
       <label className="block w-full">
-        <span className="text-gray-700">Truck</span>
+      <label className="block text-sm text-gray-700">Truck</label>
         <Select name="truck" value={formData.truck} onValueChange={handleOptionSelect}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select Truck" />

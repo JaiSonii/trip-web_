@@ -91,7 +91,7 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
       expenseType: newCharge.expenseType,
       paymentMode: newCharge.paymentMode,
       transaction_id: newCharge.transactionId || '',
-      driver: newCharge.driver || '',
+      driver: newCharge.paymentMode === 'Paid By Driver' ? newCharge.driver : '',
       amount: newCharge.amount,
       date: newCharge.date,
       notes: newCharge.notes || '',

@@ -15,7 +15,6 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const month = url.searchParams.get('month');
     const year = url.searchParams.get('year');
-    console.log(`${month} ${year}`);
 
     await connectToDatabase();
 

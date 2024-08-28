@@ -59,25 +59,27 @@ export async function GET(req: Request) {
             {
                 $group: {
                     _id: '$truckDetails.ownership',
+                    tripCount: { $sum: 1 }, // Counting the number of trips per ownership type
                     totalFreight: { $sum: '$amount' },
                     totalCharges: {
                         $sum: {
-                            $cond: [{ $eq: ['$charges.partyBill', true] }, '$charges.amount', 0]
+                            $cond: [{ $eq: ['$charges.partyBill', true] }, { $ifNull: ['$charges.amount', 0] }, 0]
                         }
                     },
                     totalDeductions: {
                         $sum: {
-                            $cond: [{ $eq: ['$charges.partyBill', false] }, '$charges.amount', 0]
+                            $cond: [{ $eq: ['$charges.partyBill', false] }, { $ifNull: ['$charges.amount', 0] }, 0]
                         }
                     },
-                    tripCount: { $sum: 1 },
                     trips: { $push: '$$ROOT' }
                 }
             }
         ]);
 
-        const marketTruckTrips = tripsData.find(d => d._id === 'Market') || { trips: [], totalFreight: 0, totalCharges: 0, totalDeductions: 0 };
-        const ownTruckTrips = tripsData.find(d => d._id === 'Self') || { trips: [], totalFreight: 0, totalCharges: 0, totalDeductions: 0 };
+        const marketTruckTrips = tripsData.find(d => d._id === 'Market') || { trips: [], tripCount: 0, totalFreight: 0, totalCharges: 0, totalDeductions: 0 };
+        const ownTruckTrips = tripsData.find(d => d._id === 'Self') || { trips: [], tripCount: 0, totalFreight: 0, totalCharges: 0, totalDeductions: 0 };
+
+        console.log(tripsData);
 
         const [expenses, officeExpenses] = await Promise.all([
             Expense.find({ user_id: user, date: { $gte: startDate, $lt: endDate } }).select('amount').lean(),
@@ -89,6 +91,8 @@ export async function GET(req: Request) {
 
         const marketTruckProfit = marketTruckTrips.totalFreight + marketTruckTrips.totalCharges - marketTruckTrips.totalDeductions - totalExpense;
         const ownTruckProfit = ownTruckTrips.totalFreight + ownTruckTrips.totalCharges - ownTruckTrips.totalDeductions - totalOfficeExpense;
+
+        const totalTrips = marketTruckTrips.tripCount + ownTruckTrips.tripCount; // Total number of trips
 
         const htmlReport = `
 <!DOCTYPE html>
@@ -147,7 +151,7 @@ export async function GET(req: Request) {
             </div>
 
             <div class="box bg-lightOrangeButtonColor text-gray-900 font-semibold rounded-lg shadow-lg text-sm md:text-base text-box">
-                <h2>Total Trips for ${month} ${year}: ${marketTruckTrips.tripCount + ownTruckTrips.tripCount}</h2>
+                <h2>Total Trips for ${month} ${year}: ${totalTrips}</h2> <!-- Display total trips -->
             </div>
 
             <div class="box bg-lightOrangeButtonColor text-gray-900 font-semibold rounded-lg shadow-lg text-sm md:text-base text-box">
@@ -179,20 +183,14 @@ export async function GET(req: Request) {
     </div>
 </body>
 </html>
-
-
-
-
-
-
-
 `;
 
         return new Response(htmlReport, {
             headers: { 'Content-Type': 'text/html' },
         });
 
-    } catch (error: any) {
-        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json({ error: 'Failed to fetch trip data', status: 500 });
     }
 }
