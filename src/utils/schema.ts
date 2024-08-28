@@ -42,7 +42,7 @@ export const PaymentBookSchema = {
   },
   paymentType: {
     type: String,
-    enum: ['Cash', 'Cheque', 'Online Transfer'],
+    enum: ['Cash', 'Cheque', 'Online Transfer', 'Bank Transfer', 'UPI', 'Fuel', 'Others'],
     required: true
   },
   receivedByDriver: {
