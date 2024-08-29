@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { ITrip } from '@/utils/interface';
 import { statuses } from '@/utils/schema';
 import { useRouter } from 'next/navigation';
@@ -19,6 +19,23 @@ import {
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
+const TripBalance = ({trip} : {trip : ITrip})=>{
+  const [balance, setBalance] = useState(0)
+  useEffect(()=>{
+    if(trip){
+      const balance = async ()=>{
+        const pending = await fetchBalance(trip)
+        setBalance(pending)
+      }
+      balance()
+    }
+  },[trip])
+
+  return (
+    <p className='text-green-600 font-semibold text-md'>{balance}</p>
+  )
+}
+
 const columnOptions = [
   { label: 'Start Date', value: 'startDate' },
   { label: 'LR Number', value: 'LR' },
@@ -35,10 +52,18 @@ const TripsPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedStatuses, setSelectedStatuses] = useState<number[]>([]);
   const [selectedColumns, setSelectedColumns] = useState<string[]>(columnOptions.map(col => col.value));
-  const [totalBalance, setTotalBalance] = useState(0);
+  const [totalBalance, setTotalBalance] = useState<number | null>(null);
+  const [visibleColumns, setVisibleColumns] = useState<string[]>(columnOptions.map(col => col.label));
 
-  // Memoized column options to prevent re-rendering unless changed
-  const visibleColumns = useMemo(() => columnOptions.filter(col => selectedColumns.includes(col.value)), [selectedColumns]);
+  const toggleColumn = (column: string) => {
+    setVisibleColumns((prev) =>
+      prev.includes(column)
+        ? prev.filter((col) => col !== column)
+        : [...prev, column]
+    );
+  };
+
+
 
   const fetchTrips = useCallback(async (statuses: number[] = []) => {
     setLoading(true);
@@ -59,6 +84,10 @@ const TripsPage = () => {
 
       const data = await res.json();
       setTrips(data.trips);
+
+      // Calculate total balance
+      const balances = await Promise.all(data.trips.map((trip: ITrip) => fetchBalance(trip)));
+      setTotalBalance(balances.reduce((acc, balance) => acc + balance, 0));
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -66,20 +95,9 @@ const TripsPage = () => {
     }
   }, []);
 
-  const calculateTotalBalance = useCallback(async () => {
-    if (trips) {
-      const balances = await Promise.all(trips.map(trip => fetchBalance(trip)));
-      setTotalBalance(balances.reduce((acc, balance) => acc + balance, 0));
-    }
-  }, [trips]);
-
   useEffect(() => {
     fetchTrips(selectedStatuses);
   }, [selectedStatuses, fetchTrips]);
-
-  useEffect(() => {
-    calculateTotalBalance();
-  }, [trips, calculateTotalBalance]);
 
   const handleStatusChange = (value: string) => {
     const status = parseInt(value);
@@ -87,14 +105,6 @@ const TripsPage = () => {
       prev.includes(status)
         ? prev.filter(s => s !== status)
         : [...prev, status]
-    );
-  };
-
-  const handleColumnChange = (column: string) => {
-    setSelectedColumns(prev =>
-      prev.includes(column)
-        ? prev.filter(col => col !== column)
-        : [...prev, column]
     );
   };
 
@@ -113,7 +123,11 @@ const TripsPage = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center bg-lightOrange rounded-sm text-buttonTextColor p-2">
           <span>Total Balance :</span>
-          <span className="ml-2 text-lg font-bold">{totalBalance}</span>
+          {totalBalance !== null ? (
+            <span className="ml-2 text-lg font-bold">{totalBalance}</span>
+          ) : (
+            <span className="ml-2 text-lg font-bold animate-pulse">Calculating...</span>
+          )}
         </div>
         <div className="flex items-center space-x-4">
           <Select onValueChange={handleStatusChange}>
@@ -133,12 +147,6 @@ const TripsPage = () => {
               ))}
             </SelectContent>
           </Select>
-          <Button
-            className="bg-[#CC5500] text-white rounded-full px-4"
-            onClick={() => setSelectedColumns(columnOptions.map(col => col.value))}
-          >
-            Reset Columns
-          </Button>
         </div>
       </div>
 
@@ -148,19 +156,17 @@ const TripsPage = () => {
             <Button variant="outline">Select Columns</Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
-            {columnOptions.map((col, index) => (
-              <div key={index} className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id={col.value}
-                  checked={selectedColumns.includes(col.value)}
-                  onChange={() => handleColumnChange(col.value)}
-                  className="form-checkbox h-4 w-4 text-orange-600"
-                />
-                <label htmlFor={col.value} className="text-gray-700">
-                  {col.label}
+            {columnOptions.map((col) => (
+              <DropdownMenuItem key={col.value} asChild>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={visibleColumns.includes(col.label)}
+                    onChange={() => toggleColumn(col.label)}
+                  />
+                  <span>{col.label}</span>
                 </label>
-              </div>
+              </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -175,11 +181,12 @@ const TripsPage = () => {
           <table className="custom-table w-full border-collapse table-auto">
             <thead>
               <tr className="bg-orange-600 text-white">
-                {visibleColumns.map(col => (
-                  <th key={col.value} className="border p-4 text-left">
-                    {col.label}
-                  </th>
-                ))}
+                {visibleColumns.includes('Start Date') && <th className="border p-4 text-left">Start Date</th>}
+                {visibleColumns.includes('LR Number') && <th className="border p-4 text-left">LR Number</th>}
+                {visibleColumns.includes('Truck Number') && <th className="border p-4 text-left">Truck Number</th>}
+                {visibleColumns.includes('Party Name') && <th className="border p-4 text-left">Party Name</th>}
+                {visibleColumns.includes('Route') && <th className="border p-4 text-left">Route</th>}
+                {visibleColumns.includes('Status') && <th className="border p-4 text-left">Status</th>}
                 <th>Party Balance</th>
               </tr>
             </thead>
@@ -190,7 +197,7 @@ const TripsPage = () => {
                   className="hover:bg-gray-100 cursor-pointer"
                   onClick={() => router.push(`/user/trips/${trip.trip_id}`)}
                 >
-                  {visibleColumns.includes(columnOptions[0]) && (
+                  {visibleColumns.includes('Start Date') && (
                     <td className="border p-4">
                       <div className="flex items-center space-x-2">
                         <FaCalendarAlt className="text-bottomNavBarColor" />
@@ -198,8 +205,8 @@ const TripsPage = () => {
                       </div>
                     </td>
                   )}
-                  {visibleColumns.includes(columnOptions[1]) && <td className="border p-4">{trip.LR}</td>}
-                  {visibleColumns.includes(columnOptions[2]) && (
+                  {visibleColumns.includes('LR Number') && <td className="border p-4">{trip.LR}</td>}
+                  {visibleColumns.includes('Truck Number') && (
                     <td className="border p-4">
                       <div className="flex items-center space-x-2">
                         <FaTruck className="text-bottomNavBarColor" />
@@ -207,7 +214,7 @@ const TripsPage = () => {
                       </div>
                     </td>
                   )}
-                  {visibleColumns.includes(columnOptions[3]) && (
+                  {visibleColumns.includes('Party Name') && (
                     <td className="border p-4">
                       <div className="flex items-center space-x-2">
                         <GoOrganization className="text-bottomNavBarColor" />
@@ -215,7 +222,7 @@ const TripsPage = () => {
                       </div>
                     </td>
                   )}
-                  {visibleColumns.includes(columnOptions[4]) && (
+                  {visibleColumns.includes('Route') && (
                     <td className="border p-4">
                       <div className="flex items-center space-x-2">
                         <FaRoute className="text-bottomNavBarColor" />
@@ -223,36 +230,28 @@ const TripsPage = () => {
                       </div>
                     </td>
                   )}
-                  {visibleColumns.includes(columnOptions[5]) && (
-                    <td className="border p-4">
+                  {visibleColumns.includes('Status') && <td className="border p-4">
                       <div className="flex flex-col items-center space-x-2">
                         <span>{statuses[trip.status as number]}</span>
                         <div className="relative w-full bg-gray-200 h-1 rounded">
                           <div
                             className={`absolute top-0 left-0 h-1 rounded transition-width duration-500 ${trip.status === 0
-                                ? 'bg-red-500'
-                                : trip.status === 1
-                                  ? 'bg-yellow-500'
-                                  : trip.status === 2
-                                    ? 'bg-blue-500'
-                                    : trip.status === 3
-                                      ? 'bg-green-500'
-                                      : 'bg-green-800'
+                              ? 'bg-red-500'
+                              : trip.status === 1
+                                ? 'bg-yellow-500'
+                                : trip.status === 2
+                                  ? 'bg-blue-500'
+                                  : trip.status === 3
+                                    ? 'bg-green-500'
+                                    : 'bg-green-800'
                               }`}
                             style={{ width: `${(trip.status + 1) * 25}%` }}
                           />
 
                         </div>
                       </div>
-                    </td>
-                  )}
-                  <td className="border p-4">
-                    <div className="flex items-center space-x-2">
-                      <FaFileInvoiceDollar className="text-bottomNavBarColor" />
-                      <span>{fetchBalance(trip)}</span>
-                    </div>
-                  </td>
-
+                    </td>}
+                  <td><TripBalance trip={trip} /></td>
                 </tr>
               ))}
             </tbody>

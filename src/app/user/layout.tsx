@@ -4,11 +4,6 @@ import dynamic from 'next/dynamic';
 
 const MainLayout = dynamic(() => import('@/components/layout/MainLayout'), { ssr: false });
 
-import { Inter as FontSans } from "next/font/google"
-const fontSans = FontSans({
-  subsets: ["latin"],
-  variable: "--font-sans",
-})
 
 export const metadata: Metadata = {
   title: "Awajahi Web",
