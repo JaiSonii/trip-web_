@@ -246,8 +246,10 @@ export const userSchema = new Schema({
   user_id: { type: String, required: true, unique: true },
   phone: { type: String, required: true, unique: true },
   name : {type : String},
-  driver: {type : String, default : null},
-  accountant : {type : String, default : null},
+  role : {
+    name : String,
+    user : String
+  },
   createdAt: { type: Date, default: Date.now }
 });
 

@@ -1,21 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import jwt from 'jsonwebtoken';
-import crypto from 'crypto';
+
 import { model, models } from "mongoose";
-import { connectToDatabase, userSchema } from "@/utils/schema";
+import { connectToDatabase, driverSchema, userSchema } from "@/utils/schema";
+import { generateUserId } from "@/utils/auth";
 
 const User = models.User || model('User', userSchema);
 
-function generateUserId(phoneNumber: string): string {
-  // Remove any non-digit characters from the phone number
-  const sanitizedPhone = phoneNumber.replace(/\D/g, '');
 
-  // Generate a SHA-256 hash of the sanitized phone number
-  const hash = crypto.createHash('sha256').update(sanitizedPhone).digest('hex');
-
-  // Truncate the hash to create a user_id
-  return hash.substring(0, 16);
-}
 
 export async function POST(req: NextRequest) {
   const { phone, session, otp } = await req.json();
@@ -45,17 +37,66 @@ export async function POST(req: NextRequest) {
       }
 
       // Create a JWT token with relevant user data
+      let jwtObject: any = {};
+      if (user.role?.name === 'driver') {
+        const Driver = models.Driver || model('Driver', driverSchema);
+        const driver = await Driver.findOne({ user_id: user.role.user, contactNumber: user.phone });
+        jwtObject = {
+          user_id: user.user_id,
+          phone: user.phone,
+          role: {
+            name: 'driver',
+            user: user.role.user,
+            driver_id: driver?.driver_id
+          }
+        };
+      } else if (user.role?.name === 'accountant') {
+        jwtObject = {
+          user_id: user.user_id,
+          phone: user.phone,
+          role: {
+            name: 'accountant',
+            user: user.role.user
+          }
+        };
+      } else {
+        jwtObject = { user_id: user.user_id, phone: user.phone };
+      }
+
       const token = jwt.sign(
-        { user_id: user.user_id, phone: user.phone },
+        jwtObject,
         process.env.JWT_SECRET as string,
         { expiresIn: '10d' }
       );
 
-      // Set the auth token in cookies
-      const response = NextResponse.json({ message: 'User logged in', status: 200 , token});
-      response.cookies.set('auth_token', token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+      const response = NextResponse.json({ message: 'User logged in', status: 200 });
 
+      // Set the auth_token cookie securely with HttpOnly flag
+      response.cookies.set('auth_token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        path: '/', // Set path to the root to ensure it's accessible across the app
+        sameSite: 'strict', // CSRF protection
+      });
+
+      // Optionally, you can include additional user information in a separate JWT token (e.g., role), but store it securely
+      
+      const roleToken = jwt.sign(
+        { role: jwtObject.role  },
+        process.env.JWT_SECRET as string,
+        { expiresIn: '10d' }
+      );
+
+      if(jwtObject.role){
+        response.cookies.set('role_token', roleToken, {
+          path: '/',
+          sameSite: 'strict',
+        });
+      }
       return response;
+
+
+      // Set the auth token in cooki
     } else {
       return NextResponse.json({ message: "Invalid OTP" }, { status: 400 });
     }

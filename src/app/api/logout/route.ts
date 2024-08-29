@@ -45,6 +45,7 @@ export async function GET(req: NextRequest) {
             // Clear the token cookie
             const response = NextResponse.json({ message: 'Token invalidated successfully', status: 200 });
             response.cookies.delete('auth_token');
+            response.cookies.delete('role_token')
             return response
         } else {
             return NextResponse.json({ error: 'Invalid token', status: 400 });

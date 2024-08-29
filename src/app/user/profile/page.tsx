@@ -38,6 +38,17 @@ const UserProfile: React.FC = () => {
       }),
     });
 
+    if(!response.ok){
+      throw new Error('Failed to Grant Access')
+    }
+
+    const data = await response.json()
+    if(data.status == 400){
+      setError(data.error);
+      alert(data.error)
+      return;
+    }
+
     if (response.ok) {
       alert("Access granted successfully");
       setPhone("");

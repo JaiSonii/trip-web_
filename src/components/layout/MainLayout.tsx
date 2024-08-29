@@ -13,10 +13,12 @@ import { Button } from '../ui/button';
 import { signOut } from 'firebase/auth';
 import { MdArrowDropDown } from "react-icons/md";
 import { motion } from 'framer-motion';
-import { decryptData } from '@/utils/encryption';
 import { SearchIcon } from 'lucide-react';
 import whiteLogo from '@/assets/awajahi-white-logo.png'
 import Image from 'next/image';
+import jwt from 'jsonwebtoken'
+
+
 
 const MainLayout = () => {
   const pathname = usePathname();
@@ -58,8 +60,12 @@ const MainLayout = () => {
   };
 
   const selectedRole = getCookie('selectedRole');
+  const roleToken = Cookies.get('role_token')
+  const decodedToken: any = jwt.decode(roleToken as string)
 
-  const menuItems = [
+  const menuItems = decodedToken?.role.name == 'driver' ? [{
+    href: `/user/drivers/${decodedToken.role.driver_id}`, label: `Driver`, icon: RiSteering2Fill
+  }] : [
     { href: `/user/parties`, label: 'Parties', icon: FaUsers },
     { href: `/user/trips`, label: 'Trips', icon: FaClipboardList },
     { href: `/user/drivers`, label: 'Drivers', icon: RiSteering2Fill },
@@ -150,12 +156,12 @@ const MainLayout = () => {
 
 
           </div>
-          <Button variant={'outline'} onClick={() => setIsSwitchBoxOpen(!isSwitchBoxOpen)} >
+          {/* <Button variant={'outline'} onClick={() => setIsSwitchBoxOpen(!isSwitchBoxOpen)} >
             <div className='flex items-center space-x-1'>
               <span className='text-white'>{selectedRole}</span>
               <MdArrowDropDown className='text-white' />
             </div>
-          </Button>
+          </Button> */}
         </div>
         {/* Switch Account Box */}
         {isSwitchBoxOpen && (

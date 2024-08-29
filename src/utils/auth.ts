@@ -3,18 +3,14 @@ import jwt, { JwtPayload } from 'jsonwebtoken';
 import { NextRequest } from 'next/server';
 import { connectToDatabase, TokenBlacklistSchema } from '@/utils/schema'; // Import your schema
 import { model, models } from 'mongoose';
+import crypto from 'crypto';
 
 // Define the TokenBlackList model
 const TokenBlackList = models.TokenBlackList || model('TokenBlackList', TokenBlacklistSchema);
 
 export async function verifyToken(req: Request) {
-  const tokenResult = fetchCookie(req as NextRequest);
+  const token = fetchCookie(req as NextRequest);
   
-  if (tokenResult.user) {
-    return { user: tokenResult.user };
-  }
-  
-  const token = tokenResult.token;
   
   if (!token) {
     return { error: 'Unauthorized: No token provided' };
@@ -34,7 +30,11 @@ export async function verifyToken(req: Request) {
     const decodedToken = jwt.verify(token, process.env.JWT_SECRET as string) as JwtPayload;
 
     // Optionally, you can add more checks for the token payload
-    return { user: decodedToken.user_id };
+    if (decodedToken.role) return {user : decodedToken.role.user}
+
+      
+    else return { user: decodedToken.user_id };
+    
   } catch (err) {
     return { error: 'Unauthorized: Invalid token' };
   }
@@ -42,16 +42,16 @@ export async function verifyToken(req: Request) {
 
 export function fetchCookie(req: NextRequest) {
   const token = req.cookies.get('auth_token');
-  const role = req.cookies.get('selectedRole');
-  let user_id = req.cookies.get('userId');
-  
-  if (!token) {
-    return { token: null };
-  } else {
-    if (role && user_id && req.nextUrl.pathname !== '/api/login') {
-      return { user: user_id };
-    } else {
-      return { token: token.value };
-    }
-  }
+  return token?.value
+}
+
+export function generateUserId(phoneNumber: string): string {
+  // Remove any non-digit characters from the phone number
+  const sanitizedPhone = phoneNumber.replace(/\D/g, '');
+
+  // Generate a SHA-256 hash of the sanitized phone number
+  const hash = crypto.createHash('sha256').update(sanitizedPhone).digest('hex');
+
+  // Truncate the hash to create a user_id
+  return hash.substring(0, 16);
 }
