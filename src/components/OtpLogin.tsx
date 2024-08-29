@@ -19,6 +19,7 @@ import Image from "next/image";
 import whiteLogo from '@/assets/awajahi-white-logo.png';
 import logo from '@/assets/awajahi logo.png'
 import otpPic from '@/assets/otp-pic.png';
+import Link from "next/link";
 
 function OtpLogin() {
   const router = useRouter();
@@ -147,10 +148,12 @@ function OtpLogin() {
       </div>
       <div className="col-span-3 flex justify-center items-center bg-white">
         <div className="flex flex-col gap-2 w-full max-w-md p-8">
-          <div className="flex items-center mb-6">
+          <Link href={'/'}>
+          <div className="flex items-center mb-6 cursor-pointer">
             <Image src={logo} alt="logo" width={60} height={64} priority />
             <h3 className="text-black font-semibold text-2xl ml-2">Awajahi</h3>
           </div>
+          </Link>
           <div>
             {session ? <Image src={otpPic} width={398} height={398} alt="otp img" /> :
               <h3 className="text-black font-semibold text-3xl mb-5">Hey! Welcome to Awajahi</h3>}
