@@ -60,6 +60,7 @@ function OtpLogin() {
         });
 
         const result = await res.json();
+        console.log(result)
 
         if (result.status === 200) {
           Cookies.set("selectedRole", "carrier");

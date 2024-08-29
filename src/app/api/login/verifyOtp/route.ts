@@ -68,10 +68,26 @@ export async function POST(req: NextRequest) {
         process.env.JWT_SECRET as string,
         { expiresIn: '10d' }
       );
+      const roleToken = jwt.sign(
+        { role: jwtObject.role  },
+        process.env.JWT_SECRET as string,
+        { expiresIn: '10d' }
+      );
 
-      const response = NextResponse.json({ message: 'User logged in', status: 200 });
+      let response 
 
-      // Set the auth_token cookie securely with HttpOnly flag
+      if(jwtObject.role){
+        response = NextResponse.json({message : 'User Logged In', status : 200, roleToken,token})
+        response.cookies.set('role_token', roleToken, {
+          path: '/',
+          sameSite: 'strict',
+        });
+
+      }else{
+        response = NextResponse.json({message : 'User Logged In', status : 200, roleToken,token})
+        
+      }
+
       response.cookies.set('auth_token', token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -79,20 +95,6 @@ export async function POST(req: NextRequest) {
         sameSite: 'strict', // CSRF protection
       });
 
-      // Optionally, you can include additional user information in a separate JWT token (e.g., role), but store it securely
-      
-      const roleToken = jwt.sign(
-        { role: jwtObject.role  },
-        process.env.JWT_SECRET as string,
-        { expiresIn: '10d' }
-      );
-
-      if(jwtObject.role){
-        response.cookies.set('role_token', roleToken, {
-          path: '/',
-          sameSite: 'strict',
-        });
-      }
       return response;
 
 
