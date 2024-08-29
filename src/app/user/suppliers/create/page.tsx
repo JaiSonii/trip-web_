@@ -63,7 +63,6 @@ const CreateSupplierPage: React.FC = () => {
                 </div>
             )}
             <div className='w-full h-full'>
-                <h1 className='text-xl font-bold text-center'>Add a New Supplier</h1>
                 <SupplierForm onSubmit={handlePartySubmit} />
             </div>
         </>

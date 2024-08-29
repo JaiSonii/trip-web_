@@ -64,7 +64,6 @@ const CreatePartyPage: React.FC = () => {
                 </div>
             )}
             <div className='w-full h-full'>
-                <h1 className='text-xl font-bold text-center'>Add a New Party</h1>
                 <PartyForm onSubmit={handlePartySubmit} />
             </div>
         </>
