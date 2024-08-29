@@ -145,7 +145,7 @@ function OtpLogin() {
 
         </div>
       </div>
-      <div className="col-span-3 flex justify-center items-center">
+      <div className="col-span-3 flex justify-center items-center bg-white">
         <div className="flex flex-col gap-2 w-full max-w-md p-8">
           <div className="flex items-center mb-6">
             <Image src={logo} alt="logo" width={60} height={64} priority />

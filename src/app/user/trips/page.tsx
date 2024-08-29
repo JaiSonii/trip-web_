@@ -245,7 +245,7 @@ const TripsPage = () => {
                                     ? 'bg-green-500'
                                     : 'bg-green-800'
                               }`}
-                            style={{ width: `${(trip.status + 1) * 25}%` }}
+                            style={{ width: `${(trip.status + 1) * 20}%` }}
                           />
 
                         </div>

@@ -122,6 +122,7 @@ const SupplierLayout = ({ children, supplierId }: TruckLayoutProps) => {
                 body: JSON.stringify(payments),
             });
             if (!response.ok) {
+                alert('Failed to add payment')
                 throw new Error('Failed to add payment');
             }
             setIsAddPaymentModalOpen(false);
@@ -129,7 +130,8 @@ const SupplierLayout = ({ children, supplierId }: TruckLayoutProps) => {
             if(pathname.includes('passbook')) router.refresh()
             else router.push(`/user/suppliers/${supplierId}/passbook`)
             // You might want to fetch the updated supplier details here
-        } catch (error) {
+        } catch (error : any) {
+            alert(error.message)
             console.error('Failed to add payment:', error);
         }
     };

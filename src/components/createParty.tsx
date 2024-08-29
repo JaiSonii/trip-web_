@@ -61,7 +61,7 @@ const PartyForm: React.FC<Props> = ({ onSubmit }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto p-4 bg-white shadow-md rounded-md">
+    <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto p-4 bg-white shadow-md rounded-md text-buttonTextColor">
       <label className="block mb-2">
         Name:
         <input
