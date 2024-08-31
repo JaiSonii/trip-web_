@@ -70,7 +70,7 @@ export async function POST(this: any, req: Request) {
       fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3FileName}${contentType === 'application/pdf' ? '.pdf' : ''}`;
     }
 
-    console.log('validity', formData.get('validity'))
+    const validity = formData.get('ewbValidity')
 
     // Prepare trip data
     const newTrip: ITrip = new Trip({
@@ -94,9 +94,12 @@ export async function POST(this: any, req: Request) {
       material: formData.get('material') || '',
       notes: formData.get('notes') || '',
       accounts: [],
-      ewbValidityDate: formData.get('validity') ? new Date(formData.get('validity') as string) : null,
-      ewayBill: fileUrl,
     });
+
+    if(validity !== null){
+      newTrip.ewbValidityDate = new Date(validity as string)
+      newTrip.ewayBill = fileUrl
+    }
 
     // Save the new trip document
     const savedTrip = await newTrip.save();

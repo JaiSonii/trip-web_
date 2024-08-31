@@ -87,7 +87,6 @@ const CreateTripPage: React.FC = () => {
       formData.append('LR', trip.LR);
       formData.append('material', trip.material);
       formData.append('notes', trip.notes);
-      formData.append('validity', trip.ewbValidity)
 
       // Append the file to formData if it exists
       if (trip.file) {

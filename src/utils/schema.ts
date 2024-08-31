@@ -135,7 +135,8 @@ export const tripSchema = new Schema({
     default : ''
   },
   ewbValidityDate :{
-    type : Date
+    type : Date ,
+    default : null
   },
   dates: [
     Date
