@@ -93,7 +93,7 @@ const DriversPage = () => {
                   </div>
                 </td>
                 <td className="border p-4 space-x-2 gap-3">
-                  <div className='flex items-center'>
+                  <div className='flex items-center space-x-2'>
                     <FaPhone className="text-green-500" />
                     <span>{driver.contactNumber || ''}</span>
                   </div>

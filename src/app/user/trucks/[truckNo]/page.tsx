@@ -165,39 +165,42 @@ const TruckPage = () => {
                       )}
                     </div>
                   ) : (
-                    <div className="flex flex-col space-y-4 p-2 bg-gray-50 rounded-lg shadow-sm">
-                      <div className="flex flex-col space-y-2">
+                    <div className="flex items-center gap-4 p-2 bg-white rounded-lg">
+                      <div className="flex flex-col justify-center space-y-1 border-r border-gray-300 pr-4">
                         <div className="flex items-center space-x-2">
-                          <FaRoute className="text-bottomNavBarColor" />
-                          <span className="font-semibold text-lg text-gray-800">{item.route?.origin.split(',')[0]} &rarr; {item.route?.destination.split(',')[0]}</span>
+                          <FaRoute className="text-bottomNavBarColor text-base" />
+                          <span className="font-semibold text-sm text-gray-800">
+                            {item.route?.origin.split(',')[0]} &rarr; {item.route?.destination.split(',')[0]}
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <GoOrganization className="text-bottomNavBarColor text-base" />
+                          <span className="text-xs text-gray-600">{item.partyName}</span>
                         </div>
                       </div>
-                      <hr className="border-t border-gray-200" />
-                      <div className="flex items-center space-x-2">
-                        <GoOrganization className="text-bottomNavBarColor" />
-                        <span className="text-sm text-gray-600">{item.partyName}</span>
-                      </div>
-                      <hr className="border-t border-gray-200" />
-                      <div className="flex justify-between items-center space-x-2">
-                        <span className="font-semibold text-gray-600">{statuses[item.status as number]}</span>
-                        <div className="relative w-full bg-gray-300 h-2 rounded overflow-hidden">
+                      <div className="flex flex-col justify-between items-start flex-grow pl-4">
+                        <span className="font-semibold text-sm text-gray-600">
+                          {statuses[item.status as number]}
+                        </span>
+                        <div className="w-full bg-gray-200 h-2 rounded overflow-hidden mt-1">
                           <div
-                            className={`absolute top-0 left-0 h-full transition-width duration-500 rounded ${item.status === 0
-                              ? "bg-red-500"
-                              : item.status === 1
-                                ? "bg-yellow-500"
-                                : item.status === 2
-                                  ? "bg-blue-500"
-                                  : item.status === 3
-                                    ? "bg-green-500"
-                                    : "bg-green-800"
+                            className={`h-full transition-width duration-500 rounded ${item.status === 0
+                                ? "bg-red-500"
+                                : item.status === 1
+                                  ? "bg-yellow-500"
+                                  : item.status === 2
+                                    ? "bg-blue-500"
+                                    : item.status === 3
+                                      ? "bg-green-500"
+                                      : "bg-green-800"
                               }`}
-                            style={{ width: `${(item.status as number / 4) * 100}%` }}
+                            style={{ width: `${(item.status + 1) * 20}%` }}
                           ></div>
                         </div>
                       </div>
-
                     </div>
+
+
                   )}
                 </td>
 
@@ -217,7 +220,7 @@ const TruckPage = () => {
                     <div className='flex items-center justify-center'>
                       <Link href={`/user/trips/${item.trip_id}`}><Button variant={'outline'} >View Trip</Button></Link>
                     </div>
-                    
+
                   }
                 </td>
               </tr>

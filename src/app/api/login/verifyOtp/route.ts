@@ -84,7 +84,7 @@ export async function POST(req: NextRequest) {
         });
 
       }else{
-        response = NextResponse.json({message : 'User Logged In', status : 200, roleToken,token, jwtObject})
+        response = NextResponse.json({message : 'User Logged In', status : 200, roleToken,token})
         
       }
 
@@ -94,6 +94,8 @@ export async function POST(req: NextRequest) {
         path: '/', // Set path to the root to ensure it's accessible across the app
         sameSite: 'strict', // CSRF protection
       });
+
+      
 
       return response;
 

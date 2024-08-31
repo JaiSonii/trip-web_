@@ -19,6 +19,7 @@ export const partySchema = new Schema({
     type: String,
   },
   contactNumber: {
+    required : true,
     type: String,
   },
   address: {
