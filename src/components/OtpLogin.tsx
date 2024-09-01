@@ -99,8 +99,6 @@ function OtpLogin() {
         });
 
         const { data } = await res.json();
-        console.log(data)
-
         if (data.Status === "Success") {
           setSuccess("OTP sent successfully.");
           setSession(data.Details);

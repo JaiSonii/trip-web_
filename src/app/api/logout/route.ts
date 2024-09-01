@@ -10,10 +10,10 @@ const TokenBlackList = models.TokenBlackList || model('TokenBlackList', TokenBla
 export async function GET(req: NextRequest) {
     try {
         // Verify the token
-        const { user, error } = await verifyToken(req as Request);
-        if (!user || error) {
-            return NextResponse.json({ error, status: 401 });
-        }
+        // const { user, error } = await verifyToken(req as Request);
+        // if (!user || error) {
+        //     return NextResponse.json({ error, status: 401 });
+        // }
 
         // Connect to the database
         await connectToDatabase();

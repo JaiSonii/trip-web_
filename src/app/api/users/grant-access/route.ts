@@ -57,3 +57,27 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
 }
+
+
+
+export async function GET(req: Request) {
+    try {
+        // Verify the token and get the user information
+        const { user, error } = await verifyToken(req);
+
+        if (!user || error) {
+            return NextResponse.json({ error: 'Authentication failed' }, { status: 401 });
+        }
+
+        // Connect to the database
+        await connectToDatabase();
+
+        // Fetch users where the role.user matches the authenticated user's ID
+        const users = await User.find({ 'role.user': user })
+
+        return NextResponse.json({ users ,status: 200 });
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json({ error: 'Internal Server Error' ,status: 500 });
+    }
+}

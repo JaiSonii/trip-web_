@@ -83,29 +83,12 @@ const MainLayout = () => {
     try {
       await fetch(`/api/logout`)
       Cookies.remove('auth_token')
-      Cookies.remove('selectedRole')
-      Cookies.remove('userId')
       router.push('/login');
     } catch (error) {
       console.error('Error signing out: ', error);
     }
   };
 
-  const handleSwitchAccount = (role: 'driver' | 'accountant' | 'carrier') => {
-    setIsSwitchBoxOpen(false);
-    if (selectedRole === role) {
-      return
-    }
-    if (role === 'carrier') {
-      Cookies.remove('userId');
-      Cookies.set('selectedRole', 'carrier')
-    } else {
-      document.cookie = `selectedRole=${role}; path=/;`;
-      document.cookie = `userId=${user[role]}; path=/;`;
-
-    }
-    pathname != `/user/parties` ? router.push(`/user/parties`) : window.location.reload()
-  };
 
   return (
     <div className="flex h-screen">
@@ -144,7 +127,7 @@ const MainLayout = () => {
             <div className="ml-3 text-center">
               <Button variant={'link'}>
                 <Link href={{
-                  pathname: `/user/profile`,
+                  pathname: `/user/profile/details`,
                   query: { phone, user_id: user?.user_id }
                 }}>
                   <p className="text-lg font-semibold">{phone}</p>
@@ -172,36 +155,11 @@ const MainLayout = () => {
             transition={{ duration: 0.3 }}
             className="absolute bottom-20 right-4 bg-white text-black rounded-lg shadow-lg z-50"
           >
-            <button onClick={() => handleSwitchAccount('carrier')} className="block w-full text-left p-2 font-semibold hover:bg-lightOrange rounded-sm">
-              <div className='flex justify-between p-2'>
-                <span>Carrier Account</span>
-                {selectedRole === 'carrier' && <FaCheckCircle className="ml-2 text-green-500" />}
-              </div>
-            </button>
-
-            {user?.driver && (
-              <button onClick={() => handleSwitchAccount('driver')} className="block w-full text-left p-2 font-semibold hover:bg-lightOrange rounded-sm">
-                <div className='flex justify-between p-2'>
-                  <span>Driver Account</span>
-                  {selectedRole === 'driver' && <FaCheckCircle className="ml-2 text-green-500" />}
-                </div>
-              </button>
-            )}
-
-            {user?.accountant && (
-              <button onClick={() => handleSwitchAccount('accountant')} className="block w-full text-left p-2 font-semibold hover:bg-lightOrange rounded-sm">
-                <div className='flex justify-between p-2'>
-                  <span>Accountant Account</span>
-                  {selectedRole === 'accountant' && <FaCheckCircle className="ml-2 text-green-500" />}
-                </div>
-
-              </button>
-            )}
           </motion.div>
         )}
 
         {/* Sign Out Button */}
-        <div className="flex items-center justify-center p-4 cursor-pointer hover:bg-lightOrange" onClick={handleSignOut}>
+        <div className="flex items-center justify-center p-4 cursor-pointer hover:bg-lightOrange" onClick={()=>handleSignOut}>
           <FaSignOutAlt style={{ width: '24px', height: '24px' }} />
           <span className="ml-3 text-lg font-semibold">Sign Out</span>
         </div>

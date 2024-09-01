@@ -10,7 +10,7 @@ const User = models.User || model('User', userSchema);
 
 
 export async function POST(req: NextRequest) {
-  const { phone, session, otp } = await req.json();
+  let { phone, session, otp } = await req.json();
   console.log(session)
   console.log(phone)
   console.log(otp)
@@ -20,8 +20,12 @@ export async function POST(req: NextRequest) {
       `https://2factor.in/API/V1/${process.env.TWO_FACTOR_API_KEY}/SMS/VERIFY/${session}/${otp}`
     );
 
+
+
     const data = await response.json();
-    console.log(data)
+    if(phone.includes('+91')){
+      phone = phone.split('+91')[1]
+    }
 
     await connectToDatabase()
     if (data.Status === 'Success') {

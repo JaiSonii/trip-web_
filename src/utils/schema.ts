@@ -252,6 +252,9 @@ export const userSchema = new Schema({
     name : String,
     user : String
   },
+  gstNumber : String,
+  address : String,
+  company : String,
   createdAt: { type: Date, default: Date.now }
 });
 
