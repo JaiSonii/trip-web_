@@ -17,6 +17,7 @@ import { SearchIcon } from 'lucide-react';
 import whiteLogo from '@/assets/awajahi-white-logo.png'
 import Image from 'next/image';
 import jwt from 'jsonwebtoken'
+import { IoDocument } from 'react-icons/io5';
 
 
 
@@ -66,17 +67,18 @@ const MainLayout = () => {
   const menuItems = decodedToken?.role.name == 'driver' ? [{
     href: `/user/drivers/${decodedToken.role.driver_id}`, label: `Driver`, icon: RiSteering2Fill
   }] : [
-    { href: `/user/parties`, label: 'Parties', icon: FaUsers },
+    { href: `/user/parties`, label: 'Customers', icon: FaUsers },
     { href: `/user/trips`, label: 'Trips', icon: FaClipboardList },
     { href: `/user/drivers`, label: 'Drivers', icon: RiSteering2Fill },
-    { href: `/user/trucks`, label: 'Trucks', icon: FaTruck },
+    { href: `/user/trucks`, label: 'Lorries', icon: FaTruck },
     { href: `/user/suppliers`, label: 'Suppliers', icon: FaUser },
     {
       href: `/user/expenses/truckExpense?monthYear=${encodeURIComponent(selectedMonthYear)}`,
       label: 'Expenses', icon: FaFileInvoiceDollar
     },
     { href: `/user/shops`, label: 'Shop Khata', icon: FaShop },
-    { href: `/user/search`, label: 'Search', icon: SearchIcon }
+    { href: `/user/search`, label: 'Search', icon: SearchIcon },
+    { href : `/user/documents`, label : 'Documents', icon : IoDocument}
   ];
 
   const handleSignOut = async () => {
