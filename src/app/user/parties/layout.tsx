@@ -49,7 +49,7 @@ const PartiesLayout = ({ children }: { children: React.ReactNode }) => {
             {!pathname.includes('create') &&
               <Button>
                 <Link href="/user/parties/create">
-                  Add Party
+                  Add Customer
                 </Link>
               </Button>
             }

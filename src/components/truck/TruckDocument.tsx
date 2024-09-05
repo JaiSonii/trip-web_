@@ -59,10 +59,10 @@ const TruckDocuments: React.FC<TruckDocumentProps> = ({ truckNo }) => {
                 </h1>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {documents?.RC && renderDocument('License', documents.RC)}
-                {documents?.Pollution && renderDocument('Aadhar', documents.Pollution)}
-                {documents?.Permit && renderDocument('PAN', documents.Permit)}
-                {documents?.Insurance && renderDocument('Police Verification', documents.Insurance)}
+                {documents?.RC && renderDocument('RC', documents.RC)}
+                {documents?.Pollution && renderDocument('Pollution', documents.Pollution)}
+                {documents?.Permit && renderDocument('Permit', documents.Permit)}
+                {documents?.Insurance && renderDocument('Insurance', documents.Insurance)}
             </div>
         </div>
     );

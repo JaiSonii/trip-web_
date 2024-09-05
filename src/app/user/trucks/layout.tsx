@@ -23,7 +23,7 @@ const TrucksLayout = ({ children }: { children: React.ReactNode }) => {
             {!pathname.includes('create') && 
             <Button >
               <Link href="/user/trucks/create">
-                Add Truck
+                Add Lorry
               </Link>
             </Button>
 }
