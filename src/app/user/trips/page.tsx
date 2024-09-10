@@ -32,7 +32,7 @@ const TripBalance = ({trip} : {trip : ITrip})=>{
   },[trip])
 
   return (
-    <p className='text-green-600 font-semibold text-md'>{balance}</p>
+    <p className='text-green-600 font-semibold text-md'>₹{balance}</p>
   )
 }
 
@@ -43,6 +43,8 @@ const columnOptions = [
   { label: 'Party Name', value: 'party' },
   { label: 'Route', value: 'route' },
   { label: 'Status', value: 'status' },
+  {label : 'Invoice Amt', value : 'invoice'},
+  {label : 'Truck Hire Cost', value : 'truckCost'}
 ];
 
 const TripsPage = () => {
@@ -187,6 +189,8 @@ const TripsPage = () => {
                 {visibleColumns.includes('Party Name') && <th className="border p-4 text-left">Party Name</th>}
                 {visibleColumns.includes('Route') && <th className="border p-4 text-left">Route</th>}
                 {visibleColumns.includes('Status') && <th className="border p-4 text-left">Status</th>}
+                {visibleColumns.includes('Truck Hire Cost') && <th className="border p-4 text-left">Truck Hire Cost</th>}
+                {visibleColumns.includes('Invoice Amt') && <th className="border p-4 text-left">Invoice Amount</th>}
                 <th>Party Balance</th>
               </tr>
             </thead>
@@ -251,6 +255,8 @@ const TripsPage = () => {
                         </div>
                       </div>
                     </td>}
+                    {visibleColumns.includes('Truck Hire Cost') &&<td ><p className='text-red-500 font-semibold'>₹{trip.truckHireCost || 0} </p></td>}
+                    {visibleColumns.includes('Invoice Amt') && <td ><p className='text-green-600 font-semibold'>₹{trip.amount}</p></td>}
                   <td><TripBalance trip={trip} /></td>
                 </tr>
               ))}

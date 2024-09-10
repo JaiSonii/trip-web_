@@ -8,6 +8,7 @@ import DriverSelect from '../DriverSelect';
 import { motion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import { statuses } from '@/utils/schema';
+import ShopSelect from '@/components/shopkhata/ShopSelect';
 
 interface ChargeModalProps {
   isOpen: boolean;
@@ -31,6 +32,7 @@ interface TripExpense {
   transactionId: string;
   driver: string;
   truck?: string
+  shop_id?: string
 }
 
 const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, driverId, selected, truckPage }) => {
@@ -46,7 +48,8 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
     paymentMode: selected?.paymentMode || 'Cash',
     transactionId: selected?.transaction_id || '',
     driver: driverId || '',
-    truck: selected?.truck || ''
+    truck: selected?.truck || '',
+    shop_id: selected?.shop_id || ''
   });
 
   const pathname = usePathname()
@@ -57,6 +60,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
   const [trucks, setTrucks] = useState<TruckModel[]>([])
   const [trips, setTrips] = useState<ITrip[]>([])
   const [trip, setTrip] = useState<ITrip>()
+  const [shops, setShops] = useState<any[]>([])
 
   useEffect(() => {
     if (!selected) return;
@@ -72,9 +76,22 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
       paymentMode: selected?.paymentMode || 'Cash',
       transactionId: selected?.transaction_id || '',
       driver: selected?.driver || '',
-      truck : selected?.truck || ''
+      truck: selected?.truck || '',
+      shop_id: selected?.shop_id || ''
     });
   }, [selected]);
+
+  const fetchshops = async () => {
+    const res = await fetch(`/api/shopkhata`)
+    const data = await res.json()
+    setShops(data.shops)
+  }
+
+  useEffect(() => {
+    if (formData.paymentMode === 'Credit') {
+      fetchshops()
+    }
+  }, [formData.paymentMode])
 
   useEffect(() => {
     const fetchDriverName = async () => {
@@ -124,11 +141,11 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
     }
   }, [pathname])
 
-  useEffect(()=>{
-    if(formData.paymentMode === 'Paid By Driver' && trip){
-      setFormData((prevData) => ({...prevData, driver: trip.driver }));
+  useEffect(() => {
+    if (formData.paymentMode === 'Paid By Driver' && trip) {
+      setFormData((prevData) => ({ ...prevData, driver: trip.driver }));
     }
-  },[trip,formData.paymentMode])
+  }, [trip, formData.paymentMode])
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prevData) => {
@@ -306,7 +323,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
 
           <label className="block text-sm font-medium text-gray-700">Payment Mode</label>
           <div className="flex flex-row w-full justify-start gap-3 mb-3">
-            {['Cash', 'Paid By Driver', 'Online'].map((type) => (
+            {['Cash', 'Paid By Driver', 'Online', 'Credit'].map((type) => (
               <button
                 key={type}
                 type="button"
@@ -346,6 +363,15 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
                 placeholder="Transaction ID"
               />
             </div>
+          )}
+
+          {formData.paymentMode === 'Credit' && (
+            <ShopSelect
+              shops={shops} // Pass the shops array as a prop
+              formData={formData}
+              handleChange={handleChange}
+              setFormData={setFormData}
+            />
           )}
 
           {(formData.expenseType !== 'Fuel Expense' && !selected && !truckPage && !pathname.includes('expenses')) && (

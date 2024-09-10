@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { officeExpenseTypes } from '@/utils/utilArray';
 import { motion } from 'framer-motion';
+import ShopSelect from './shopkhata/ShopSelect';
 
 interface ChargeModalProps {
     isOpen: boolean;
@@ -21,6 +22,7 @@ const OfficeExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSav
         notes: selected?.notes || '',
         paymentMode: selected?.paymentMode || 'Cash',
         transactionId: selected?.transactionId || '',
+        shop_id : selected?.shop_id || ''
     });
 
     useEffect(() => {
@@ -32,11 +34,24 @@ const OfficeExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSav
                 notes: selected.notes || '',
                 paymentMode: selected.paymentMode || 'Cash',
                 transactionId: selected.transactionId || '',
+                shop_id : selected?.shop_id || ''
             });
         }
     }, [selected])
 
+    const [shops, setShops] = useState<any[]>([])
 
+    const fetchshops = async () => {
+        const res = await fetch(`/api/shopkhata`)
+        const data = await res.json()
+        setShops(data.shops)
+      }
+    
+      useEffect(() => {
+        if (formData.paymentMode === 'Credit') {
+          fetchshops()
+        }
+      }, [formData.paymentMode])
 
     const handleSelectChange = (value: string) => {
         setFormData((prevData: any) => {
@@ -124,7 +139,7 @@ const OfficeExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSav
 
                     <label className="block text-sm font-medium text-gray-700">Payment Mode</label>
                     <div className="flex flex-row w-full justify-start gap-3 mb-3">
-                        {['Cash', 'Online'].map((type) => (
+                        {['Cash', 'Online', 'Credit'].map((type) => (
                             <button
                                 key={type}
                                 type="button"
@@ -149,6 +164,15 @@ const OfficeExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSav
                                 placeholder="Transaction ID"
                             />
                         </div>
+                    )}
+
+                    {formData.paymentMode === 'Credit' && (
+                        <ShopSelect
+                            shops={shops} // Pass the shops array as a prop
+                            formData={formData}
+                            handleChange={handleChange}
+                            setFormData={setFormData}
+                        />
                     )}
 
                     <div className="mb-4">

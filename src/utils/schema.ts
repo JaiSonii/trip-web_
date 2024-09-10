@@ -317,6 +317,7 @@ ExpenseSchema = new Schema({
     type : Number,
     required : true
   },
+  shop_id : String,
   date : {
     type : Date,
     required : true
@@ -367,6 +368,7 @@ export const OfficeExpenseSchema = new Schema({
     required : true
   },
   paymentMode : String,
+  shop_id :  String,
   date : {
     type : Date,
     required : true
@@ -379,6 +381,35 @@ export const TokenBlacklistSchema = new Schema({
   token: { type: String, required: true },
   expiresAt: { type: Date, required: true },
 });
+
+export const ShopKhataSchema = new Schema({
+  user_id : {type : String, required : true},
+  shop_id : {
+    type : String,
+    required : true,
+    unique : true
+  },
+  name : {
+    type : String,
+    required : true
+  },
+  contactNumber : String,
+  address : String,
+  gstNumber : String,
+
+})
+
+export const ShopKhataAccountsSchema = new Schema({
+  user_id : {type : String, required : true},
+  shop_id : {
+    type : String,
+    required : true
+  },
+  reason : String,
+  payment : Number,
+  credit : Number,
+  date : {type : Date, required : true}
+})
 
 const connectString: any = process.env.NEXT_PUBLIC_MONGO_URL
 

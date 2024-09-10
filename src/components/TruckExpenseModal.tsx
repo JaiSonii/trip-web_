@@ -8,6 +8,7 @@ import DriverSelect from './trip/DriverSelect';
 import { motion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import { statuses } from '@/utils/schema';
+import ShopSelect from './shopkhata/ShopSelect';
 
 interface ChargeModalProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ interface TripExpense {
   transactionId: string;
   driver: string;
   truck?: string
+  shop_id?: string;
 }
 
 const TruckExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, driverId, selected, truckPage }) => {
@@ -44,7 +46,8 @@ const TruckExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave
     paymentMode: selected?.paymentMode || 'Cash',
     transactionId: selected?.transaction_id || '',
     driver: driverId || '',
-    truck: selected?.truck || ''
+    truck: selected?.truck || '',
+    shop_id: selected?.shop_id || ''
   });
 
   const pathname = usePathname()
@@ -67,9 +70,24 @@ const TruckExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave
       paymentMode: selected?.paymentMode || 'Cash',
       transactionId: selected?.transaction_id || '',
       driver: selected?.driver || '',
-      truck : selected?.truck || ''
+      truck: selected?.truck || '',
+      shop_id: selected?.shop_id || ''
     });
   }, [selected]);
+
+  const [shops, setShops] = useState<any[]>([])
+
+  const fetchshops = async () => {
+    const res = await fetch(`/api/shopkhata`)
+    const data = await res.json()
+    setShops(data.shops)
+  }
+
+  useEffect(() => {
+    if (formData.paymentMode === 'Credit') {
+      fetchshops()
+    }
+  }, [formData.paymentMode])
 
 
 
@@ -80,7 +98,7 @@ const TruckExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave
         fetch(`/api/drivers/create`)
       ])
 
-      const [ truckData, driverData] = await Promise.all([
+      const [truckData, driverData] = await Promise.all([
         truckRes.ok ? truckRes.json() : [],
         driverRes.ok ? driverRes.json() : []
       ])
@@ -165,16 +183,16 @@ const TruckExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave
             >
               Fuel & Driver
             </Button>
-              <Button
-                variant="link"
-                onClick={() => setSelectedCategory('Maintenance')}
-                className={`px-4 py-2 transition duration-300 ease-in-out ${selectedCategory === 'Maintenance'
-                  ? 'border-b-2 border-bottomNavBarColor text-bottomNavBarColor'
-                  : 'border-transparent text-gray-600 hover:text-bottomNavBarColor hover:border-bottomNavBarColor'
-                  }`}
-              >
-                Maintenance
-              </Button>
+            <Button
+              variant="link"
+              onClick={() => setSelectedCategory('Maintenance')}
+              className={`px-4 py-2 transition duration-300 ease-in-out ${selectedCategory === 'Maintenance'
+                ? 'border-b-2 border-bottomNavBarColor text-bottomNavBarColor'
+                : 'border-transparent text-gray-600 hover:text-bottomNavBarColor hover:border-bottomNavBarColor'
+                }`}
+            >
+              Maintenance
+            </Button>
           </div>
 
           <div className="mb-4">
@@ -215,32 +233,32 @@ const TruckExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave
             </div>
           </div>
 
-          
 
-            <div className="mb-4 w-1/2">
-              <label className="block text-sm font-medium text-gray-700">Select Truck</label>
-              <Select value={formData.truck} onValueChange={(value) => handleSelectChange('truck', value)}>
-                <SelectTrigger className="w-full text-black" value={formData.truck}>
-                  <SelectValue placeholder='Select Truck' />
-                </SelectTrigger>
-                <SelectContent>
-                  {trucks.map((truck) => (
-                    <SelectItem key={truck.truckNo} value={truck.truckNo}>
-                      <span>{truck.truckNo}</span>
-                      <span
-                        className={`ml-2 p-1 rounded ${truck.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
-                      >
-                        {truck.status}
-                      </span>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+
+          <div className="mb-4 w-1/2">
+            <label className="block text-sm font-medium text-gray-700">Select Truck</label>
+            <Select value={formData.truck} onValueChange={(value) => handleSelectChange('truck', value)}>
+              <SelectTrigger className="w-full text-black" value={formData.truck}>
+                <SelectValue placeholder='Select Truck' />
+              </SelectTrigger>
+              <SelectContent>
+                {trucks.map((truck) => (
+                  <SelectItem key={truck.truckNo} value={truck.truckNo}>
+                    <span>{truck.truckNo}</span>
+                    <span
+                      className={`ml-2 p-1 rounded ${truck.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+                    >
+                      {truck.status}
+                    </span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
           <label className="block text-sm font-medium text-gray-700">Payment Mode</label>
           <div className="flex flex-row w-full justify-start gap-3 mb-3">
-            {['Cash', 'Paid By Driver', 'Online'].map((type) => (
+            {['Cash', 'Paid By Driver', 'Online','Credit'].map((type) => (
               <button
                 key={type}
                 type="button"
@@ -293,6 +311,15 @@ const TruckExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave
                 className="p-2 border border-gray-300 rounded-md"
               />
             </div>
+          )}
+
+          {formData.paymentMode === 'Credit' && (
+            <ShopSelect
+              shops={shops} // Pass the shops array as a prop
+              formData={formData}
+              handleChange={handleChange}
+              setFormData={setFormData}
+            />
           )}
 
           {formData.partyBill && (

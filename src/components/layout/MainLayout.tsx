@@ -76,7 +76,7 @@ const MainLayout = () => {
       href: `/user/expenses/truckExpense?monthYear=${encodeURIComponent(selectedMonthYear)}`,
       label: 'Expenses', icon: FaFileInvoiceDollar
     },
-    { href: `/user/shops`, label: 'Shop Khata', icon: FaShop },
+    { href: `/user/shopkhata`, label: 'Shop Khata', icon: FaShop },
     { href: `/user/search`, label: 'Search', icon: SearchIcon },
     { href : `/user/documents`, label : 'Documents', icon : IoDocument}
   ];
