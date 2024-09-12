@@ -72,7 +72,7 @@ export async function POST(req: Request) {
     const truck = await newTruck.save();
 
     // Return successful response with created truck data
-    return NextResponse.json({ truck }, { status: 200 });
+    return NextResponse.json({ truck , status: 200 });
   } catch (error: any) {
     // Handle errors during request processing
     console.error('Error creating truck:', error);

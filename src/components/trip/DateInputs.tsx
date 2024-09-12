@@ -4,7 +4,7 @@ export const DateInputs: React.FC<{ formData: any; handleChange: (e: React.Chang
       <input
         type="date"
         
-        value={formData.startDate.toISOString().substr(0, 10)}
+        value={new Date(formData.startDate).toISOString().split('T')[0]}
         onChange={(e) => handleChange({ target: { name: 'startDate', value: new Date(e.target.value) } } as any)}
         required
       />

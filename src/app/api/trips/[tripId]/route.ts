@@ -47,7 +47,10 @@ export async function PATCH(req: Request, { params }: { params: { tripId: string
     const { tripId } = params;
     const { data } = await req.json();
     const { amount, podImage, status, dates, account, notes } = data;
+    console.log(status)
+    console.log(dates)
     await connectToDatabase();
+
 
     const trip = await Trip.findOne({ user_id: user, trip_id: tripId });
 
@@ -77,7 +80,7 @@ export async function PATCH(req: Request, { params }: { params: { tripId: string
 
     }
 
-    if (status && dates) {
+    if (status !== undefined && dates) {
       trip.status = status;
     
       if (status === 2 && podImage) {
@@ -99,6 +102,7 @@ export async function PATCH(req: Request, { params }: { params: { tripId: string
       }
     
       trip.dates = dates;
+      console.log(trip)
     }
     
 
@@ -136,6 +140,10 @@ export async function PUT(req: Request, { params }: { params: { tripId: string }
     }
 
     const trip = await Trip.findOneAndUpdate({ user_id: user, trip_id: tripId }, data, { new: true });
+    if(data.startDate){
+      trip.dates[0] = data.startDate
+      await trip.save()
+    }
 
     if (!trip) {
       return NextResponse.json({ message: 'Trip not found' }, { status: 404 });

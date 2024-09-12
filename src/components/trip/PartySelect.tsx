@@ -7,6 +7,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Link from "next/link";
+import { Button } from "../ui/button";
 
 interface PartySelectProps {
   parties: IParty[];
@@ -34,10 +36,10 @@ const PartySelect: React.FC<PartySelectProps> = ({ parties, formData, handleChan
   return (
     <div>
       <label className="block w-full">
-      <label className="block text-sm text-gray-700">Party</label>
+      <label className="block text-sm text-gray-700">Customer</label>
         <Select name="party" defaultValue={formData.party} onValueChange={handleSelectChange}>
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select Party" />
+            <SelectValue placeholder="Select Customer" />
           </SelectTrigger>
           <SelectContent>
             <div className="p-2">
@@ -54,8 +56,16 @@ const PartySelect: React.FC<PartySelectProps> = ({ parties, formData, handleChan
                 <SelectItem key={party.party_id} value={party.party_id}>{party.name}</SelectItem>
               ))
             ) : (
-              <div className="p-2 text-gray-500">No parties found</div>
+              <div className="p-2 text-gray-500">No customers found</div>
             )}
+            <Button variant={'ghost'} className="w-full" onClick={()=>{
+              localStorage.setItem('tripData',JSON.stringify(formData))
+            }}>
+            <Link href={{pathname : `/user/parties/create`, query : {
+              nextpath : `/user/trips/create`
+            }}}>Add New Customer</Link>
+            </Button>
+            
           </SelectContent>
         </Select>
       </label>

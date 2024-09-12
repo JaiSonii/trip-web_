@@ -161,7 +161,7 @@ const MainLayout = () => {
         )}
 
         {/* Sign Out Button */}
-        <div className="flex items-center justify-center p-4 cursor-pointer hover:bg-lightOrange" onClick={()=>handleSignOut}>
+        <div className="flex items-center justify-center p-4 cursor-pointer hover:bg-lightOrange" onClick={handleSignOut}>
           <FaSignOutAlt style={{ width: '24px', height: '24px' }} />
           <span className="ml-3 text-lg font-semibold">Sign Out</span>
         </div>

@@ -26,7 +26,6 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onD
   const [modalType, setModalType] = useState<'gave' | 'got' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [edit, setEdit] = useState<boolean>(false);
-  const [showContact, setShowContact] = useState<boolean>(false);
 
   const tabs = [
     { logo: <FaTruckMoving />, name: 'Driver Accounts', path: `/user/drivers/${driverId}` },
@@ -136,10 +135,10 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onD
     <div className='flex flex-col gap-2 justify-start'>
       <div className="flex items-center justify-between p-4 bg-gray-200 rounded-sm">
         <div className="flex items-center gap-2">
-          <h1 className="text-3xl font-bold mr-5 cursor-pointer" onClick={() => setShowContact(!showContact)}>
+          <h1 className="text-3xl font-bold mr-5 cursor-pointer" >
             {name}
           </h1>
-          {showContact && <span className="ml-2 text-lg text-gray-700">{contactNumber}</span>}
+          <span className="ml-2 text-lg text-gray-700">{contactNumber}</span>
           {status === 'Available' && (
             <svg style={{ width: '20px', height: '20px' }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
               <path fill="#4caf50" d="M44,24c0,11-9,20-20,20S4,35,4,24S13,4,24,4S44,13,44,24z"></path>

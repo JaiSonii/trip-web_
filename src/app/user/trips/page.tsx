@@ -19,17 +19,17 @@ import {
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
-const TripBalance = ({trip} : {trip : ITrip})=>{
+const TripBalance = ({ trip }: { trip: ITrip }) => {
   const [balance, setBalance] = useState(0)
-  useEffect(()=>{
-    if(trip){
-      const balance = async ()=>{
+  useEffect(() => {
+    if (trip) {
+      const balance = async () => {
         const pending = await fetchBalance(trip)
         setBalance(pending)
       }
       balance()
     }
-  },[trip])
+  }, [trip])
 
   return (
     <p className='text-green-600 font-semibold text-md'>₹{balance}</p>
@@ -43,8 +43,8 @@ const columnOptions = [
   { label: 'Party Name', value: 'party' },
   { label: 'Route', value: 'route' },
   { label: 'Status', value: 'status' },
-  {label : 'Invoice Amt', value : 'invoice'},
-  {label : 'Truck Hire Cost', value : 'truckCost'}
+  { label: 'Invoice Amt', value: 'invoice' },
+  { label: 'Truck Hire Cost', value: 'truckCost' }
 ];
 
 const TripsPage = () => {
@@ -121,7 +121,7 @@ const TripsPage = () => {
   }
 
   return (
-    <div className="w-full h-full p-4">
+    <div className="w-full p-4 max-h-full overflow-y-auto">
       <div className="flex items-center justify-between">
         <div className="flex items-center bg-lightOrange rounded-sm text-buttonTextColor p-2">
           <span>Total Balance :</span>
@@ -144,7 +144,7 @@ const TripsPage = () => {
                     checked={selectedStatuses.includes(index)}
                     onChange={() => handleStatusChange(index.toString())}
                   />
-                  {status}
+                  <span className='text-black'>{status}</span>
                 </SelectItem>
               ))}
             </SelectContent>
@@ -179,22 +179,22 @@ const TripsPage = () => {
           <div className="text-gray-500">No trips found</div>
         </div>
       ) : (
-        <div className="table-container overflow-auto bg-white shadow rounded-lg mt-4">
+        <div className="table-container overflow-auto bg-white shadow rounded-lg mt-4" style={{ maxHeight: '70vh' }}>
           <table className="custom-table w-full border-collapse table-auto">
-            <thead>
+            <thead className='sticky'>
               <tr className="bg-orange-600 text-white">
-                {visibleColumns.includes('Start Date') && <th className="border p-4 text-left">Start Date</th>}
-                {visibleColumns.includes('LR Number') && <th className="border p-4 text-left">LR Number</th>}
-                {visibleColumns.includes('Truck Number') && <th className="border p-4 text-left">Truck Number</th>}
-                {visibleColumns.includes('Party Name') && <th className="border p-4 text-left">Party Name</th>}
-                {visibleColumns.includes('Route') && <th className="border p-4 text-left">Route</th>}
-                {visibleColumns.includes('Status') && <th className="border p-4 text-left">Status</th>}
-                {visibleColumns.includes('Truck Hire Cost') && <th className="border p-4 text-left">Truck Hire Cost</th>}
-                {visibleColumns.includes('Invoice Amt') && <th className="border p-4 text-left">Invoice Amount</th>}
-                <th>Party Balance</th>
+                {visibleColumns.includes('Start Date') && <th className="border p-4 text-left sticky top-0 z-10 ">Start Date</th>}
+                {visibleColumns.includes('LR Number') && <th className="border p-4 text-left sticky top-0 z-10 ">LR Number</th>}
+                {visibleColumns.includes('Truck Number') && <th className="border p-4 text-left sticky top-0 z-10 ">Truck Number</th>}
+                {visibleColumns.includes('Party Name') && <th className="border p-4 text-left sticky top-0 z-10 ">Party Name</th>}
+                {visibleColumns.includes('Route') && <th className="border p-4 text-left sticky top-0 z-10 ">Route</th>}
+                {visibleColumns.includes('Status') && <th className="border p-4 text-left sticky top-0 z-10 ">Status</th>}
+                {visibleColumns.includes('Truck Hire Cost') && <th className="border p-4 text-left sticky top-0 z-10 ">Truck Hire Cost</th>}
+                {visibleColumns.includes('Invoice Amt') && <th className="border p-4 text-left sticky top-0 z-10 ">Invoice Amount</th>}
+                <th className="border p-4 text-left sticky top-0 z-10 bg-orange-600">Party Balance</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody style={{maxHeight : '70vh'}}>
               {trips.map((trip: ITrip | any, index) => (
                 <tr
                   key={index}
@@ -235,28 +235,28 @@ const TripsPage = () => {
                     </td>
                   )}
                   {visibleColumns.includes('Status') && <td className="border p-4">
-                      <div className="flex flex-col items-center space-x-2">
-                        <span>{statuses[trip.status as number]}</span>
-                        <div className="relative w-full bg-gray-200 h-1 rounded">
-                          <div
-                            className={`absolute top-0 left-0 h-1 rounded transition-width duration-500 ${trip.status === 0
-                              ? 'bg-red-500'
-                              : trip.status === 1
-                                ? 'bg-yellow-500'
-                                : trip.status === 2
-                                  ? 'bg-blue-500'
-                                  : trip.status === 3
-                                    ? 'bg-green-500'
-                                    : 'bg-green-800'
-                              }`}
-                            style={{ width: `${(trip.status + 1) * 20}%` }}
-                          />
+                    <div className="flex flex-col items-center space-x-2">
+                      <span>{statuses[trip.status as number]}</span>
+                      <div className="relative w-full bg-gray-200 h-1 rounded">
+                        <div
+                          className={`absolute top-0 left-0 h-1 rounded transition-width duration-500 ${trip.status === 0
+                            ? 'bg-red-500'
+                            : trip.status === 1
+                              ? 'bg-yellow-500'
+                              : trip.status === 2
+                                ? 'bg-blue-500'
+                                : trip.status === 3
+                                  ? 'bg-green-500'
+                                  : 'bg-green-800'
+                            }`}
+                          style={{ width: `${(trip.status + 1) * 20}%` }}
+                        />
 
-                        </div>
                       </div>
-                    </td>}
-                    {visibleColumns.includes('Truck Hire Cost') &&<td ><p className='text-red-500 font-semibold'>₹{trip.truckHireCost || 0} </p></td>}
-                    {visibleColumns.includes('Invoice Amt') && <td ><p className='text-green-600 font-semibold'>₹{trip.amount}</p></td>}
+                    </div>
+                  </td>}
+                  {visibleColumns.includes('Truck Hire Cost') && <td ><p className='text-red-500 font-semibold'>{trip.truckHireCost ? '₹' + trip.truckHireCost : 'NA'} </p></td>}
+                  {visibleColumns.includes('Invoice Amt') && <td ><p className='text-green-600 font-semibold'>₹{trip.amount}</p></td>}
                   <td><TripBalance trip={trip} /></td>
                 </tr>
               ))}

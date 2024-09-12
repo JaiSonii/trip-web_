@@ -79,7 +79,7 @@ const TruckDocuments = () => {
           <div>
             <h2 className="text-xl font-medium text-gray-800">{docType}</h2>
             {documents[docType] && (
-              <Link href={documents[docType]} target="_blank" rel="noopener noreferrer" className="text-sm text-buttonTextColor hover:underline">
+              <Link href={documents[docType].split('.pdf')[0]} target="_blank" rel="noopener noreferrer" className="text-sm text-buttonTextColor hover:underline">
                 View {docType}
               </Link>
             )}

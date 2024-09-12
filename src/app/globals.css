@@ -212,3 +212,7 @@ td{
   @apply border p-4
 }
 
+th{
+  @apply sticky
+}
+

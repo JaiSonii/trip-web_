@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import PartyForm from '@/components/createParty';
 import { IParty } from '@/utils/interface';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { isValidGSTNumber } from '@/utils/validate';
 import { isValidPhone } from '@/utils/validate';
 import Loading from '../loading';
@@ -13,6 +13,8 @@ import Loading from '../loading';
 const CreatePartyPage: React.FC = () => {
     const [saving, setSaving] = useState(false)
     const router = useRouter()
+    const params = useSearchParams()
+    const nextpath = params.get('nextpath')
 
 
     const handlePartySubmit = async (party: IParty) => {
@@ -47,7 +49,12 @@ const CreatePartyPage: React.FC = () => {
             }
 
             const data = await res.json();
-            router.push('/user/parties');
+            if(nextpath){
+                const current = JSON.parse(localStorage.getItem('tripData') as any)
+                current.party = data.data.party_id
+                localStorage.setItem('tripData', JSON.stringify(current))
+            }
+            router.push(nextpath ? nextpath : '/user/parties');
         } catch (error) {
             console.error('Error saving party:', error);
             alert('An error occurred while saving the party. Please try again.');

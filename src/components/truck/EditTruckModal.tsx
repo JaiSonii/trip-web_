@@ -5,11 +5,13 @@ import React, { useState, useEffect } from 'react';
 import { minitruck, openBody, closedContainer, trailer, truckTypes } from '@/utils/utilArray';
 import { validateTruckNo } from '@/utils/validate';
 import { useRouter } from 'next/navigation';
-import { ISupplier, TruckModel } from '@/utils/interface';
+import { IDriver, ISupplier, TruckModel } from '@/utils/interface';
 import SupplierSelect from '@/components/truck/SupplierSelect';
 import AdditionalDetails from '@/components/truck/AdditionalDetails';
 import Loading from '@/app/user/trucks/loading';
 import { Button } from '../ui/button';
+import DriverSelect from '../trip/DriverSelect';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 type FormData = {
     truckNo: string;
@@ -19,6 +21,7 @@ type FormData = {
     bodyLength: number | null;
     ownership: string;
     supplier: string;
+    driver_id: string
 }
 
 interface EditTruckModalProps {
@@ -38,30 +41,30 @@ const EditTruckModal: React.FC<EditTruckModalProps> = ({ truck, isOpen, onClose,
         capacity: truck.capacity || '',
         bodyLength: truck.bodyLength as any || '',
         ownership: truck.ownership || '',
-        supplier: truck.supplier || ''
+        supplier: truck.supplier || '',
+        driver_id: truck.driver_id || ''
     });
 
     const [showDetails, setShowDetails] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [suppliers, setSuppliers] = useState<ISupplier[]>([]);
     const [loading, setLoading] = useState(true);
+    const [drivers, setDrivers] = useState<IDriver[]>([]);
 
     useEffect(() => {
         const fetchSuppliers = async () => {
             try {
-                const res = await fetch('/api/suppliers', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                });
+                const [supplierRes, driverRes] = await Promise.all([fetch('/api/suppliers'), fetch(`/api/drivers`)]);
 
-                if (!res.ok) {
-                    throw new Error('Failed to fetch suppliers');
+                // Correct the condition to check if either request failed
+                if (!supplierRes.ok || !driverRes.ok) {
+                    throw new Error('Failed to fetch data');
                 }
 
-                const data = await res.json();
-                setSuppliers(data.suppliers);
+                const [supplierData, driverData] = await Promise.all([supplierRes.json(), driverRes.json()]);
+                setSuppliers(supplierData.suppliers);
+                setDrivers(driverData.drivers);
+                console.log(driverData);
             } catch (err) {
                 setError((err as Error).message);
             } finally {
@@ -71,6 +74,7 @@ const EditTruckModal: React.FC<EditTruckModalProps> = ({ truck, isOpen, onClose,
 
         fetchSuppliers();
     }, []);
+
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -167,6 +171,25 @@ const EditTruckModal: React.FC<EditTruckModalProps> = ({ truck, isOpen, onClose,
                             <option value='Self'>Self</option>
                             <option value='Market'>Market</option>
                         </select>
+                        <label className="block text-sm text-gray-700">Driver</label>
+                        <Select name="driver_id" value={formdata.driver_id} onValueChange={(value) => setFormdata({ ...formdata, driver_id: value })}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select Driver" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {drivers.map((driver) => (
+                                    <SelectItem key={driver.driver_id} value={driver.driver_id}>
+                                        <span>{driver.name}</span>
+                                        <span
+                                            className={`ml-2 p-1 rounded ${driver.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+                                        >
+                                            {driver.status}
+                                        </span>
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+
                         {formdata.ownership === 'Market' && (
                             <SupplierSelect
                                 suppliers={suppliers}

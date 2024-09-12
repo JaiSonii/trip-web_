@@ -9,19 +9,9 @@ import { usePathname } from "next/navigation";
 const inter = Inter({ subsets: ["latin"] });
 
 // Notification Component
-const Notification = ({ message, onClose }: { message: string, onClose: () => void }) => {
-  return (
-    <div className="fixed top-5 right-5 bg-lightOrange border-l-4 border-yellow-500 text-buttonTextColor p-4 rounded shadow-lg">
-      <div className="flex items-center justify-between">
-        <span>{message}</span>
-        <button onClick={onClose} className="ml-4 text-buttonTextColor transform duration-300 ease-in-out hover:scale-125">X</button>
-      </div>
-    </div>
-  );
-};
+
 
 const PartiesLayout = ({ children }: { children: React.ReactNode }) => {
-  const [showNotification, setShowNotification] = useState(true); // State for controlling notification visibility
 
   const headings: any = {
     '/user/parties': 'Customers',
@@ -31,14 +21,10 @@ const PartiesLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
 
   // Handle closing the notification
-  const closeNotification = () => {
-    setShowNotification(false);
-  };
+ 
 
   // Effect to show notification on load
-  useEffect(() => {
-    setShowNotification(true);
-  }, []);
+
 
   return (
     <div className={`${inter.className} bg-gray-100 min-h-screen flex flex-col`}>
@@ -65,13 +51,7 @@ const PartiesLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
       </div>
 
-      {/* Notification */}
-      {showNotification && (
-        <Notification 
-          message="Don't forget to add a phone number for each party!" 
-          onClose={closeNotification} 
-        />
-      )}
+     
     </div>
   );
 };

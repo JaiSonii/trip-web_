@@ -12,6 +12,8 @@ import Charges from './Charges'; // Import the Charges component
 import { fetchBalance } from '@/helpers/fetchTripBalance';
 import { fetchPartyName } from '@/helpers/fetchPartyName';
 import EWayBillUpload from './EwayBillUpload';
+import { Button } from '@/components/ui/button';
+import { UndoIcon } from 'lucide-react';
 
 interface TripDetailsProps {
   trip: ITrip;
@@ -59,8 +61,49 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
     fetchParty();
   }, [trip]);
 
+  const handleUndoStatus = async ()=>{
+    const updateDates = (dates: (Date | null)[]): (Date | null)[] => {
+      // Create a copy of the array to avoid mutating the original array
+      const updatedDates = [...dates];
+      
+      for (let i = 1; i < updatedDates.length; i++) {
+        if (updatedDates[i] === null) {
+          updatedDates[i - 1] = null;
+        }
+      }
+      
+      return updatedDates;
+    };
+    if(trip.status == 0){
+      alert('Cannot Undo the Status')
+      return
+    }
+    const data = {
+      status : trip.status ? trip.status - 1 : alert('No Trip Status'),
+      dates : updateDates(trip.dates)
+    }
+    try {
+      const res = await fetch(`/api/trips/${trip.trip_id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ data }),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to settle amount');
+      }
+      const resData = await res.json();
+      console.log(resData)
+      setTrip(resData.trip);
+    } catch (error) {
+      alert(error)
+      console.log('Error settling amount:', error);
+    }
+  }
+
   const handleStatusUpdate = async (data: any) => {
-    console.log(data);
     try {
       const res = await fetch(`/api/trips/${trip.trip_id}`, {
         method: 'PATCH',
@@ -146,7 +189,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
     // Add logic to handle adding the new charge
   };
 
-  const podUrl = ''; // Assuming podImage path
+  
 
   return (
     <div className="p-6 bg-white shadow-md rounded-md grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -171,6 +214,12 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
           <div className="flex items-center space-x-4">
             <StatusButton status={trip.status as number} statusUpdate={handleStatusUpdate} dates={trip.dates} amount={tripBalance} />
             <ViewBillButton />
+            <Button variant={'destructive'} onClick={handleUndoStatus}>
+              <div className='flex items-center space-x-2'>
+                <UndoIcon />
+                <span>Undo Status</span>
+              </div>
+            </Button>
             {/* Add more buttons as needed */}
           </div>
         </div>

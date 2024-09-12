@@ -38,8 +38,13 @@ const PartyForm: React.FC<Props> = ({ onSubmit }) => {
   // Handle form submission
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if(!formData.name || !formData.contactNumber){
+      alert('!Fill in the required feilds')
+      return
+    }
     // Generate a unique party ID
     const partyId = 'party' + uuidv4();
+
     // Create a new party object
     const newParty: IParty = {
       ...formData,
@@ -49,21 +54,12 @@ const PartyForm: React.FC<Props> = ({ onSubmit }) => {
     } as IParty; // Type assertion to ensure newParty matches IParty
     // Call onSubmit with the new party object
     onSubmit(newParty);
-    // Optionally, clear the form after submission
-    setFormData({
-      name: '',
-      contactPerson: '',
-      contactNumber: '',
-      address: '',
-      gstNumber: '',
-      balance: 0,
-    });
   };
 
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto p-4 bg-white shadow-md rounded-md text-black">
       <label className="block mb-2">
-        Name:
+        Name*
         <input
           type="text"
           name="name"
@@ -74,7 +70,7 @@ const PartyForm: React.FC<Props> = ({ onSubmit }) => {
         />
       </label>
       <label className="block mb-2">
-        Contact Person:
+        Contact Person
         <input
           type="text"
           name="contactPerson"
@@ -84,7 +80,7 @@ const PartyForm: React.FC<Props> = ({ onSubmit }) => {
         />
       </label>
       <label className="block mb-2">
-        Contact Number:
+        Contact Number*
         <input
           type="text"
           name="contactNumber"
@@ -94,7 +90,7 @@ const PartyForm: React.FC<Props> = ({ onSubmit }) => {
         />
       </label>
       <label className="block mb-2">
-        Address:
+        Address
         <input
           type="text"
           name="address"
@@ -104,7 +100,7 @@ const PartyForm: React.FC<Props> = ({ onSubmit }) => {
         />
       </label>
       <label className="block mb-2">
-        GST Number:
+        GST Number
         <input
           type="text"
           name="gstNumber"

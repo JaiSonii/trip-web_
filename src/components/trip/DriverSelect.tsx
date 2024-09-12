@@ -7,6 +7,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from '../ui/button';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 type Props = {
   drivers: IDriver[];
@@ -17,6 +20,7 @@ type Props = {
 
 const DriverSelect: React.FC<Props> = ({ drivers, formData, handleChange }) => {
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const pathname = usePathname()
 
   const handleOptionSelect = (value: string) => {
     const event = {
@@ -35,7 +39,7 @@ const DriverSelect: React.FC<Props> = ({ drivers, formData, handleChange }) => {
   return (
     <div>
       <label className="block text-sm text-gray-700">Driver</label>
-        <Select name="driver" value={formData.driver} onValueChange={handleOptionSelect}>
+        <Select name="driver" defaultValue={formData.driver} value={formData.driver} onValueChange={handleOptionSelect}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select Driver" />
           </SelectTrigger>
@@ -63,6 +67,13 @@ const DriverSelect: React.FC<Props> = ({ drivers, formData, handleChange }) => {
             ) : (
               <div className="p-2 text-gray-500">No drivers found</div>
             )}
+            <Button variant={'ghost'} className="w-full" onClick={()=>{
+              localStorage.setItem('tripData',JSON.stringify(formData))
+            }}>
+            <Link href={{pathname : `/user/drivers/create`, query : {
+              nextpath : pathname
+            }}}>Add New Driver</Link>
+            </Button>
           </SelectContent>
         </Select>
     </div>

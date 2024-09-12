@@ -7,6 +7,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from '../ui/button';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 type Props = {
   trucks: TruckModel[];
@@ -21,6 +24,7 @@ const TruckSelect: React.FC<Props> = ({ trucks, formData, handleChange, setFormD
   const [supplierName, setSupplierName] = useState<string>('');
   const [selectedTruck, setSelectedTruck] = useState<TruckModel | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const pathname = usePathname()
 
   const fetchSupplierName = async (supplierId: string) => {
     try {
@@ -70,10 +74,10 @@ const TruckSelect: React.FC<Props> = ({ trucks, formData, handleChange, setFormD
   return (
     <div>
       <label className="block w-full">
-      <label className="block text-sm text-gray-700">Truck</label>
+      <label className="block text-sm text-gray-700">Lorry</label>
         <Select name="truck" value={formData.truck} onValueChange={handleOptionSelect}>
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select Truck" />
+            <SelectValue placeholder="Select Lorry" />
           </SelectTrigger>
           <SelectContent>
             <div className="p-2">
@@ -97,8 +101,15 @@ const TruckSelect: React.FC<Props> = ({ trucks, formData, handleChange, setFormD
                 </SelectItem>
               ))
             ) : (
-              <div className="p-2 text-gray-500">No trucks found</div>
+              <div className="p-2 text-gray-500">No lorries found</div>
             )}
+            <Button variant={'ghost'} className="w-full" onClick={()=>{
+              localStorage.setItem('tripData',JSON.stringify(formData))
+            }}>
+            <Link href={{pathname : `/user/trucks/create`, query : {
+              nextpath : pathname
+            }}}>Add New Lorry</Link>
+            </Button>
           </SelectContent>
         </Select>
       </label>

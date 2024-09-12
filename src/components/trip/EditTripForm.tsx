@@ -4,6 +4,8 @@ import TruckSelect from './TruckSelect';
 import DriverSelect from './DriverSelect';
 import RouteInputs from './RouteInputs';
 import { IDriver, IParty, ITrip, TruckModel } from '@/utils/interface';
+import { DateInputs } from './DateInputs';
+import { Button } from '../ui/button';
 
 type Props = {
     parties: IParty[];
@@ -113,6 +115,8 @@ const EditTripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, tri
                     />
                 </div>
 
+                <DateInputs formData={formData} handleChange={handleChange} />
+
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700">
                         <input
@@ -153,12 +157,12 @@ const EditTripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, tri
                     </div>
                 )}
 
-                <button
-                    className="w-full p-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50"
+                <Button
+                    className='w-full'
                     type="submit"
                 >
                     Submit
-                </button>
+                </Button>
             </form>
         </div>
     );

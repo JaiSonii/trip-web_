@@ -82,7 +82,7 @@ const CreateTripPage: React.FC = () => {
       formData.append('perUnit', trip.perUnit.toString());
       formData.append('totalUnits', trip.totalUnits.toString());
       formData.append('amount', trip.amount.toString());
-      formData.append('startDate', trip.startDate.toISOString());
+      formData.append('startDate', trip.startDate);
       formData.append('truckHireCost', trip.truckHireCost.toString());
       formData.append('LR', trip.LR);
       formData.append('material', trip.material);

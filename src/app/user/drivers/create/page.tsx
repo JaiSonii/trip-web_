@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import DriverForm from '@/components/createDriver';
 import { IDriver } from '@/utils/interface';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Loading from '../loading';
 
 
@@ -14,6 +14,8 @@ const isValidPhone = (phone: string): boolean => {
 const CreateDriverPage: React.FC = () => {
     const [saving, setSaving] = useState(false)
     const router = useRouter();
+    const params = useSearchParams()
+    const nextpath = params.get('nextpath')
 
 
     const handleDriverSubmit = async (driver: IDriver) => {
@@ -46,7 +48,12 @@ const CreateDriverPage: React.FC = () => {
             }
 
             const data = await res.json();
-            router.push('/user/drivers');
+            if(nextpath){
+                const current = JSON.parse(localStorage.getItem('tripData') as any)
+                current.driver = data.data.driver_id
+                localStorage.setItem('tripData', JSON.stringify(current))
+            }
+            router.push(nextpath ? nextpath : '/user/drivers');
         } catch (error) {
             console.error('Error saving party:', error);
             alert('An error occurred while saving the party. Please try again.');

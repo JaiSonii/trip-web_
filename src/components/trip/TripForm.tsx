@@ -17,10 +17,10 @@ type Props = {
 
 const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr }) => {
     const [formData, setFormData] = useState({
-        party: '',
-        truck: '',
-        driver: '',
-        supplierId: '',
+        party: JSON.parse(localStorage.getItem('tripData') as any)?.party || '',
+        truck: JSON.parse(localStorage.getItem('tripData') as any)?.truck ||'',
+        driver: JSON.parse(localStorage.getItem('tripData') as any)?.driver ||'',
+        supplierId: JSON.parse(localStorage.getItem('tripData') as any)?.supplierId ||'',
         route: {
             origin: '',
             destination: ''
@@ -38,6 +38,21 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr }) =
         ewbValidity: null
     });
 
+    useEffect(()=>{
+        if(localStorage.getItem('tripData')){
+            const savedItem = JSON.parse(localStorage.getItem('tripData') as any)
+            setFormData(JSON.parse(localStorage.getItem('tripData') as any))
+            setFormData((prev)=>({
+                ...prev,
+                party:savedItem.party,
+                truck: savedItem.truck,
+                driver: savedItem.driver,
+                supplierId: savedItem.supplierId
+            }))
+            
+        }
+    },[])
+
     const [file, setFile] = useState<File | null>(null)
 
     const [showDetails, setShowDetails] = useState(false);
@@ -54,6 +69,8 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr }) =
         }))
 
     };
+
+    
 
     const submitEwayBill = async () => {
         if (file) {
@@ -136,6 +153,7 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr }) =
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSubmit(formData);
+        localStorage.removeItem('tripData')
     };
 
     return (

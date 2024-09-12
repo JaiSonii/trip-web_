@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import { minitruck, openBody, closedContainer, trailer, truckTypes } from '@/utils/utilArray';
 import { validateTruckNo } from '@/utils/validate';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { IDriver, ISupplier, TruckModel } from '@/utils/interface';
 import SupplierSelect from '@/components/truck/SupplierSelect';
 import AdditionalDetails from '@/components/truck/AdditionalDetails';
@@ -47,6 +47,8 @@ const CreateTruck: React.FC = () => {
     const [suppliers, setSuppliers] = useState<ISupplier[]>([]);
     const [loading, setLoading] = useState(true);
     const [drivers, setDrivers] = useState<IDriver[]>([])
+    const params = useSearchParams()
+    const nextpath = params.get('nextpath')
 
     useEffect(() => {
         setSaving(true)
@@ -141,8 +143,12 @@ const CreateTruck: React.FC = () => {
                 alert(data.error)
                 return
             }
-
-            router.push('/user/trucks')
+            if(nextpath){
+                const current = JSON.parse(localStorage.getItem('tripData') as any)
+                current.truck = data.truck.truckNo
+                localStorage.setItem('tripData', JSON.stringify(current))
+            }
+            router.push(nextpath ? nextpath : '/user/trucks');
         } catch (error) {
             // Handle fetch errors
             console.error('Error creating truck:', error);

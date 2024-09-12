@@ -56,7 +56,7 @@ export async function POST(req: Request) {
     });
 
     const savedDriver = await newDriver.save();
-    return NextResponse.json({ message: 'Saved Successfully', data: savedDriver }, { status: 200 });
+    return NextResponse.json({ message: 'Saved Successfully', data: savedDriver , status: 200 });
 
   } catch (error: any) {
     console.error('Error saving Driver:', error);
