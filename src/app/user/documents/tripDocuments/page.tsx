@@ -56,12 +56,7 @@ const TripDocumentsLanding = () => {
           filteredTrips.map((trip) => (
             <Link href={{
               pathname : `/user/documents/tripDocuments/${trip.trip_id}`,
-              query : {
-                trip_id : trip.trip_id,
-                origin : trip.route.origin,
-                destination : trip.route.destination,
-                ewayBill : trip.ewayBill,
-              }}} key={trip.trip_id}>
+             }} key={trip.trip_id}>
               <div className={`bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out hover:shadow-lightOrangeButtonColor hover:bg-lightOrange cursor-pointer ${viewMode === 'grid' ? 'h-full' : 'flex items-center space-x-4'}`}>
                 <FaFolder className="text-bottomNavBarColor mb-4" size={50} />
                 <div className="flex flex-col">

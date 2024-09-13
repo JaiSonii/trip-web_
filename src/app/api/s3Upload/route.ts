@@ -5,6 +5,7 @@ import { tripSchema } from "@/utils/schema";
 import pdf from 'pdf-parse-new';
 import sharp from 'sharp'
 import tesseract from 'node-tesseract-ocr';
+import { verifyToken } from "@/utils/auth";
 
 const s3Client = new S3Client({
   region: process.env.AWS_S3_REGION,
@@ -37,11 +38,11 @@ function extractTripDetails(text: string) {
   const truckNumber = truckNumberMatch ? truckNumberMatch[1] : null;
 
   return {
-      origin,
-      destination,
-      startDate,
-      freightAmount,
-      truckNumber
+    origin,
+    destination,
+    startDate,
+    freightAmount,
+    truckNumber
   };
 }
 
@@ -119,6 +120,10 @@ async function extractTextFromImage(buffer: Buffer): Promise<string> {
 
 export async function POST(request: Request) {
   try {
+    const {user, error} = await verifyToken(request)
+    if( !user || error){
+      return NextResponse.json({error : 'Unauthorized User', status : 401})
+    }
     const formData = await request.formData();
     const file = formData.get("file") as File;
     const tripId = formData.get("tripId") as string;
@@ -155,16 +160,30 @@ export async function POST(request: Request) {
 
     // Upload the file to S3
     const s3FileName = await uploadFileToS3(fileBuffer, fileName, contentType);
-    const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3FileName}${contentType==='application/pdf' ? '.pdf' : ''}`;
+    const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3FileName}${contentType === 'application/pdf' ? '.pdf' : ''}`;
 
     // Update the Trip document with the E-Way Bill URL and validity date
-    const trip = await Trip.findOneAndUpdate(
-      { trip_id: tripId },
-      { ewayBill: fileUrl, ewbValidityDate },
-      { new: true }
+    const updateResult = await Trip.updateOne(
+      { user_id: user, trip_id: tripId },
+      {
+        $push: {
+          documents: {
+            filename: file.name,
+            type: 'ewayBill',
+            uploadedDate: new Date(),
+            validityDate: ewbValidityDate,
+            url: fileUrl,
+          },
+        },
+      }
     );
 
+    if (updateResult.modifiedCount === 0) {
+      return NextResponse.json({ error: 'Trip not found or update failed.' }, { status: 404 });
+    }
+
     return NextResponse.json({ success: true, fileUrl, ewbValidityDate });
+
   } catch (error) {
     console.error("Error uploading e-way bill:", error);
     return NextResponse.json({ error: "Failed to upload e-way bill." }, { status: 500 });

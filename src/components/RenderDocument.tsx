@@ -9,10 +9,10 @@ const isPdf = (fileName: string) => {
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 export const renderDocument = (title: string, documentUrl: string) => (
-    <div className="bg-white p-4 rounded-xl shadow-lg transform transition duration-300 hover:scale-105 hover:shadow-2xl border border-gray-200 max-w-sm">
+    <div className="bg-white p-4 rounded-xl shadow-lg transform transition duration-300 hover:scale-105 hover:shadow-2xl border border-gray-200 max-w-sm hover:bg-lightOrange">
         <h2 className="text-md font-semibold text-gray-800 mb-3 text-center truncate">{title}</h2>
-        <Link href={documentUrl} target="_blank" rel="noopener noreferrer">
-            <div className="relative overflow-hidden h-40 w-full rounded-lg border border-gray-300 hover:shadow-md transition-shadow duration-200 group">
+        <Link href={documentUrl.split('.pdf')[0]} target="_blank" rel="noopener noreferrer">
+            <div className="relative overflow-hidden h-40 w-full rounded-lg border border-gray-300 transition-shadow duration-200 group">
                 {isPdf(documentUrl) ? (
                     <div className="flex justify-center items-center h-full w-full group-hover:opacity-90">
                         <Document

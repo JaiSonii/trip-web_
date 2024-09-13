@@ -68,7 +68,7 @@ export interface ITrip extends Document {
   accounts : PaymentBook[]
   ewayBill : string
   ewbValidityDate : Date
-  docuements : [{
+  documents : [{
     filename : string,
     type : string,
     validityDate : Date,
