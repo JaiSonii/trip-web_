@@ -36,7 +36,7 @@ const TruckExpense: React.FC = () => {
   const monthYear = searchParams.get('monthYear')?.split(' ');
   const [month, year] = monthYear ? monthYear : [null, null];
 
-  const router = useRouter();
+  
 
   const getBook = async () => {
     try {
@@ -54,7 +54,7 @@ const TruckExpense: React.FC = () => {
     try {
       selected ? await handleAddCharge(expense, expense.id) : handleAddCharge(expense, '',expense.truck);
       setModalOpen(false); // Close the modal after saving
-      getBook();
+      await getBook();
     } catch (error) {
       console.error(error);
     }

@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
                 phone: phone,
                 role: {
                     name : role,
-                    user : data.userId
+                    user : user
                 },
             });
             await newUser.save();

@@ -175,9 +175,10 @@ const TripExpensePage: React.FC = () => {
                   {visibleColumns.includes('Action') && (
                     <td className="border p-4">
                       <div className="flex items-center space-x-2">
-                        <Button variant="outline" onClick={() => { setSelected(fuel); setModalOpen(true); }}>
+                        {fuel.partyBill != false && <Button variant="outline" onClick={() => { setSelected(fuel); setModalOpen(true); }}>
                           <MdEdit />
-                        </Button>
+                        </Button>}
+                        
                         <Button variant="destructive" onClick={() => handleDeleteCharge(fuel._id)}>
                           <MdDelete />
                         </Button>
