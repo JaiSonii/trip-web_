@@ -67,7 +67,9 @@ export async function GET(req: Request, { params }: { params: { shopId: string }
       }));
   
       // Combine khata, formatted expenses, and formatted office expenses
-      const combinedData = [...khata, ...formattedExpenses, ...formattedOfficeExpenses];
+      const combinedData = [...khata, ...formattedExpenses, ...formattedOfficeExpenses].sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
   
       return NextResponse.json({ khata: combinedData, status: 200 });
     } catch (error) {

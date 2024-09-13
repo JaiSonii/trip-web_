@@ -2,6 +2,14 @@ import mongoose, { ConnectOptions } from "mongoose";
 import { Schema } from "mongoose";
 import { decryptData, encryptData } from "./encryption";
 
+const docuementSchema = new Schema({
+  filename : String,
+  type : String,
+  validityDate : Date,
+  uploadedDate: Date,
+  url : String
+})
+
 export const partySchema = new Schema({
   user_id: {
     type: String,
@@ -29,6 +37,8 @@ export const partySchema = new Schema({
     type: String,
   },
 });
+
+
 
 
 export const PaymentBookSchema = {
@@ -59,17 +69,7 @@ export const PaymentBookSchema = {
   },
 }
 
-// export const accountSchema = new Schema({
-//   tripId: { type: String, required: true },
-//   driverId: { type: String, required: true },
-//   partyId: { type: String, required: true },
-//   userId: { type: String, required: true },
-//   amount: { type: Number, required: true },
-//   paymentType: { type: String, required: true },
-//   receivedByDriver: { type: Boolean, required: true },
-//   date: { type: Date, required: true },
-//   notes: { type: String }
-// });
+
 
 
 
@@ -150,7 +150,10 @@ export const tripSchema = new Schema({
   },
   accounts: [
     PaymentBookSchema,
-  ]
+  ],
+ documents : [
+  docuementSchema
+ ] 
 });
 
 
@@ -187,12 +190,7 @@ export const driverSchema = new mongoose.Schema({
   accounts: [{
     type: driverAccountSchema
   }],
-  documents: {
-    License: String,
-    Aadhar: String,
-    PAN: String,
-    PoliceVerification: String
-  }
+  documents: [docuementSchema]
 });
 
 
@@ -213,12 +211,7 @@ export const truckSchema: Schema = new Schema({
   status: { type: String, enum: ['Available', 'On Trip'] },
   trip_id: { type: String, default: '' },
   driver_id : {type : String, default : ''},
-  documents : {
-    RC : String,
-    Pollution : String,
-    Permit : String,
-    Insurance : String
-  },
+  documents : [docuementSchema],
   updatedAt: { type: Date, default: Date.now }
 });
 
@@ -410,6 +403,8 @@ export const ShopKhataAccountsSchema = new Schema({
   credit : Number,
   date : {type : Date, required : true}
 })
+
+
 
 const connectString: any = process.env.NEXT_PUBLIC_MONGO_URL
 

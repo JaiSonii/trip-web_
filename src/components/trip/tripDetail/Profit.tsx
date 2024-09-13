@@ -28,6 +28,7 @@ interface Expense {
   paymentMode: string;
   transactionId: string;
   driver: string;
+  shop_id : string
 }
 
 const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, driverId, truckNo, truckCost }) => {
@@ -96,6 +97,7 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
       date: newCharge.date,
       notes: newCharge.notes || '',
       truck: truckNo,
+      shop_id  : newCharge.shop_id || ''
     };
 
     if (id) {

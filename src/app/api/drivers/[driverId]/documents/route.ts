@@ -49,10 +49,23 @@ export async function POST(request: Request, { params }: { params: { driverId: s
 
     // Update the Driver document with the uploaded document
     await connectToDatabase()
-    const update = { [`documents.${name}`]: fileUrl }
-    const driver = await Driver.findOneAndUpdate({ user_id: user, driver_id: driverId }, { $set: update }, { new: true })
+    const driver = await Driver.updateOne(
+      { user_id: user, driver_id: driverId },
+      {
+        $push: {
+          documents: {
+            filename: file.name,
+            type: name,
+            validity: new Date(),
+            uploadedDate: new Date(),
+            url: fileUrl
+          }
+        }
+      }
+    );
+    
 
-    return NextResponse.json({ success: true, documents: driver.documents })
+    return NextResponse.json({ success: true })
   } catch (error) {
     console.error("Error uploading document:", error)
     return NextResponse.json({ error: "Failed to upload document." }, { status: 500 })

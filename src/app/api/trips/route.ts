@@ -98,7 +98,13 @@ export async function POST(this: any, req: Request) {
 
     if(validity !== null){
       newTrip.ewbValidityDate = new Date(validity as string)
-      newTrip.ewayBill = fileUrl
+      newTrip.docuements.push({
+        filename: file?.name || '',
+        type: "ewayBill",
+        validityDate: new Date(validity as any),
+        uploadedDate: new Date(),
+        url: fileUrl,
+      })
     }
 
     // Save the new trip document

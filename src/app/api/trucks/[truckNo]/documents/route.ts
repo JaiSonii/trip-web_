@@ -16,7 +16,7 @@ export async function GET(req: Request, { params }: { params: { truckNo: string 
         const { truckNo } = params
         await connectToDatabase()
         const truck = await Truck.findOne({ user_id: user, truckNo: truckNo }).select(['truckNo', 'documents']).exec();
-        
+
         return NextResponse.json({ status: 200, documents: truck.documents })
     } catch (error) {
         console.log(error)
@@ -26,12 +26,12 @@ export async function GET(req: Request, { params }: { params: { truckNo: string 
 
 export async function POST(request: Request, { params }: { params: { truckNo: string } }) {
     try {
-        const { user, error } = await verifyToken(request)
+        const { user, error } = await verifyToken(request);
         if (!user || error) {
-            return NextResponse.json({ error })
+            return NextResponse.json({ error }, { status: 401 });
         }
 
-        const { truckNo } = params
+        const { truckNo } = params;
         const formData = await request.formData();
         const file = formData.get("file") as File;
         const docType = formData.get("docType") as string;
@@ -49,21 +49,33 @@ export async function POST(request: Request, { params }: { params: { truckNo: st
         const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3FileName}${contentType === 'application/pdf' ? '.pdf' : ''}`;
 
         // Connect to the database and update the truck document with the specific field for the document type
-        await connectToDatabase()
-        const updateField = `documents.${docType}`;
-        const truck = await Truck.findOneAndUpdate(
+        await connectToDatabase();
+
+        // Use the $push operator to add the document directly without fetching the truck document
+        const result = await Truck.updateOne(
             { user_id: user, truckNo: truckNo },
-            { $set: { [updateField]: fileUrl } },
-            { new: true }
+            {
+                $push: {
+                    documents: {
+                        filename: file.name,
+                        type: docType,
+                        validityDate: new Date(),
+                        uploadedDate: new Date(),
+                        url: fileUrl
+                    }
+                }
+            }
         );
 
-        if (!truck) {
+        // Check if the truck was found and updated
+        if (result.matchedCount === 0) {
             return NextResponse.json({ error: "Truck not found." }, { status: 404 });
         }
 
-        return NextResponse.json({ success: true, documents: truck.documents });
+        return NextResponse.json({ success: true, message: "Document uploaded successfully." });
     } catch (error) {
         console.error("Error uploading document:", error);
         return NextResponse.json({ error: "Failed to upload document." }, { status: 500 });
     }
 }
+

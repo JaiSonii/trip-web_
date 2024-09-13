@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import mongoose, { model, models } from 'mongoose';
+import  { model, models } from 'mongoose';
 import { connectToDatabase, driverSchema } from '@/utils/schema';
 import { IDriver } from '@/utils/interface';
 import { verifyToken } from '@/utils/auth';
+import {v4 as uuidv4} from 'uuid'
 
 
 const Driver = models.Driver || model('Driver', driverSchema);
@@ -48,7 +49,7 @@ export async function POST(req: Request) {
 
     const newDriver: IDriver = new Driver({
       user_id : user,
-      driver_id : data.driver_id,
+      driver_id : 'driver' + uuidv4(),
       name: data.name,
       contactNumber : data.contactNumber,
       balance : data.balance,

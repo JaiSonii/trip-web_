@@ -3,7 +3,8 @@ import  { model, models } from 'mongoose';
 import { connectToDatabase, partySchema } from '@/utils/schema';
 import { IParty } from '@/utils/interface';
 
-import { auth } from '@/firebase/firebaseAdmin';
+import {v4 as uuidv4} from 'uuid'
+
 import { fetchCookie, verifyToken } from '@/utils/auth';
 
 const Party = models.Party || model('Party', partySchema);
@@ -58,7 +59,7 @@ export async function POST(req: Request) {
 
     const newParty: IParty = new Party({
       user_id : user,
-      party_id: data.party_id,
+      party_id: 'party' + uuidv4(),
       name: data.name,
       contactPerson: data.contactPerson,
       contactNumber: data.contactNumber,

@@ -40,9 +40,9 @@ const TripDocumentsPage = () => {
                 startDate={new Date(trip.startDate)}
                 route={trip.route}
                 trip_id={tripId}
-                ewayBill={trip.ewayBill}
+                ewayBill={trip.docuements.find(doc=>doc.type == 'ewayBill')?.url}
                 ewbValidityDate={new Date(trip.ewbValidityDate)}
-                POD={trip.POD as string}
+                POD={trip.docuements.find(doc=>doc.type == 'POD')?.url as string}
             />
         </div>
     );

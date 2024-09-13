@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
         if (!existingUser) {
             // If the user does not exist in your database, create a new one
             const Driver = models.Driver || model('Driver', driverSchema)
-            const driver = await Driver.findOne({user_id : data.userId, contactNumber : phone})
+            const driver = await Driver.findOne({user_id : user, contactNumber : phone})
             if(!driver && role === 'driver'){
                 return NextResponse.json({error : 'Driver Not Found', status : 400})
             }

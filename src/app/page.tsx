@@ -109,7 +109,7 @@ export default function Home() {
 
 
       {/* Hero Section */}
-      <section className="p-4 lg:p-16">
+      <section className="p-4 lg:p-16 bg-white">
         <div className="flex flex-col-reverse lg:flex-row items-center justify-between gap-6 ">
           <div className="w-full lg:w-auto flex justify-center items-end h-full mt-10 lg:mt-0">
             <Image src={mobile_img} alt="mobile" width={300} height={380} className="lg:w-auto w-full" />
@@ -195,7 +195,7 @@ export default function Home() {
 
 
 
-      <section className="p-8 sm:p-16">
+      <section className="p-8 sm:p-16 bg-white">
         {/* Section Content */}
         <h2 className="mt-10 text-3xl sm:text-5xl font-semibold text-center mb-10 sm:mb-20">Why Choose Us?</h2>
 

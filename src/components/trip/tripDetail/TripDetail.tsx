@@ -247,7 +247,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
           <p className="text-xl font-semibold ">₹ {tripBalance}</p>
         </div>
         <Profit charges={charges} truckCost={trip.truckHireCost && trip.truckHireCost} amount={trip.amount} setCharges={setCharges} tripId={trip.trip_id} driverId={trip.driver} truckNo={trip.truck} />
-        <EWayBillUpload validity={trip.ewbValidityDate ? trip.ewbValidityDate : null} tripId={trip.trip_id} ewayBillUrl={ewayBillUrl} setEwayBillUrl={setEwayBillUrl} />
+        <EWayBillUpload validity={trip.ewbValidityDate ? trip.ewbValidityDate : null} tripId={trip.trip_id} ewayBillUrl={trip.docuements?.find(doc=>doc.type == 'ewayBill')?.url || trip.ewayBill} setEwayBillUrl={setEwayBillUrl} />
         {trip.POD ? <PODViewer podUrl={trip.POD} /> : null}
       </div>
     </div>

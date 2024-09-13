@@ -48,6 +48,9 @@ export async function POST(req: Request, { params }: { params: { tripId: string 
       return NextResponse.json({ status: 400, message: "Cannot Add Fuel to Party Bill" })
     }
 
+
+    console.log(data)
+
     // Create a new instance of TripExpense with the parsed data and tripId
     const charge = new Expense({
       ...data,
