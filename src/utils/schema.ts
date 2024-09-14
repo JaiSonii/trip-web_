@@ -1,8 +1,7 @@
 import mongoose, { ConnectOptions } from "mongoose";
 import { Schema } from "mongoose";
-import { decryptData, encryptData } from "./encryption";
 
-const docuementSchema = new Schema({
+const documentSchema = new Schema({
   filename : String,
   type : String,
   validityDate : Date,
@@ -152,7 +151,7 @@ export const tripSchema = new Schema({
     PaymentBookSchema,
   ],
  documents : [
-  docuementSchema
+  documentSchema
  ] 
 });
 
@@ -190,7 +189,7 @@ export const driverSchema = new mongoose.Schema({
   accounts: [{
     type: driverAccountSchema
   }],
-  documents: [docuementSchema]
+  documents: [documentSchema]
 });
 
 
@@ -211,10 +210,9 @@ export const truckSchema: Schema = new Schema({
   status: { type: String, enum: ['Available', 'On Trip'] },
   trip_id: { type: String, default: '' },
   driver_id : {type : String, default : ''},
-  documents : [docuementSchema],
+  documents : [documentSchema],
   updatedAt: { type: Date, default: Date.now }
 });
-
 export const supplierSchema: Schema = new Schema({
   user_id: {
     type: String,

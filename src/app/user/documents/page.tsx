@@ -1,9 +1,28 @@
+'use client'
 import Link from 'next/link';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FaRoute, FaTruck, FaUserTie } from 'react-icons/fa';
 import { RiSteering2Fill } from 'react-icons/ri';
 
 const DocumentsPage = () => {
+
+  const fetchRecentDocuments = async()=>{
+    try {
+      const res = await fetch(`/api/documents/recent`)
+      if(!res.ok){
+        throw new Error('Failed to fetch recent docuemnts')
+      }
+      const data = await res.json()
+      console.log(data)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  useEffect(()=>{
+    fetchRecentDocuments()
+  },[])
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <div className="flex items-center justify-between mb-4 border-b-2 border-gray-300 pb-2">

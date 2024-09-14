@@ -216,3 +216,22 @@ th{
   @apply sticky
 }
 
+select {
+  @apply cursor-pointer
+  w-full
+  mt-1
+  p-2
+  border
+  rounded
+  border-lightOrange
+  focus:ring-2 focus:ring-lightOrange focus:border-lightOrange
+  hover:border-primaryOrange
+  transition-all
+  duration-200
+  ease-in-out
+  bg-white
+  text-gray-800
+  shadow-sm
+  focus:shadow-md
+  outline-none
+}

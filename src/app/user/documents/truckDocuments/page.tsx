@@ -7,11 +7,13 @@ import React, { useEffect, useState } from 'react';
 import { FaFolder } from 'react-icons/fa6';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import TruckDocumentUpload from '@/components/documents/TruckDocumentUpload';
 
 const TruckDocuments = () => {
   const [trucks, setTrucks] = useState<TruckModel[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [modalOpen, setModalOpen] = useState(false)
 
   const fetchTrucks = async () => {
     try {
@@ -58,6 +60,9 @@ const TruckDocuments = () => {
           <Button onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}>
             {viewMode === 'grid' ? 'Switch to List View' : 'Switch to Grid View'}
           </Button>
+         <Button onClick={()=>setModalOpen(true)}>
+          Upload Document
+         </Button>
         </div>
       </div>
 
@@ -78,6 +83,11 @@ const TruckDocuments = () => {
           <div className="text-center col-span-3 text-gray-500">No trucks found</div>
         )}
       </div>
+      {modalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <TruckDocumentUpload open={modalOpen} setOpen={setModalOpen}  />
+        </div>
+      )}
     </div>
   );
 };

@@ -94,6 +94,7 @@ export async function POST(this: any, req: Request) {
       material: formData.get('material') || '',
       notes: formData.get('notes') || '',
       accounts: [],
+      documents : []
     });
 
     if(validity !== null){

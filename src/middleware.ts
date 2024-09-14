@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { NextRequest, userAgent } from 'next/server'
-import { verifyToken } from './utils/auth'
 import jwt from 'jsonwebtoken'
  
 // This function can be marked `async` if using `await` inside

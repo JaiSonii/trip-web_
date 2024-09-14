@@ -6,11 +6,16 @@ import React, { useEffect, useState } from 'react';
 import { FaFolder } from 'react-icons/fa6';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import dynamic from 'next/dynamic';
 
 const TripDocumentsLanding = () => {
+
+  const TripDocumentUpload = dynamic(()=> import('@/components/documents/TripDocumentUpload'),{ssr : false})
+
   const [trips, setTrips] = useState<ITrip[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [modalOpen, setModalOpen] = useState(false)
 
   const fetchTrips = async () => {
     try {
@@ -48,6 +53,9 @@ const TripDocumentsLanding = () => {
           <Button onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}>
             {viewMode === 'grid' ? 'Switch to List View' : 'Switch to Grid View'}
           </Button>
+          <Button onClick={() => setModalOpen(true)}>
+            Upload Document
+          </Button>
         </div>
       </div>
 
@@ -55,8 +63,8 @@ const TripDocumentsLanding = () => {
         {filteredTrips.length > 0 ? (
           filteredTrips.map((trip) => (
             <Link href={{
-              pathname : `/user/documents/tripDocuments/${trip.trip_id}`,
-             }} key={trip.trip_id}>
+              pathname: `/user/documents/tripDocuments/${trip.trip_id}`,
+            }} key={trip.trip_id}>
               <div className={`bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out hover:shadow-lightOrangeButtonColor hover:bg-lightOrange cursor-pointer ${viewMode === 'grid' ? 'h-full' : 'flex items-center space-x-4'}`}>
                 <FaFolder className="text-bottomNavBarColor mb-4" size={50} />
                 <div className="flex flex-col">
@@ -70,6 +78,11 @@ const TripDocumentsLanding = () => {
           <div className="text-center col-span-3 text-gray-500">No trips found</div>
         )}
       </div>
+      {modalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <TripDocumentUpload open={modalOpen} setOpen={setModalOpen}  />
+        </div>
+      )}
     </div>
   );
 };
