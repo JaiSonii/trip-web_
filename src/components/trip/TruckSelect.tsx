@@ -59,7 +59,6 @@ const TruckSelect: React.FC<Props> = ({ trucks, formData, handleChange, setFormD
 
   const handleOptionSelect = (value: string) => {
     const truck : TruckModel | undefined= trucks.find(truck => truck.truckNo === value);
-    console.log(truck)
     setFormData((prev: any) => ({
       ...prev,
       truck: value,

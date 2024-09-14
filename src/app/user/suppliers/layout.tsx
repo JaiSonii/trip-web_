@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 const headings: any = {
   '/user/suppliers': 'Suppliers',
-  '/user/suppliers/create' : 'New Supplier'
+  '/user/suppliers/create': 'New Supplier'
 }
 
 const SuppliersLayout = ({ children }: { children: React.ReactNode }) => {
@@ -20,11 +20,13 @@ const SuppliersLayout = ({ children }: { children: React.ReactNode }) => {
           <h1 className="text-3xl font-bold text-bottomNavBarColor">{headings[pathname] || 'Supplier'}</h1>
           <div className="flex space-x-4">
             {!pathname.includes('create') &&
-              <Button >
-                <Link href="/user/suppliers/create">
+              <Link href="/user/suppliers/create">
+                <Button >
+
                   Add Supplier
-                </Link>
-              </Button>
+
+                </Button>
+              </Link>
             }
           </div>
         </div>

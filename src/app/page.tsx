@@ -1,10 +1,9 @@
-'use client'
+
 
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import React from "react";
-import './globals.css'
+import '@/app/globals.css'
 import Image from "next/image";
 import heroImg from '@/assets/hero section illustration.png'
 import logo_img from '@/assets/awajahi logo.png'

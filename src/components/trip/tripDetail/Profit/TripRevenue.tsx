@@ -34,7 +34,7 @@ const TripRevenue: React.FC<DriverNameProps> = ({ tripId , amount}) => {
     if (loading) return <span>Loading...</span>;
     if (error || !revenue) return <span>NA</span>;
 
-    return <span className='text-green-500 font-semibold'>{revenue || ''}</span>;
+    return <span className='text-green-500 font-semibold'>₹{revenue || ''}</span>;
 };
 
 export default TripRevenue;

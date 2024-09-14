@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import '@/app/globals.css';
+import './globals.css';
 import { cn } from "@/lib/utils";
 import { Roboto as FontSans } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
-import logo from '@/assets/awajahi logo.png'
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -16,7 +15,6 @@ export const metadata: Metadata = {
   description: "Awajahi Web is transforming transportation in India, one mile at a time. Discover our services and how we are moving India efficiently and reliably.",
   keywords: ["Awajahi", "Transport", "Logistics", "India", "Moving Services", "Web Application", "Fleet Management","awajahi"],
   authors: [{ name: "Awajahi Team" }],
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
   robots: {
     index: true,
     follow: true,

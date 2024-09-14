@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 const headings: any = {
   '/user/trucks': 'Lorries',
-  '/user/trucks/create' : 'New Lorry'
+  '/user/trucks/create': 'New Lorry'
 }
 
 const TrucksLayout = ({ children }: { children: React.ReactNode }) => {
@@ -20,13 +20,15 @@ const TrucksLayout = ({ children }: { children: React.ReactNode }) => {
         <div className="flex items-center justify-between mb-4 border-b-2 border-gray-300 pb-2">
           <h1 className="text-3xl font-bold text-bottomNavBarColor">{headings[pathname] || 'Lorries'}</h1>
           <div className="flex space-x-4">
-            {!pathname.includes('create') && 
-            <Button >
+            {!pathname.includes('create') &&
               <Link href="/user/trucks/create">
-                Add Lorry
+                <Button >
+
+                  Add Lorry
+
+                </Button>
               </Link>
-            </Button>
-}
+            }
           </div>
         </div>
         <div className="flex-grow">

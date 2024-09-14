@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ["latin"] });
 
 const headings: any = {
   '/user/drivers': 'Drivers',
-  '/user/drivers/create' : 'New Driver'
+  '/user/drivers/create': 'New Driver'
 }
 
 interface DriversLayoutProps {
@@ -26,11 +26,13 @@ const DriversLayout = ({ children }: DriversLayoutProps) => {
           <h1 className="text-3xl font-bold text-bottomNavBarColor">{headings[pathname] || 'Drivers'}</h1>
           <div className="flex space-x-4">
             {!pathname.includes('create') &&
-              <Button>
-                <Link href="/user/drivers/create">
+              <Link href="/user/drivers/create">
+                <Button>
+
                   Add Driver
-                </Link>
-              </Button>
+
+                </Button>
+              </Link>
             }
           </div>
         </div>

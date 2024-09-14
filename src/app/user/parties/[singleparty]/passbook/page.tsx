@@ -92,34 +92,34 @@ const SinglePartyPassbook = () => {
             >
               <td>
                 <div className='flex items-center space-x-2'>
-                <FaCalendarAlt className='text-bottomNavBarColor' />
-                <span>{new Date(acc.startDate || acc.paymentDate).toLocaleDateString()}</span>
+                  <FaCalendarAlt className='text-bottomNavBarColor' />
+                  <span>{new Date(acc.startDate || acc.paymentDate).toLocaleDateString()}</span>
                 </div>
-                
+
               </td>
               <td className="p-4">
                 {acc.accountType ? (
                   <span className="text-lg font-semibold">{acc.accountType}</span>
                 ) : (
-                  <div className="flex flex-col justify-between h-full">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <FaTruck className="text-bottomNavBarColor" />
-                      <span className="ml-1 text-lg font-medium">{acc.truck}</span>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-3">
+                      <FaTruck className="text-bottomNavBarColor text-2xl" />
+                      <span className="ml-1 text-lg font-semibold text-gray-800">{acc.truck}</span>
                     </div>
-                    <hr className="border-gray-300 my-1" />
-                    <div className="flex items-center space-x-2 mt-2">
-                      <FaRoute className="text-bottomNavBarColor" />
-                      <span className="text-gray-600 text-md">
+                    <div className="flex items-center space-x-3 border-l-2 border-gray-200 pl-4">
+                      <FaRoute className="text-bottomNavBarColor text-2xl" />
+                      <span className="text-gray-700 text-md font-medium">
                         {acc.route.origin.split(',')[0]} &rarr; {acc.route.destination.split(',')[0]}
                       </span>
                     </div>
                   </div>
+
                 )}
               </td>
 
 
 
-              <td>{acc.accountType ? acc.amount : ''}</td>
+              <td>{acc.accountType ? <span className='text-green-500 font-semibold'>₹{acc.amount}</span> : ''}</td>
               <td>{acc.accountType ? '' : (<TripRevenue tripId={acc.trip_id} amount={acc.amount} />)}</td>
             </tr>
           ))}

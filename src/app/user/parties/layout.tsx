@@ -21,7 +21,7 @@ const PartiesLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
 
   // Handle closing the notification
- 
+
 
   // Effect to show notification on load
 
@@ -33,17 +33,21 @@ const PartiesLayout = ({ children }: { children: React.ReactNode }) => {
           <h1 className="text-3xl font-bold text-bottomNavBarColor">{headings[pathname] || 'Customers'}</h1>
           <div className="flex space-x-4">
             {!pathname.includes('create') &&
-              <Button>
-                <Link href="/user/parties/create">
+              <Link href="/user/parties/create">
+                <Button>
+
                   Add Customer
-                </Link>
-              </Button>
-            }
-            <Button>
-              <Link href="/user/trips/create">
-                Add Trip
+
+                </Button>
               </Link>
-            </Button>
+            }
+            <Link href="/user/trips/create">
+              <Button>
+
+                Add Trip
+              </Button>
+            </Link>
+
           </div>
         </div>
         <div className="flex-grow">
@@ -51,7 +55,7 @@ const PartiesLayout = ({ children }: { children: React.ReactNode }) => {
         </div>
       </div>
 
-     
+
     </div>
   );
 };

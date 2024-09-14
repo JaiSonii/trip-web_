@@ -13,7 +13,7 @@ const TripsLayout = ({ children }: { children: React.ReactNode }) => {
 
   const headings: any = {
     '/user/trips': 'Trips',
-    '/user/trips/create' : 'Create New Trip'
+    '/user/trips/create': 'Create New Trip'
   }
 
   return (
@@ -23,11 +23,13 @@ const TripsLayout = ({ children }: { children: React.ReactNode }) => {
           <h1 className="text-2xl font-bold text-bottomNavBarColor">{headings[pathname]}</h1>
           <div className="flex space-x-4">
             {!pathname.includes('create') &&
-              <Button variant="newyork">
-                <Link href="/user/trips/create">
+              <Link href="/user/trips/create">
+                <Button>
+
                   Add Trip
-                </Link>
-              </Button>
+                </Button>
+              </Link>
+
             }
 
           </div>
