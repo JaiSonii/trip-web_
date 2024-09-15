@@ -102,14 +102,14 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId }) => {
                 }
 
                 const data = await res.json();
-                if(data.status === 402){
+                if (data.status === 402) {
                     setError(data.error)
                     return
                 }
                 setFormData({
                     ...formData,
                     validityDate: new Date(data.validity).toISOString().split('T')[0],
-                    file : e.target.files[0],
+                    file: e.target.files[0],
                     docType: types.has(data.docType) ? data.docType : 'Other',
                 });
             } catch (error) {
@@ -212,19 +212,51 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId }) => {
                             {filteredTrips && filteredTrips.length > 0 ? (
                                 filteredTrips.map((trip) => (
                                     <SelectItem key={trip.trip_id} value={trip.trip_id}>
-                                        <div className='flex items-center justify-around w-full'>
-                                            <span className='font-semibold'>{trip.route.origin.split(',')[0]} &rarr; {trip.route.destination.split(',')[0]}</span>
-                                            <div className="flex flex-col items-center space-x-2 w-1/2">
-                                                <span>{statuses[trip.status as number]}</span>
-                                                <div className="relative w-full bg-gray-200 h-1 rounded">
+                                        <div className="flex items-center justify-between w-full p-2 space-x-4">
+
+                                            {/* Display route origin to destination */}
+                                            <span className="font-semibold text-gray-700 whitespace-nowrap">
+                                                {trip.route.origin.split(',')[0]} &rarr; {trip.route.destination.split(',')[0]}
+                                            </span>
+
+                                            {/* Status indicator with progress bar */}
+                                            <div className="flex flex-col w-1/2 space-y-1">
+                                                {/* Status label */}
+                                                <span className="text-sm text-gray-600">
+                                                    {statuses[trip.status as number]}
+                                                </span>
+
+                                                {/* Progress bar for status */}
+                                                <div className="relative w-full h-1 bg-gray-200 rounded">
                                                     <div
-                                                        className={`absolute top-0 left-0 h-1 rounded transition-width duration-500 ${trip.status === 0 ? 'bg-red-500' : trip.status === 1 ? 'bg-yellow-500' : trip.status === 2 ? 'bg-blue-500' : trip.status === 3 ? 'bg-green-500' : 'bg-green-800'}`}
+                                                        className={`absolute top-0 left-0 h-1 rounded transition-width duration-500 ${trip.status === 0
+                                                                ? 'bg-red-500'
+                                                                : trip.status === 1
+                                                                    ? 'bg-yellow-500'
+                                                                    : trip.status === 2
+                                                                        ? 'bg-blue-500'
+                                                                        : trip.status === 3
+                                                                            ? 'bg-green-500'
+                                                                            : 'bg-green-800'
+                                                            }`}
                                                         style={{ width: `${(trip.status as number / 4) * 100}%` }}
-                                                    ></div>
+                                                    />
                                                 </div>
                                             </div>
+
+                                            {/* LR number */}
+                                            <span className="text-sm text-gray-600 whitespace-nowrap">
+                                                {trip.LR}
+                                            </span>
+
+                                            {/* Start date */}
+                                            <span className="text-sm text-gray-600 whitespace-nowrap">
+                                                {new Date(trip.startDate).toISOString().split('T')[0]}
+                                            </span>
+
                                         </div>
                                     </SelectItem>
+
                                 ))
                             ) : (
                                 <div className="p-2 text-gray-500">No Trips found</div>

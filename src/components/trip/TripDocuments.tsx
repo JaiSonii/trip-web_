@@ -3,7 +3,7 @@
 import React from 'react';
 import { FaArrowRight } from 'react-icons/fa';
 import { pdfjs } from 'react-pdf';
-import { renderDocument } from '../RenderDocument';
+import RenderDocument from '../RenderDocument';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -41,8 +41,8 @@ const TripDocuments: React.FC<TripDocumentProps> = ({ documents, ewbValidityDate
 
             {/* Grid Layout for E-way Bill and POD */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {documents.map((doc: any)=>(
-                    doc?.url && renderDocument(doc.type, doc.url)
+                {documents.map((doc: any, index : number)=>(
+                    doc?.url && <RenderDocument documentUrl={doc.url} title={doc.type} key={index} />
                 ))}
             </div>
 

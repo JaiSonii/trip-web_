@@ -28,6 +28,8 @@ const useFetchData = (tripId: string) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+ 
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -92,6 +94,9 @@ const TripPage: React.FC = () => {
   const { trip, parties, trucks, drivers, loading, error, setTrip, handleEditClicked } = useFetchData(tripId as string);
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [docModalOpen, setDocModalOpen] = useState(false)
+
+  const TripDocumentUpload = dynamic(()=> import('@/components/documents/TripDocumentUpload'), {ssr : false})
 
   const handleEdit = useCallback(async (data: Partial<ITrip>) => {
     setIsSubmitting(true);
@@ -171,7 +176,10 @@ const TripPage: React.FC = () => {
 
   return (
     <div className="mx-auto p-4">
-      {!isEditing && (
+      <div className='flex items-center justify-between'>
+        <Button onClick={()=>setDocModalOpen(true)}>
+          Upload Document
+        </Button>
         <div className="flex justify-end space-x-4 mb-4">
           <Button
             variant="outline"
@@ -191,7 +199,9 @@ const TripPage: React.FC = () => {
             <MdDelete className="mr-2" /> Delete
           </Button>
         </div>
-      )}
+      </div>
+
+
       {isEditing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <motion.div
@@ -219,6 +229,11 @@ const TripPage: React.FC = () => {
         </div>
       )}
       <TripDetails trip={trip as ITrip} setTrip={setTrip} />
+      {docModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <TripDocumentUpload open={docModalOpen} setOpen={setDocModalOpen} tripId={tripId as string} />
+        </div>
+      )}
     </div>
   );
 };

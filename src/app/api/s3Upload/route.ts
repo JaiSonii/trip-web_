@@ -169,7 +169,7 @@ export async function POST(request: Request) {
         $push: {
           documents: {
             filename: file.name,
-            type: 'ewayBill',
+            type: 'E-Way Bill',
             uploadedDate: new Date(),
             validityDate: ewbValidityDate,
             url: fileUrl,

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { pdfjs } from 'react-pdf';
-import { renderDocument } from '../RenderDocument';
+import RenderDocument from '../RenderDocument';
 import { Button } from '../ui/button';
 import dynamic from 'next/dynamic';
 
@@ -47,8 +47,8 @@ const TruckDocuments: React.FC<TruckDocumentProps> = ({ truckNo }) => {
                 </Button>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {documents.map((doc : any)=>(
-                    doc?.url && renderDocument(doc.type, doc.url)
+                {documents.map((doc : any, index: number)=>(
+                    doc?.url && <RenderDocument documentUrl={doc.url} title={doc.type} key={index}/>
                 ))}
             </div>
             {modalOpen && (
