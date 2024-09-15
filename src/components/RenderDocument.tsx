@@ -1,3 +1,5 @@
+'use client'
+
 import Link from "next/link";
 import {Document, Page, pdfjs} from 'react-pdf'
 import Image from "next/image";

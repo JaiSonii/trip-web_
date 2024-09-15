@@ -23,6 +23,7 @@ const DocumentsPage = () => {
         throw new Error('Failed to fetch recent docuemnts')
       }
       const data = await res.json()
+      console.log(data)
       if(data.documents.length === 0){
         setError('No recent documents found')
         return
@@ -132,7 +133,7 @@ const DocumentsPage = () => {
         </div>
         {loading && <div>{loadingIndicator}</div>}
         {error && <p className='text-red-500'>{error}</p>}
-        <RecentDocuments docs={recentDocs} />
+        {recentDocs && <RecentDocuments docs={recentDocs} />}
       </div>
       <div className='mt-4'>
         <div className='border-b-2 border-gray-300 mb-4'>
