@@ -1,9 +1,4 @@
 {
-    "regions": ["sin1"],
-    "functions": {
-      "api/**": {
-        "regions": ["sin1"]
-      }
-    }
+    "regions": ["sin1"]
   }
   
