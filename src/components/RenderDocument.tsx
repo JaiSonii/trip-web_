@@ -13,7 +13,7 @@ interface RenderDocumentProps {
     documentUrl: string;
 }
 
-const RenderDocument = ({ title, documentUrl }: RenderDocumentProps) => (
+const renderDocument = (title: string, documentUrl: string) => (
     <div className="bg-white p-4 rounded-xl shadow-lg transform transition duration-300 hover:scale-105 hover:shadow-2xl border border-gray-200 max-w-sm hover:bg-lightOrange">
         <h2 className="text-md font-semibold text-gray-800 mb-3 text-center truncate">{title}</h2>
         <Link href={documentUrl.split('.pdf')[0]} target="_blank" rel="noopener noreferrer">
@@ -43,6 +43,10 @@ const RenderDocument = ({ title, documentUrl }: RenderDocumentProps) => (
             </div>
         </Link>
     </div>
+);
+
+const RenderDocument = ({ title, documentUrl }: RenderDocumentProps) => (
+    renderDocument(title,documentUrl)
 );
 
 export default RenderDocument;
