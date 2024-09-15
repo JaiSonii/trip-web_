@@ -8,7 +8,7 @@ import { FaFolderOpen } from 'react-icons/fa6';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 import dynamic from 'next/dynamic';
 
-const RecentDocuments = dynamic(()=>import('@/components/documents/RecentDocuments'))
+const RecentDocuments = dynamic(()=>import('@/components/documents/RecentDocuments'),{ssr : false})
 
 const DocumentsPage = () => {
   const [recentDocs, setRecentDocs] = useState<any[]>([])
