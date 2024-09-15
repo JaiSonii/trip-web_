@@ -8,12 +8,13 @@ import { FaFolderOpen } from 'react-icons/fa6';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 import dynamic from 'next/dynamic';
 
+const RecentDocuments = dynamic(()=>import('@/components/documents/RecentDocuments'))
+
 const DocumentsPage = () => {
   const [recentDocs, setRecentDocs] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
-  const RenderDocument = dynamic(()=>import('@/components/RenderDocument'))
 
   const fetchRecentDocuments = async () => {
     try {
@@ -131,12 +132,7 @@ const DocumentsPage = () => {
         </div>
         {loading && <div>{loadingIndicator}</div>}
         {error && <p className='text-red-500'>{error}</p>}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          
-          {recentDocs?.map((doc: any,index : number) => (
-            doc?.url && <RenderDocument documentUrl={doc.url} title={doc.type} key={index} />
-          ))}
-        </div>
+        <RecentDocuments docs={recentDocs} />
       </div>
       <div className='mt-4'>
         <div className='border-b-2 border-gray-300 mb-4'>

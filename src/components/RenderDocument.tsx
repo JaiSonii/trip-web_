@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Document, Page, pdfjs } from 'react-pdf';
+import {Document, Page, pdfjs} from 'react-pdf'
 import Image from "next/image";
 
 const isPdf = (fileName: string) => {
@@ -8,12 +8,7 @@ const isPdf = (fileName: string) => {
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
-interface RenderDocumentProps {
-    title: string;
-    documentUrl: string;
-}
-
-const renderDocument = (title: string, documentUrl: string) => (
+export const renderDocument = (title: string, documentUrl: string) => (
     <div className="bg-white p-4 rounded-xl shadow-lg transform transition duration-300 hover:scale-105 hover:shadow-2xl border border-gray-200 max-w-sm hover:bg-lightOrange">
         <h2 className="text-md font-semibold text-gray-800 mb-3 text-center truncate">{title}</h2>
         <Link href={documentUrl.split('.pdf')[0]} target="_blank" rel="noopener noreferrer">
@@ -44,9 +39,3 @@ const renderDocument = (title: string, documentUrl: string) => (
         </Link>
     </div>
 );
-
-const RenderDocument = ({ title, documentUrl }: RenderDocumentProps) => (
-    renderDocument(title,documentUrl)
-);
-
-export default RenderDocument;
