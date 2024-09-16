@@ -60,7 +60,6 @@ const MainLayout = () => {
     if (parts.length === 2) return parts.pop()?.split(';').shift();
   };
 
-  const selectedRole = getCookie('selectedRole');
   const roleToken = Cookies.get('role_token')
   const decodedToken: any = jwt.decode(roleToken as string)
 
@@ -94,7 +93,7 @@ const MainLayout = () => {
 
   return (
     <div className="flex h-screen">
-      <div className={`h-full w-1/6 bg-gradient-to-bl from-bottomNavBarColor via-bottomNavBarColor to-orange-500 text-white fixed top-0 left-0 md:flex flex-col shadow-lg transition-transform duration-300 ease-in-out ${isMenuOpen ? 'transform translate-x-0' : 'transform -translate-x-full'} md:translate-x-0 z-40`}>
+      <div className={`max-h-screen w-1/6 bg-gradient-to-bl from-bottomNavBarColor via-bottomNavBarColor to-orange-500 text-white fixed top-0 left-0 md:flex flex-col shadow-lg transition-transform duration-300 ease-in-out ${isMenuOpen ? 'transform translate-x-0' : 'transform -translate-x-full'} md:translate-x-0 z-40`}>
 
         {/* Logo and Title */}
         <div className="flex items-center justify-center p-4 md:justify-start md:pl-4 border-b border-borderColor">
@@ -141,12 +140,6 @@ const MainLayout = () => {
 
 
           </div>
-          {/* <Button variant={'outline'} onClick={() => setIsSwitchBoxOpen(!isSwitchBoxOpen)} >
-            <div className='flex items-center space-x-1'>
-              <span className='text-white'>{selectedRole}</span>
-              <MdArrowDropDown className='text-white' />
-            </div>
-          </Button> */}
         </div>
         {/* Switch Account Box */}
         {isSwitchBoxOpen && (

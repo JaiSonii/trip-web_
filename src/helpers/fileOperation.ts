@@ -3,6 +3,7 @@ import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import pdf from 'pdf-parse-new';
 import sharp from 'sharp'
 import tesseract from 'node-tesseract-ocr';
+import { PDFDocument } from 'pdf-lib';
 
 const s3Client = new S3Client({
     region: process.env.AWS_S3_REGION,
@@ -11,20 +12,56 @@ const s3Client = new S3Client({
         secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY!,
     },
 });
+ // Assume S3 client is initialized
 
+// Function to compress PDF files
+async function compressPDF(pdfBuffer: Buffer): Promise<Buffer> {
+    const pdfDoc = await PDFDocument.load(pdfBuffer);
 
-export async function uploadFileToS3(fileBuffer: Buffer, fileName: string, contentType: string): Promise<string> {
+    // Compress PDF by removing object streams, or you can apply other optimizations here
+    const optimizedPdfBuffer = await pdfDoc.save({
+        useObjectStreams: false, // This can slightly reduce the size
+    });
+
+    return Buffer.from(optimizedPdfBuffer);
+}
+
+// Function to handle image or PDF compression and upload to S3
+export async function uploadFileToS3(
+    fileBuffer: Buffer,
+    fileName: string,
+    contentType: string
+): Promise<string> {
+    let optimizedBuffer = fileBuffer;
+
+    // Compress image if the content type is image
+    if (contentType.startsWith('image/')) {
+        optimizedBuffer = await sharp(fileBuffer)
+            .resize({
+                width: 1200, // Resize image to a maximum width of 1200px (optional)
+                fit: sharp.fit.inside, // Maintain aspect ratio
+            })
+            .toBuffer();
+    }
+
+    // Compress PDF if the content type is a PDF
+    if (contentType === 'application/pdf') {
+        optimizedBuffer = await compressPDF(fileBuffer);
+    }
+
     const params = {
         Bucket: process.env.AWS_S3_BUCKET_NAME!,
         Key: fileName,
-        Body: fileBuffer,
+        Body: optimizedBuffer,
         ContentType: contentType,
     };
 
     const command = new PutObjectCommand(params);
     await s3Client.send(command);
+
     return fileName;
 }
+
 
 export async function extractValidityDate(text: string): Promise<Date | null> {
     const regex = /(?:valid|vahd)?\s*upto\s*[:\-]?\s*(\d{2})\/(\d{2})\/(\d{4})/i

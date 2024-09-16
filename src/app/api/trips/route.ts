@@ -6,7 +6,7 @@ import { ITrip } from '@/utils/interface';
 import {v4 as uuidv4} from 'uuid'
 import { partySchema } from '@/utils/schema';
 import { verifyToken } from '@/utils/auth';
-import { uploadFileToS3 } from '@/helpers/S3Operation';
+import { uploadFileToS3 } from '@/helpers/fileOperation';
 
 const Trip = models.Trip || model('Trip', tripSchema);
 const Party = models.Party || model('Party', partySchema)
@@ -34,7 +34,7 @@ export async function GET(req: Request) {
       query.status = { $in: statuses };
     }
 
-    const trips = await Trip.find(query).lean().sort({ 'dates.0': -1 }).exec();
+    const trips = await Trip.find(query).lean().sort({ 'startDate': -1 }).exec();
 
     return NextResponse.json({ trips });
   } catch (err) {
