@@ -8,12 +8,19 @@ import { FaFolder } from 'react-icons/fa6';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import TruckDocumentUpload from '@/components/documents/TruckDocumentUpload';
+import { useSearchParams } from 'next/navigation';
+import dynamic from 'next/dynamic';
 
 const TruckDocuments = () => {
   const [trucks, setTrucks] = useState<TruckModel[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [modalOpen, setModalOpen] = useState(false)
+  const [documents, setDocuments] = useState<any[]>([])
+
+  const RecentDocuments = dynamic(()=>import('@/components/documents/RecentDocuments'))
+
+  const type = useSearchParams().get('type')
 
   const fetchTrucks = async () => {
     try {
@@ -26,8 +33,26 @@ const TruckDocuments = () => {
     }
   };
 
+  const fetchDocuments = async () => {
+    if (type) {
+      try {
+        const res = await fetch(`/api/trucks/documents?type=${encodeURIComponent(type)}`)
+        const data = res.ok ? await res.json() : alert('Failed to fetch documents');
+        console.log(data)
+        setDocuments(data.documents)
+      } catch (error) {
+        alert('Failed to fetch documents')
+        console.log(error)
+      }
+    }
+  }
+
   useEffect(() => {
-    fetchTrucks();
+    if (type) {
+      fetchDocuments()
+    } else {
+      fetchTrucks();
+    }
   }, []);
 
   const getTruckIcon = (truckType: string) => {
@@ -45,6 +70,12 @@ const TruckDocuments = () => {
       truck.truckType.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const filteredDocs = documents?.filter(
+    (doc) =>
+      doc.truckNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      doc.truckType.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
       <div className="flex items-center justify-between mb-4 border-b-2 border-gray-300 pb-2">
@@ -60,9 +91,9 @@ const TruckDocuments = () => {
           <Button onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}>
             {viewMode === 'grid' ? 'Switch to List View' : 'Switch to Grid View'}
           </Button>
-         <Button onClick={()=>setModalOpen(true)}>
-          Upload Document
-         </Button>
+          <Button onClick={() => setModalOpen(true)}>
+            Upload Document
+          </Button>
         </div>
       </div>
 
@@ -83,9 +114,12 @@ const TruckDocuments = () => {
           <div className="text-center col-span-3 text-gray-500">No trucks found</div>
         )}
       </div>
+      <div>
+        {filteredDocs && <RecentDocuments docs={filteredDocs} />}
+      </div>
       {modalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-          <TruckDocumentUpload open={modalOpen} setOpen={setModalOpen}  />
+          <TruckDocumentUpload open={modalOpen} setOpen={setModalOpen} />
         </div>
       )}
     </div>

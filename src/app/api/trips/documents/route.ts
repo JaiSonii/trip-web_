@@ -16,7 +16,7 @@ export async function GET(request: Request) {
     await connectToDatabase();
 
     // Fetch only the required fields from the trips collection
-    const trips = await Trip.find({ user_id: user, ewayBill: { $ne: '' } }, 'startDate ewayBill trip_id ewbValidityDate route POD').lean();
+    const trips = await Trip.find({ user_id: user}, 'startDate ewayBill trip_id ewbValidityDate route POD documents LR').lean();
 
     // Generate presigned URLs for the fetched trips
     // const tripsWithPresignedUrls = trips.map(trip => {

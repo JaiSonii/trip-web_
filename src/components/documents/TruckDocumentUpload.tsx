@@ -142,7 +142,7 @@ const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo }) => {
         data.append('docType', formData.docType);
 
         try {
-            const response = await fetch(`/api/trucks/${truckNo}/documents`, {
+            const response = await fetch(`/api/trucks/${truckNo || formData.truckNo}/documents`, {
                 method: 'PUT',
                 body: data,
             });

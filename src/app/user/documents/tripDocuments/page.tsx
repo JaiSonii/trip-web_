@@ -7,6 +7,7 @@ import { FaFolder } from 'react-icons/fa6';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import dynamic from 'next/dynamic';
+import { useSearchParams } from 'next/navigation';
 
 const TripDocumentsLanding = () => {
 
@@ -16,6 +17,7 @@ const TripDocumentsLanding = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [modalOpen, setModalOpen] = useState(false)
+
 
   const fetchTrips = async () => {
     try {
@@ -27,6 +29,8 @@ const TripDocumentsLanding = () => {
       alert('Failed to fetch trips');
     }
   };
+
+
 
   useEffect(() => {
     fetchTrips();

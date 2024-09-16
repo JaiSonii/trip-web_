@@ -138,7 +138,7 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
         data.append('docType', formData.docType);
 
         try {
-            const response = await fetch(`/api/drivers/${driverId}/documents`, {
+            const response = await fetch(`/api/drivers/${driverId || formData.driverId}/documents`, {
                 method: 'PUT',
                 body: data,
             });

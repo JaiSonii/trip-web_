@@ -8,7 +8,7 @@ import { FaFolderOpen } from 'react-icons/fa6';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 import dynamic from 'next/dynamic';
 
-const RecentDocuments = dynamic(()=>import('@/components/documents/RecentDocuments'),{ssr : false})
+const RecentDocuments = dynamic(() => import('@/components/documents/RecentDocuments'), { ssr: false })
 
 const DocumentsPage = () => {
   const [recentDocs, setRecentDocs] = useState<any[]>([])
@@ -24,14 +24,14 @@ const DocumentsPage = () => {
       }
       const data = await res.json()
       console.log(data)
-      if(data.documents.length === 0){
+      if (data.documents.length === 0) {
         setError('No recent documents found')
         return
       }
       setRecentDocs(data.documents)
     } catch (error: any) {
       console.log(error)
-    }finally{
+    } finally {
       setLoading(false)
     }
   }
@@ -39,27 +39,42 @@ const DocumentsPage = () => {
   const TruckDocArray = [
     {
       title: 'Registration Certificate',
-      link: '#',
+      link: {
+        pathname: '/user/documents/truckDocuments',
+        query: { type: 'Registration Certificate' }
+      },
       icon: <FaRegIdCard className='text-bottomNavBarColor' size={70} /> // Icon representing an ID card or certificate
     },
     {
       title: 'Permit',
-      link: '#',
+      link: {
+        pathname: '/user/documents/truckDocuments',
+        query: { type: 'Permit' }
+      },
       icon: <FaFileContract className='text-bottomNavBarColor' size={70} /> // Icon representing a legal permit or document
     },
     {
       title: 'Insurance',
-      link: '#',
+      link: {
+        pathname: '/user/documents/truckDocuments',
+        query: { type: 'Insurance' }
+      },
       icon: <FaShieldAlt className='text-bottomNavBarColor' size={70} /> // Icon representing protection or insurance
     },
     {
       title: 'Pollution Certificate',
-      link: '#',
+      link: {
+        pathname: '/user/documents/truckDocuments',
+        query: { type: 'Pollution Certificate' }
+      },
       icon: <FaLeaf className='text-bottomNavBarColor' size={70} /> // Icon representing environmental or pollution-related certification
     },
     {
       title: 'Other',
-      link: '#',
+      link: {
+        pathname: '/user/documents/truckDocuments',
+        query: { type: 'Other' }
+      },
       icon: <FaFolderOpen className='text-bottomNavBarColor' size={70} /> // Folder icon for "Other" category
     }
   ];
@@ -67,27 +82,42 @@ const DocumentsPage = () => {
   const DriverDocArray = [
     {
       title: 'License',
-      link: '#',
+      link: {
+        pathname: '/user/documents/driverDocuments',
+        query: { type: 'License' }
+      },
       icon: <FaRegIdCard className='text-bottomNavBarColor' size={70} /> // Icon representing an ID card or certificate
     },
     {
       title: 'Aadhar',
-      link: '#',
+      link: {
+        pathname: '/user/documents/driverDocuments',
+        query: { type: 'Aadhar' }
+      },
       icon: <FaIdCardAlt className='text-bottomNavBarColor' size={70} /> // Icon representing a legal permit or document
     },
     {
       title: 'PAN',
-      link: '#',
+      link: {
+        pathname: '/user/documents/driverDocuments',
+        query: { type: 'PAN' }
+      },
       icon: <FaPassport className='text-bottomNavBarColor' size={70} /> // Icon representing protection or insurance
     },
     {
       title: 'Police Verification',
-      link: '#',
+      link: {
+        pathname: '/user/documents/driverDocuments',
+        query: { type: 'Police Verification' }
+      },
       icon: <FaRegCheckCircle className='text-bottomNavBarColor' size={70} /> // Icon representing environmental or pollution-related certification
     },
     {
       title: 'Other',
-      link: '#',
+      link: {
+        pathname: '/user/documents/driverDocuments',
+        query: { type: 'Other' }
+      },
       icon: <FaFolderOpen className='text-bottomNavBarColor' size={70} /> // Folder icon for "Other" category
     }
   ];

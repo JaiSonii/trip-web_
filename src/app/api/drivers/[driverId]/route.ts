@@ -19,7 +19,9 @@ export async function GET(req: Request, { params }: { params: { driverId: string
   try {
     await connectToDatabase();
 
-    const driver = await Driver.findOne({user_id : user, driver_id : driverId}).exec();
+    const driver : IDriver = await Driver.findOne({user_id : user, driver_id : driverId}).exec();
+
+  
 
     if (!driver) {
       return NextResponse.json({ message: 'Driver not found' }, { status: 404 });

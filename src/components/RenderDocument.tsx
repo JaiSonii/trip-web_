@@ -1,7 +1,7 @@
 'use client'
 
 import Link from "next/link";
-import {Document, Page, pdfjs} from 'react-pdf'
+import { Document, Page, pdfjs } from 'react-pdf'
 import Image from "next/image";
 
 const isPdf = (fileName: string) => {
@@ -10,9 +10,14 @@ const isPdf = (fileName: string) => {
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
-export const renderDocument = (title: string, documentUrl: string) => (
+export const renderDocument = (title: string, documentUrl: string, additionalData?: { [key: string]: string } ) => (
     <div className="bg-white p-4 rounded-xl shadow-lg transform transition duration-300 hover:scale-105 hover:shadow-2xl border border-gray-200 max-w-sm hover:bg-lightOrange">
-        <h2 className="text-md font-semibold text-gray-800 mb-3 text-center truncate">{title}</h2>
+        <h2 className="text-lg font-semibold text-gray-800 mb-1 text-left truncate">{title}</h2>
+        <div className="flex justify-between text-md font-semibold text-gray-800 mb-1">
+            {additionalData && Object.keys(additionalData).map((key) => (
+                additionalData[key] ? <h2 key={key}>{additionalData[key]}</h2> : null
+            ))}
+        </div>
         <Link href={documentUrl.split('.pdf')[0]} target="_blank" rel="noopener noreferrer">
             <div className="relative overflow-hidden h-40 w-full rounded-lg border border-gray-300 transition-shadow duration-200 group">
                 {isPdf(documentUrl) ? (
