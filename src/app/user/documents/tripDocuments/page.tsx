@@ -7,7 +7,7 @@ import { FaFolder } from 'react-icons/fa6';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import dynamic from 'next/dynamic';
-import { useSearchParams } from 'next/navigation';
+import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 
 const TripDocumentsLanding = () => {
 
@@ -17,16 +17,25 @@ const TripDocumentsLanding = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [modalOpen, setModalOpen] = useState(false)
+  const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(true)
 
 
   const fetchTrips = async () => {
     try {
+      setMessage('fetching trips...')
       const res = await fetch(`/api/trips`);
-      const data = res.ok ? await res.json() : alert('Failed to fetch trips');
+      const data = res.ok ? await res.json() : setMessage('Failed to fetch trips');
       setTrips(data.trips);
+      setMessage('')
+      if(data.trips.length === 0){
+        setMessage('No trips found')
+      }
     } catch (error) {
       console.error(error);
       alert('Failed to fetch trips');
+    }finally{
+      setLoading(false)
     }
   };
 
@@ -39,7 +48,8 @@ const TripDocumentsLanding = () => {
   const filteredTrips = trips.filter((trip) =>
     trip.route.origin.toLowerCase().includes(searchTerm.toLowerCase()) ||
     trip.route.destination.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    new Date(trip.startDate).toLocaleDateString().includes(searchTerm)
+    new Date(trip.startDate).toLocaleDateString().includes(searchTerm) ||
+    trip.LR.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -72,15 +82,15 @@ const TripDocumentsLanding = () => {
               <div className={`bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out hover:shadow-lightOrangeButtonColor hover:bg-lightOrange cursor-pointer ${viewMode === 'grid' ? 'h-full' : 'flex items-center space-x-4'}`}>
                 <FaFolder className="text-bottomNavBarColor mb-4" size={50} />
                 <div className="flex flex-col">
-                  <span className="font-semibold">{trip.route.origin} &rarr; {trip.route.destination}</span>
+                  <span className="font-semibold text-black">{trip.route.origin} &rarr; {trip.route.destination}</span>
                   <span className="text-gray-500">Start Date: {new Date(trip.startDate).toLocaleDateString()}</span>
+                  <span className='text-gray-500'>{trip.LR}</span>
                 </div>
               </div>
             </Link>
           ))
-        ) : (
-          <div className="text-center col-span-3 text-gray-500">No trips found</div>
-        )}
+        ) : null}
+        {message && <span className="text-center col-span-3 text-gray-500">{loading && loadingIndicator} {message}</span>}
       </div>
       {modalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">

@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import TruckDocumentUpload from '@/components/documents/TruckDocumentUpload';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 
 const TruckDocuments = () => {
   const [trucks, setTrucks] = useState<TruckModel[]>([]);
@@ -17,6 +18,8 @@ const TruckDocuments = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [modalOpen, setModalOpen] = useState(false)
   const [documents, setDocuments] = useState<any[]>([])
+  const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(true)
 
   const RecentDocuments = dynamic(()=>import('@/components/documents/RecentDocuments'))
 
@@ -24,25 +27,41 @@ const TruckDocuments = () => {
 
   const fetchTrucks = async () => {
     try {
+      setMessage('fetching trucks...')
       const res = await fetch(`/api/trucks`);
-      const data = res.ok ? await res.json() : alert('Failed to fetch Trucks');
+      const data = res.ok ? await res.json() : setMessage('Failed to fetch Trucks');
       setTrucks(data.trucks);
+      setMessage('')
+      if(data.trucks.length === 0){
+        setMessage('No trucks found')
+      }
     } catch (error) {
       console.log(error);
       alert('Failed to fetch Trucks');
+      setMessage('Failed to fetch Trucks')
+    }finally{
+      setLoading(false)
     }
   };
 
   const fetchDocuments = async () => {
     if (type) {
       try {
+        setMessage('fetching documents...')
         const res = await fetch(`/api/trucks/documents?type=${encodeURIComponent(type)}`)
-        const data = res.ok ? await res.json() : alert('Failed to fetch documents');
-        console.log(data)
+        const data = res.ok ? await res.json() : setMessage('Failed to fetch documents');
         setDocuments(data.documents)
+        setMessage('')
+        if(data.documents.length === 0){
+          setMessage('No documents found')
+          return
+        }
       } catch (error) {
         alert('Failed to fetch documents')
         console.log(error)
+        setMessage('Failed to fetch documents')
+      }finally{
+        setLoading(false)
       }
     }
   }
@@ -110,9 +129,8 @@ const TruckDocuments = () => {
               </div>
             </Link>
           ))
-        ) : (
-          <div className="text-center col-span-3 text-gray-500">No trucks found</div>
-        )}
+        ) : null}
+        {message && <span className="text-center col-span-3 text-gray-500">{loading && loadingIndicator} {message}</span>}
       </div>
       <div>
         {filteredDocs && <RecentDocuments docs={filteredDocs} />}

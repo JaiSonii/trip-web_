@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import DriverDocumentUpload from '@/components/documents/DriverDocumentUpload';
 import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
+import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 
 const DriverDocuments = () => {
   const [drivers, setDrivers] = useState<IDriver[]>([]);
@@ -16,6 +17,8 @@ const DriverDocuments = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [modalOpen, setModalOpen] = useState(false)
   const [docuemnts, setDocuments] = useState<any[]>([])
+  const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(true)
 
   const RecentDocuments = dynamic(()=>import('@/components/documents/RecentDocuments'),{ssr : false})
 
@@ -24,23 +27,41 @@ const DriverDocuments = () => {
 
   const fetchDrivers = async () => {
     try {
+      setMessage('fetching drivers...')
       const res = await fetch(`/api/drivers`);
-      const data = res.ok ? await res.json() : alert('Failed to fetch drivers');
+      const data = res.ok ? await res.json() : setMessage('Failed to fetch drivers');
       setDrivers(data.drivers);
+      setMessage('')
+      if(data.drivers.length === 0){
+        setMessage('No drivers found')
+        return
+      }
     } catch (error) {
       console.error(error);
       alert('Failed to fetch drivers');
+      setMessage('Falied to fetch drivers')
+    }finally{
+      setLoading(false)
     }
   };
 
   const fetchDocuments = async () => {
     try {
+      setMessage('fetching documents...')
       const res = await fetch(`/api/drivers/documents?type=${encodeURIComponent('License')}`)
-      const data = res.ok ? await res.json() : alert('Failed to fetch documents');
+      const data = res.ok ? await res.json() : setMessage('Falied to fetch documents');
       setDocuments(data.documents)
+      setMessage('')
+      if(data.documents.length === 0){
+        setMessage('No documents found')
+        return
+      }
     } catch (error) {
       alert('Failed to fetch documents')
       console.log(error)
+      setMessage('Falied to fetch documents')
+    }finally{
+      setLoading(false)
     }
   }
 
@@ -98,9 +119,8 @@ const DriverDocuments = () => {
               </div>
             </Link>
           ))
-        ) : (
-          <div className="text-center col-span-3 text-gray-500">No drivers found</div>
-        )}
+        ) : null}
+        {message && <span className="text-center col-span-3 text-gray-500">{loading && loadingIndicator} {message}</span>}
       </div>
       <div>
         {filteredDocs && <RecentDocuments docs={filteredDocs} />}
