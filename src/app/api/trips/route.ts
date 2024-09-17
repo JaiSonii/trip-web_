@@ -101,7 +101,7 @@ export async function POST(this: any, req: Request) {
       newTrip.ewbValidityDate = new Date(validity as string)
       newTrip.documents.push({
         filename: file?.name || '',
-        type: "ewayBill",
+        type: "E-Way Bill",
         validityDate: new Date(validity as any),
         uploadedDate: new Date(),
         url: fileUrl,

@@ -10,6 +10,7 @@ import { FaCalendarAlt } from 'react-icons/fa';
 import { IoAddCircle } from 'react-icons/io5';
 import OfficeExpenseModal from '@/components/OfficeExpenseModal';
 import { icons, IconKey } from '@/utils/icons';
+import { formatNumber } from '@/utils/utilArray';
 
 const OfficeExpense: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
@@ -134,7 +135,7 @@ const OfficeExpense: React.FC = () => {
                                             <span>{new Date(expense.date).toLocaleDateString()}</span>
                                         </div>
                                     </td>
-                                    <td className="border p-4">{expense.amount}</td>
+                                    <td className="border p-4">₹{formatNumber(expense.amount)}</td>
                                     <td className="border p-4">
                                         <div className="flex items-center space-x-2">
                                             {icons[expense.expenseType as IconKey]}

@@ -14,6 +14,7 @@ import { FaRoute, FaTruck } from 'react-icons/fa6';
 import { RouteIcon } from 'lucide-react';
 import { HiBuildingOffice } from 'react-icons/hi2';
 import { BsFillEmojiExpressionlessFill } from 'react-icons/bs';
+import { formatNumber } from '@/utils/utilArray';
 
 const ExpenseModal = dynamic(() => import('@/components/trip/tripDetail/ExpenseModal'))
 
@@ -140,7 +141,7 @@ const ExpenseLayout: React.FC<TruckLayoutProps> = ({ children }) => {
             <FaTruck />
             <span className="text-lg font-semibold text-blue-600">Truck Expense</span>
           </div>
-          <span className="text-3xl font-bold text-blue-800 mt-4">{truckExpense}</span>
+          <span className="text-3xl font-bold text-blue-800 mt-4">₹{formatNumber(truckExpense)}</span>
         </div>
 
         <div className="flex flex-col items-center border border-green-300 bg-green-50 p-6 rounded-lg w-full md:w-1/4 shadow-lg transition-all transform hover:scale-105">
@@ -150,7 +151,7 @@ const ExpenseLayout: React.FC<TruckLayoutProps> = ({ children }) => {
             </svg>
             <span className="text-lg font-semibold text-green-600">Trip Expense</span>
           </div>
-          <span className="text-3xl font-bold text-green-800 mt-4">{tripExpense}</span>
+          <span className="text-3xl font-bold text-green-800 mt-4">₹{formatNumber(tripExpense)}</span>
         </div>
 
         <div className="flex flex-col items-center border border-yellow-300 bg-yellow-50 p-6 rounded-lg w-full md:w-1/4 shadow-lg transition-all transform hover:scale-105">
@@ -160,7 +161,7 @@ const ExpenseLayout: React.FC<TruckLayoutProps> = ({ children }) => {
             </svg>
             <span className="text-lg font-semibold text-yellow-600">Office Expense</span>
           </div>
-          <span className="text-3xl font-bold text-yellow-800 mt-4">{officeExpense}</span>
+          <span className="text-3xl font-bold text-yellow-800 mt-4">₹{formatNumber(officeExpense)}</span>
         </div>
 
         <div className="flex flex-col items-center border border-red-300 bg-red-50 p-6 rounded-lg w-full md:w-1/4 shadow-lg transition-all transform hover:scale-105">
@@ -170,7 +171,7 @@ const ExpenseLayout: React.FC<TruckLayoutProps> = ({ children }) => {
             </svg>
             <span className="text-lg font-semibold text-red-600">Total Month Expense</span>
           </div>
-          <span className="text-3xl font-bold text-red-800 mt-4">{monthExpense}</span>
+          <span className="text-3xl font-bold text-red-800 mt-4">₹{formatNumber(monthExpense)}</span>
           <span className="text-sm font-medium text-red-600 mt-2">{percentageIncrease >= 0 ? `+${percentageIncrease.toFixed(2)}%` : `${percentageIncrease.toFixed(2)}%`} compared to last month</span>
         </div>
 

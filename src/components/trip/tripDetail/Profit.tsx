@@ -5,6 +5,7 @@ import ProfitItem from './Profit/ProfitItem';
 import { handleAddCharge } from '@/helpers/ExpenseOperation';
 import { Button } from '@/components/ui/button';
 import { FaChevronUp, FaChevronDown } from 'react-icons/fa';
+import { formatNumber } from '@/utils/utilArray';
 
 interface ProfitProps {
   charges: TripExpense[];
@@ -143,13 +144,13 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
 
       <div className="flex flex-row w-full items-center justify-between">
         <span className="text-md font-bold text-gray-800">Freight Amount: </span>
-        <span className="text-md font-semibold text-blue-700">{amount.toFixed(2)}</span>
+        <span className="text-md font-semibold text-blue-700">₹{formatNumber(amount)}</span>
       </div>
 
       <div className="py-4 border-b border-gray-200 cursor-pointer flex justify-between items-center hover:bg-gray-100 transition-colors rounded-md" onClick={() => setShowTotalCharges(!showTotalCharges)}>
         <span className="font-medium text-gray-700">Total Charges</span>
         <span className="flex items-center text-green-600 font-semibold">
-          +{chargesAmount.toFixed(2)}
+          +₹{formatNumber(chargesAmount)}
           {showTotalCharges ? <FaChevronUp className="ml-2 transition-transform" /> : <FaChevronDown className="ml-2 transition-transform" />}
         </span>
       </div>
@@ -160,7 +161,7 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
       <div className="py-4 border-b border-gray-200 cursor-pointer flex justify-between items-center hover:bg-gray-100 transition-colors rounded-md" onClick={() => setShowTotalDeductions(!showTotalDeductions)}>
         <span className="font-medium text-gray-700">Total Deductions</span>
         <span className="flex items-center text-red-600 font-semibold">
-          -{deduction.toFixed(2)}
+          -₹{formatNumber(deduction)}
           {showTotalDeductions ? <FaChevronUp className="ml-2 transition-transform" /> : <FaChevronDown className="ml-2 transition-transform" />}
         </span>
       </div>
@@ -171,7 +172,7 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
       <div className="py-4 border-b border-gray-200 cursor-pointer flex justify-between items-center hover:bg-gray-100 transition-colors rounded-md" onClick={() => setShowTruckExpenses(!showTruckExpenses)}>
         <span className="font-medium text-gray-700">Expenses</span>
         <span className="flex items-center text-red-600 font-semibold">
-          -{expenseAmount.toFixed(2)}
+          -₹{formatNumber(expenseAmount)}
           {showTruckExpenses ? <FaChevronUp className="ml-2 transition-transform" /> : <FaChevronDown className="ml-2 transition-transform" />}
         </span>
       </div>
@@ -183,7 +184,7 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
       {truckCost != 0 &&
         <div className="py-4 mt-4 flex justify-between items-center">
           <span className="font-medium text-gray-800">Truck Hire Cost: </span>
-          <span className="text-red-600 font-bold">-{truckCost}</span>
+          <span className="text-red-600 font-bold">-₹{formatNumber(truckCost as number)}</span>
         </div>
       }
 
@@ -191,7 +192,7 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
       <hr />
       <div className="py-4 mt-4 flex justify-between items-center">
         <span className="font-medium text-gray-800">Net Profit: </span>
-        <span className="text-blue-700 font-bold">{netProfit.toFixed(2)}</span>
+        <span className="text-blue-700 font-bold">₹{formatNumber(netProfit)}</span>
       </div>
 
       <div className="flex justify-end mt-4">

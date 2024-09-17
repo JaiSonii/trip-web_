@@ -6,6 +6,7 @@ import { ITrip, IParty } from '@/utils/interface';
 import { statuses } from '@/utils/schema';
 import { fetchBalance } from '@/helpers/fetchTripBalance';
 import { FaCalendarAlt, FaTruck, FaRoute, FaFileInvoiceDollar } from 'react-icons/fa';
+import TripBalance from '@/components/trip/TripBalance';
 
 // Dynamically import the Loading component
 const Loading = dynamic(() => import('../loading'), {
@@ -97,7 +98,7 @@ const TruckTripsPage = () => {
         <td className="border p-4">
           <div className='flex items-center space-x-2'>
             <FaFileInvoiceDollar className="text-[rgb(247,132,50)]" />
-            <span>{fetchBalance(trip)}</span>
+            <span><TripBalance trip={trip} /></span>
           </div>
         </td>
       </tr>

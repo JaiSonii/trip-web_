@@ -13,6 +13,7 @@ import { FaCalendarAlt, FaTruck } from 'react-icons/fa';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { IoAddCircle } from 'react-icons/io5';
 import TruckExpenseModal from '@/components/TruckExpenseModal';
+import { formatNumber } from '@/utils/utilArray';
 
 const TruckExpense: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
@@ -157,7 +158,7 @@ const TruckExpense: React.FC = () => {
                       </div>
                     </td>
                   )}
-                  {visibleColumns.amount && <td className="border p-4">{expense.amount}</td>}
+                  {visibleColumns.amount && <td className="border p-4">₹{formatNumber(expense.amount)}</td>}
                   {visibleColumns.expenseType && (
                     <td className="border p-4">
                       <div className="flex items-center space-x-2">

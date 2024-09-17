@@ -30,7 +30,7 @@ export async function GET(req: Request) {
         // Merge all documents into a single array and sort by validityDate in descending order (latest first)
         const allDocuments = [...trips, ...drivers, ...trucks]
             .reduce((acc, item) => acc.concat(item.documents), [])
-            .sort((a: any, b: any) => new Date(b.validityDate).getTime() - new Date(a.validityDate).getTime())
+            .sort((a: any, b: any) => new Date(b.uploadedDate).getTime() - new Date(a.uploadedDate).getTime())
             .slice(0, 3); // Get the latest 5 documents
 
         // Return the latest five documents

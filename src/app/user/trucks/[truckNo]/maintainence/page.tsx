@@ -11,6 +11,7 @@ import { MdDelete, MdEdit, MdLocalGasStation, MdPayment } from 'react-icons/md';
 import DriverName from '@/components/driver/DriverName';
 import { FaCalendarAlt } from 'react-icons/fa';
 import { IconKey, icons } from '@/utils/icons';
+import { formatNumber } from '@/utils/utilArray';
 
 const TruckMaintainenceBook = () => {
   const { truckNo } = useParams();
@@ -122,7 +123,7 @@ const TruckMaintainenceBook = () => {
                   </div>
                 </td>
 
-                <td className="border p-4">{expense.amount}</td>
+                <td className="border p-4">₹{formatNumber(expense.amount)}</td>
                 <td className="border p-4">
                   <div className="flex items-center space-x-2">
                     {icons[expense.expenseType as IconKey]}

@@ -11,7 +11,7 @@ import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 
 const TripDocumentsLanding = () => {
 
-  const TripDocumentUpload = dynamic(()=> import('@/components/documents/TripDocumentUpload'),{ssr : false})
+  const TripDocumentUpload = dynamic(() => import('@/components/documents/TripDocumentUpload'), { ssr: false })
 
   const [trips, setTrips] = useState<ITrip[]>([]);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -28,13 +28,13 @@ const TripDocumentsLanding = () => {
       const data = res.ok ? await res.json() : setMessage('Failed to fetch trips');
       setTrips(data.trips);
       setMessage('')
-      if(data.trips.length === 0){
+      if (data.trips.length === 0) {
         setMessage('No trips found')
       }
     } catch (error) {
       console.error(error);
       alert('Failed to fetch trips');
-    }finally{
+    } finally {
       setLoading(false)
     }
   };
@@ -48,8 +48,9 @@ const TripDocumentsLanding = () => {
   const filteredTrips = trips.filter((trip) =>
     trip.route.origin.toLowerCase().includes(searchTerm.toLowerCase()) ||
     trip.route.destination.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    new Date(trip.startDate).toLocaleDateString().includes(searchTerm) ||
-    trip.LR.toLowerCase().includes(searchTerm.toLowerCase())
+    new Date(trip.startDate).toLocaleDateString().includes(searchTerm.toLowerCase()) ||
+    trip.LR.toLowerCase().includes(searchTerm.toLowerCase())||
+    trip.truck.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -84,7 +85,11 @@ const TripDocumentsLanding = () => {
                 <div className="flex flex-col">
                   <span className="font-semibold text-black">{trip.route.origin} &rarr; {trip.route.destination}</span>
                   <span className="text-gray-500">Start Date: {new Date(trip.startDate).toLocaleDateString()}</span>
-                  <span className='text-gray-500'>{trip.LR}</span>
+                  <div className='flex justify-between'>
+                    <span className='text-gray-500'>{trip.LR}</span>
+                    <span className='text-gray-700'>{trip.truck}</span>
+                  </div>
+
                 </div>
               </div>
             </Link>
@@ -94,7 +99,7 @@ const TripDocumentsLanding = () => {
       </div>
       {modalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-          <TripDocumentUpload open={modalOpen} setOpen={setModalOpen}  />
+          <TripDocumentUpload open={modalOpen} setOpen={setModalOpen} />
         </div>
       )}
     </div>

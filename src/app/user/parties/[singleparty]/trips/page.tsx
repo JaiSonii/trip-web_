@@ -6,6 +6,10 @@ import { statuses } from '@/utils/schema';
 import { fetchBalance } from '@/helpers/fetchTripBalance';
 import { FaCalendarAlt, FaTruck, FaRoute, FaFileInvoiceDollar } from 'react-icons/fa';
 import Loading from '../loading';
+import { loadingIndicator } from '@/components/ui/LoadingIndicator';
+import { formatNumber } from '@/utils/utilArray';
+import TripBalance from '@/components/trip/TripBalance';
+
 
 const SinglePartyTrips = () => {
   const router = useRouter();
@@ -93,9 +97,9 @@ const SinglePartyTrips = () => {
                 </div>
               </td>
               <td className="border p-4">
-              <div className='flex items-center space-x-2'>
-                <FaFileInvoiceDollar className="text-bottomNavBarColor" />
-                <span>{fetchBalance(trip)}</span>
+                <div className='flex items-center space-x-2'>
+                  <FaFileInvoiceDollar className="text-bottomNavBarColor" />
+                  <span><TripBalance trip={trip} /></span>
                 </div>
               </td>
             </tr>

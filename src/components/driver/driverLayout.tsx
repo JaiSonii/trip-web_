@@ -73,6 +73,8 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onD
     } catch (error: any) {
       console.error('Failed to update driver:', error);
       setError(error.message);
+    }finally{
+      router.refresh()
     }
   };
 

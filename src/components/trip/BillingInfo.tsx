@@ -1,53 +1,63 @@
+import { formatNumber } from "@/utils/utilArray";
 import React, { useEffect } from "react";
 
 interface BillingInfoProps {
   formData: any;
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
-  setFormData: React.Dispatch<React.SetStateAction<any>>; // Adding setFormData prop
+  setFormData: React.Dispatch<React.SetStateAction<any>>;
 }
 
 export const BillingInfo: React.FC<BillingInfoProps> = ({ formData, handleChange, setFormData }) => {
   useEffect(() => {
-    if (formData.billingType !== 'Fixed') {
-      const newAmount =
-        (parseFloat(formData.perUnit) || 0) *
-        (parseFloat(formData.totalUnits) || 0);
+    // If billing type is not Fixed, calculate the new amount
+    if (formData.billingType !== "Fixed") {
+      const newAmount = (parseFloat(formData.perUnit) || 0) * (parseFloat(formData.totalUnits) || 0);
       setFormData((prevFormData: any) => ({
         ...prevFormData,
-        amount: newAmount
+        amount: newAmount,
       }));
     }
   }, [formData.billingType, formData.perUnit, formData.totalUnits, setFormData]);
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    if (e.target.value === '0') {
-      handleChange({ target: { name: e.target.name, value: '' } } as React.ChangeEvent<HTMLInputElement>);
+    if (e.target.value === "0") {
+      handleChange({
+        target: { name: e.target.name, value: "" },
+      } as React.ChangeEvent<HTMLInputElement>);
     }
   };
+
+
 
   return (
     <div className="billing-info">
       <h2 className="text-md font-semibold mb-2">Billing Information</h2>
       <div className="flex flex-wrap gap-2 mb-4">
-        {['Fixed', 'Per Tonne', 'Per Kg', 'Per Trip', 'Per Day', 'Per Hour', 'Per Litre', 'Per Bag'].map((type) => (
+        {["Fixed", "Per Tonne", "Per Kg", "Per Trip", "Per Day", "Per Hour", "Per Litre", "Per Bag"].map((type) => (
           <button
             key={type}
             type="button"
-            className={`p-2 rounded-md ${formData.billingType === type ? 'bg-bottomNavBarColor text-white' : 'bg-lightOrange text-buttonTextColor'}`}
-            onClick={() => handleChange({ target: { name: 'billingType', value: type } } as React.ChangeEvent<HTMLInputElement | HTMLSelectElement>)}
+            className={`p-2 rounded-md ${
+              formData.billingType === type ? "bg-bottomNavBarColor text-white" : "bg-lightOrange text-buttonTextColor"
+            }`}
+            onClick={() =>
+              handleChange({
+                target: { name: "billingType", value: type },
+              } as React.ChangeEvent<HTMLInputElement | HTMLSelectElement>)
+            }
           >
             {type}
           </button>
         ))}
       </div>
-      {formData.billingType === 'Fixed' ? (
+      {formData.billingType === "Fixed" ? (
         <label className="block">
           <span className="text-gray-700 text-sm">Freight Amount</span>
           <input
             className="w-full p-2 border border-gray-300 rounded-md mb-4"
-            type="number"
+            type="text"
             name="amount"
-            value={formData.amount || ''}
+            value={formatNumber(formData.amount)}
             placeholder="Freight Amount"
             onChange={handleChange}
             onFocus={handleFocus}
@@ -63,7 +73,7 @@ export const BillingInfo: React.FC<BillingInfoProps> = ({ formData, handleChange
                 className="w-full p-2 border border-gray-300 rounded-md mb-4"
                 type="number"
                 name="perUnit"
-                value={formData.perUnit || ''}
+                value={formData.perUnit || ""}
                 placeholder="Per Unit"
                 onChange={handleChange}
                 onFocus={handleFocus}
@@ -71,12 +81,12 @@ export const BillingInfo: React.FC<BillingInfoProps> = ({ formData, handleChange
               />
             </label>
             <label className="block">
-              <span className="text-gray-700">Total {formData.billingType.split(' ')[1]}s</span>
+              <span className="text-gray-700">Total {formData.billingType.split(" ")[1]}s</span>
               <input
                 className="w-full p-2 border border-gray-300 rounded-md mb-4"
                 type="number"
                 name="totalUnits"
-                value={formData.totalUnits || ''}
+                value={formData.totalUnits || ""}
                 placeholder="Total Units"
                 onChange={handleChange}
                 onFocus={handleFocus}
@@ -88,29 +98,16 @@ export const BillingInfo: React.FC<BillingInfoProps> = ({ formData, handleChange
             <span className="text-gray-700 text-sm">Freight Amount</span>
             <input
               className="w-full p-2 border border-gray-300 rounded-md mb-4"
-              type="number"
+              type="text"
               name="amount"
-              value={formData.amount || ''}
+              value={formatNumber(formData.amount)}
               placeholder="Freight Amount"
               readOnly
             />
           </label>
         </>
       )}
-      {formData.hasSupplier && (
-        <label className="block">
-          <span className="text-gray-700">Truck Hire Cost</span>
-          <input
-            className="w-full p-2 border border-gray-300 rounded-md"
-            type="number"
-            name="truckHireCost"
-            value={formData.truckHireCost || ''}
-            placeholder="Truck Hire Cost"
-            onChange={handleChange}
-            onFocus={handleFocus}
-          />
-        </label>
-      )}
+    
     </div>
   );
 };

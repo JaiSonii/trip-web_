@@ -1,4 +1,6 @@
+import { formatNumber } from '@/utils/utilArray';
 import React, { useState, useEffect } from 'react';
+import { loadingIndicator } from '../ui/LoadingIndicator';
 
 interface DriverNameProps {
     driverId: string;
@@ -25,10 +27,10 @@ const DriverBalance: React.FC<DriverNameProps> = ({ driverId }) => {
         loadDriverBalance();
     }, [driverId]);
 
-    if (loading) return <span>Loading...</span>;
+    if (loading) return loadingIndicator;
     if (error || !balance) return <span>NA</span>;
 
-    return <span className={balance > 0 ? 'text-green-500 p-2 font-semibold' : 'text-red-500 p-2 font-semibold'}>{balance || ''}</span>;
+    return <span className={balance > 0 ? 'text-green-500 p-2 font-semibold' : 'text-red-500 p-2 font-semibold'}>₹{formatNumber(balance) || ''}</span>;
 };
 
 export default DriverBalance;

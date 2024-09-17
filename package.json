@@ -57,7 +57,7 @@
     "sharp": "^0.33.5",
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
-    "tesseract.js": "^5.1.0",
+    "tesseract.js": "^5.1.1",
     "use-debounce": "^10.0.2",
     "uuid": "^10.0.0"
   },

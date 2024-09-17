@@ -7,6 +7,10 @@ import { BillingInfo } from './BillingInfo';
 import { DateInputs } from './DateInputs';
 import { IDriver, IParty, TruckModel } from '@/utils/interface';
 import { Button } from '../ui/button';
+import { formatNumber } from '@/utils/utilArray';
+import { loadingIndicator } from '../ui/LoadingIndicator';
+import { createWorker } from 'tesseract.js'
+import { extractEWayBillDetails } from '@/helpers/TripOperation';
 type Props = {
     parties: IParty[];
     trucks: TruckModel[];
@@ -18,9 +22,9 @@ type Props = {
 const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr }) => {
     const [formData, setFormData] = useState({
         party: JSON.parse(localStorage.getItem('tripData') as any)?.party || '',
-        truck: JSON.parse(localStorage.getItem('tripData') as any)?.truck ||'',
-        driver: JSON.parse(localStorage.getItem('tripData') as any)?.driver ||'',
-        supplierId: JSON.parse(localStorage.getItem('tripData') as any)?.supplierId ||'',
+        truck: JSON.parse(localStorage.getItem('tripData') as any)?.truck || '',
+        driver: JSON.parse(localStorage.getItem('tripData') as any)?.driver || '',
+        supplierId: JSON.parse(localStorage.getItem('tripData') as any)?.supplierId || '',
         route: {
             origin: '',
             destination: ''
@@ -38,20 +42,20 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr }) =
         ewbValidity: null
     });
 
-    useEffect(()=>{
-        if(localStorage.getItem('tripData')){
+    useEffect(() => {
+        if (localStorage.getItem('tripData')) {
             const savedItem = JSON.parse(localStorage.getItem('tripData') as any)
             setFormData(JSON.parse(localStorage.getItem('tripData') as any))
-            setFormData((prev)=>({
+            setFormData((prev) => ({
                 ...prev,
-                party:savedItem.party,
+                party: savedItem.party,
                 truck: savedItem.truck,
                 driver: savedItem.driver,
                 supplierId: savedItem.supplierId
             }))
-            
+
         }
-    },[])
+    }, [])
 
     const [file, setFile] = useState<File | null>(null)
 
@@ -70,45 +74,84 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr }) =
 
     };
 
-    
 
-    const submitEwayBill = async () => {
-        if (file) {
-            try {
-                setFileLoading(true)
-                const data = new FormData()
-                data.append('file', file)
-                const res = await fetch(`/api/trips/getEwaybillDetails`, {
-                    method: 'POST',
-                    body: data
-                })
-                const resData = await res.json()
-                const tripData = resData.ewbValidityDate
-                tripData ? setFormData((prev) => {
-                    const newFormData = {
-                        ...prev,
-                        startDate: new Date(tripData.startDate),
-                        route: {
-                            origin: tripData.origin.split('\n')[0],
-                            destination: tripData.destination.split('\n')[0],
-                        },
-                        truck: tripData.truckNo,
-                        ewbValidity: tripData.validity
-                    };
-                    console.log("Updated Form Data:", newFormData); // Debugging line
-                    return newFormData;
-                }) : submitEwayBill();
-            } catch (error: any) {
-                alert(error.message)
-                console.log(error)
-            } finally {
-                setFileLoading(false)
-            }
+
+    const processTripData = (tripData: any) => {
+        if (!tripData) return;
+
+        const driverId = trucks.find((truck) => truck.truckNo === tripData.truckNo)?.driver_id;
+
+        setFormData((prev) => ({
+            ...prev,
+            startDate: new Date(tripData.startDate),
+            route: {
+                origin: tripData.origin.split('\n')[0],
+                destination: tripData.destination.split('\n')[0],
+            },
+            truck: tripData.truckNo,
+            ewbValidity: tripData.validity,
+            driver: driverId,
+        }));
+    };
+
+    const processFileUpload = async (file: File, isPdf: boolean) => {
+        const data = new FormData();
+
+        if (!isPdf) {
+            const text = await extractTextFromImage(file);
+            const res = await fetch(`/api/trips/getEwaybillDetails/text`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain',
+                    'Accept': 'application/json'
+                },
+                body: text
+            })
+            if (!res.ok) throw new Error("Failed to process file");
+
+            const data = await res.json()
+
+            return data
         } else {
-            alert('No file selected')
+            data.append('file', file);
+            const res = await fetch(`/api/trips/getEwaybillDetails`, {
+                method: 'POST',
+                body: data
+            })
+            if (!res.ok) throw new Error("Failed to process file");
+
+            return await res.json();
         }
 
-    }
+    };
+
+    const extractTextFromImage = async (file: File): Promise<string> => {
+        const worker = await createWorker('eng');
+        const { data: { text } } = await worker.recognize(file);
+        await worker.terminate();
+        return text;
+    };
+
+    const submitEwayBill = async () => {
+        if (!file) return;
+
+        try {
+            setFileLoading(true);
+            const isPdf = file.type === 'application/pdf';
+            const resData = await processFileUpload(file, isPdf);
+            processTripData(resData.ewbValidityDate);
+            console.log(formData)
+
+        } catch (error: any) {
+            alert(error.message);
+            console.error("Error submitting e-way bill:", error);
+
+        } finally {
+            setFileLoading(false);
+        }
+    };
+
+
 
     useEffect(() => {
         const updatedTruck = trucks.find(truck => truck.truckNo === formData.truck);
@@ -152,23 +195,58 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr }) =
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit(formData);
-        localStorage.removeItem('tripData')
+
+        // Helper function to remove commas and check if the value is a valid number
+        const sanitizeInput = (value: string) => {
+            // Remove commas and extra spaces
+            const sanitizedValue = parseFloat(value.replace(/,/g, '').trim());
+            // Check if the sanitized value is a valid number
+            if (!isNaN(Number(sanitizedValue))) {
+                return sanitizedValue;
+            }
+            return null;
+        };
+
+        // Sanitize 'amount' and 'truckHireCost' fields
+        const sanitizedAmount = sanitizeInput(formData.amount.toString());
+        const sanitizedTruckHireCost = sanitizeInput(formData.truckHireCost.toString());
+
+        if (sanitizedAmount === null || sanitizedTruckHireCost === null) {
+            alert('Please enter valid numeric values for Amount and Truck Hire Cost.');
+            return;
+        }
+
+
+        // Proceed with submission
+        onSubmit({
+            ...formData,
+            amount: sanitizedAmount,
+            truckHireCost: sanitizedTruckHireCost,
+        });
+
+        localStorage.removeItem('tripData');
     };
 
     return (
         <div className="bg-white text-black p-4 max-w-3xl mx-auto shadow-md rounded-md">
             <div className='flex items-center gap-3 mb-4'>
+
                 <input
                     type="file"
                     accept=".pdf"
                     onChange={handleFileChange}
                     className=""
+                    disabled={fileLoading}
                 />
-                <Button onClick={submitEwayBill} >
-                    {fileLoading ? 'Loading...' : 'Upload'}
-                </Button>
+                {fileLoading ? loadingIndicator :
+                    <Button onClick={submitEwayBill} >
+                        Upload
+                    </Button>
+                }
+
             </div>
+
+
 
             <form className="space-y-4" onSubmit={handleSubmit}>
                 <BillingInfo
@@ -270,10 +348,10 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr }) =
                     <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700">Truck Hire Cost</label>
                         <input
-                            type="number"
+                            type="text"
                             className="w-full p-2 border border-gray-300 rounded-md"
                             name="truckHireCost"
-                            value={formData.truckHireCost}
+                            value={formatNumber(formData.truckHireCost)}
                             placeholder="Truck Hire Cost"
                             onChange={handleChange}
                         />

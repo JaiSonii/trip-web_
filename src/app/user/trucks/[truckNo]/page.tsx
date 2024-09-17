@@ -10,6 +10,7 @@ import { MdDelete, MdEdit } from 'react-icons/md';
 import Link from 'next/link';
 import { FaCalendarAlt, FaRoute } from 'react-icons/fa';
 import { GoOrganization } from 'react-icons/go';
+import { formatNumber } from '@/utils/utilArray';
 
 const Loading = dynamic(() => import('./loading'), {
   ssr: false,
@@ -129,9 +130,9 @@ const TruckPage = () => {
   return (
     <div className="w-full h-full p-4">
       <div className="mb-4 flex justify-between items-center bg-gray-100 p-4 rounded-lg shadow-md">
-        <h2 className="text-lg font-bold text-green-700">Total Revenue: <span className="text-black">{revenue}</span></h2>
-        <h2 className="text-lg font-bold text-red-700">Total Expense: <span className="text-black">{totalExpense}</span></h2>
-        <h2 className="text-lg font-bold text-blue-700">Profit: <span className="text-black">{revenue - totalExpense}</span></h2>
+        <h2 className="text-lg font-bold text-green-700">Total Revenue: <span className="text-black">₹{formatNumber(revenue)}</span></h2>
+        <h2 className="text-lg font-bold text-red-700">Total Expense: <span className="text-black">₹{formatNumber(totalExpense)}</span></h2>
+        <h2 className="text-lg font-bold text-blue-700">Profit: <span className="text-black">₹{formatNumber(revenue - totalExpense)}</span></h2>
       </div>
 
       <div className="table-container">
@@ -205,7 +206,7 @@ const TruckPage = () => {
                 </td>
 
                 <td>
-                  <span className='text-red-500 font-semibold'>{item.expenseType ? item.amount : ''}</span>
+                  <span className='text-red-500 font-semibold'>₹{item.expenseType ? formatNumber(item.amount) : 0}</span>
                 </td>
                 <td>{!item.expenseType ? <TripRevenue tripId={item.trip_id} amount={item.amount} /> : ''}</td>
                 <td>

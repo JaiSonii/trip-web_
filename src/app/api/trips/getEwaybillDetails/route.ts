@@ -70,7 +70,8 @@ async function extractValidityDate(text: string) {
                     startDate : '',
                     origin : '',
                     destination : '',
-                    validity : ''
+                    validity : '',
+                    truckNo : '',
                 }
             `;
 

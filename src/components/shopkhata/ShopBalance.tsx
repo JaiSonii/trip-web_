@@ -1,3 +1,4 @@
+import { formatNumber } from '@/utils/utilArray';
 import React, { useEffect, useState } from 'react';
 
 type Props = {
@@ -30,7 +31,7 @@ const ShopBalance: React.FC<Props> = ({ shopId }) => {
         balance < 0 ? 'text-red-500' : 'text-green-500'
       }`}
     >
-      {balance < 0 ? `- ₹${Math.abs(balance).toFixed(2)}` : `₹${balance.toFixed(2)}`}
+      {balance < 0 ? `- ₹${formatNumber(Math.abs(balance))}` : `₹${formatNumber(balance)}`}
     </div>
   );
 };

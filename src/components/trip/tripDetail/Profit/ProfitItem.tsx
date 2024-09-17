@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import { Button } from '@/components/ui/button';
+import { formatNumber } from '@/utils/utilArray';
 
 interface ProfitItemProps {
   data: any;
@@ -62,7 +63,7 @@ const ProfitItem: React.FC<ProfitItemProps> = ({ data, index, setOpen, setSelect
       <div className='flex flex-row items-center justify-between w-full'>
         <div className="flex flex-row justify-between w-full">
           <p className="text-sm font-medium text-gray-900">{data.expenseType}</p>
-          <p className="text-sm font-semibold text-gray-600">{sign}{data.amount.toFixed(2)}</p>
+          <p className="text-sm font-semibold text-gray-600">{sign}₹{formatNumber(data.amount)}</p>
         </div>
         {isHovered && (
           <div className="flex space-x-2 transition-opacity duration-200 ease-in-out opacity-100">

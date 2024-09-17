@@ -45,8 +45,9 @@ const CreateTripPage: React.FC = () => {
         // Find the latest trip's LR
         if (tripsData.trips.length > 0) {
           const latestTrip = tripsData.trips[0]; // Assuming the API returns trips sorted by date descending
-          let num = parseInt(latestTrip.LR.split(' ')[1]) + 1
-          setLatestLR('LRN ' + num); // Assuming 'lr' is the field containing LR in the trip object
+          let num = parseInt(latestTrip.LR.split('LRN ')[1]) + 1
+          const LR = `LRN ${typeof num === 'number' ? num : '001'}`
+          setLatestLR(LR); // Assuming 'lr' is the field containing LR in the trip object
         } else {
           setLatestLR('LRN 001'); // No trips found
         }
@@ -65,7 +66,6 @@ const CreateTripPage: React.FC = () => {
 
   const handleTripSubmit = async (trip: any) => {
     setSaving(true); // Show loading overlay
-    console.log(trip)
 
     try {
       // Create a new FormData object

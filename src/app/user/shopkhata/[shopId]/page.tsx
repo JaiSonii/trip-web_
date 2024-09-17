@@ -1,5 +1,6 @@
 'use client'
 import { Button } from '@/components/ui/button'
+import { formatNumber } from '@/utils/utilArray'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
@@ -53,8 +54,8 @@ const ShopPage = () => {
                       {account.trip_id && <Button variant={"link"} className='text-red-500 pt-1 rounded-lg'><Link href={`/user/trips/${account.trip_id}`}>from a trip</Link></Button>}
                     </div>
                   </td>
-                  <td><span className='text-red-600 font-semibold'>{account.credit || (account.type === 'truck' && account.amount) || ''}</span></td>
-                  <td ><span className='text-green-600 font-semibold'>{account.payment || (account.type !== 'truck' && account.amount) || ''}</span></td>
+                  <td><span className='text-red-600 font-semibold'>₹{formatNumber(account.credit) || (account.type === 'truck' && formatNumber(account.amount)) || 0}</span></td>
+                  <td ><span className='text-green-600 font-semibold'>₹{formatNumber(account.payment) || (account.type !== 'truck' && formatNumber(account.amount)) || 0}</span></td>
                  
                 </tr>
               ))}

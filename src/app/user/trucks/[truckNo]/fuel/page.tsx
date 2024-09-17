@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import Loading from '../loading';
 import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal';
 import { IExpense } from '@/utils/interface';
+import { formatNumber } from '@/utils/utilArray';
 
 interface TripDetails {
   [key: string]: string;
@@ -117,7 +118,7 @@ const TruckFuelBook: React.FC = () => {
                     <span>{new Date(fuel.date).toLocaleDateString()}</span>
                   </div>
                 </td>
-                <td className="border p-4">{fuel.amount}</td>
+                <td className="border p-4">₹{formatNumber(fuel.amount)}</td>
                 <td className="border p-4">
                   <div className="flex items-center space-x-2">
                     <MdPayment className="text-green-500" />

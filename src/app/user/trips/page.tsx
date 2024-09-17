@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { formatNumber } from '@/utils/utilArray';
 
 const TripBalance = ({ trip }: { trip: ITrip }) => {
   const [balance, setBalance] = useState(0)
@@ -32,7 +33,7 @@ const TripBalance = ({ trip }: { trip: ITrip }) => {
   }, [trip])
 
   return (
-    <p className='text-green-600 font-semibold text-md'>₹{balance}</p>
+    <p className='text-green-600 font-semibold text-md'>₹{formatNumber(balance)}</p>
   )
 }
 
@@ -255,8 +256,8 @@ const TripsPage = () => {
                       </div>
                     </div>
                   </td>}
-                  {visibleColumns.includes('Truck Hire Cost') && <td ><p className='text-red-500 font-semibold'>{trip.truckHireCost ? '₹' + trip.truckHireCost : 'NA'} </p></td>}
-                  {visibleColumns.includes('Invoice Amt') && <td ><p className='text-green-600 font-semibold'>₹{trip.amount}</p></td>}
+                  {visibleColumns.includes('Truck Hire Cost') && <td ><p className='text-red-500 font-semibold'>{trip.truckHireCost ? '₹' + formatNumber(trip.truckHireCost) : 'NA'} </p></td>}
+                  {visibleColumns.includes('Invoice Amt') && <td ><p className='text-green-600 font-semibold'>₹{formatNumber(trip.amount)}</p></td>}
                   <td><TripBalance trip={trip} /></td>
                 </tr>
               ))}

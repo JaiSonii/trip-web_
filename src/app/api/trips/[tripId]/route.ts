@@ -1,6 +1,6 @@
 import DriverModal from "@/components/driver/driverModal";
 import { fetchBalance, fetchBalanceBack } from "@/helpers/fetchTripBalance";
-import { uploadFileToS3 } from "@/helpers/S3Operation";
+import { uploadFileToS3 } from "@/helpers/fileOperation";
 import { verifyToken } from "@/utils/auth";
 import { ITrip, PaymentBook } from "@/utils/interface";
 import { connectToDatabase, driverSchema, ExpenseSchema, partySchema, supplierAccountSchema, tripChargesSchema, truckSchema } from "@/utils/schema";

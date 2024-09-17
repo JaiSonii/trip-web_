@@ -14,6 +14,7 @@ import { fetchPartyName } from '@/helpers/fetchPartyName';
 import EWayBillUpload from './EwayBillUpload';
 import { Button } from '@/components/ui/button';
 import { UndoIcon } from 'lucide-react';
+import { formatNumber } from '@/utils/utilArray';
 
 interface TripDetailsProps {
   trip: ITrip;
@@ -225,7 +226,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
         </div>
 
         <div className="mt-6 flex items-center justify-between gap-6 py-4">
-          <TripInfo label="Freight Amount" value={`₹ ${trip.amount.toLocaleString()}`} />
+          <TripInfo label="Freight Amount" value={`₹ ${formatNumber(trip.amount)}`} />
           <TripInfo label="Start Date" value={new Date(trip.startDate).toLocaleDateString()} />
           <TripInfo label="End Date" value={trip.dates[1] ? new Date(trip.dates[1]).toLocaleDateString() : '----'} />
           
@@ -244,7 +245,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
       <div className="col-span-1 space-y-6">
         <div className="flex items-center justify-between bg-gradient-to-r p-4 from-orange-500 via-bottomNavBarColor to-bottomNavBarColor rounded-lg shadow-lg text-white">
           <h3 className="text-xl font-bold">Pending Balance</h3>
-          <p className="text-xl font-semibold ">₹ {tripBalance}</p>
+          <p className="text-xl font-semibold ">₹ {formatNumber(tripBalance)}</p>
         </div>
         <Profit charges={charges} truckCost={trip.truckHireCost && trip.truckHireCost} amount={trip.amount} setCharges={setCharges} tripId={trip.trip_id} driverId={trip.driver} truckNo={trip.truck} />
         <EWayBillUpload validity={trip.ewbValidityDate ? trip.ewbValidityDate : null} tripId={trip.trip_id} ewayBillUrl={trip.documents?.find(doc=>doc.type == 'ewayBill')?.url || trip.ewayBill} setEwayBillUrl={setEwayBillUrl} />

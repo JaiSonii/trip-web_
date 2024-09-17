@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { FaCalendarAlt, FaRoute, FaTruck } from 'react-icons/fa';
 import Loading from '../loading';
+import { formatNumber } from '@/utils/utilArray';
 
 interface ITrip {
   trip_id: string;
@@ -119,7 +120,7 @@ const SinglePartyPassbook = () => {
 
 
 
-              <td>{acc.accountType ? <span className='text-green-500 font-semibold'>₹{acc.amount}</span> : ''}</td>
+              <td>{acc.accountType ? <span className='text-green-500 font-semibold'>₹{formatNumber(acc.amount)}</span> : ''}</td>
               <td>{acc.accountType ? '' : (<TripRevenue tripId={acc.trip_id} amount={acc.amount} />)}</td>
             </tr>
           ))}

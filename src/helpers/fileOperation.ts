@@ -119,3 +119,4 @@ export async function extractTextFromImage(buffer: Buffer): Promise<string> {
     });
     return text;
 }
+

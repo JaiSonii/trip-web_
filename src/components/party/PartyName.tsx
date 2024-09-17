@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchPartyName } from '@/helpers/fetchPartyName';
+import { loadingIndicator } from '../ui/LoadingIndicator';
 
 interface DriverNameProps {
     partyId: string;
@@ -28,7 +29,7 @@ const PartyName: React.FC<DriverNameProps> = ({ partyId }) => {
         loadPartyName();
     }, [partyId]);
 
-    if (loading) return <span>Loading...</span>;
+    if (loading) return loadingIndicator;
     if (error || !driverName) return <span>NA</span>;
 
     return <span>{driverName || ''}</span>;

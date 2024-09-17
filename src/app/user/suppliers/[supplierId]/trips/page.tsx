@@ -8,6 +8,7 @@ import { useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import Loading from '../../loading'
 import { FaCalendarAlt, FaTruck, FaRoute } from 'react-icons/fa'
+import { formatNumber } from '@/utils/utilArray'
 
 
 const SupplierDetailPage = () => {
@@ -76,7 +77,7 @@ const SupplierDetailPage = () => {
                                     </div>
 
                                 </td>
-                                <td>{trip.truckHireCost}</td>
+                                <td><span className='text-red-500 font-semibold'>₹{formatNumber(trip.truckHireCost)}</span></td>
                                 <td className="border p-4">
                                     <div className="flex flex-col items-center space-x-2">
                                         <span>{statuses[trip.status as number]}</span>

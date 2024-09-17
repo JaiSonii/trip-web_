@@ -1,5 +1,5 @@
 import Trip from "@/components/search/Trip";
-import { uploadFileToS3 } from "@/helpers/S3Operation";
+import { uploadFileToS3 } from "@/helpers/fileOperation";
 import { verifyToken } from "@/utils/auth";
 import { connectToDatabase, driverSchema } from "@/utils/schema";
 import { model, models } from "mongoose";

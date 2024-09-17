@@ -12,6 +12,7 @@ import TripRoute from '@/components/trip/TripRoute';
 import DriverName from '@/components/driver/DriverName';
 import { FaCalendarAlt } from 'react-icons/fa';
 import { IconKey, icons } from '@/utils/icons';
+import { formatNumber } from '@/utils/utilArray';
 
 // Dynamically import ExpenseModal to split the code
 const ExpenseModal = dynamic(() => import('@/components/trip/tripDetail/ExpenseModal'), {
@@ -84,7 +85,7 @@ const OtherExpense = () => {
             <span>{new Date(expense.date).toLocaleDateString()}</span>
           </div>
           </td>
-        <td className="border p-4">{expense.amount}</td>
+        <td className="border p-4">₹{formatNumber(expense.amount)}</td>
         <td className="border p-4">
           <div className="flex items-center space-x-2">
             {icons[expense.expenseType as IconKey]}

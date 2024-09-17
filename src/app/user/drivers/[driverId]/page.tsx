@@ -17,6 +17,7 @@ import { handleEditAccount } from '@/helpers/TripOperation';
 import { handleAddCharge as EditExpense } from '@/helpers/ExpenseOperation';
 import { FaCalendarAlt } from 'react-icons/fa';
 import Link from 'next/link';
+import { formatNumber } from '@/utils/utilArray';
 
 const Driver: React.FC = () => {
   const router = useRouter();
@@ -213,8 +214,8 @@ const Driver: React.FC = () => {
                       {account.trip_id && <Button variant={"link"} className='text-red-500 pt-1 rounded-lg'><Link href={`/user/trips/${account.trip_id}`}>from a trip</Link></Button>}
                     </div>
                   </td>
-                  <td><span className='text-red-600 font-semibold'>{account.gave || (account.type === 'truck' && account.amount) || ''}</span></td>
-                  <td ><span className='text-green-600 font-semibold'>{account.got || (account.type !== 'truck' && account.amount) || ''}</span></td>
+                  <td><span className='text-red-600 font-semibold'>₹{formatNumber(account.gave) || (account.type === 'truck' && formatNumber(account.amount)) || 0}</span></td>
+                  <td ><span className='text-green-600 font-semibold'>₹{formatNumber(account.got) || (account.type !== 'truck' && formatNumber(account.amount)) || 0}</span></td>
                   <td>
                     <div className='flex flex-row gap-2 items-center w-full'>
                       <Button

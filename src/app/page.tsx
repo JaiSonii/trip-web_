@@ -28,7 +28,7 @@ import loginIcon from '@/assets/login icon.png'
 
 export default function Home() {
   return (
-    <div className=" w-screen">
+    <div className=" w-screen text-black">
       {/* Navigation Section */}
       <section className="bg-[radial-gradient(ellipse_at_80%_50%,_#FFC499_0%,_#FFFFFF_80%)] px-4 sm:px-8 lg:px-16">
         {/* Top Section: Logo and Navigation */}
@@ -194,7 +194,7 @@ export default function Home() {
 
 
 
-      <section className="p-8 sm:p-16 bg-white">
+      <section className="p-8 sm:p-16 bg-white text-black">
         {/* Section Content */}
         <h2 className="mt-10 text-3xl sm:text-5xl font-semibold text-center mb-10 sm:mb-20">Why Choose Us?</h2>
 

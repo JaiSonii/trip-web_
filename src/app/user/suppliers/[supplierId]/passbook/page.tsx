@@ -3,6 +3,7 @@ import Loading from '../../loading'
 import TripRoute from '@/components/trip/TripRoute'
 import { Button } from '@/components/ui/button'
 import { ISupplierAccount, ITrip } from '@/utils/interface'
+import { formatNumber } from '@/utils/utilArray'
 import Link from 'next/link'
 import { useParams, useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
@@ -69,21 +70,23 @@ const SupplierPassbook = () => {
           <tbody>
             {accounts && accounts.map((acc: ISupplierAccount, index: number) => (
               <tr key={index} className="border-t hover:bg-slate-100 cursor-pointer">
-                <td className="border p-4 flex items-center space-x-2">
-                  <FaCalendarAlt className="text-bottomNavBarColor" />
-                  <span>{new Date(acc.date).toLocaleDateString()}</span>
+                <td className="border p-2">
+                  <div className="flex items-center space-x-2">
+                    <FaCalendarAlt className="text-bottomNavBarColor" />
+                    <span>{new Date(acc.date).toLocaleDateString()}</span>
+                  </div>
                 </td>
                 <td className="border p-2">
-                  <div className="flex flex-col space-y-2">
+                  <div className="flex items-center justify-between space-y-2">
                     <span className="font-medium flex items-center space-x-2 p-1"><FaWallet className='text-bottomNavBarColor' /><span>Trip Payment</span></span>
-                    <hr className='text-gray-200'/>
+
                     <span className=" text-gray-600 flex items-center space-x-2 p-1">
                       <FaRoute className='text-bottomNavBarColor' />
                       <TripRoute tripId={acc.trip_id} />
                     </span>
                   </div>
                 </td>
-                <td className="border p-2"><span className='text-green-600 font-semibold'>{acc.amount}</span></td>
+                <td className="border p-2"><span className='text-green-600 font-semibold'>₹{formatNumber(acc.amount)}</span></td>
                 <td className="border p-2"></td>
                 <td className='border p-2'>
                   <div className='flex items-center gap-2'>
@@ -95,24 +98,24 @@ const SupplierPassbook = () => {
             ))}
             {trips && trips.map((trip: ITrip, index: number) => (
               <tr key={index} className="border-t hover:bg-slate-100 cursor-pointer">
-                <td className="border p-4 flex items-center space-x-2">
-                  <FaCalendarAlt className="text-bottomNavBarColor" />
-                  <span>{new Date(trip.startDate).toLocaleDateString()}</span>
+                <td className="border p-2">
+                  <div className="flex items-center space-x-2">
+                    <FaCalendarAlt className="text-bottomNavBarColor" />
+                    <span>{new Date(trip.startDate).toLocaleDateString()}</span>
+                  </div>
                 </td>
                 <td className="border p-2">
-                  <div className="flex items-center">
-                  <div className="flex flex-col space-y-2">
+                  <div className="flex items-center justify-between space-y-2">
                     <span className="font-medium flex items-center space-x-2 p-1"><FaTruck className='text-bottomNavBarColor' /><span>{trip.truck}</span></span>
-                    <hr className='text-gray-200'/>
+
                     <span className=" text-gray-600 flex items-center space-x-2 p-1">
                       <FaRoute className='text-bottomNavBarColor' />
                       <TripRoute tripId={trip.trip_id} />
                     </span>
                   </div>
-                  </div>
                 </td>
                 <td className="border p-2">{ }</td>
-                <td className="border p-2"><span className='text-red-600 font-semibold'>{trip.truckHireCost}</span></td>
+                <td className="border p-2"><span className='text-red-600 font-semibold'>₹{formatNumber(trip.truckHireCost)}</span></td>
                 <td className='border p-2'><Link href={`/user/trips/${trip.trip_id}`}><Button variant='outline'>View Trip</Button></Link></td>
               </tr>
             ))}

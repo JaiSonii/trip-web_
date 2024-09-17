@@ -16,6 +16,7 @@ import { DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/co
 import { DropdownMenu } from '@/components/ui/dropdown-menu';
 import TripExpenseModal from '@/components/TripExpenseModal';
 import { IoAddCircle } from 'react-icons/io5';
+import { formatNumber } from '@/utils/utilArray';
 
 const TripExpensePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
@@ -147,7 +148,7 @@ const TripExpensePage: React.FC = () => {
               {maintainenceBook.map((fuel: any, index: number) => (
                 <tr key={index} className="border-t hover:bg-indigo-100 cursor-pointer transition-colors">
                   {visibleColumns.includes('Date') && <td className="border p-4">{new Date(fuel.date).toLocaleDateString()}</td>}
-                  {visibleColumns.includes('Amount') && <td className="border p-4">{fuel.amount}</td>}
+                  {visibleColumns.includes('Amount') && <td className="border p-4">₹{formatNumber(fuel.amount)}</td>}
                   {visibleColumns.includes('Expense Type') && (
                     <td className="border p-4">
                       <div className="flex items-center space-x-2">
