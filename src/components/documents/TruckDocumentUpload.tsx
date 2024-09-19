@@ -270,6 +270,7 @@ const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo }) => {
                         <option value="Permit">Permit</option>
                         <option value="Insurance">Insurance</option>
                         <option value="Pollution Certificate">Pollution Certificate</option>
+                        <option value="Fitness Certificate">Fitness Certificate</option>
                         <option value="Other">Other</option>
                     </select>
                 </div>

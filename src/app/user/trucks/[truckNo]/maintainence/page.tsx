@@ -1,17 +1,16 @@
 'use client';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Loading from '../loading';
 import { IExpense } from '@/utils/interface';
-import { fetchDriverName } from '@/helpers/driverOperations';
-import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal';
 import TripRoute from '@/components/trip/TripRoute';
 import { Button } from '@/components/ui/button';
-import { MdDelete, MdEdit, MdLocalGasStation, MdPayment } from 'react-icons/md';
+import { MdDelete, MdEdit, MdPayment } from 'react-icons/md';
 import DriverName from '@/components/driver/DriverName';
 import { FaCalendarAlt } from 'react-icons/fa';
 import { IconKey, icons } from '@/utils/icons';
 import { formatNumber } from '@/utils/utilArray';
+import dynamic from 'next/dynamic';
 
 const TruckMaintainenceBook = () => {
   const { truckNo } = useParams();
@@ -20,6 +19,8 @@ const TruckMaintainenceBook = () => {
   const [modelOpen, setModelOpen] = useState(false);
   const [selected, setSelected] = useState<IExpense>();
   const [error, setError] = useState<string | null>(null);
+
+  const ExpenseModal = dynamic(()=>import('@/components/trip/tripDetail/ExpenseModal'),{ssr : false})
 
   useEffect(() => {
     const fetchMaintenance = async () => {

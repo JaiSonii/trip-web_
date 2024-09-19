@@ -17,15 +17,7 @@ const Loading = dynamic(() => import('./loading'), {
   loading: () => <div>Loading...</div>,
 });
 
-const ExpenseModal = dynamic(() => import('@/components/trip/tripDetail/ExpenseModal'), {
-  ssr: false,
-  loading: () => <Loading />,
-});
 
-const TripRevenue = dynamic(() => import('@/components/trip/tripDetail/Profit/TripRevenue'), {
-  ssr: false,
-  loading: () => <Loading />,
-});
 
 const TruckPage = () => {
   const { truckNo } = useParams();
@@ -36,6 +28,16 @@ const TruckPage = () => {
   const [totalExpense, setTotalExpense] = useState(0);
   const [modelOpen, setModelOpen] = useState(false);
   const [selected, setSelected] = useState<IExpense | null>(null);
+
+  const ExpenseModal = dynamic(() => import('@/components/trip/tripDetail/ExpenseModal'), {
+    ssr: false,
+    loading: () => <Loading />,
+  });
+  
+  const TripRevenue = dynamic(() => import('@/components/trip/tripDetail/Profit/TripRevenue'), {
+    ssr: false,
+    loading: () => <Loading />,
+  });
 
   useEffect(() => {
     const fetchData = async () => {

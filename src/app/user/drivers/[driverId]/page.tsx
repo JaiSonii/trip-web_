@@ -1,23 +1,21 @@
 'use client'
 import React, { useEffect, useState } from 'react';
-import { useParams, usePathname, useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { MdDelete, MdEdit } from "react-icons/md";
-import DriverLayout from '@/components/driver/driverLayout';
-import { IDriver, IDriverAccount, ITrip, IExpense, PaymentBook } from '@/utils/interface';
+import { IDriver, IDriverAccount, IExpense, PaymentBook } from '@/utils/interface';
 import Loading from '../loading';
 import { ExpenseforDriver } from '@/helpers/ExpenseOperation';
 import { handleDelete as DeleteForExpense } from '@/helpers/ExpenseOperation';
 import { DeleteAccount } from '@/helpers/TripOperation';
 import { deleteDriverAccount, EditDriverAccount } from '@/helpers/driverOperations';
 import { Button } from '@/components/ui/button';
-import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal';
-import Modal from '@/components/trip/tripDetail/Modal';
 import DriverModal from '@/components/driver/driverModal';
 import { handleEditAccount } from '@/helpers/TripOperation';
 import { handleAddCharge as EditExpense } from '@/helpers/ExpenseOperation';
 import { FaCalendarAlt } from 'react-icons/fa';
 import Link from 'next/link';
 import { formatNumber } from '@/utils/utilArray';
+import dynamic from 'next/dynamic';
 
 const Driver: React.FC = () => {
   const router = useRouter();
@@ -32,6 +30,9 @@ const Driver: React.FC = () => {
   const [paymentEdit, setPaymentEdit] = useState(false);
   const [accountEdit, setAccountEdit] = useState(false);
   const [selected, setSelected] = useState<any>([]);
+
+  const ExpenseModal = dynamic(()=>import('@/components/trip/tripDetail/ExpenseModal'),{ssr : false})
+  const Modal = dynamic(()=>import('@/components/trip/tripDetail/Modal'), {ssr : false})
 
   const handleDelete = async (account: any) => {
     if (account.expenseType) {

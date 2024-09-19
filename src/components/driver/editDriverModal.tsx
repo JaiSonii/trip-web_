@@ -26,7 +26,7 @@ const EditDriverModal: React.FC<EditDriverModalProps> = ({ name, driverId, handl
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-md w-full max-w-md">
         <h2 className="text-2xl mb-4">Edit Driver</h2>
         <form onSubmit={handleSubmit}>

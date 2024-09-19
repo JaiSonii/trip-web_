@@ -7,6 +7,7 @@ import { RiSteering2Fill } from 'react-icons/ri';
 import { FaFileInvoice, FaFolderOpen } from 'react-icons/fa6';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 import dynamic from 'next/dynamic';
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
 
 const RecentDocuments = dynamic(() => import('@/components/documents/RecentDocuments'), { ssr: false })
 
@@ -70,13 +71,22 @@ const DocumentsPage = () => {
       icon: <FaLeaf className='text-bottomNavBarColor' size={70} /> // Icon representing environmental or pollution-related certification
     },
     {
+      title: 'Fitness Certificate',
+      link: {
+        pathname: '/user/documents/truckDocuments',
+        query: { type: 'Fitness Certificate' }
+      },
+      icon: <FaFolderOpen className='text-bottomNavBarColor' size={70} /> // Folder icon for "Other" category
+    },
+    {
       title: 'Other',
       link: {
         pathname: '/user/documents/truckDocuments',
         query: { type: 'Other' }
       },
       icon: <FaFolderOpen className='text-bottomNavBarColor' size={70} /> // Folder icon for "Other" category
-    }
+    },
+
   ];
 
   const DriverDocArray = [
@@ -208,14 +218,15 @@ const DocumentsPage = () => {
         {error && <p className='text-red-500'>{error}</p>}
         {recentDocs && <RecentDocuments docs={recentDocs} />}
       </div>
+
+    {/* Trip Docs */}
+
       <div className='mt-4'>
         <div className='border-b-2 border-gray-300 mb-4'>
-          <h1 className="text-3xl font-bold text-bottomNavBarColor my-4">Lorry Documents</h1>
+          <h1 className="text-3xl font-bold text-bottomNavBarColor  my-4">Trip Documents</h1>
         </div>
-
-
         <div className="grid grid-cols-5 gap-6">
-          {TruckDocArray.map((item: any, index: number) => (
+          {TripDocArray.map((item: any, index: number) => (
             <Link key={index} href={item.link}>
               <div className="flex flex-col items-center justify-center gap-4 bg-white shadow-lg rounded-lg p-6 transition-all hover:bg-lightOrange transform hover:scale-105 w-48 h-48 ">
                 <div className="text-5xl text-bottomNavBarColor">{item.icon}</div>
@@ -227,6 +238,60 @@ const DocumentsPage = () => {
         </div>
       </div>
 
+          {/* {Lorry Docs} */}
+
+      <div className='mt-4'>
+        <div className='border-b-2 border-gray-300 mb-4'>
+          <h1 className="text-3xl font-bold text-bottomNavBarColor my-4">Lorry Documents</h1>
+        </div>
+
+        <div className=" w-full flex items-center justify-center px-16">
+          <Carousel
+            opts={{
+              align: "start",  // Align to start to behave more like grid
+              slidesToScroll: 1,     // Show 5 items at a time
+            }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-2 md:-ml-4">
+              {TruckDocArray.map((item, index) => (
+                <CarouselItem key={index} className="pl-2 md:pl-4 basis-1/5"> {/* Take 1/5 of container */}
+                  <div className="p-1">
+                    <Link href={item.link}>
+                      <div className="flex flex-col items-center justify-center gap-4 bg-white shadow-lg rounded-lg p-6 transition-all hover:bg-lightOrange transform hover:scale-105 w-48 h-48">
+                        <div className="text-5xl text-bottomNavBarColor">{item.icon}</div>
+                        <h2 className="text-xl font-semibold text-buttonTextColor text-center">{item.title}</h2>
+                      </div>
+                    </Link>
+                  </div>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+
+            {/* Navigation */}
+            <div className="absolute top-1/2 -left-4 -translate-y-1/2">
+              <CarouselPrevious />
+            </div>
+            <div className="absolute top-1/2 -right-4 -translate-y-1/2">
+              <CarouselNext />
+            </div>
+          </Carousel>
+        </div>
+
+        {/* <div className="grid grid-cols-5 gap-6">
+          {TruckDocArray.map((item: any, index: number) => (
+            <Link key={index} href={item.link}>
+              <div className="flex flex-col items-center justify-center gap-4 bg-white shadow-lg rounded-lg p-6 transition-all hover:bg-lightOrange transform hover:scale-105 w-48 h-48 ">
+                <div className="text-5xl text-bottomNavBarColor">{item.icon}</div>
+                <h2 className="text-xl font-semibold text-buttonTextColor text-center">{item.title}</h2>
+              </div>
+            </Link>
+
+          ))}
+        </div> */}
+      </div>
+
+          {/* Driver Docs */}
       <div className='mt-4'>
         <div className='border-b-2 border-gray-300 mb-4'>
           <h1 className="text-3xl font-bold text-bottomNavBarColor  my-4">Driver Documents</h1>
@@ -244,33 +309,7 @@ const DocumentsPage = () => {
 
           ))}
         </div>
-
-
-
       </div>
-
-      <div className='mt-4'>
-        <div className='border-b-2 border-gray-300 mb-4'>
-          <h1 className="text-3xl font-bold text-bottomNavBarColor  my-4">Trip Documents</h1>
-        </div>
-
-
-        <div className="grid grid-cols-5 gap-6">
-          {TripDocArray.map((item: any, index: number) => (
-            <Link key={index} href={item.link}>
-              <div className="flex flex-col items-center justify-center gap-4 bg-white shadow-lg rounded-lg p-6 transition-all hover:bg-lightOrange transform hover:scale-105 w-48 h-48 ">
-                <div className="text-5xl text-bottomNavBarColor">{item.icon}</div>
-                <h2 className="text-xl font-semibold text-buttonTextColor text-center">{item.title}</h2>
-              </div>
-            </Link>
-
-          ))}
-        </div>
-
-
-
-      </div>
-
     </div>
   );
 };

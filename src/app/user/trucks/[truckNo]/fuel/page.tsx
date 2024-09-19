@@ -7,9 +7,9 @@ import DriverName from '@/components/driver/DriverName';
 import TripRoute from '@/components/trip/TripRoute';
 import { Button } from '@/components/ui/button';
 import Loading from '../loading';
-import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal';
 import { IExpense } from '@/utils/interface';
 import { formatNumber } from '@/utils/utilArray';
+import dynamic from 'next/dynamic';
 
 interface TripDetails {
   [key: string]: string;
@@ -22,6 +22,8 @@ const TruckFuelBook: React.FC = () => {
   const [tripDetails, setTripDetails] = useState<TripDetails>({});
   const [modelOpen, setModelOpen] = useState(false);
   const [selected, setSelected] = useState<IExpense | undefined>(undefined);
+
+  const ExpenseModal = dynamic(()=>import('@/components/trip/tripDetail/ExpenseModal'),{ssr : false})
 
   const fetchFuel = useCallback(async () => {
     setLoading(true);

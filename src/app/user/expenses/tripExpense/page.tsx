@@ -1,22 +1,20 @@
 'use client';
 import Loading from '../loading';
-import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal';
 import { Button } from '@/components/ui/button';
 import { ITripCharges, IExpense } from '@/utils/interface';
 import { useSearchParams } from 'next/navigation';
 import React, { Suspense, useEffect, useState } from 'react';
-import { MdDelete, MdEdit, MdLocalGasStation, MdPayment } from 'react-icons/md';
+import { MdDelete, MdEdit, MdPayment } from 'react-icons/md';
 import { fetchTripExpense, handleAddCharge, handleDelete } from '@/helpers/ExpenseOperation';
 import TripRoute from '@/components/trip/TripRoute';
 import DriverName from '@/components/driver/DriverName';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { icons, IconKey } from '@/utils/icons';
 import { DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { DropdownMenu } from '@/components/ui/dropdown-menu';
-import TripExpenseModal from '@/components/TripExpenseModal';
 import { IoAddCircle } from 'react-icons/io5';
 import { formatNumber } from '@/utils/utilArray';
+import dynamic from 'next/dynamic';
 
 const TripExpensePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
@@ -27,6 +25,8 @@ const TripExpensePage: React.FC = () => {
   const [visibleColumns, setVisibleColumns] = useState<string[]>([
     'Date', 'Amount', 'Expense Type', 'Payment Mode', 'Notes', 'Truck', 'Driver', 'Trip', 'Action'
   ]);
+
+  const TripExpenseModal = dynamic(()=>import('@/components/TripExpenseModal'), {ssr : false})
 
   const searchParams = useSearchParams();
   const monthYear = searchParams.get('monthYear')?.split(' ');

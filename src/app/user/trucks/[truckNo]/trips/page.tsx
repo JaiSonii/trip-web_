@@ -4,7 +4,6 @@ import { useParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { ITrip, IParty } from '@/utils/interface';
 import { statuses } from '@/utils/schema';
-import { fetchBalance } from '@/helpers/fetchTripBalance';
 import { FaCalendarAlt, FaTruck, FaRoute, FaFileInvoiceDollar } from 'react-icons/fa';
 import TripBalance from '@/components/trip/TripBalance';
 
