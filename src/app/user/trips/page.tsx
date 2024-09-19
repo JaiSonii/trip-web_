@@ -19,6 +19,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { formatNumber } from '@/utils/utilArray';
+import { SlOptionsVertical } from 'react-icons/sl';
 
 const TripBalance = ({ trip }: { trip: ITrip }) => {
   const [balance, setBalance] = useState(0)
@@ -122,7 +123,7 @@ const TripsPage = () => {
   }
 
   return (
-    <div className="w-full p-4 max-h-full overflow-y-auto">
+    <div className="w-full p-4 max-h-full overflow-y-hidden">
       <div className="flex items-center justify-between">
         <div className="flex items-center bg-lightOrange rounded-sm text-buttonTextColor p-2">
           <span>Total Balance :</span>
@@ -195,7 +196,7 @@ const TripsPage = () => {
                 <th className="border p-4 text-left sticky top-0 z-10 bg-orange-600">Party Balance</th>
               </tr>
             </thead>
-            <tbody style={{maxHeight : '70vh'}}>
+            <tbody style={{ maxHeight: '70vh' }}>
               {trips.map((trip: ITrip | any, index) => (
                 <tr
                   key={index}
@@ -250,7 +251,7 @@ const TripsPage = () => {
                                   ? 'bg-green-500'
                                   : 'bg-green-800'
                             }`}
-                          style={{ width: `${(trip.status ) * 25}%` }}
+                          style={{ width: `${(trip.status) * 25}%` }}
                         />
 
                       </div>
@@ -259,8 +260,15 @@ const TripsPage = () => {
                   {visibleColumns.includes('Truck Hire Cost') && <td ><p className='text-red-500 font-semibold'>{trip.truckHireCost ? '₹' + formatNumber(trip.truckHireCost) : 'NA'} </p></td>}
                   {visibleColumns.includes('Invoice Amt') && <td ><p className='text-green-600 font-semibold'>₹{formatNumber(trip.amount)}</p></td>}
                   <td><TripBalance trip={trip} /></td>
+                  {/* <div className='p-4'>
+                    <SlOptionsVertical />
+                  </div> */}
+
                 </tr>
+
               ))}
+
+
             </tbody>
           </table>
         </div>

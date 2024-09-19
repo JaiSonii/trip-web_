@@ -1,10 +1,10 @@
 'use client'
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
-import { FaFileContract, FaIdCardAlt, FaLeaf, FaPassport, FaRegCheckCircle, FaRegIdCard, FaRoute, FaShieldAlt, FaTruck, FaUserTie } from 'react-icons/fa';
+import { FaFileAlt, FaFileContract, FaIdCardAlt, FaLeaf, FaPassport, FaRegCheckCircle, FaRegIdCard, FaRoute, FaShieldAlt, FaTruck, FaTruckLoading, FaUserTie } from 'react-icons/fa';
 import { RiSteering2Fill } from 'react-icons/ri';
 // import { renderDocument } from '@/components/RenderDocument';
-import { FaFolderOpen } from 'react-icons/fa6';
+import { FaFileInvoice, FaFolderOpen } from 'react-icons/fa6';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 import dynamic from 'next/dynamic';
 
@@ -122,6 +122,49 @@ const DocumentsPage = () => {
     }
   ];
 
+  const TripDocArray = [
+    {
+      title: 'E-Way Bill',
+      link: {
+        pathname: '/user/documents/tripDocuments',
+        query: { type: 'E-Way Bill' }
+      },
+      icon: <FaFileInvoice className="text-bottomNavBarColor" size={70} /> // Icon representing an invoice-like document for E-Way Bill
+    },
+    {
+      title: 'POD',
+      link: {
+        pathname: '/user/documents/tripDocuments',
+        query: { type: 'POD' }
+      },
+      icon: <FaFileContract className="text-bottomNavBarColor" size={70} /> // Icon representing proof of delivery (contract-like document)
+    },
+    {
+      title: 'Bilty',
+      link: {
+        pathname: '/user/documents/tripDocuments',
+        query: { type: 'Bilty' }
+      },
+      icon: <FaTruckLoading className="text-bottomNavBarColor" size={70} /> // Icon representing a truck loading document (Bilty)
+    },
+    {
+      title: 'FM/Challan',
+      link: {
+        pathname: '/user/documents/tripDocuments',
+        query: { type: 'FM/Challan' }
+      },
+      icon: <FaFileAlt className="text-bottomNavBarColor" size={70} /> // Icon representing a general form or challan
+    },
+    {
+      title: 'Other',
+      link: {
+        pathname: '/user/documents/tripDocuments',
+        query: { type: 'Other' }
+      },
+      icon: <FaFolderOpen className="text-bottomNavBarColor" size={70} /> // Folder icon for "Other" category
+    }
+  ];
+
   useEffect(() => {
     fetchRecentDocuments()
   }, [])
@@ -201,6 +244,31 @@ const DocumentsPage = () => {
 
           ))}
         </div>
+
+
+
+      </div>
+
+      <div className='mt-4'>
+        <div className='border-b-2 border-gray-300 mb-4'>
+          <h1 className="text-3xl font-bold text-bottomNavBarColor  my-4">Trip Documents</h1>
+        </div>
+
+
+        <div className="grid grid-cols-5 gap-6">
+          {TripDocArray.map((item: any, index: number) => (
+            <Link key={index} href={item.link}>
+              <div className="flex flex-col items-center justify-center gap-4 bg-white shadow-lg rounded-lg p-6 transition-all hover:bg-lightOrange transform hover:scale-105 w-48 h-48 ">
+                <div className="text-5xl text-bottomNavBarColor">{item.icon}</div>
+                <h2 className="text-xl font-semibold text-buttonTextColor text-center">{item.title}</h2>
+              </div>
+            </Link>
+
+          ))}
+        </div>
+
+
+
       </div>
 
     </div>

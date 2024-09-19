@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import Autosuggest, { SuggestionsFetchRequestedParams, SuggestionSelectedEventData } from 'react-autosuggest';
 import axios from 'axios';
 import debounce from 'lodash.debounce';
+import { indianStates } from '@/utils/utilArray';
 
 interface RouteInputsProps {
     formData: {
@@ -31,7 +32,7 @@ const RouteInputs: React.FC<RouteInputsProps> = ({ formData, handleChange }) => 
                 const response = await axios.get(`https://secure.geonames.org/searchJSON?name_startsWith=${value}&maxRows=7&country=IN&username=${username}`);
                 const data = response.data;
 
-                const uniqueSuggestions = Array.from(new Set(data.geonames.map((city: any) => city.name + ", " + city.adminName1)));
+                const uniqueSuggestions = Array.from(new Set(data.geonames.map((city: any) => city.name + ", " + indianStates[city.adminName1 as string] || city.adminName1)));
                 cache[value] = uniqueSuggestions as string[];
                 setSuggestions(uniqueSuggestions as []);
             } catch (error) {

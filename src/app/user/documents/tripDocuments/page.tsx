@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import dynamic from 'next/dynamic';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator';
+import { useSearchParams } from 'next/navigation';
 
 const TripDocumentsLanding = () => {
 
@@ -19,7 +20,31 @@ const TripDocumentsLanding = () => {
   const [modalOpen, setModalOpen] = useState(false)
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(true)
+  const [documents, setDocuments] = useState<any[]>([])
 
+  const type = useSearchParams().get('type')
+
+  const RecentDocuments = dynamic(()=>import('@/components/documents/RecentDocuments'), {ssr : false})
+
+  const fetchDocuments = async()=>{
+    try {
+      setMessage('fetching documents...')
+      const res = await fetch(`/api/trips/documents?type=${encodeURIComponent(type as string)}`)
+      const data = res.ok? await res.json() : setMessage('Failed to fetch documents');
+      setDocuments(data.documents)
+      setMessage('')
+      if(data.documents.length === 0){
+        setMessage('No documents found')
+        return
+      }
+    } catch (error) {
+      console.error(error);
+      alert('Failed to fetch documents');
+      setMessage('Falied to fetch documents')
+    }finally{
+      setLoading(false)
+    }
+  }
 
   const fetchTrips = async () => {
     try {
@@ -42,7 +67,11 @@ const TripDocumentsLanding = () => {
 
 
   useEffect(() => {
-    fetchTrips();
+    if (type) {
+      fetchDocuments()
+    } else {
+      fetchTrips();
+    }
   }, []);
 
   const filteredTrips = trips.filter((trip) =>
@@ -51,6 +80,14 @@ const TripDocumentsLanding = () => {
     new Date(trip.startDate).toLocaleDateString().includes(searchTerm.toLowerCase()) ||
     trip.LR.toLowerCase().includes(searchTerm.toLowerCase())||
     trip.truck.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const filteredDocs = documents.filter((doc) =>
+    doc.route.origin.toLowerCase().includes(searchTerm.toLowerCase())||
+    doc.route.destination.toLowerCase().includes(searchTerm.toLowerCase())||
+    doc.LR.toLowerCase().includes(searchTerm.toLowerCase())||
+    doc.truck.toLowerCase().includes(searchTerm.toLowerCase())||
+    new Date(doc.startDate).toLocaleDateString().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -96,6 +133,9 @@ const TripDocumentsLanding = () => {
           ))
         ) : null}
         {message && <span className="text-center col-span-3 text-gray-500">{loading && loadingIndicator} {message}</span>}
+      </div>
+      <div>
+        {filteredDocs && <RecentDocuments docs={filteredDocs} />}
       </div>
       {modalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">

@@ -104,6 +104,46 @@ export const truckTypes = [
   'Other'
 ]
 
+export const indianStates : {[key : string] : string} = {
+  "Andhra Pradesh": "AP",
+  "Arunachal Pradesh": "AR",
+  "Assam": "AS",
+  "Bihar": "BR",
+  "Chhattisgarh": "CG",
+  "Goa": "GA",
+  "Gujarat": "GJ",
+  "Haryana": "HR",
+  "Himachal Pradesh": "HP",
+  "Jharkhand": "JH",
+  "Karnataka": "KA",
+  "Kerala": "KL",
+  "Madhya Pradesh": "MP",
+  "Maharashtra": "MH",
+  "Manipur": "MN",
+  "Meghalaya": "ML",
+  "Mizoram": "MZ",
+  "Nagaland": "NL",
+  "Odisha": "OR",
+  "Punjab": "PB",
+  "Rajasthan": "RJ",
+  "Sikkim": "SK",
+  "Tamil Nadu": "TN",
+  "Telangana": "TG",
+  "Tripura": "TR",
+  "Uttar Pradesh": "UP",
+  "Uttarakhand": "UK",
+  "West Bengal": "WB",
+  "Andaman and Nicobar Islands": "AN",
+  "Chandigarh": "CH",
+  "Dadra and Nagar Haveli and Daman and Diu": "DN",
+  "Lakshadweep": "LD",
+  "Delhi": "DL",
+  "Puducherry": "PY",
+  "Ladakh": "LA",
+  "Jammu and Kashmir": "JK"
+};
+
+
 
 import { FaTruckPickup, FaTruckLoading, FaTruckMoving, FaGasPump, FaEllipsisH } from "react-icons/fa";
 import { MdLocalShipping, MdOutlineLocalShipping, MdOutlineConstruction } from "react-icons/md";
@@ -213,5 +253,7 @@ export const formatNumber = (num: number) => {
   const formattedNumber = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ","); // Insert commas after every two digits
   return otherNumbers ? `${formattedNumber},${lastThree}` : lastThree;
 };
+
+
 
 

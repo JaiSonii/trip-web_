@@ -7,34 +7,76 @@ const Trip = models.Trip || model('Trip', tripSchema);
 
 
 
-export async function GET(request: Request) {
+export async function GET(req: Request) {
   try {
-    const { user, error } = await verifyToken(request);
+    // Verify user token
+    const { user, error } = await verifyToken(req);
     if (!user || error) {
       return NextResponse.json({ error: 'Unauthorized User', status: 401 });
     }
+
+    // Extract 'type' from query parameters
+    const url = new URL(req.url);
+    const documentType = url.searchParams.get('type');
     await connectToDatabase();
+    // Ensure 'type' is provided
+    if (!documentType) {
+      return NextResponse.json({error : 'No docType provided', status : 400})
+    }
 
-    // Fetch only the required fields from the trips collection
-    const trips = await Trip.find({ user_id: user}, 'startDate ewayBill trip_id ewbValidityDate route POD documents LR').lean();
+    // Connect to the database
+    
 
-    // Generate presigned URLs for the fetched trips
-    // const tripsWithPresignedUrls = trips.map(trip => {
-    //   const presignedUrl = s3.getSignedUrl('getObject', {
-    //     Bucket: 'awajahi-doc-store', // Replace with your bucket name
-    //     Key: trip.ewayBill, // The key (filename) of the ewayBill in S3
-    //     Expires: 60 * 60, // Presigned URL expiration time in seconds (1 hour here)
-    //   });
+    // Use aggregation to filter documents directly in MongoDB
+    const trips = await Trip.aggregate([
+      {
+        $match: { user_id: user } // Match the user_id with the user
+      },
+      {
+        $project: {
+          user_id: 1,
+          trip_id: 1,
+          LR: 1,
+          startDate: 1,
+          route : 1,
+          truck : 1,
+          documents: {
+            $filter: {
+              input: '$documents',
+              as: 'document',
+              cond: { $eq: ['$$document.type', documentType] }
+            }
+          }
+        }
+      },
+      {
+        $match: { 'documents.0': { $exists: true } } // Only return drivers with matching documents
+      }
+    ]);
 
-    //   return {
-    //     ...trip,
-    //     ewayBillUrl: presignedUrl,
-    //   };
-    // });
+    // Format the result to combine driver info with each document
+    const formattedDocs = trips.flatMap((trip: any) =>
+      trip.documents.map((doc: any) => ({
+        filename: doc.filename,
+        type: doc.type,
+        validityDate: doc.validityDate,
+        uploadedDate: doc.uploadedDate,
+        url: doc.url,
+        user_id: trip.user_id,
+        trip_id: trip.trip_id,
+        route: trip.route,
+        LR: trip.LR,
+        truck : trip.truck,
+        startDate : trip.startDate
+      }))
+    );
 
-    return NextResponse.json(trips);
+    // Return the formatted documents
+    return NextResponse.json({ documents: formattedDocs, status: 200 });
+
   } catch (error) {
-    console.log(error);
-    return NextResponse.json({ error: 'Internal Server Error', status: 500 });
+    console.error(error);
+    return NextResponse.json({ error: 'Something went wrong', status: 500 });
   }
 }
+

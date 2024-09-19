@@ -48,7 +48,7 @@ const DriverDocuments = () => {
   const fetchDocuments = async () => {
     try {
       setMessage('fetching documents...')
-      const res = await fetch(`/api/drivers/documents?type=${encodeURIComponent('License')}`)
+      const res = await fetch(`/api/drivers/documents?type=${encodeURIComponent(type as string)}`)
       const data = res.ok ? await res.json() : setMessage('Falied to fetch documents');
       setDocuments(data.documents)
       setMessage('')

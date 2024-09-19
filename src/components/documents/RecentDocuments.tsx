@@ -14,8 +14,9 @@ const RecentDocuments: React.FC<props> = ({ docs }) => {
                     doc.type,
                     doc.url,
                     {
-                        ...(doc.driver_id && { name: doc.name, contactNumber: doc.contactNumber }),
-                        ...(doc.truckNo && { truck: doc.truckNo, truckType: doc.truckType })
+                        ...(doc.driver_id && { Name: doc.name, Contact: doc.contactNumber }),
+                        ...(doc.truckNo && { Lorry: doc.truckNo, type: doc.truckType }),
+                        ...(doc.trip_id) && {trip_id : doc.trip_id, truck : doc.truck , origin : doc.route.origin, dest : doc.route.destination, LR : doc.LR, startDate : doc.startDate}
                     }
                 )
             ))}
