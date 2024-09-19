@@ -75,7 +75,7 @@ export async function POST(req: NextRequest) {
       const roleToken = jwt.sign(
         { role: jwtObject.role  },
         process.env.JWT_SECRET as string,
-        { expiresIn: '10d' }
+        { expiresIn: '30d' }
       );
 
       let response 

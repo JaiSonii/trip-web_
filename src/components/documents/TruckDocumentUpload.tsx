@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator'; // Ensure this component is available
-import {  TruckModel } from '@/utils/interface';
+import { TruckModel } from '@/utils/interface';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation';
+import { createWorker } from 'tesseract.js';
+import { getDocType } from '@/helpers/ImageOperation';
+import { extractLatestDate } from '@/helpers/ImageOperation';
 
 interface DocumentForm {
     filename: string;
@@ -67,7 +70,7 @@ const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo }) => {
     const handleOptionSelect = (value: string) => {
         setFormData((prev) => ({ ...prev, truckNo: value }));
     };
-    
+
 
     // Handle input changes
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -77,12 +80,18 @@ const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo }) => {
             [name]: value,
         }));
     };
-    
+
+    const extractTextFromImage = async (file: File): Promise<string> => {
+        const worker = await createWorker('eng');
+        const { data: { text } } = await worker.recognize(file);
+        await worker.terminate();
+        return text;
+    };
 
     // Handle file change
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const fileData = new FormData();
-        const types = new Set(['Permit','Insurance', 'Registration Certificate','Pollution'])
+        const types = new Set(['Permit', 'Insurance', 'Registration Certificate', 'Pollution'])
         if (e.target.files) {
             setFormData({
                 ...formData,
@@ -92,29 +101,42 @@ const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo }) => {
             fileData.append('file', e.target.files[0] as File);
             setLoading(true);
             try {
-                const res = await fetch(`/api/documents/validate`, {
-                    method: 'POST',
-                    body: fileData,
-                });
-
-                setLoading(false);
-
-                if (!res.ok) {
-                    setError('Failed to get validity and docType. Please enter manually.');
-                    return;
-                }
-
-                const data = await res.json();
-                if(data.status === 402){
-                    setError(data.error)
+                if (e.target.files[0].type.includes('image/')) {
+                    const text = await extractTextFromImage(e.target.files[0]);
+                    const type = getDocType(text)
+                    const validity : string = extractLatestDate(text) as any
+                    setFormData((prev) => ({
+                        ...prev,
+                        docType: types.has(type) ? type : 'Other',
+                        validityDate : new Date(validity || Date.now()).toISOString().split('T')[0]
+                    }))
+                    setLoading(false)
                     return
+                } else {
+                    const res = await fetch(`/api/documents/validate`, {
+                        method: 'POST',
+                        body: fileData,
+                    });
+
+                    setLoading(false);
+
+                    if (!res.ok) {
+                        setError('Failed to get validity and docType. Please enter manually.');
+                        return;
+                    }
+
+                    const data = await res.json();
+                    if (data.status === 402) {
+                        setError(data.error)
+                        return
+                    }
+                    setFormData({
+                        ...formData,
+                        file: e.target.files[0],
+                        validityDate: new Date(data.validity).toISOString().split('T')[0],
+                        docType: types.has(data.docType) ? data.docType : 'Other',
+                    });
                 }
-                setFormData({
-                    ...formData,
-                    file : e.target.files[0],
-                    validityDate: new Date(data.validity).toISOString().split('T')[0],
-                    docType: types.has(data.docType) ? data.docType : 'Other',
-                });
             } catch (error) {
                 setLoading(false);
                 setError('Error occurred while validating document.');

@@ -5,6 +5,9 @@ import { IDriver } from '@/utils/interface';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation';
+import { getDocType } from '@/helpers/ImageOperation';
+import { createWorker } from 'tesseract.js';
+import { extractLatestDate } from '@/helpers/ImageOperation';
 
 interface DocumentForm {
     filename: string;
@@ -75,6 +78,13 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
         });
     };
 
+    const extractTextFromImage = async (file: File): Promise<string> => {
+        const worker = await createWorker('eng');
+        const { data: { text } } = await worker.recognize(file);
+        await worker.terminate();
+        return text;
+    };
+
     // Handle file change
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const types = new Set(['License', 'Aadhar', 'PAN', 'Police Verification'])
@@ -88,6 +98,18 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
             fileData.append('file', e.target.files[0] as File);
             setLoading(true);
             try {
+                if (e.target.files[0].type.includes('image/')) {
+                    const text = await extractTextFromImage(e.target.files[0]);
+                    const type = getDocType(text)
+                    const validity : string = extractLatestDate(text) as any
+                    setFormData((prev) => ({
+                        ...prev,
+                        docType: types.has(type) ? type : 'Other',
+                        validityDate : new Date(validity || Date.now()).toISOString().split('T')[0]
+                    }))
+                    setLoading(false)
+                    return
+                } else {
                 const res = await fetch(`/api/documents/validate`, {
                     method: 'POST',
                     body: fileData,
@@ -111,9 +133,10 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
                     validityDate: new Date(data.validity).toISOString().split('T')[0],
                     docType: types.has(data.docType) ? data.docType : 'Other',
                 });
+            }
             } catch (error) {
                 setLoading(false);
-                setError('Error occurred while validating document.');
+                setError('Error occurred while validating document. Please enter manually');
             }
         }
     };

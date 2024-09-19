@@ -6,6 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { motion } from 'framer-motion'
 import { statuses } from '@/utils/schema';
 import { useRouter } from 'next/navigation';
+import { createWorker } from 'tesseract.js';
+import { getDocType } from '@/helpers/ImageOperation';
+import { extractLatestDate } from '@/helpers/ImageOperation';
 
 interface DocumentForm {
     filename: string;
@@ -76,6 +79,13 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId }) => {
         });
     };
 
+    const extractTextFromImage = async (file: File): Promise<string> => {
+        const worker = await createWorker('eng');
+        const { data: { text } } = await worker.recognize(file);
+        await worker.terminate();
+        return text;
+    };
+
     // Handle file change
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const types = new Set(['E-Way Bill', 'POD', 'Bilty'])
@@ -88,30 +98,44 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId }) => {
 
             fileData.append('file', e.target.files[0] as File);
             setLoading(true);
+
             try {
-                const res = await fetch(`/api/documents/validate`, {
-                    method: 'POST',
-                    body: fileData,
-                });
-
-                setLoading(false);
-
-                if (!res.ok) {
-                    setError('Failed to get validity and docType. Please enter manually.');
-                    return;
-                }
-
-                const data = await res.json();
-                if (data.status === 402) {
-                    setError(data.error)
+                if (e.target.files[0].type.includes('image/')) {
+                    const text = await extractTextFromImage(e.target.files[0]);
+                    const type = getDocType(text)
+                    const validity : string= extractLatestDate(text) as any
+                    setFormData((prev) => ({
+                        ...prev,
+                        docType: types.has(type) ? type : 'Other',
+                        validityDate : new Date(validity || Date.now()).toISOString().split('T')[0]
+                    }))
+                    setLoading(false)
                     return
+                } else {
+                    const res = await fetch(`/api/documents/validate`, {
+                        method: 'POST',
+                        body: fileData,
+                    });
+
+                    setLoading(false);
+
+                    if (!res.ok) {
+                        setError('Failed to get validity and docType. Please enter manually.');
+                        return;
+                    }
+
+                    const data = await res.json();
+                    if (data.status === 402) {
+                        setError(data.error)
+                        return
+                    }
+                    setFormData({
+                        ...formData,
+                        validityDate: new Date(data.validity).toISOString().split('T')[0],
+                        file: e.target.files[0],
+                        docType: types.has(data.docType) ? data.docType : 'Other',
+                    });
                 }
-                setFormData({
-                    ...formData,
-                    validityDate: new Date(data.validity).toISOString().split('T')[0],
-                    file: e.target.files[0],
-                    docType: types.has(data.docType) ? data.docType : 'Other',
-                });
             } catch (error) {
                 setLoading(false);
                 setError('Error occurred while validating document.');
@@ -230,14 +254,14 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId }) => {
                                                 <div className="relative w-full h-1 bg-gray-200 rounded">
                                                     <div
                                                         className={`absolute top-0 left-0 h-1 rounded transition-width duration-500 ${trip.status === 0
-                                                                ? 'bg-red-500'
-                                                                : trip.status === 1
-                                                                    ? 'bg-yellow-500'
-                                                                    : trip.status === 2
-                                                                        ? 'bg-blue-500'
-                                                                        : trip.status === 3
-                                                                            ? 'bg-green-500'
-                                                                            : 'bg-green-800'
+                                                            ? 'bg-red-500'
+                                                            : trip.status === 1
+                                                                ? 'bg-yellow-500'
+                                                                : trip.status === 2
+                                                                    ? 'bg-blue-500'
+                                                                    : trip.status === 3
+                                                                        ? 'bg-green-500'
+                                                                        : 'bg-green-800'
                                                             }`}
                                                         style={{ width: `${(trip.status as number / 4) * 100}%` }}
                                                     />

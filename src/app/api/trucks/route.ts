@@ -76,8 +76,11 @@ export async function POST(req: Request) {
   } catch (error: any) {
     // Handle errors during request processing
     console.error('Error creating truck:', error);
+    if(error.code == 11000){
+      return NextResponse.json({ error: 'Lorry Already Exists', status: 500 })
+    }
 
     // Return error response with appropriate status code and message
-    return NextResponse.json({ error: error.message || 'Failed to create truck' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Failed to add lorry' }, { status: 500 });
   }
 }

@@ -1,13 +1,36 @@
-import { extractTextFromImage, extractTextFromPdf } from "@/helpers/fileOperation";
-import { getDocType } from "@/helpers/ImageOperation";
-import { verifyToken } from "@/utils/auth";
-import { NextResponse } from "next/server";
+export function getDocType(text: string): string {
+    const docTypes = [
+        { keywords: ['National Permit Authorization Number', 'AUTHORIZATION CERTIFICATE OF N.P.'], type: 'Permit' },
+        { keywords: ['CERTIFICATE OF REGISTRATION', 'Form 23A'], type: 'Registration Certificate' },
+        { keywords: ['INSURANCE COMPANY', 'Period of Insurance'], type: 'Insurance' },
+        { keywords: ['TAX RECEIPT', 'Transport Department'], type: 'Tax Receipt' },
+        { keywords: ['E-Way Bill', 'EWB'], type: 'E-Way Bill' },
+        { keywords: ['Bilty'], type: 'Bilty' },
+        { keywords: ['Proof of Delivery', 'POD'], type: 'POD' },
+        { keywords: ['Expense Receipt', 'Receipt'], type: 'Expense Receipt' },
+        { keywords: ['PAN', 'Permanent Account Number'], type: 'PAN' },
+        { keywords: ['Police Verification'], type: 'Police Verification' },
+        { keywords: ['Aadhar', 'Aadhaar', 'Unique Identification Number'], type: 'Aadhar Card' },
+        { keywords: ['License', 'Driving License','DLNo.'], type: 'License' },
+        { keywords: ['Pollution Certificate', 'Pollution Under Control'], type: 'Pollution Certificate' },
+        { keywords: ['fitness', 'Fitness','Certificate of Fitness'], type : 'Fitness Certificate'}
+    ];
 
-// Helper function to determine document type based on text content
-// Helper function to determine document type based on text content
+    // Normalize text to lowercase for case-insensitive matching
+    const lowerCaseText = text.toLowerCase();
+
+    for (const doc of docTypes) {
+        // Check if any of the keywords are present in the text (flexible matching)
+        if (doc.keywords.some(keyword => lowerCaseText.includes(keyword.toLowerCase()))) {
+            return doc.type;
+        }
+    }
+
+    return 'Other';
+}
 
 
-const extractLatestDate = (text: string) => {
+export const extractLatestDate = (text: string) => {
     // Regular expression to match dates in formats: dd/MM/yyyy, dd-MM-yyyy, dd-MMM-yyyy
     const dateRegex = /\b\d{2}[\/-]\w{3,}[\/-]\d{2,4}\b|\b\d{2}[\/-]\d{2}[\/-]\d{2,4}\b/g;
 
@@ -46,7 +69,7 @@ const extractLatestDate = (text: string) => {
 };
 
 // Helper function to parse date according to format
-const parseDate = (dateStr: string, format: string) => {
+export const parseDate = (dateStr: string, format: string) => {
     const parts = dateStr.split(/[\/-]/);
     let day, month, year;
 
@@ -75,55 +98,7 @@ const parseDate = (dateStr: string, format: string) => {
 };
 
 // Helper function to parse month from "MMM" format (e.g., "Jan", "Feb")
-const parseMonth = (monthStr: string) => {
+export const parseMonth = (monthStr: string) => {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     return months.indexOf(monthStr);
 };
-
-
-export async function POST(req: Request) {
-    const { user, error } = await verifyToken(req);
-
-    if (!user || error) {
-        return NextResponse.json({ error: 'Unauthorized User', status: 401 });
-    }
-
-    try {
-        const formData = await req.formData();
-        const file = formData.get('file') as File;
-
-        if (!file) {
-            return NextResponse.json({ error: 'No file uploaded', status: 400 });
-        }
-
-        // Ensure `file` is treated as a Blob (for arrayBuffer to work)
-        const fileBuffer = await file.arrayBuffer(); // Make sure this works correctly
-        const fileType = file.type;
-
-        let text: string;
-
-        // Process the file based on the type
-        if (fileType === 'application/pdf') {
-            const pdfBuffer = Buffer.from(fileBuffer);
-            text = await extractTextFromPdf(pdfBuffer);
-        } else if (fileType.startsWith('image/')) {
-            const imageBuffer = Buffer.from(fileBuffer);
-            text = await extractTextFromImage(imageBuffer);
-        } else {
-            return NextResponse.json({ error: 'Unsupported file type', status: 400 });
-        }
-
-        // Determine the document type and extract validity
-        const docType = getDocType(text);
-        const validity = extractLatestDate(text);
-
-        if(docType === 'Other' && !validity){
-            return NextResponse.json({error : 'Failed to extract validity and type, Enter Manually', status : 402})
-        }
-
-        return NextResponse.json({ docType, validity, status: 200 });
-    } catch (err) {
-        console.error('Error processing file:', err);
-        return NextResponse.json({ error: 'Internal Server Error', status: 500 });
-    }
-}

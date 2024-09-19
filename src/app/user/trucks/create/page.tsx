@@ -151,8 +151,8 @@ const CreateTruck: React.FC = () => {
             router.push(nextpath ? nextpath : '/user/trucks');
         } catch (error) {
             // Handle fetch errors
-            console.error('Error creating truck:', error);
-            alert('Failed to create truck. Please try again later.');
+            console.error('Error creating lorry:', error);
+            alert('Failed to add lorry. Please try again later.');
         }
     };
 

@@ -24,7 +24,6 @@ const DocumentsPage = () => {
         throw new Error('Failed to fetch recent docuemnts')
       }
       const data = await res.json()
-      console.log(data)
       if (data.documents.length === 0) {
         setError('No recent documents found')
         return
