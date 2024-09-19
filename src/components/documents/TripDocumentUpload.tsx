@@ -139,7 +139,7 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId }) => {
         data.append('docType', formData.docType);
 
         try {
-            const response = await fetch(`/api/trips/${tripId}/documents`, {
+            const response = await fetch(`/api/trips/${tripId || formData.tripId}/documents`, {
                 method: 'PUT',
                 body: data,
             });
