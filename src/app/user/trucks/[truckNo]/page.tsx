@@ -151,7 +151,7 @@ const TruckPage = () => {
                 <TableCell>
                   <div className='flex items-center space-x-2'>
                     <FaCalendarAlt className='text-bottomNavBarColor' />
-                    <span>{new Date(item.date || item.dates?.[0]).toLocaleDateString()}</span>
+                    <span>{new Date(item.date || item.startDate).toLocaleDateString()}</span>
                   </div>
                 </TableCell>
                 <TableCell>
