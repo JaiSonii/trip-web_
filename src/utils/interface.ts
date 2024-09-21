@@ -75,6 +75,8 @@ export interface ITrip extends Document {
     uploadedDate : Date,
     url : string
   }]
+  partyName : string;
+  balance : number
 }
 
 
@@ -92,6 +94,7 @@ export interface IParty extends Document {
   balance: number;
   createdAt: Date;
   updatedAt: Date;
+  partyBalance : number
 }
 
 

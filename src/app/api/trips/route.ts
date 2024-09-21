@@ -3,7 +3,7 @@ import mongoose, { model, models } from 'mongoose';
 import { driverSchema, supplierSchema, tripSchema, truckSchema } from '@/utils/schema';
 import { connectToDatabase } from '@/utils/schema';
 import { ITrip } from '@/utils/interface';
-import {v4 as uuidv4} from 'uuid'
+import { v4 as uuidv4 } from 'uuid'
 import { partySchema } from '@/utils/schema';
 import { verifyToken } from '@/utils/auth';
 import { uploadFileToS3 } from '@/helpers/fileOperation';
@@ -13,7 +13,7 @@ const Party = models.Party || model('Party', partySchema)
 const Supplier = models.Supplier || model('Supplier', supplierSchema)
 const Driver = models.Driver || model('Driver', driverSchema)
 const Truck = models.Truck || model('Truck', truckSchema)
-
+// Assuming you have this schema defined
 
 export async function GET(req: Request) {
   const { user, error } = await verifyToken(req);
@@ -27,14 +27,94 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const statuses = url.searchParams.get('statuses')?.split(',').map(Number);
 
+    // Prepare query with user_id and optional statuses filter
     const query: any = { user_id: user };
-
-    // If statuses are provided, use the $in operator to match any of the statuses
     if (statuses && statuses.length > 0) {
       query.status = { $in: statuses };
     }
 
-    const trips = await Trip.find(query).lean().sort({ 'startDate': -1 }).exec();
+    // Use an aggregation pipeline to fetch the required data, calculate balance, and join with Party collection
+    const trips = await Trip.aggregate([
+      { $match: query },  // Filter trips based on user_id and optional statuses
+      {
+        $lookup: {
+          from: 'parties',  // Join with the Party collection
+          localField: 'party',
+          foreignField: 'party_id',
+          as: 'partyDetails'
+        }
+      },
+      { $unwind: '$partyDetails' },  // Unwind partyDetails array
+      {
+        $lookup: {
+          from: 'tripcharges',  // Join with the TripExpense collection
+          localField: 'trip_id',
+          foreignField: 'trip_id',
+          as: 'tripExpenses'
+        }
+      },
+      {
+        $addFields: {
+          // Calculate the final balance based on the fetchBalance logic
+          balance: {
+            $let: {
+              vars: {
+                accountBalance: {
+                  $sum: {
+                    $map: {
+                      input: '$accounts',
+                      as: 'account',
+                      in: '$$account.amount'
+                    }
+                  }
+                },
+                chargeToBill: {
+                  $sum: {
+                    $map: {
+                      input: {
+                        $filter: {
+                          input: '$tripExpenses',
+                          as: 'expense',
+                          cond: { $eq: ['$$expense.partyBill', true] }
+                        }
+                      },
+                      as: 'filteredExpense',
+                      in: '$$filteredExpense.amount'
+                    }
+                  }
+                },
+                chargeNotToBill: {
+                  $sum: {
+                    $map: {
+                      input: {
+                        $filter: {
+                          input: '$tripExpenses',
+                          as: 'expense',
+                          cond: { $eq: ['$$expense.partyBill', false] }
+                        }
+                      },
+                      as: 'filteredExpense',
+                      in: '$$filteredExpense.amount'
+                    }
+                  }
+                }
+              },
+              in: {
+                $subtract: [
+                  { $add: ['$amount', '$$chargeToBill'] },  // Add trip amount and chargeToBill
+                  { $add: ['$$accountBalance', '$$chargeNotToBill'] }  // Subtract accountBalance and chargeNotToBill
+                ]
+              }
+            }
+          },
+          // Include the party name from the joined partyDetails
+          partyName: '$partyDetails.name'
+        }
+      },
+      { $sort: { startDate: -1 } },  // Sort by startDate in descending order
+      // Exclude unnecessary fields including accountBalance, chargeToBill, and chargeNotToBill
+      { $project: { partyDetails: 0, tripExpenses: 0, accounts: 0, chargeToBill: 0, chargeNotToBill: 0, accountBalance: 0 } }
+    ]);
 
     return NextResponse.json({ trips });
   } catch (err) {
@@ -42,6 +122,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
+
 
 
 
@@ -94,10 +175,10 @@ export async function POST(this: any, req: Request) {
       material: formData.get('material') || '',
       notes: formData.get('notes') || '',
       accounts: [],
-      documents : []
+      documents: []
     });
 
-    if(validity !== null){
+    if (validity !== null) {
       newTrip.ewbValidityDate = new Date(validity as string)
       newTrip.documents.push({
         filename: file?.name || '',

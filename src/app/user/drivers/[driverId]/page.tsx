@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { MdDelete, MdEdit } from "react-icons/md";
 import { IDriver, IDriverAccount, IExpense, PaymentBook } from '@/utils/interface';
@@ -12,10 +12,11 @@ import { Button } from '@/components/ui/button';
 import DriverModal from '@/components/driver/driverModal';
 import { handleEditAccount } from '@/helpers/TripOperation';
 import { handleAddCharge as EditExpense } from '@/helpers/ExpenseOperation';
-import { FaCalendarAlt } from 'react-icons/fa';
+import { FaCalendarAlt, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
 import Link from 'next/link';
 import { formatNumber } from '@/utils/utilArray';
 import dynamic from 'next/dynamic';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const Driver: React.FC = () => {
   const router = useRouter();
@@ -30,9 +31,78 @@ const Driver: React.FC = () => {
   const [paymentEdit, setPaymentEdit] = useState(false);
   const [accountEdit, setAccountEdit] = useState(false);
   const [selected, setSelected] = useState<any>([]);
+  const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
 
-  const ExpenseModal = dynamic(()=>import('@/components/trip/tripDetail/ExpenseModal'),{ssr : false})
-  const Modal = dynamic(()=>import('@/components/trip/tripDetail/Modal'), {ssr : false})
+  const sortedAccounts = useMemo(() => {
+    if (!accounts || accounts.length === 0) return []; // Ensure accounts is not null or empty
+
+    // Utility functions to get sortable values for specific fields
+    const getSortableDate = (account: any) => {
+      return new Date(account.date || account.paymentDate).getTime(); // Use date if available, otherwise fallback to paymentDate
+    };
+
+    const getSortableGave = (account: any) => {
+      return account.gave || (account.type === 'truck' ? account.amount : 0); // Use 'gave' or fallback to 'amount' if it's a truck expense
+    };
+
+    const getSortableGot = (account: any) => {
+      return account.got || (account.type !== 'truck' ? account.amount : 0); // Use 'got' or fallback to 'amount' for non-truck types
+    };
+
+    let sortableAccounts = [...accounts as any];
+
+    if (sortConfig.key !== null) {
+      sortableAccounts.sort((a, b) => {
+        let aValue, bValue;
+        if (sortConfig.key === 'date') {
+          // Special case for date column
+          aValue = getSortableDate(a);
+          bValue = getSortableDate(b);
+        } else if (sortConfig.key === 'gave') {
+          // Special case for 'gave'
+          aValue = getSortableGave(a);
+          bValue = getSortableGave(b);
+        } else if (sortConfig.key === 'got') {
+          // Special case for 'got'
+          aValue = getSortableGot(a);
+          bValue = getSortableGot(b);
+        } else {
+          // Generic case for other fields
+          aValue = a[sortConfig.key];
+          bValue = b[sortConfig.key];
+        }
+
+        if (aValue < bValue) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    return sortableAccounts;
+  }, [accounts, sortConfig]);
+
+
+  const requestSort = (key: any) => {
+    let direction: 'asc' | 'desc' = 'asc'
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc'
+    }
+    setSortConfig({ key, direction })
+  }
+
+  const getSortIcon = (columnName: any) => {
+    if (sortConfig.key === columnName) {
+      return sortConfig.direction === 'asc' ? <FaSortUp /> : <FaSortDown />
+    }
+    return <FaSort />
+  }
+
+  const ExpenseModal = dynamic(() => import('@/components/trip/tripDetail/ExpenseModal'), { ssr: false })
+  const Modal = dynamic(() => import('@/components/trip/tripDetail/Modal'), { ssr: false })
 
   const handleDelete = async (account: any) => {
     if (account.expenseType) {
@@ -187,37 +257,50 @@ const Driver: React.FC = () => {
 
   return (
     <div className="w-full">
-      
+
       <div className="w-full h-full p-4">
         <div className="table-container">
-          <table className="custom-table">
-            <thead>
-              <tr>
-                <th>Date</th>
-                <th>Reason</th>
-                <th>Driver Gave</th>
-                <th>Driver Got</th>
-                <th>Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {accounts.map((account, index: number) => (
-                <tr key={account._id}>
-                  <td>
+          <Table className="custom-table">
+            <TableHeader>
+              <TableRow>
+                <TableHead onClick={() => requestSort('date')}>
+                  <div className='flex justify-between'>
+                    Date {getSortIcon('date')}
+                  </div>
+
+                </TableHead>
+                <TableHead>Reason</TableHead>
+                <TableHead onClick={() => requestSort('gave')}>
+                  <div className='flex justify-between'>
+                    Driver Gave {getSortIcon('gave')}
+                  </div>
+                </TableHead>
+                <TableHead onClick={() => requestSort('got')}>
+                  <div className='flex justify-between'>
+                    Driver Got {getSortIcon('got')}
+                  </div>
+                </TableHead>
+                <TableHead>Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sortedAccounts.map((account, index: number) => (
+                <TableRow key={account._id}>
+                  <TableCell>
                     <div className='flex items-center space-x-2'>
                       <FaCalendarAlt className='text-bottomNavBarColor' />
                       <span>{new Date(account.date || account.paymentDate).toLocaleDateString()}</span>
                     </div>
-                  </td>
-                  <td >
+                  </TableCell>
+                  <TableCell >
                     <div className='flex items-center space-x-2 '>
                       <span>{account.reason || account.expenseType || `Trip ${account.accountType} `}</span>
                       {account.trip_id && <Button variant={"link"} className='text-red-500 pt-1 rounded-lg'><Link href={`/user/trips/${account.trip_id}`}>from a trip</Link></Button>}
                     </div>
-                  </td>
-                  <td><span className='text-red-600 font-semibold'>₹{formatNumber(account.gave) || (account.type === 'truck' && formatNumber(account.amount)) || 0}</span></td>
-                  <td ><span className='text-green-600 font-semibold'>₹{formatNumber(account.got) || (account.type !== 'truck' && formatNumber(account.amount)) || 0}</span></td>
-                  <td>
+                  </TableCell>
+                  <TableCell><span className='text-red-600 font-semibold'>₹{formatNumber(account.gave) || (account.type === 'truck' && formatNumber(account.amount)) || 0}</span></TableCell>
+                  <TableCell ><span className='text-green-600 font-semibold'>₹{formatNumber(account.got) || (account.type !== 'truck' && formatNumber(account.amount)) || 0}</span></TableCell>
+                  <TableCell>
                     <div className='flex flex-row gap-2 items-center w-full'>
                       <Button
                         variant={'outline'}
@@ -243,11 +326,11 @@ const Driver: React.FC = () => {
                         <MdDelete />
                       </Button>
                     </div>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
       <ExpenseModal

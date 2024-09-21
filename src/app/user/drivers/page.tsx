@@ -1,17 +1,53 @@
 // DriversPage.tsx
 'use client'
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IDriver } from '@/utils/interface';
 import Loading from './loading';
 import DriverBalance from '@/components/driver/DriverBalance';
-import { FaUser, FaPhone, FaCircle } from 'react-icons/fa';
+import { FaUser, FaPhone, FaCircle, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { formatNumber } from '@/utils/utilArray';
 
 const DriversPage = () => {
   const router = useRouter();
   const [drivers, setDrivers] = useState<IDriver[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
+
+  const sortedDrivers = useMemo(() => {
+    if (!drivers || drivers.length === 0) return []; // This line ensures that trips is not null or empty
+    let sortableTrips = [...drivers as any];
+    if (sortConfig.key !== null) {
+      sortableTrips.sort((a, b) => {
+        if (a[sortConfig.key!] < b[sortConfig.key!]) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (a[sortConfig.key!] > b[sortConfig.key!]) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return sortableTrips;
+  }, [drivers, sortConfig]);
+
+
+  const requestSort = (key: any) => {
+    let direction: 'asc' | 'desc' = 'asc'
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc'
+    }
+    setSortConfig({ key, direction })
+  }
+
+  const getSortIcon = (columnName: any) => {
+    if (sortConfig.key === columnName) {
+      return sortConfig.direction === 'asc' ? <FaSortUp /> : <FaSortDown />
+    }
+    return <FaSort />
+  }
 
   useEffect(() => {
     const fetchDrivers = async () => {
@@ -60,45 +96,48 @@ const DriversPage = () => {
     );
   }
 
-  const statusColors = {
-    Available: 'text-green-500',
-    'On Trip': 'text-red-500',
-    on_leave: 'text-yellow-500',
-    suspended: 'text-gray-500',
-  };
 
   return (
     <div className="w-full h-full p-4">
       <div className="table-container overflow-auto bg-white shadow rounded-lg">
-        <table className="custom-table w-full border-collapse table-auto">
-          <thead>
-            <tr className="bg-blue-600 text-white">
-              <th className="border p-4 text-left">Name</th>
-              <th className="border p-4 text-left">Contact Number</th>
-              <th className="border p-4 text-left">Status</th>
-              <th className="border p-4 text-left">Balance (in Rupees)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {drivers.map((driver, index) => (
-              <tr
+        <Table className="custom-table w-full border-collapse table-auto">
+          <TableHeader>
+            <TableRow >
+              <TableHead onClick={()=>requestSort('name')}>
+                <div className='flex justify-between'>
+                Name {getSortIcon('name')}
+                </div>
+                
+                </TableHead>
+              <TableHead >Contact Number</TableHead>
+              <TableHead >Status</TableHead>
+              <TableHead onClick={()=>requestSort('balance')}>
+              <div className='flex justify-between'>
+                Balance {getSortIcon('balance')}
+                </div>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sortedDrivers.map((driver, index) => (
+              <TableRow
                 key={index}
                 className="border-t hover:bg-blue-100 cursor-pointer transition-colors"
                 onClick={() => router.push(`/user/drivers/${driver.driver_id}`)}
               >
-                <td className="border p-4 space-x-2">
+                <TableCell className="border p-4 space-x-2">
                   <div className='flex items-center gap-3'>
                     <FaUser className="text-bottomNavBarColor" />
                     <span>{driver.name}</span>
                   </div>
-                </td>
-                <td className="border p-4 space-x-2 gap-3">
+                </TableCell>
+                <TableCell className="border p-4 space-x-2 gap-3">
                   <div className='flex items-center space-x-2'>
                     <FaPhone className="text-green-500" />
                     <span>{driver.contactNumber || ''}</span>
                   </div>
-                </td>
-                <td className="border p-4 flex items-center space-x-2">
+                </TableCell>
+                <TableCell className="border p-4 flex items-center space-x-2">
                   <div className='flex items-center gap-3'>
                   <span
                       className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
@@ -109,14 +148,14 @@ const DriversPage = () => {
                     </span>
                   </div>
 
-                </td>
-                <td className="border p-4 space-x-2 font-semibold text-xl">
-                  <DriverBalance driverId={driver.driver_id} />
-                </td>
-              </tr>
+                </TableCell>
+                <TableCell className="border p-4 space-x-2 font-semibold text-xl">
+                  <span className={`${driver.balance as number < 0 ? 'text-red-500' : 'text-green-500'} font-semibold`}>₹{formatNumber(driver.balance as number)}</span>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

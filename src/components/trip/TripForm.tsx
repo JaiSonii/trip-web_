@@ -216,6 +216,10 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr }) =
             return;
         }
 
+        if(!formData.supplierId && !formData.driver){
+            alert('Driver Needs to be assigned!')
+            return
+        }
 
         // Proceed with submission
         onSubmit({

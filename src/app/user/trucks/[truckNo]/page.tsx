@@ -1,9 +1,8 @@
 'use client';
 import React, { useEffect, useState, useCallback } from 'react';
-import { ITrip, IExpense } from '@/utils/interface';
+import {  IExpense } from '@/utils/interface';
 import { useParams, useRouter } from 'next/navigation';
 import { statuses } from '@/utils/schema';
-import { fetchPartyName } from '@/helpers/fetchPartyName';
 import dynamic from 'next/dynamic';
 import { Button } from '@/components/ui/button';
 import { MdDelete, MdEdit } from 'react-icons/md';
@@ -11,6 +10,7 @@ import Link from 'next/link';
 import { FaCalendarAlt, FaRoute } from 'react-icons/fa';
 import { GoOrganization } from 'react-icons/go';
 import { formatNumber } from '@/utils/utilArray';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const Loading = dynamic(() => import('./loading'), {
   ssr: false,
@@ -33,11 +33,7 @@ const TruckPage = () => {
     ssr: false,
     loading: () => <Loading />,
   });
-  
-  const TripRevenue = dynamic(() => import('@/components/trip/tripDetail/Profit/TripRevenue'), {
-    ssr: false,
-    loading: () => <Loading />,
-  });
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -54,16 +50,17 @@ const TruckPage = () => {
           profitRes.ok ? profitRes.json() : []
         ]);
 
-        const tripDataWithPartyNames = await Promise.all(
-          tripData.trips.map(async (trip: any) => {
-            const partyName = await fetchPartyName(trip.party);
-            return { ...trip, partyName };
-          })
-        );
+        // const tripDataWithPartyNames = await Promise.all(
+        //   tripData.trips.map(async (trip: any) => {
+        //     const partyName = await fetchPartyName(trip.party);
+        //     return { ...trip, partyName };
+        //   })
+        // );
 
-        const combinedData = [...expenseData, ...tripDataWithPartyNames].sort(
+        const combinedData = [...expenseData, ...tripData.trips].sort(
           (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
         );
+        console.log(combinedData)
         setData(combinedData);
 
         setTotalExpense(profitData.truckExpense);
@@ -138,26 +135,26 @@ const TruckPage = () => {
       </div>
 
       <div className="table-container">
-        <table className="custom-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Reason</th>
-              <th>Expense</th>
-              <th>Revenue</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table className="custom-table">
+          <TableHeader>
+            <TableRow>
+              <TableHead>Date</TableHead>
+              <TableHead>Reason</TableHead>
+              <TableHead>Expense</TableHead>
+              <TableHead>Revenue</TableHead>
+              <TableHead>Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {data.map((item, index) => (
-              <tr key={index}>
-                <td>
+              <TableRow key={index}>
+                <TableCell>
                   <div className='flex items-center space-x-2'>
                     <FaCalendarAlt className='text-bottomNavBarColor' />
                     <span>{new Date(item.date || item.dates?.[0]).toLocaleDateString()}</span>
                   </div>
-                </td>
-                <td>
+                </TableCell>
+                <TableCell>
                   {item.expenseType ? (
                     <div className="flex items-center space-x-2 p-2">
                       <span className="font-semibold text-lg text-gray-800">{item.expenseType}</span>
@@ -188,14 +185,14 @@ const TruckPage = () => {
                         <div className="w-full bg-gray-200 h-2 rounded overflow-hidden mt-1">
                           <div
                             className={`h-full transition-width duration-500 rounded ${item.status === 0
-                                ? "bg-red-500"
-                                : item.status === 1
-                                  ? "bg-yellow-500"
-                                  : item.status === 2
-                                    ? "bg-blue-500"
-                                    : item.status === 3
-                                      ? "bg-green-500"
-                                      : "bg-green-800"
+                              ? "bg-red-500"
+                              : item.status === 1
+                                ? "bg-yellow-500"
+                                : item.status === 2
+                                  ? "bg-blue-500"
+                                  : item.status === 3
+                                    ? "bg-green-500"
+                                    : "bg-green-800"
                               }`}
                             style={{ width: `${(item.status + 1) * 20}%` }}
                           ></div>
@@ -205,13 +202,13 @@ const TruckPage = () => {
 
 
                   )}
-                </td>
+                </TableCell>
 
-                <td>
+                <TableCell>
                   <span className='text-red-500 font-semibold'>₹{item.expenseType ? formatNumber(item.amount) : 0}</span>
-                </td>
-                <td>{!item.expenseType ? <TripRevenue tripId={item.trip_id} amount={item.amount} /> : ''}</td>
-                <td>
+                </TableCell>
+                <TableCell><span className='text-green-500 font-semibold'>₹{!item.expenseType ? formatNumber(item.revenue) : ''}</span></TableCell>
+                <TableCell>
                   {item.expenseType ?
                     <div className='flex space-x-2 justify-center items-center w-full p-1'>
                       <Button variant="outline" onClick={() => {
@@ -225,11 +222,11 @@ const TruckPage = () => {
                     </div>
 
                   }
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
       <ExpenseModal
         isOpen={modelOpen}

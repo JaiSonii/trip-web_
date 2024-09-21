@@ -67,9 +67,9 @@ const SuppliersPage = () => {
   return (
     <div className="w-full h-full p-4">
       <div className="table-container overflow-auto bg-white shadow rounded-lg">
-        <table className="custom-table w-full border-collapse table-auto">
+        <table className="custom-table">
           <thead>
-            <tr className="bg-purple-600 text-white">
+            <tr className="bg-bottomNavBarColor text-white">
               <th className="border p-4 text-left">Supplier Name</th>
               <th className="border p-4 text-left">Contact Number</th>
               <th className="border p-4 text-left">Active Trips</th>

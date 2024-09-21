@@ -6,9 +6,7 @@ import { statuses } from '@/utils/schema';
 import { useRouter } from 'next/navigation';
 import Loading from './loading';
 import { fetchBalance } from '@/helpers/fetchTripBalance';
-import PartyName from '@/components/party/PartyName';
-import { FaTruck, FaRoute, FaCalendarAlt, FaFileInvoiceDollar } from 'react-icons/fa';
-import { GoOrganization } from 'react-icons/go';
+import { FaTruck, FaRoute, FaCalendarAlt, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
 import {
   Select,
   SelectTrigger,
@@ -20,23 +18,24 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { formatNumber } from '@/utils/utilArray';
 import { SlOptionsVertical } from 'react-icons/sl';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
-const TripBalance = ({ trip }: { trip: ITrip }) => {
-  const [balance, setBalance] = useState(0)
-  useEffect(() => {
-    if (trip) {
-      const balance = async () => {
-        const pending = await fetchBalance(trip)
-        setBalance(pending)
-      }
-      balance()
-    }
-  }, [trip])
+// const TripBalance = ({ trip }: { trip: ITrip }) => {
+//   const [balance, setBalance] = useState(0)
+//   useEffect(() => {
+//     if (trip) {
+//       const balance = async () => {
+//         const pending = await fetchBalance(trip)
+//         setBalance(pending)
+//       }
+//       balance()
+//     }
+//   }, [trip])
 
-  return (
-    <p className='text-green-600 font-semibold text-md'>₹{formatNumber(balance)}</p>
-  )
-}
+//   return (
+//     <p className='text-green-600 font-semibold text-md'>₹{formatNumber(balance)}</p>
+//   )
+// }
 
 const columnOptions = [
   { label: 'Start Date', value: 'startDate' },
@@ -51,21 +50,55 @@ const columnOptions = [
 
 const TripsPage = () => {
   const router = useRouter();
-  const [trips, setTrips] = useState<ITrip[] | null>(null);
+  const [trips, setTrips] = useState<ITrip[] | null>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedStatuses, setSelectedStatuses] = useState<number[]>([]);
   const [selectedColumns, setSelectedColumns] = useState<string[]>(columnOptions.map(col => col.value));
   const [totalBalance, setTotalBalance] = useState<number | null>(null);
   const [visibleColumns, setVisibleColumns] = useState<string[]>(columnOptions.map(col => col.label));
+  const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
 
-  const toggleColumn = (column: string) => {
-    setVisibleColumns((prev) =>
-      prev.includes(column)
-        ? prev.filter((col) => col !== column)
-        : [...prev, column]
-    );
-  };
+  const sortedTrips = useMemo(() => {
+    if (!trips || trips.length === 0) return []; // This line ensures that trips is not null or empty
+    let sortableTrips = [...trips as any];
+    if (sortConfig.key !== null) {
+      sortableTrips.sort((a, b) => {
+        if (a[sortConfig.key!] < b[sortConfig.key!]) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (a[sortConfig.key!] > b[sortConfig.key!]) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return sortableTrips;
+  }, [trips, sortConfig]);
+
+
+  const requestSort = (key: keyof ITrip) => {
+    let direction: 'asc' | 'desc' = 'asc'
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc'
+    }
+    setSortConfig({ key, direction })
+  }
+
+  const getSortIcon = (columnName: keyof ITrip) => {
+    if (sortConfig.key === columnName) {
+      return sortConfig.direction === 'asc' ? <FaSortUp /> : <FaSortDown />
+    }
+    return <FaSort />
+  }
+
+  const toggleColumn = useCallback((column: string) => {
+    setVisibleColumns(prev => {
+      const isVisible = prev.includes(column);
+      return isVisible ? prev.filter(col => col !== column) : [...prev, column];
+    });
+  }, []);
+
 
 
 
@@ -87,11 +120,14 @@ const TripsPage = () => {
       }
 
       const data = await res.json();
+      console.log(data)
       setTrips(data.trips);
 
       // Calculate total balance
-      const balances = await Promise.all(data.trips.map((trip: ITrip) => fetchBalance(trip)));
-      setTotalBalance(balances.reduce((acc, balance) => acc + balance, 0));
+      const totalBalance = data.trips.reduce((acc: number, trip: ITrip) => acc + trip.balance, 0);
+
+      // Set the total balance
+      setTotalBalance(totalBalance);
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -101,7 +137,11 @@ const TripsPage = () => {
 
   useEffect(() => {
     fetchTrips(selectedStatuses);
-  }, [selectedStatuses, fetchTrips]);
+  }, []);
+
+  const handleStatusSubmit = () => {
+    fetchTrips(selectedStatuses);
+  }
 
   const handleStatusChange = (value: string) => {
     const status = parseInt(value);
@@ -114,6 +154,8 @@ const TripsPage = () => {
 
   if (loading) return <Loading />;
 
+
+
   if (error) {
     return (
       <div className="flex justify-center items-center h-full">
@@ -123,7 +165,7 @@ const TripsPage = () => {
   }
 
   return (
-    <div className="w-full p-4 max-h-full overflow-y-hidden">
+    <div className="w-full p-4 h-full bg-white">
       <div className="flex items-center justify-between">
         <div className="flex items-center bg-lightOrange rounded-sm text-buttonTextColor p-2">
           <span>Total Balance :</span>
@@ -149,6 +191,7 @@ const TripsPage = () => {
                   <span className='text-black'>{status}</span>
                 </SelectItem>
               ))}
+              <Button className='justify-center w-full' onClick={handleStatusSubmit}>Apply</Button>
             </SelectContent>
           </Select>
         </div>
@@ -181,96 +224,138 @@ const TripsPage = () => {
           <div className="text-gray-500">No trips found</div>
         </div>
       ) : (
-        <div className="table-container overflow-auto bg-white shadow rounded-lg mt-4" style={{ maxHeight: '70vh' }}>
-          <table className="custom-table w-full border-collapse table-auto">
-            <thead className='sticky'>
-              <tr className="bg-orange-600 text-white">
-                {visibleColumns.includes('Start Date') && <th className="border p-4 text-left sticky top-0 z-10 ">Start Date</th>}
-                {visibleColumns.includes('LR Number') && <th className="border p-4 text-left sticky top-0 z-10 ">LR Number</th>}
-                {visibleColumns.includes('Truck Number') && <th className="border p-4 text-left sticky top-0 z-10 ">Truck Number</th>}
-                {visibleColumns.includes('Party Name') && <th className="border p-4 text-left sticky top-0 z-10 ">Party Name</th>}
-                {visibleColumns.includes('Route') && <th className="border p-4 text-left sticky top-0 z-10 ">Route</th>}
-                {visibleColumns.includes('Status') && <th className="border p-4 text-left sticky top-0 z-10 ">Status</th>}
-                {visibleColumns.includes('Truck Hire Cost') && <th className="border p-4 text-left sticky top-0 z-10 ">Truck Hire Cost</th>}
-                {visibleColumns.includes('Invoice Amt') && <th className="border p-4 text-left sticky top-0 z-10 ">Invoice Amount</th>}
-                <th className="border p-4 text-left sticky top-0 z-10 bg-orange-600">Party Balance</th>
-              </tr>
-            </thead>
-            <tbody style={{ maxHeight: '70vh' }}>
-              {trips.map((trip: ITrip | any, index) => (
-                <tr
-                  key={index}
-                  className="hover:bg-gray-100 cursor-pointer"
-                  onClick={() => router.push(`/user/trips/${trip.trip_id}`)}
-                >
+        <div className="w-full border rounded-t-lg ">
+          <div className="">
+            <Table className="custom-table">
+              <TableHeader className="">
+                <TableRow>
                   {visibleColumns.includes('Start Date') && (
-                    <td className="border p-4">
-                      <div className="flex items-center space-x-2">
-                        <FaCalendarAlt className="text-bottomNavBarColor" />
-                        <span>{new Date(trip.startDate).toLocaleDateString()}</span>
+                    <TableHead className="" onClick={() => requestSort('startDate')}>
+                      <div className="flex justify-center">
+                        Start Date {getSortIcon('startDate')}
                       </div>
-                    </td>
+                    </TableHead>
                   )}
-                  {visibleColumns.includes('LR Number') && <td className="border p-4">{trip.LR}</td>}
-                  {visibleColumns.includes('Truck Number') && (
-                    <td className="border p-4">
-                      <div className="flex items-center space-x-2">
-                        <FaTruck className="text-bottomNavBarColor" />
-                        <span>{trip.truck}</span>
+                  {visibleColumns.includes('LR Number') && (
+                    <TableHead className="border p-4 text-left cursor-pointer" onClick={() => requestSort('LR')}>
+                      <div className="flex justify-center">
+                        LR Number {getSortIcon('LR')}
                       </div>
-                    </td>
+                    </TableHead>
                   )}
-                  {visibleColumns.includes('Party Name') && (
-                    <td className="border p-4">
-                      <div className="flex items-center space-x-2">
-                        <GoOrganization className="text-bottomNavBarColor" />
-                        <span><PartyName partyId={trip.party} /></span>
-                      </div>
-                    </td>
-                  )}
-                  {visibleColumns.includes('Route') && (
-                    <td className="border p-4">
-                      <div className="flex items-center space-x-2">
-                        <FaRoute className="text-bottomNavBarColor" />
-                        <span>{trip.route.origin.split(',')[0]} -&gt; {trip.route.destination.split(',')[0]}</span>
-                      </div>
-                    </td>
-                  )}
-                  {visibleColumns.includes('Status') && <td className="border p-4">
-                    <div className="flex flex-col items-center space-x-2">
-                      <span>{statuses[trip.status as number]}</span>
-                      <div className="relative w-full bg-gray-200 h-1 rounded">
-                        <div
-                          className={`absolute top-0 left-0 h-1 rounded transition-width duration-500 ${trip.status === 0
-                            ? 'bg-red-500'
-                            : trip.status === 1
-                              ? 'bg-yellow-500'
-                              : trip.status === 2
-                                ? 'bg-blue-500'
-                                : trip.status === 3
-                                  ? 'bg-green-500'
-                                  : 'bg-green-800'
-                            }`}
-                          style={{ width: `${(trip.status) * 25}%` }}
-                        />
-
-                      </div>
+                  {visibleColumns.includes('Truck Number') && <TableHead className="">Truck Number</TableHead>}
+                  {visibleColumns.includes('Party Name') && <TableHead className="" onClick={() => requestSort('partyName')}>
+                    <div className='flex justify-center'>
+                      Party Name {getSortIcon('partyName')}
                     </div>
-                  </td>}
-                  {visibleColumns.includes('Truck Hire Cost') && <td ><p className='text-red-500 font-semibold'>{trip.truckHireCost ? '₹' + formatNumber(trip.truckHireCost) : 'NA'} </p></td>}
-                  {visibleColumns.includes('Invoice Amt') && <td ><p className='text-green-600 font-semibold'>₹{formatNumber(trip.amount)}</p></td>}
-                  <td><TripBalance trip={trip} /></td>
-                  {/* <div className='p-4'>
-                    <SlOptionsVertical />
-                  </div> */}
+                  </TableHead>}
+                  {visibleColumns.includes('Route') && <TableHead className="">Route</TableHead>}
+                  {visibleColumns.includes('Status') && <TableHead className="">Status</TableHead>}
+                  {visibleColumns.includes('Truck Hire Cost') && (
+                    <TableHead className="" onClick={() => requestSort('truckHireCost')}>
+                      <div className="flex justify-center">
+                        Truck Hire Cost {getSortIcon('truckHireCost')}
+                      </div>
+                    </TableHead>
+                  )}
+                  {visibleColumns.includes('Invoice Amt') && (
+                    <TableHead className="" onClick={() => requestSort('amount')}>
+                      <div className="flex justify-center">
+                        Invoice Amount {getSortIcon('amount')}
+                      </div>
+                    </TableHead>
+                  )}
+                  <TableHead onClick={() => requestSort('balance')}>
+                    <div className="flex justify-center">
+                      Party Balance {getSortIcon('balance')}
+                    </div>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedTrips.map((trip: ITrip, index) => (
+                  <TableRow
+                    key={index}
+                    className="hover:bg-orange-100 cursor-pointer"
+                    onClick={() => router.push(`/user/trips/${trip.trip_id}`)}
+                  >
+                    {visibleColumns.includes('Start Date') && (
+                      <TableCell className="">
+                        <div className="flex items-center space-x-2">
+                          <FaCalendarAlt className="text-orange-600" />
+                          <span>{new Date(trip.startDate).toLocaleDateString()}</span>
+                        </div>
+                      </TableCell>
+                    )}
+                    {visibleColumns.includes('LR Number') && <TableCell className="">{trip.LR}</TableCell>}
+                    {visibleColumns.includes('Truck Number') && (
+                      <TableCell className="">
+                        <div className="flex items-center space-x-2">
+                          <FaTruck className="text-orange-600" />
+                          <span>{trip.truck}</span>
+                        </div>
+                      </TableCell>
+                    )}
+                    {visibleColumns.includes('Party Name') && (
+                      <TableCell className="">
+                        <div className="flex items-center space-x-2">
+                          <span>{trip.partyName}</span>
+                        </div>
+                      </TableCell>
+                    )}
+                    {visibleColumns.includes('Route') && (
+                      <TableCell className="">
+                        <div className="flex items-center space-x-2">
+                          <span>{trip.route.origin.split(',')[0]} &rarr; {trip.route.destination.split(',')[0]}</span>
+                        </div>
+                      </TableCell>
+                    )}
+                    {visibleColumns.includes('Status') && (
+                      <TableCell className="">
+                        <div className="flex flex-col items-center space-x-2">
+                          <span>{statuses[trip.status as number]}</span>
+                          <div className="relative w-full bg-gray-200 h-1 rounded">
+                            <div
+                              className={`absolute top-0 left-0 h-1 rounded transition-width duration-500 ${trip.status === 0
+                                ? 'bg-red-500'
+                                : trip.status === 1
+                                  ? 'bg-yellow-500'
+                                  : trip.status === 2
+                                    ? 'bg-blue-500'
+                                    : trip.status === 3
+                                      ? 'bg-green-500'
+                                      : 'bg-green-800'
+                                }`}
+                              style={{ width: `${(trip.status as number) * 25}%` }}
+                            />
+                          </div>
+                        </div>
+                      </TableCell>
+                    )}
+                    {visibleColumns.includes('Truck Hire Cost') && (
+                      <TableCell className="">
+                        <p className='text-red-500 font-semibold'>
+                          {trip.truckHireCost ? '₹' + formatNumber(trip.truckHireCost) : 'NA'}
+                        </p>
+                      </TableCell>
+                    )}
+                    {visibleColumns.includes('Invoice Amt') && (
+                      <TableCell className="">
+                        <p className='text-green-600 font-semibold'>₹{formatNumber(trip.amount)}</p>
+                      </TableCell>
+                    )}
+                    <TableCell className="">
+                      <div className='flex items-center justify-between'>
+                        <p className='text-green-600 font-semibold'>₹{formatNumber(trip.balance)}</p>
+                        <SlOptionsVertical />
+                      </div>
 
-                </tr>
-
-              ))}
-
-
-            </tbody>
-          </table>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       )}
     </div>

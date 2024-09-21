@@ -5,10 +5,11 @@ import { ISupplier, ITrip } from '@/utils/interface'
 import { statuses } from '@/utils/schema'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import Loading from '../../loading'
-import { FaCalendarAlt, FaTruck, FaRoute } from 'react-icons/fa'
+import { FaCalendarAlt, FaTruck, FaRoute, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa'
 import { formatNumber } from '@/utils/utilArray'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 
 
 const SupplierDetailPage = () => {
@@ -16,6 +17,40 @@ const SupplierDetailPage = () => {
     const { supplierId } = useParams()
     const [trips, setTrips] = useState<ITrip[]>([])
     const [loading, setLoading] = useState(true)
+    const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
+
+    const sortedTrips = useMemo(() => {
+      if (!trips || trips.length === 0) return []; // This line ensures that trips is not null or empty
+      let sortableTrips = [...trips as any];
+      if (sortConfig.key !== null) {
+        sortableTrips.sort((a, b) => {
+          if (a[sortConfig.key!] < b[sortConfig.key!]) {
+            return sortConfig.direction === 'asc' ? -1 : 1;
+          }
+          if (a[sortConfig.key!] > b[sortConfig.key!]) {
+            return sortConfig.direction === 'asc' ? 1 : -1;
+          }
+          return 0;
+        });
+      }
+      return sortableTrips;
+    }, [trips, sortConfig]);
+  
+  
+    const requestSort = (key: keyof ITrip) => {
+      let direction: 'asc' | 'desc' = 'asc'
+      if (sortConfig.key === key && sortConfig.direction === 'asc') {
+        direction = 'desc'
+      }
+      setSortConfig({ key, direction })
+    }
+  
+    const getSortIcon = (columnName: keyof ITrip) => {
+      if (sortConfig.key === columnName) {
+        return sortConfig.direction === 'asc' ? <FaSortUp /> : <FaSortDown />
+      }
+      return <FaSort />
+    }
 
     const fetchSupplierTrips = async (supplierId: string) => {
         const res = await fetch(`/api/trips/supplier/${supplierId}`, {
@@ -43,55 +78,73 @@ const SupplierDetailPage = () => {
         <div className="w-full h-full p-4">
             <h1 className="text-2xl font-bold mb-4">Trips</h1>
             <div className="table-container">
-                <table className="custom-table">
-                    <thead>
-                        <tr className="bg-gray-200">
-                            <th className="border p-2">Start Date</th>
-                            <th className="border p-2">Truck Number</th>
-                            <th className="border p-2">Route</th>
-                            <th className="border p-2">Truck Hire Cost</th>
-                            <th className="border p-2">Trip Status</th>
-                            <th className='border p-2'>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {trips.map((trip, index) => (
-                            <tr key={index} className="border-t hover:bg-slate-100 cursor-pointer">
-                                <td className="border p-4">
+                <Table className="custom-table">
+                    <TableHeader>
+                        <TableRow className="bg-gray-200">
+                            <TableHead onClick={()=> requestSort('startDate')}>
+                                <div className='flex justify-between'>
+                                Start Date {getSortIcon('startDate')}
+                                </div>
+                                </TableHead>
+                            <TableHead>Truck Number</TableHead>
+                            <TableHead>Route</TableHead>
+                            <TableHead onClick={()=> requestSort('truckHireCost')}>
+                            <div className='flex justify-between'>
+                                Truck Hire Cost {getSortIcon('truckHireCost')}
+                                </div>
+                            </TableHead>
+                            <TableHead onClick={()=>requestSort('status')}>
+                            <div className='flex justify-between'>
+                                Status {getSortIcon('status')}
+                                </div>
+                            </TableHead>
+                            <TableHead  onClick={()=> requestSort('balance')}>
+                            <div className='flex justify-between'>
+                                Trip Balance {getSortIcon('balance')}
+                                </div>
+                            </TableHead>
+                            <TableHead className='border p-2'>Action</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {sortedTrips.map((trip, index) => (
+                            <TableRow key={index} className="border-t hover:bg-slate-100 cursor-pointer">
+                                <TableCell className="border p-4">
                                 <div className='flex items-center space-x-2'>
                                     <FaCalendarAlt className="text-bottomNavBarColor" />
                                     <span>{new Date(trip.startDate).toLocaleDateString()}</span>
                                     </div>
-                                </td>
-                                <td className="border p-4 ">
+                                </TableCell>
+                                <TableCell className="border p-4 ">
                                     <div className='flex items-center space-x-2'>
                                         <FaTruck className="text-bottomNavBarColor" />
                                         <span>{trip.truck}</span>
                                     </div>
 
-                                </td>
-                                <td className="border p-4">
+                                </TableCell>
+                                <TableCell className="border p-4">
                                     <div className='flex items-center space-x-2'>
                                         <FaRoute className="text-bottomNavBarColor" />
                                         <span>{trip.route.origin.split(',')[0]} -&gt; {trip.route.destination.split(',')[0]}</span>
                                     </div>
 
-                                </td>
-                                <td><span className='text-red-500 font-semibold'>₹{formatNumber(trip.truckHireCost)}</span></td>
-                                <td className="border p-4">
+                                </TableCell>
+                                <TableCell><span className='text-red-500 font-semibold'>₹{formatNumber(trip.truckHireCost)}</span></TableCell>
+                                <TableCell className="border p-4">
                                     <div className="flex flex-col items-center space-x-2">
                                         <span>{statuses[trip.status as number]}</span>
                                         <div className="relative w-full bg-gray-200 h-1 rounded">
                                             <div className={`absolute top-0 left-0 h-1 rounded transition-width duration-500 ${trip.status === 0 ? 'bg-red-500' : trip.status === 1 ? 'bg-yellow-500' : trip.status === 2 ? 'bg-blue-500' : trip.status === 3 ? 'bg-green-500' : 'bg-green-800'}`} style={{ width: `${(trip.status as number / 4) * 100}%` }}></div>
                                         </div>
                                     </div>
-                                </td>
-                                <td><Link href={`/user/trips/${trip.trip_id}`}><Button variant='outline'>View Trip</Button></Link></td>
+                                </TableCell>
+                                <TableCell><span className='font-semibold text-green-500'>₹{formatNumber(trip.balance)}</span></TableCell>
+                                <TableCell><Link href={`/user/trips/${trip.trip_id}`}><Button variant='outline'>View Trip</Button></Link></TableCell>
 
-                            </tr>
+                            </TableRow>
                         ))}
-                    </tbody>
-                </table>
+                    </TableBody>
+                </Table>
             </div>
         </div>
     )

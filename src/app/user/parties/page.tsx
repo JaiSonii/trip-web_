@@ -1,14 +1,16 @@
 // PartiesPage.tsx
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { IParty } from '@/utils/interface';
 import { useRouter } from 'next/navigation';
 import Loading from './loading';
 import PartyBalance from '@/components/party/PartyBalance';
-import { FaPhone, FaUserTie } from 'react-icons/fa6';
+import { FaPhone, FaSort, FaSortDown, FaSortUp, FaUserTie } from 'react-icons/fa6';
 import { GoOrganization } from "react-icons/go";
 import { FaAddressBook, FaObjectGroup } from 'react-icons/fa';
+import { formatNumber } from '@/utils/utilArray';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const PartiesPage = () => {
   const router = useRouter();
@@ -18,6 +20,40 @@ const PartiesPage = () => {
   const [parties, setParties] = useState<IParty[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
+
+  const sortedParties = useMemo(() => {
+    if (!parties || parties.length === 0) return []; // This line ensures that trips is not null or empty
+    let sortableTrips = [...parties as any];
+    if (sortConfig.key !== null) {
+      sortableTrips.sort((a, b) => {
+        if (a[sortConfig.key!] < b[sortConfig.key!]) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (a[sortConfig.key!] > b[sortConfig.key!]) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return sortableTrips;
+  }, [parties, sortConfig]);
+
+
+  const requestSort = (key: any) => {
+    let direction: 'asc' | 'desc' = 'asc'
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc'
+    }
+    setSortConfig({ key, direction })
+  }
+
+  const getSortIcon = (columnName: any) => {
+    if (sortConfig.key === columnName) {
+      return sortConfig.direction === 'asc' ? <FaSortUp /> : <FaSortDown />
+    }
+    return <FaSort />
+  }
 
   useEffect(() => {
     const fetchParties = async () => {
@@ -32,6 +68,7 @@ const PartiesPage = () => {
 
         if (res.ok) {
           const data = await res.json(); // Parse the response body as JSON
+          console.log(data)
           setParties(data.parties);
           setLoading(false)
         }
@@ -63,49 +100,57 @@ const PartiesPage = () => {
   return (
     <div className="w-full h-full p-4">
       <div className="table-container">
-        <table className="custom-table">
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Contact Person</th>
-              <th>Contact Number</th>
-              <th>Address</th>
-              <th>GST Number</th>
-              <th>Balance</th>
-            </tr>
-          </thead>
-          <tbody>
-            {parties.map((party, index) => (
-              <tr key={party.party_id as string} className="border-t w-full cursor-pointer" onClick={() => router.push(`/user/parties/${party.party_id}/trips`)}>
-                <td>
+        <Table className="custom-table">
+          <TableHeader>
+            <TableRow>
+              <TableHead onClick={() => requestSort('name')}>
+                <div className='flex justify-between'>
+                  Name {getSortIcon('name')}
+                </div>
+              </TableHead>
+              <TableHead>Contact Person</TableHead>
+              <TableHead>Contact Number</TableHead>
+              <TableHead>Address</TableHead>
+              <TableHead>GST Number</TableHead>
+              <TableHead onClick={() => requestSort('partyBalance')}>
+                <div className='flex justify-between'>
+                  Balance {getSortIcon('partyBalance')}
+                </div>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sortedParties.map((party, index) => (
+              <TableRow key={party.party_id as string} className="border-t w-full cursor-pointer" onClick={() => router.push(`/user/parties/${party.party_id}/trips`)}>
+                <TableCell>
                   <div className='flex items-center space-x-2'>
                     <GoOrganization className="text-bottomNavBarColor" />
                     <span>{party.name}</span>
                   </div>
-                </td>
-                <td>
+                </TableCell>
+                <TableCell>
                   <div className='flex items-center space-x-2'>
                     <FaUserTie className="text-bottomNavBarColor" />
                     <span>{party.contactPerson}</span>
                   </div>
-                </td>
-                <td>
+                </TableCell>
+                <TableCell>
                   <div className='flex items-center space-x-2'>
                     <FaPhone className="text-green-500" />
                     <span>{party.contactNumber}</span>
                   </div>
-                </td>
-                <td>
+                </TableCell>
+                <TableCell>
                   <div className='flex items-center space-x-2'>
                     <FaAddressBook className="text-bottomNavBarColor" />
                     <span>{party.address}</span>
-                  </div></td>
-                <td>{party.gstNumber}</td>
-                <td><PartyBalance partyId={party.party_id} /></td>
-              </tr>
+                  </div></TableCell>
+                <TableCell>{party.gstNumber}</TableCell>
+                <TableCell><span className='text-green-600 font-semibold'>₹{formatNumber(party.partyBalance) || ''}</span></TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

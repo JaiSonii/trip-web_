@@ -92,7 +92,6 @@ export const tripSchema = new Schema({
   },
   driver: {
     type: String,
-    required: true,
   },
   supplier :{
     type: String,
