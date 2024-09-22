@@ -4,6 +4,7 @@ import { TruckModel } from '@/utils/interface';
 import Loading from './loading';
 import { useRouter } from 'next/navigation';
 import { truckTypesIcons } from '@/utils/utilArray';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const TrucksPage = () => {
   const router = useRouter();
@@ -52,34 +53,34 @@ const TrucksPage = () => {
 
   return (
     <div className="w-full h-full p-4">
-      <div className="table-container">
-        <table className="custom-table w-full border-collapse">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="border p-2">Truck Number</th>
-              <th className="border p-2">Truck Type</th>
-              <th className="border p-2">Ownership</th>
-              <th className="border p-2">Status</th>
-            </tr>
-          </thead>
-          <tbody>
+      <div className="">
+        <Table className="">
+          <TableHeader>
+            <TableRow className="">
+              <TableHead className="">Truck Number</TableHead>
+              <TableHead className="">Truck Type</TableHead>
+              <TableHead className="">Ownership</TableHead>
+              <TableHead className="">Status</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {trucks.map((truck, index) => {
               const Icon = truckTypesIcons.find(item => item.type === truck.truckType)?.Icon;
               return (
-                <tr
+                <TableRow
                   key={index}
                   className="border-t hover:bg-gray-100 transition-colors duration-200"
                   onClick={() => router.push(`/user/trucks/${truck.truckNo}`)}
                 >
-                  <td className="border p-2 text-gray-800 font-medium">{truck.truckNo}</td>
-                  <td className="border p-2 ">
+                  <TableCell className=" text-gray-800 font-medium">{truck.truckNo}</TableCell>
+                  <TableCell className=" ">
                   <div className='flex items-center space-x-2 justify-between'>
                     <span>{truck.truckType}</span>
                     {Icon && <Icon className="inline-block ml-2 h-6 w-6 text-bottomNavBarColor" />}
                     </div>
-                  </td>
-                  <td className="border p-2 text-gray-700">{truck.ownership}</td>
-                  <td className="border p-2">
+                  </TableCell>
+                  <TableCell className=" text-gray-700">{truck.ownership}</TableCell>
+                  <TableCell className="">
                     <span
                       className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
                         truck.status === 'Available' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
@@ -87,12 +88,12 @@ const TrucksPage = () => {
                     >
                       {truck.status}
                     </span>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               );
             })}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

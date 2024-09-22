@@ -196,7 +196,7 @@ const ExpenseLayout: React.FC<TruckLayoutProps> = ({ children }) => {
         ))}
       </div>
 
-      <div>{children}</div>
+      <div className='p-2 overflow-auto'>{children}</div>
       
     </div>
   );

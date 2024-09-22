@@ -84,8 +84,8 @@ const SinglePartyTrips = () => {
   if (trips.length === 0) return <div>No trips for this party</div>;
 
   return (
-    <div className="table-container flex flex-col justify-start gap-3">
-      <Table className="custom-table">
+    <div className="">
+      <Table className="">
         <TableHeader>
           <TableRow>
             <TableHead onClick={() => requestSort('startDate')}>

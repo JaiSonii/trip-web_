@@ -99,8 +99,8 @@ const DriversPage = () => {
 
   return (
     <div className="w-full h-full p-4">
-      <div className="table-container overflow-auto bg-white shadow rounded-lg">
-        <Table className="custom-table w-full border-collapse table-auto">
+      <div className="">
+        <Table className="">
           <TableHeader>
             <TableRow >
               <TableHead onClick={()=>requestSort('name')}>

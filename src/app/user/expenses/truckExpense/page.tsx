@@ -14,6 +14,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { IoAddCircle } from 'react-icons/io5';
 import TruckExpenseModal from '@/components/TruckExpenseModal';
 import { formatNumber } from '@/utils/utilArray';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const TruckExpense: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
@@ -91,10 +92,9 @@ const TruckExpense: React.FC = () => {
   return (
     <div className="w-full h-full p-4">
 
-      <div className='flex items-center justify-between'>
-        <h1 className="text-2xl font-bold mb-4 text-bottomNavBarColor">Truck Expenses</h1>
+      <div className='flex items-end'>
 
-        <div className="mb-4 flex items-center gap-2">
+        <div className=" flex items-center gap-2">
           <DropdownMenu>
             <DropdownMenuTrigger>
               <Button variant="outline">Select Columns</Button>
@@ -132,61 +132,61 @@ const TruckExpense: React.FC = () => {
       </div>
 
 
-      <div className="table-container overflow-auto bg-white shadow rounded-lg">
-        <table className="custom-table w-full border-collapse table-auto">
-          <thead>
-            <tr className="bg-indigo-600 text-white">
-              {visibleColumns.date && <th className="border p-4 text-left">Date</th>}
-              {visibleColumns.amount && <th className="border p-4 text-left">Amount</th>}
-              {visibleColumns.expenseType && <th className="border p-4 text-left">Expense Type</th>}
-              {visibleColumns.paymentMode && <th className="border p-4 text-left">Payment Mode</th>}
-              {visibleColumns.notes && <th className="border p-4 text-left">Notes</th>}
-              {visibleColumns.truck && <th className="border p-4 text-left">Truck</th>}
-              {visibleColumns.driver && <th className="border p-4 text-left">Driver</th>}
-              {visibleColumns.action && <th className="border p-4 text-left">Action</th>}
-            </tr>
-          </thead>
-          <tbody>
+      <div className="">
+        <Table className="">
+          <TableHeader>
+            <TableRow className="">
+              {visibleColumns.date && <TableHead className="">Date</TableHead>}
+              {visibleColumns.amount && <TableHead className="">Amount</TableHead>}
+              {visibleColumns.expenseType && <TableHead className="">Expense Type</TableHead>}
+              {visibleColumns.paymentMode && <TableHead className="">Payment Mode</TableHead>}
+              {visibleColumns.notes && <TableHead className="">Notes</TableHead>}
+              {visibleColumns.truck && <TableHead className="">Truck</TableHead>}
+              {visibleColumns.driver && <TableHead className="">Driver</TableHead>}
+              {visibleColumns.action && <TableHead className="">Action</TableHead>}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {maintainenceBook.length > 0 ? (
               maintainenceBook.map((expense, index) => (
-                <tr key={index} className="border-t hover:bg-indigo-100 cursor-pointer transition-colors">
+                <TableRow key={index} className="border-t hover:bg-indigo-100 cursor-pointer transition-colors">
                   {visibleColumns.date && (
-                    <td className="border p-4">
+                    <TableCell className="border p-4">
                       <div className='flex items-center space-x-2'>
                         <FaCalendarAlt className='text-bottomNavBarColor' />
                         <span>{new Date(expense.date).toLocaleDateString()}</span>
                       </div>
-                    </td>
+                    </TableCell>
                   )}
-                  {visibleColumns.amount && <td className="border p-4">₹{formatNumber(expense.amount)}</td>}
+                  {visibleColumns.amount && <TableCell className="border p-4">₹{formatNumber(expense.amount)}</TableCell>}
                   {visibleColumns.expenseType && (
-                    <td className="border p-4">
+                    <TableCell className="border p-4">
                       <div className="flex items-center space-x-2">
                         {icons[expense.expenseType as IconKey]}
                         <span>{expense.expenseType}</span>
                       </div>
-                    </td>
+                    </TableCell>
                   )}
                   {visibleColumns.paymentMode && (
-                    <td className="border p-4">
+                    <TableCell className="border p-4">
                       <div className="flex items-center space-x-2">
                         <MdPayment className="text-green-500" />
                         <span>{expense.paymentMode}</span>
                       </div>
-                    </td>
+                    </TableCell>
                   )}
-                  {visibleColumns.notes && <td className="border p-4">{expense.notes || 'N/A'}</td>}
+                  {visibleColumns.notes && <TableCell className="border p-4">{expense.notes || 'N/A'}</TableCell>}
                   {visibleColumns.truck && (
-                    <td className="border p-4">
+                    <TableCell className="border p-4">
                       <div className='flex items-center space-x-2'>
                         <FaTruck className='text-bottomNavBarColor' />
                         <span>{expense.truck || ''}</span>
                       </div>
-                    </td>
+                    </TableCell>
                   )}
-                  {visibleColumns.driver && <td className="border p-4">{expense.driver ? <DriverName driverId={expense.driver as string} /> : 'N/A'}</td>}
+                  {visibleColumns.driver && <TableCell className="border p-4">{expense.driver ? <DriverName driverId={expense.driver as string} /> : 'N/A'}</TableCell>}
                   {visibleColumns.action && (
-                    <td className="border p-4">
+                    <TableCell className="border p-4">
                       <div className="flex items-center space-x-2">
                         <Button variant="outline" onClick={() => { setSelected(expense); setModalOpen(true); }} size="sm">
                           <MdEdit />
@@ -198,17 +198,17 @@ const TruckExpense: React.FC = () => {
                           <MdDelete />
                         </Button>
                       </div>
-                    </td>
+                    </TableCell>
                   )}
-                </tr>
+                </TableRow>
               ))
             ) : (
-              <tr>
-                <td colSpan={8} className="text-center p-4 text-gray-500">No expenses found</td>
-              </tr>
+              <TableRow>
+                <TableCell colSpan={8} className="text-center p-4 text-gray-500">No expenses found</TableCell>
+              </TableRow>
             )}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       

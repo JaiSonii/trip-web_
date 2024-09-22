@@ -99,8 +99,8 @@ const PartiesPage = () => {
 
   return (
     <div className="w-full h-full p-4">
-      <div className="table-container">
-        <Table className="custom-table">
+      <div className="">
+        <Table className="">
           <TableHeader>
             <TableRow>
               <TableHead onClick={() => requestSort('name')}>

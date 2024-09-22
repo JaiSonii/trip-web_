@@ -224,9 +224,9 @@ const TripsPage = () => {
           <div className="text-gray-500">No trips found</div>
         </div>
       ) : (
-        <div className="w-full border rounded-t-lg ">
+        <div className="w-full">
           <div className="">
-            <Table className="custom-table">
+            <Table className="">
               <TableHeader className="">
                 <TableRow>
                   {visibleColumns.includes('Start Date') && (

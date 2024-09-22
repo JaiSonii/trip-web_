@@ -15,6 +15,7 @@ import { DropdownMenu } from '@/components/ui/dropdown-menu';
 import { IoAddCircle } from 'react-icons/io5';
 import { formatNumber } from '@/utils/utilArray';
 import dynamic from 'next/dynamic';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const TripExpensePage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
@@ -100,8 +101,7 @@ const TripExpensePage: React.FC = () => {
 
   return (
       <div className="w-full h-full p-4">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className="text-2xl font-bold text-bottomNavBarColor">Trip Expenses</h1>
+        <div className="flex ">
           <div className='flex items-center gap-2'>
           <DropdownMenu>
             <DropdownMenuTrigger>
@@ -129,52 +129,52 @@ const TripExpensePage: React.FC = () => {
          
         </div>
 
-        <div className="table-container overflow-auto bg-white shadow rounded-lg">
-          <table className="custom-table w-full border-collapse table-auto">
-            <thead>
-              <tr className="bg-indigo-600 text-white">
-                {visibleColumns.includes('Date') && <th className="border p-4 text-left">Date</th>}
-                {visibleColumns.includes('Amount') && <th className="border p-4 text-left">Amount</th>}
-                {visibleColumns.includes('Expense Type') && <th className="border p-4 text-left">Expense Type</th>}
-                {visibleColumns.includes('Payment Mode') && <th className="border p-4 text-left">Payment Mode</th>}
-                {visibleColumns.includes('Notes') && <th className="border p-4 text-left">Notes</th>}
-                {visibleColumns.includes('Truck') && <th className="border p-4 text-left">Truck</th>}
-                {visibleColumns.includes('Driver') && <th className="border p-4 text-left">Driver</th>}
-                {visibleColumns.includes('Trip') && <th className="border p-4 text-left">Trip</th>}
-                {visibleColumns.includes('Action') && <th className="border p-4 text-left">Action</th>}
-              </tr>
-            </thead>
-            <tbody>
+        <div className="">
+          <Table >
+            <TableHeader>
+              <TableRow >
+                {visibleColumns.includes('Date') && <TableHead className="">Date</TableHead>}
+                {visibleColumns.includes('Amount') && <TableHead className="">Amount</TableHead>}
+                {visibleColumns.includes('Expense Type') && <TableHead className="">Expense Type</TableHead>}
+                {visibleColumns.includes('Payment Mode') && <TableHead className="">Payment Mode</TableHead>}
+                {visibleColumns.includes('Notes') && <TableHead className="">Notes</TableHead>}
+                {visibleColumns.includes('Truck') && <TableHead className="">Truck</TableHead>}
+                {visibleColumns.includes('Driver') && <TableHead className="">Driver</TableHead>}
+                {visibleColumns.includes('Trip') && <TableHead className="">Trip</TableHead>}
+                {visibleColumns.includes('Action') && <TableHead className="">Action</TableHead>}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {maintainenceBook.map((fuel: any, index: number) => (
-                <tr key={index} className="border-t hover:bg-indigo-100 cursor-pointer transition-colors">
-                  {visibleColumns.includes('Date') && <td className="border p-4">{new Date(fuel.date).toLocaleDateString()}</td>}
-                  {visibleColumns.includes('Amount') && <td className="border p-4">₹{formatNumber(fuel.amount)}</td>}
+                <TableRow key={index}>
+                  {visibleColumns.includes('Date') && <TableCell className="">{new Date(fuel.date).toLocaleDateString()}</TableCell>}
+                  {visibleColumns.includes('Amount') && <TableCell className="">₹{formatNumber(fuel.amount)}</TableCell>}
                   {visibleColumns.includes('Expense Type') && (
-                    <td className="border p-4">
+                    <TableCell className="">
                       <div className="flex items-center space-x-2">
                         {icons[fuel.expenseType as IconKey]}
                         <span>{fuel.expenseType}</span>
                       </div>
-                    </td>
+                    </TableCell>
                   )}
                   {visibleColumns.includes('Payment Mode') && (
-                    <td className="border p-4">
+                    <TableCell className="">
                       <div className="flex items-center space-x-2">
                         <MdPayment className="text-green-500" />
                         <span>{fuel.paymentMode}</span>
                       </div>
-                    </td>
+                    </TableCell>
                   )}
-                  {visibleColumns.includes('Notes') && <td className="border p-4">{fuel.notes || 'N/A'}</td>}
-                  {visibleColumns.includes('Truck') && <td className="border p-4">{fuel.truck || 'N/A'}</td>}
+                  {visibleColumns.includes('Notes') && <TableCell className="">{fuel.notes || 'N/A'}</TableCell>}
+                  {visibleColumns.includes('Truck') && <TableCell className="">{fuel.truck || 'N/A'}</TableCell>}
                   {visibleColumns.includes('Driver') && (
-                    <td className="border p-4">{fuel.driver ? <DriverName driverId={fuel.driver} /> : 'N/A'}</td>
+                    <TableCell className="">{fuel.driver ? <DriverName driverId={fuel.driver} /> : 'N/A'}</TableCell>
                   )}
                   {visibleColumns.includes('Trip') && (
-                    <td className="border p-4">{fuel.trip_id ? <TripRoute tripId={fuel.trip_id} /> : 'N/A'}</td>
+                    <TableCell className="">{fuel.trip_id ? <TripRoute tripId={fuel.trip_id} /> : 'N/A'}</TableCell>
                   )}
                   {visibleColumns.includes('Action') && (
-                    <td className="border p-4">
+                    <TableCell className="">
                       <div className="flex items-center space-x-2">
                         {fuel.partyBill != false && <Button variant="outline" onClick={() => { setSelected(fuel); setModalOpen(true); }}>
                           <MdEdit />
@@ -184,12 +184,12 @@ const TripExpensePage: React.FC = () => {
                           <MdDelete />
                         </Button>
                       </div>
-                    </td>
+                    </TableCell>
                   )}
-                </tr>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
 
         <TripExpenseModal

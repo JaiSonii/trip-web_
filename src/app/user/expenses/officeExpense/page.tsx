@@ -11,6 +11,7 @@ import { IoAddCircle } from 'react-icons/io5';
 import OfficeExpenseModal from '@/components/OfficeExpenseModal';
 import { icons, IconKey } from '@/utils/icons';
 import { formatNumber } from '@/utils/utilArray';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const OfficeExpense: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
@@ -113,44 +114,44 @@ const OfficeExpense: React.FC = () => {
                 </Button>
             </div>
 
-            <div className="table-container overflow-auto bg-white shadow rounded-lg">
-                <table className="custom-table w-full border-collapse table-auto">
-                    <thead>
-                        <tr className="bg-indigo-600 text-white">
-                            <th className="border p-4 text-left">Date</th>
-                            <th className="border p-4 text-left">Amount</th>
-                            <th className="border p-4 text-left">Expense Type</th>
-                            <th className="border p-4 text-left">Payment Mode</th>
-                            <th className="border p-4 text-left">Notes</th>
-                            <th className="border p-4 text-left">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+            <div>
+                <Table >
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className=" ">Date</TableHead>
+                            <TableHead className=" ">Amount</TableHead>
+                            <TableHead className=" ">Expense Type</TableHead>
+                            <TableHead className=" ">Payment Mode</TableHead>
+                            <TableHead className=" ">Notes</TableHead>
+                            <TableHead className=" ">Action</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
                         {maintainenceBook.length > 0 ? (
                             maintainenceBook.map((expense, index) => (
-                                <tr key={index} className="border-t hover:bg-indigo-100 cursor-pointer transition-colors">
-                                    <td className="border p-4">
+                                <TableRow key={index} className="border-t hover:bg-indigo-100 cursor-pointer transition-colors">
+                                    <TableCell className="">
                                         <div className='flex items-center space-x-2'>
                                             <FaCalendarAlt className='text-bottomNavBarColor' />
                                             <span>{new Date(expense.date).toLocaleDateString()}</span>
                                         </div>
-                                    </td>
-                                    <td className="border p-4">₹{formatNumber(expense.amount)}</td>
-                                    <td className="border p-4">
+                                    </TableCell>
+                                    <TableCell className="">₹{formatNumber(expense.amount)}</TableCell>
+                                    <TableCell className="">
                                         <div className="flex items-center space-x-2">
                                             {icons[expense.expenseType as IconKey]}
                                             <span>{expense.expenseType}</span>
                                         </div>
-                                    </td>
-                                    <td className="border p-4">
+                                    </TableCell>
+                                    <TableCell className="">
                                         <div className="flex items-center space-x-2">
                                             <MdPayment className="text-green-500" />
                                             <span>{expense.paymentMode}</span>
                                         </div>
-                                    </td>
-                                    <td className="border p-4">{expense.notes || 'N/A'}</td>
+                                    </TableCell>
+                                    <TableCell className="">{expense.notes || 'N/A'}</TableCell>
 
-                                    <td className="border p-4">
+                                    <TableCell className="">
                                         <div className="flex items-center space-x-2">
                                             <Button variant="outline" onClick={() => { setSelected(expense); setModalOpen(true); }} size="sm">
                                                 <MdEdit />
@@ -161,16 +162,16 @@ const OfficeExpense: React.FC = () => {
                                                 <MdDelete />
                                             </Button>
                                         </div>
-                                    </td>
-                                </tr>
+                                    </TableCell>
+                                </TableRow>
                             ))
                         ) : (
-                            <tr>
-                                <td colSpan={8} className="text-center p-4 text-gray-500">No expenses found</td>
-                            </tr>
+                            <TableRow>
+                                <TableCell colSpan={8} className="text-center p-4 text-gray-500">No expenses found</TableCell>
+                            </TableRow>
                         )}
-                    </tbody>
-                </table>
+                    </TableBody>
+                </Table>
             </div>
             <OfficeExpenseModal
                 isOpen={modalOpen}

@@ -44,9 +44,7 @@ export async function GET(req: Request) {
     }
 
     const startDate = new Date(parseInt(year), monthNumber, 1);
-    console.log('Start Date : ' + startDate);
     const endDate = new Date(parseInt(year), monthNumber + 1, 1);
-    console.log('End Date : ' + endDate);
 
     try {
         const [tripExpense, truckExpense] = await Promise.all([
