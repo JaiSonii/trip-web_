@@ -51,6 +51,11 @@ export async function POST(req: Request) {
     }
 
     // Create a new TruckModel instance with provided data
+    const existingTruck = await Truck.findOne({user_id : user, truckNo : data.truckNo})
+    if(existingTruck){
+      return NextResponse.json({error : 'Lorry Already Exists', status: 500 })
+    }
+
     const newTruck = new Truck({
       user_id: user,
       truck_id : 'truck_id' + uuidv4(),

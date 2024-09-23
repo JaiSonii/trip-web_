@@ -10,7 +10,6 @@ import { Button } from '../ui/button';
 import { formatNumber } from '@/utils/utilArray';
 import { loadingIndicator } from '../ui/LoadingIndicator';
 import { createWorker } from 'tesseract.js'
-import { extractEWayBillDetails } from '@/helpers/TripOperation';
 type Props = {
     parties: IParty[];
     trucks: TruckModel[];

@@ -45,7 +45,8 @@ const CreateTripPage: React.FC = () => {
         // Find the latest trip's LR
         if (tripsData.trips.length > 0) {
           const latestTrip = tripsData.trips[0]; // Assuming the API returns trips sorted by date descending
-          let num = parseInt(latestTrip.LR.split('LRN ')[1]) + 1
+          let lrString = latestTrip.LR;
+          let num = parseInt(lrString.match(/\d+/)[0]) + 1;
           const LR = `LRN ${typeof num === 'number' ? num : '001'}`
           setLatestLR(LR); // Assuming 'lr' is the field containing LR in the trip object
         } else {
