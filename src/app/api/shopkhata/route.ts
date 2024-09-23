@@ -1,44 +1,102 @@
-import {models, model} from 'mongoose'
+import { models, model } from 'mongoose'
 import { connectToDatabase, ShopKhataSchema } from '@/utils/schema';
 import { verifyToken } from '@/utils/auth';
 import { NextResponse } from 'next/server';
-import {v4 as uuidv4} from 'uuid'
+import { v4 as uuidv4 } from 'uuid'
 
 const ShopKhata = models.ShopKhata || model('ShopKhata', ShopKhataSchema)
 
-export async function GET(req : Request){
-    try{
-        const {user, error} = await verifyToken(req)
-        if(!user || error){
-            return NextResponse.json({error : "Unauthorized User", status : 401})
+export async function GET(req: Request) {
+    try {
+        const { user, error } = await verifyToken(req)
+        if (!user || error) {
+            return NextResponse.json({ error: "Unauthorized User", status: 401 })
         }
         await connectToDatabase()
-        const shops = await ShopKhata.find({user_id : user})
-        return NextResponse.json({shops, status : 200})
-    }catch(error){
+        // const shops = await ShopKhata.find({ user_id: user })
+        const shops = await ShopKhata.aggregate([
+            {
+                $match: { user_id: user }
+            },
+            {
+                $lookup: {
+                    from: 'shopkhataaccounts',
+                    localField: 'shop_id',
+                    foreignField: 'shop_id',
+                    as: 'shopKhataAccounts'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'expenses',
+                    localField: 'shop_id',
+                    foreignField: 'shop_id',
+                    as: 'expenses'
+                }
+            },
+
+            {
+                $lookup: {
+                    from: 'officeexpenses',
+                    localField: 'shop_id',
+                    foreignField: 'shop_id',
+                    as: 'officeexpenses'
+                }
+            },
+            {
+                $addFields: {
+                    totalExpenses: {
+                        $sum: '$expenses.amount' // Summing the total expenses amount
+                    },
+                    totalCredit: {
+                        $sum: '$shopKhataAccounts.credit' // Summing the total credit from shopKhataAccounts
+                    },
+                    totalPayment: {
+                        $sum: '$shopKhataAccounts.payment' // Summing the total payments from shopKhataAccounts
+                    },
+                    totalOfficeExpense: {
+                        $sum: '$officeexpenses.amount'
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    balance: {
+                        $subtract: [
+                            '$totalPayment',
+                            { $add: ['$totalCredit', '$totalExpenses', '$totalOfficeExpense'] }, // Subtract total credit
+                        ]
+                    }
+                }
+            }
+        ]);
+
+
+        return NextResponse.json({ shops, status: 200 })
+    } catch (error) {
         console.log(error)
-        return NextResponse.json({error, status : 500})
+        return NextResponse.json({ error, status: 500 })
     }
 }
 
-export async function POST(req : Request){
-    try{
-        const {user, error} = await verifyToken(req)
-        if(!user || error){
-            return NextResponse.json({error : "Unauthorized User", status : 401})
+export async function POST(req: Request) {
+    try {
+        const { user, error } = await verifyToken(req)
+        if (!user || error) {
+            return NextResponse.json({ error: "Unauthorized User", status: 401 })
         }
         const data = await req.json()
         await connectToDatabase()
         const shopId = 'shop' + uuidv4()
         const newShop = new ShopKhata({
-            shop_id : shopId,
-            user_id : user,
+            shop_id: shopId,
+            user_id: user,
             ...data
         })
         await newShop.save()
-        return NextResponse.json({newShop, status : 200})
-    }catch(error){
+        return NextResponse.json({ newShop, status: 200 })
+    } catch (error) {
         console.log(error)
-        return NextResponse.json({error, status : 500})
+        return NextResponse.json({ error, status: 500 })
     }
 }

@@ -101,7 +101,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       </div>
 
       {/* Secondary Sidebar */}
-      <div className="ml-20 w-52 bg-gray-100 text-black h-screen overflow-y-auto flex flex-col justify-between"> {/* Adjusted width and overflow */}
+      <div className="ml-20 w-52 bg-[#FFFCF9] text-black h-screen overflow-y-auto flex flex-col justify-between"> {/* Adjusted width and overflow */}
         <div className="flex items-center justify-center py-6">
           <Image src={logo} alt="logo" width={51} height={60} priority />
           <span className="ml-2 text-lg hidden font-semibold md:block">Awajahi</span>

@@ -15,7 +15,80 @@ export async function GET(req: Request) {
   try {
     await connectToDatabase()
 
-    const suppliers = await Supplier.find({ user_id: user }).lean().exec();
+    const suppliers = await Supplier.aggregate([
+      {
+        $match: { user_id: user }
+      },
+      {
+        $lookup: {
+          from: 'trips',
+          localField: 'supplier_id',
+          foreignField: 'supplier',
+          as: 'trips'
+        }
+      },
+      {
+        // Add a new field `filteredTrips` containing only trips with status 1
+        $addFields: {
+          filteredTrips: {
+            $filter: {
+              input: '$trips',
+              as: 'trip',
+              cond: { $lt: ['$$trip.status', 1] }
+            }
+          }
+        }
+      },
+      {
+        // Add another field `tripCount` which is the size of the `filteredTrips` array
+        $addFields: {
+          tripCount: { $size: '$filteredTrips' }
+        }
+      },
+      {
+        // Lookup the supplier account to fetch the totalAmount from SupplierAccount collection
+        $lookup: {
+          from: 'supplieraccounts', // Collection name
+          localField: 'supplier_id',
+          foreignField: 'supplier_id',
+          as: 'accounts'
+        }
+      },
+      {
+        // Add a new field to sum the totalAmount from SupplierAccount collection
+        $addFields: {
+          totalAccountBalance: {
+            $sum: '$accounts.amount'
+          }
+        }
+      },
+      {
+        // Add a field to sum up the total truck hire cost from filteredTrips
+        $addFields: {
+          totalTruckHireCost: {
+            $sum: '$trips.truckHireCost'
+          }
+        }
+      },
+      {
+        // Calculate the balance (totalAccountBalance - totalTruckHireCost)
+        $addFields: {
+          balance: { $subtract: ['$totalAccountBalance', '$totalTruckHireCost'] }
+        }
+      },
+      {
+        $project: {
+          supplier_id: 1,
+          totalAccountBalance: 1,
+          totalTruckHireCost: 1,
+          balance: 1,
+          tripCount: 1,
+          name : 1,
+          contactNumber : 1
+        }
+      }
+    ]);
+    
     return NextResponse.json({ suppliers }, { status: 200 });
   } catch (err) {
     console.error(err);

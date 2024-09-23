@@ -1,20 +1,107 @@
 // PartiesPage.tsx
 'use client'
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ISupplier } from '@/utils/interface';
 import Loading from './loading';
 import { useRouter } from 'next/navigation';
-import { supplierTripCount } from '@/helpers/SupplierOperation';
-import SupplierBalance from '@/components/supplier/SupplierBalance';
-import { FaUserTie, FaPhone, FaTruck, FaWallet } from 'react-icons/fa';
+import { FaUserTie, FaPhone, FaTruck, FaWallet, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
+import { formatNumber } from '@/utils/utilArray';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import debounce from 'lodash.debounce';
 
 const SuppliersPage = () => {
   const router = useRouter();
 
-  const [suppliers, setSuppliers] = useState<ISupplier[] | null>(null);
+  const [suppliers, setSuppliers] = useState<ISupplier[] | any>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' });
+  const [searchQuery, setSearchQuery] = useState(''); // Track the search query
+
+  // Fetch suppliers data
+  useEffect(() => {
+    const fetchSuppliers = async () => {
+      try {
+        const res = await fetch('/api/suppliers', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' },
+        });
+
+        if (!res.ok) {
+          throw new Error('Failed to fetch suppliers');
+        }
+
+        const data = await res.json();
+        setSuppliers(data.suppliers);
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSuppliers();
+  }, []);
+
+  // Function to request sorting
+  const requestSort = (key: any) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  // Sort icon logic
+  const getSortIcon = (columnName: any) => {
+    if (sortConfig.key === columnName) {
+      return sortConfig.direction === 'asc' ? <FaSortUp /> : <FaSortDown />;
+    }
+    return <FaSort />;
+  };
+
+  // Debounce the search input to reduce re-renders on each keystroke
+  const debouncedSearch = useCallback(
+    debounce((query) => setSearchQuery(query), 300),
+    []
+  );
+
+  // Handle search input
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    debouncedSearch(e.target.value.toLowerCase());
+  };
+
+  // Filter and sort suppliers based on search query and sort configuration
+  const filteredAndSortedSuppliers = useMemo(() => {
+    let filteredSuppliers = suppliers;
+
+    // Filter based on search query
+    if (searchQuery) {
+      filteredSuppliers = suppliers.filter((supplier: any) =>
+        supplier.name.toLowerCase().includes(searchQuery) ||
+        supplier.contactNumber.toString().includes(searchQuery) ||
+        supplier.tripCount.toString().includes(searchQuery) ||
+        supplier.balance.toString().includes(searchQuery)
+      );
+    }
+
+    // Sort the suppliers
+    if (sortConfig.key !== null) {
+      filteredSuppliers.sort((a: any, b: any) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (a[sortConfig.key] > b[sortConfig.key]) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+
+    return filteredSuppliers;
+  }, [suppliers, searchQuery, sortConfig]);
+
 
   useEffect(() => {
     const fetchSuppliers = async () => {
@@ -66,51 +153,72 @@ const SuppliersPage = () => {
 
   return (
     <div className="w-full h-full p-4">
-      <div className="table-container overflow-auto bg-white shadow rounded-lg">
-        <table className="custom-table">
-          <thead>
-            <tr className="bg-bottomNavBarColor text-white">
-              <th className="border p-4 text-left">Supplier Name</th>
-              <th className="border p-4 text-left">Contact Number</th>
-              <th className="border p-4 text-left">Active Trips</th>
-              <th className="border p-4 text-left">Supplier Balance</th>
-            </tr>
-          </thead>
-          <tbody>
-            {suppliers.map((supplier) => (
-              <tr
+      <input
+        type="text"
+        placeholder="Search"
+        onChange={handleSearch}
+      />
+      <div className="mt-2">
+        <Table className="">
+          <TableHeader>
+            <TableRow className="">
+              <TableHead onClick={() => requestSort('name')}>
+                <div className='flex justify-between'>
+                  Supplier Name {getSortIcon('name')}
+                </div>
+
+              </TableHead>
+              <TableHead>
+                <div className='flex justify-between'>
+                  Contact
+                </div>
+              </TableHead>
+              <TableHead onClick={() => requestSort('tripCount')}>
+                <div className='flex justify-between'>
+                  Active Trips {getSortIcon('tripCount')}
+                </div>
+              </TableHead>
+              <TableHead onClick={() => requestSort('balance')}>
+                <div className='flex justify-between'>
+                  Supplier Balance {getSortIcon('balance')}
+                </div>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filteredAndSortedSuppliers?.map((supplier: any) => (
+              <TableRow
                 key={supplier.supplier_id as string}
-                className="border-t hover:bg-purple-100 cursor-pointer transition-colors"
                 onClick={() => router.push(`suppliers/${supplier.supplier_id}/trips`)}
               >
-                <td className="border p-4">
+                <TableCell >
                   <div className="flex items-center space-x-2">
                     <FaUserTie className="text-bottomNavBarColor" />
                     <span>{supplier.name}</span>
                   </div>
-                </td>
-                <td className="border p-4">
+                </TableCell>
+                <TableCell >
                   <div className="flex items-center space-x-2">
                     <FaPhone className="text-green-500" />
                     <span>{supplier.contactNumber}</span>
                   </div>
-                </td>
-                <td className="border p-4">
+                </TableCell>
+                <TableCell >
                   <div className="flex items-center space-x-2">
                     <FaTruck className="text-bottomNavBarColor" />
-                    <span>{supplierTripCount(supplier.supplier_id)}</span>
+                    <span>{supplier.tripCount}</span>
                   </div>
-                </td>
-                <td className="border p-4">
+                </TableCell>
+                <TableCell >
                   <div className="flex items-center space-x-2">
                     <FaWallet className="text-bottomNavBarColor" />
-                    <span><SupplierBalance supplierId={supplier.supplier_id} /></span>
+                    <span className={`${supplier.balance > 0 ? 'text-green-500' : 'text-red-500'} font-semibold`}>₹{formatNumber(supplier.balance)}</span>
                   </div>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
     </div>
   );

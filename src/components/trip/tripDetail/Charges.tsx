@@ -28,15 +28,24 @@ const Charges: React.FC<ChargesProps> = ({ charges, setCharges, tripId, trip }) 
   }, [charges]);
 
   const handleAddCharge = async (newCharge: TripExpense) => {
-    const res = await fetch(`/api/trips/${tripId}/expenses`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(newCharge),
-    });
-    const data = await res.json();
-    setCharges((prev: TripExpense[]) => [...prev, data.newCharge]);
+    try {
+      const res = await fetch(`/api/trips/${tripId}/expenses`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newCharge),
+      });
+      if(!res.ok){
+        throw new Error('Failed to add Charge')
+      }
+      const data =  await res.json();
+      setCharges((prev: TripExpense[]) => [...prev, data.newCharge]);
+    } catch (error) {
+      alert(error)
+      console.error('Error adding charge:', error);
+    }
+    
   };
 
   const toggleItemExpansion = (index: number) => {

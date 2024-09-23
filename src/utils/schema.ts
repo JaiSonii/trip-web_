@@ -277,7 +277,7 @@ export const tripChargesSchema = new Schema({
     required: true
   },
   notes: {
-    type: String
+    type: String,
   }
 })
 

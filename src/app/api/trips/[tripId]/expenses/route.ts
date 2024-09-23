@@ -49,6 +49,9 @@ export async function POST(req: Request, { params }: { params: { tripId: string 
     const data = await req.json();
 
     // Create a new instance of TripExpense with the parsed data and tripId
+    if(data.amount === 0 || !data.expenseType || !data.date){
+      throw new Error('Please fill in the required feilds')
+    }
     const newCharge = new TripCharges({
       ...data,
       trip_id: tripId,
@@ -71,10 +74,10 @@ export async function POST(req: Request, { params }: { params: { tripId: string 
     // Return a success response with the new charge
     return NextResponse.json({ status: 200, newCharge });
 
-  } catch (error) {
+  } catch (error: any) {
     // Handle any errors that occur during the process
     console.error("Error creating new trip expense:", error);
-    return NextResponse.json({ status: 500, error: "Failed to create new trip expense" });
+    return NextResponse.json({ status: 500, error:error.message });
   }
 }
 
