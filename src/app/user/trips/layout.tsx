@@ -17,8 +17,8 @@ const TripsLayout = ({ children }: { children: React.ReactNode }) => {
   }
 
   return (
-    <div className={`${inter.className} flex flex-col`}>
-      <div className="container mx-auto max-h-screen p-2 flex flex-col bg-white">
+    <div className={`${inter.className} max-h-screen flex flex-col`}>
+      <div className="container mx-auto p-2 flex flex-col bg-white">
         <div className="flex items-center justify-between mb-4 border-b-2 border-gray-300 pb-2">
           <h1 className="text-2xl font-bold text-bottomNavBarColor">{headings[pathname]}</h1>
           <div className="flex space-x-4">

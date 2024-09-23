@@ -35,7 +35,7 @@ const config: Config = {
         borderColor: '#c3c3c3',
         bottomNavBarColor: '#FE8631', 
         primaryOrange: '#ff6a00',
-        lightOrange: '#FFC49980',
+        lightOrange: '#ffa666',
         lightOrangeButtonColor: '#ffcaA4',
         destructive : '#D95C2B',
         buttonTextColor : '#6F2718 ',
