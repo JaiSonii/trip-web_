@@ -2,18 +2,21 @@
 import { Button } from "@/components/ui/button";
 import { Inter } from "next/font/google";
 import Link from 'next/link';
-import { usePathname } from "next/navigation";
+import { useParams, usePathname } from "next/navigation";
 
 const inter = Inter({ subsets: ["latin"] });
 
 
 
 const TripsLayout = ({ children }: { children: React.ReactNode }) => {
+  const {tripId} = useParams()
   const pathname = usePathname()
+ 
 
   const headings: any = {
     '/user/trips': 'Trips',
-    '/user/trips/create': 'Create New Trip'
+    '/user/trips/create': 'Create New Trip',
+    [`/user/trips/${tripId}`] : 'Trip Details'
   }
 
   return (

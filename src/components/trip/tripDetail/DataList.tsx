@@ -4,6 +4,8 @@ import { ITrip, PaymentBook } from '@/utils/interface';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import { fetchBalance } from '@/helpers/fetchTripBalance';
 import { Button } from '@/components/ui/button';
+import { formatNumber } from '@/utils/utilArray';
+import { PiPlusBold } from 'react-icons/pi';
 
 interface DataListProps {
   data: PaymentBook[];
@@ -135,12 +137,12 @@ const DataList: React.FC<DataListProps> = ({ data, label, modalTitle, trip, setD
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-semibold text-gray-800">{label}</h3>
         <Button
-          className="rounded-full flex items-center w-8 h-8"
+          className="rounded-full flex items-center w-8 h-8 p-0"
           onClick={openAddModal}
           aria-label={`Add ${label}`}
           disabled={trip.status == 4}
         >
-          +
+          <PiPlusBold color='white' size={20}/>
         </Button>
       </div>
       {!listData || listData.length === 0 ? (
@@ -155,8 +157,8 @@ const DataList: React.FC<DataListProps> = ({ data, label, modalTitle, trip, setD
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">{item.paymentType}</p>
-                  <p className="text-xs text-gray-600">Amount: {item.amount}</p>
+                  <p className="text-sm font-medium text-gray-900">Amount: ₹{formatNumber(item.amount)}</p>
+                  <p className="text-xs text-gray-600">{item.paymentType}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-xs text-gray-600">Date: {new Date(item.paymentDate).toLocaleDateString()}</p>

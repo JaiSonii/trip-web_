@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 import { IoDocumentsOutline, IoLogOutOutline, IoWalletOutline } from 'react-icons/io5';
 import Cookies from 'js-cookie';
 import Image from 'next/image';
@@ -18,6 +18,7 @@ interface MainLayoutProps {
 }
 
 const MainLayout = ({ children }: MainLayoutProps) => {
+  const { tripId } = useParams()
   const pathname = usePathname();
   const router = useRouter();
   const [selected, setSelected] = useState<string | null>(null);
@@ -45,7 +46,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const decodedToken: any = jwt.decode(roleToken as string);
 
   const primaryMenuItems = [
-    { href: '/user/home', label: 'Home', icon: TfiHome },
+    { href: '/user', label: 'Home', icon: TfiHome },
     { href: '/user/trips', label: 'Trips', icon: TfiWorld },
     { href: `/user/expenses/truckExpense`, label: 'Expenses', icon: IoWalletOutline },
     { href: '/user/documents', label: 'Docs', icon: IoDocumentsOutline },
@@ -129,7 +130,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       </div>
 
       {/* Main Content Area */}
-      <div className="flex-grow min-h-screen overflow-y-auto pb-4 rounded-3xl bg-white shadow-black shadow-xl my-2 no-scrollbar">
+      <div className={`flex-grow min-h-screen overflow-y-auto pb-4 rounded-3xl bg-white shadow-black shadow-xl my-2 ${pathname.startsWith('/user/trips/trip') ? 'thin-scrollbar' : 'no-scrollbar'} `}>
+
         {/* Render dynamic content here */}
         {children}
       </div>

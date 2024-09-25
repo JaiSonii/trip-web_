@@ -62,26 +62,26 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
     fetchParty();
   }, [trip]);
 
-  const handleUndoStatus = async ()=>{
+  const handleUndoStatus = async () => {
     const updateDates = (dates: (Date | null)[]): (Date | null)[] => {
       // Create a copy of the array to avoid mutating the original array
       const updatedDates = [...dates];
-      
+
       for (let i = 1; i < updatedDates.length; i++) {
         if (updatedDates[i] === null) {
           updatedDates[i - 1] = null;
         }
       }
-      
+
       return updatedDates;
     };
-    if(trip.status == 0){
+    if (trip.status == 0) {
       alert('Cannot Undo the Status')
       return
     }
     const data = {
-      status : trip.status ? trip.status - 1 : alert('No Trip Status'),
-      dates : updateDates(trip.dates)
+      status: trip.status ? trip.status - 1 : alert('No Trip Status'),
+      dates: updateDates(trip.dates)
     }
     try {
       const res = await fetch(`/api/trips/${trip.trip_id}`, {
@@ -190,66 +190,71 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
     // Add logic to handle adding the new charge
   };
 
-  
+
 
   return (
-    <div className="p-6 bg-white shadow-md rounded-md grid grid-cols-1 md:grid-cols-3 gap-6">
-      {/* Left Side - Trip Details */}
-      <div className="col-span-2 pr-4">
-        <TruckHeader truck={trip.truck} driver={trip.driver} />
+    <div>
+      <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Left Side - Trip Details */}
+        <div className="col-span-2 pr-4 flex flex-col gap-2">
+          {/* <TruckHeader truck={trip.truck} driver={trip.driver} /> */}
 
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
-          <TripInfo label="Party Name" value={partyName || '----'} />
-          <div className="flex flex-col md:flex-row md:gap-6">
+          <div className='grid grid-cols-3 gap-2'>
+            <TripInfo label="Lorry" value={trip.truck || '----'} />
+            <TripInfo label="Customer" value={partyName || '----'} />
+            <TripInfo label="Pending" value={`₹${formatNumber(tripBalance)}`} />
+          </div>
+
+          <div className='grid grid-cols-4 gap-2'>
+            <TripInfo label="Party Name" value={partyName || '----'} />
             <TripInfo label="LR Number" value={trip.LR || '----'} />
             <TripInfo label="Material" value={trip.material || '----'} />
             <TripInfo label="Billing Type" value={trip.billingType || '----'} />
           </div>
-          
-        </div>
-        <TripInfo label="Route" value={`${trip.route.origin} → ${trip.route.destination}`} />
-        <div className="mt-6 w-full">
-          <TripStatus status={trip.status as number} dates={trip.dates} />
-        </div>
-        <div className="col-span-3 mt-6 flex justify-start space-x-4">
-          <div className="flex items-center space-x-4">
-            <StatusButton status={trip.status as number} statusUpdate={handleStatusUpdate} dates={trip.dates} amount={tripBalance} />
-            <ViewBillButton />
-            <Button variant={'destructive'} onClick={handleUndoStatus}>
-              <div className='flex items-center space-x-2'>
-                <UndoIcon />
-                <span>Undo Status</span>
-              </div>
-            </Button>
-            {/* Add more buttons as needed */}
+
+          {/* <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+            <TripInfo label="Party Name" value={partyName || '----'} />
+            <div className="flex flex-col md:flex-row md:gap-6">
+              <TripInfo label="LR Number" value={trip.LR || '----'} />
+              <TripInfo label="Material" value={trip.material || '----'} />
+              <TripInfo label="Billing Type" value={trip.billingType || '----'} />
+            </div>
+
+          </div> */}
+          <TripInfo label="Route" value={`${trip.route.origin} → ${trip.route.destination}`} startDate={trip.startDate} />
+          <div className=" w-full">
+            <TripStatus status={trip.status as number} dates={trip.dates} />
           </div>
+          <div className="col-span-3 flex justify-center space-x-4">
+            <div className="flex items-center space-x-4">
+              <StatusButton status={trip.status as number} statusUpdate={handleStatusUpdate} dates={trip.dates} amount={tripBalance} />
+              <ViewBillButton />
+              <Button variant={'destructive'} onClick={handleUndoStatus}>
+                <div className='flex items-center space-x-2'>
+                  <UndoIcon />
+                  <span>Undo Status</span>
+                </div>
+              </Button>
+              {/* Add more buttons as needed */}
+            </div>
+          </div>
+
         </div>
 
-        <div className="mt-6 flex items-center justify-between gap-6 py-4">
-          <TripInfo label="Freight Amount" value={`₹ ${formatNumber(trip.amount)}`} />
-          <TripInfo label="Start Date" value={new Date(trip.startDate).toLocaleDateString()} />
-          <TripInfo label="End Date" value={trip.dates[1] ? new Date(trip.dates[1]).toLocaleDateString() : '----'} />
-          
+        {/* Right Side - Profit, Balance, and POD Viewer */}
+        <div className="col-span-1 space-y-6">
+          <Profit charges={charges} truckCost={trip.truckHireCost && trip.truckHireCost} amount={trip.amount} setCharges={setCharges} tripId={trip.trip_id} driverId={trip.driver} truckNo={trip.truck} />
+          <TripInfo label="Notes" value={trip.notes || 'No notes available'} tripId={trip.trip_id} />
+          {/* <EWayBillUpload validity={trip.ewbValidityDate ? trip.ewbValidityDate : null} tripId={trip.trip_id} ewayBillUrl={trip.documents?.find(doc => doc.type == 'ewayBill')?.url || trip.ewayBill} setEwayBillUrl={setEwayBillUrl} />
+          {trip.POD ? <PODViewer podUrl={trip.POD} /> : null} */}
         </div>
-        <TripInfo label="Notes" value={trip.notes || 'No notes available'} tripId={trip.trip_id} />
-
-        {/* Reusable Components */}
-        <DataList data={accounts} label="Advances" modalTitle="Add Advance" trip={trip} setData={setAccounts} setBalance={setBalance} setTrip={setTrip} />
-        <DataList data={accounts} label="Payments" modalTitle="Add Payment" trip={trip} setData={setAccounts} setBalance={setBalance} setTrip={setTrip} />
-
-        {/* Charges Component Integration */}
-        <Charges charges={charges} onAddCharge={handleAddCharge} setCharges={setCharges} tripId={trip.trip_id} trip={trip} />
       </div>
+      <div className='grid grid-cols-3 gap-2 mt-4'>
+        <div className='col-span-1 bg-[#FAFDFF] p-2 rounded-xl shadow-xl'><DataList data={accounts} label="Advances" modalTitle="Add Advance" trip={trip} setData={setAccounts} setBalance={setBalance} setTrip={setTrip} /></div>
+        <div className='col-span-1 bg-[#FAFDFF] p-2 rounded-xl shadow-xl'><DataList data={accounts} label="Payments" modalTitle="Add Payment" trip={trip} setData={setAccounts} setBalance={setBalance} setTrip={setTrip} /></div>
+        <div className='col-span-1 bg-[#FAFDFF] p-2 rounded-xl shadow-xl'><Charges charges={charges} onAddCharge={handleAddCharge} setCharges={setCharges} tripId={trip.trip_id} trip={trip} /></div>
 
-      {/* Right Side - Profit, Balance, and POD Viewer */}
-      <div className="col-span-1 space-y-6">
-        <div className="flex items-center justify-between bg-gradient-to-r p-4 from-orange-500 via-bottomNavBarColor to-bottomNavBarColor rounded-lg shadow-lg text-white">
-          <h3 className="text-xl font-bold">Pending Balance</h3>
-          <p className="text-xl font-semibold ">₹ {formatNumber(tripBalance)}</p>
-        </div>
-        <Profit charges={charges} truckCost={trip.truckHireCost && trip.truckHireCost} amount={trip.amount} setCharges={setCharges} tripId={trip.trip_id} driverId={trip.driver} truckNo={trip.truck} />
-        <EWayBillUpload validity={trip.ewbValidityDate ? trip.ewbValidityDate : null} tripId={trip.trip_id} ewayBillUrl={trip.documents?.find(doc=>doc.type == 'ewayBill')?.url || trip.ewayBill} setEwayBillUrl={setEwayBillUrl} />
-        {trip.POD ? <PODViewer podUrl={trip.POD} /> : null}
+
       </div>
     </div>
   );

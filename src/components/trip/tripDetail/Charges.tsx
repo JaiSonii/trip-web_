@@ -4,6 +4,8 @@ import { ITrip, TripExpense } from '@/utils/interface';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import EditChargeModal from './EditChargeModal';
 import { Button } from '@/components/ui/button';
+import { formatNumber } from '@/utils/utilArray';
+import { PiPlusBold } from 'react-icons/pi';
 
 interface ChargesProps {
   charges: TripExpense[];
@@ -79,11 +81,11 @@ const Charges: React.FC<ChargesProps> = ({ charges, setCharges, tripId, trip }) 
         <h3 className="text-lg font-semibold text-gray-800">Charges</h3>
         <Button
           disabled={trip.status === 4}
-          className="flex items-center justify-center w-8 h-8 rounded-full focus:outline-none ml-4 transition duration-300 ease-in-out transform hover:scale-110"
+          className="flex items-center justify-center w-8 h-8 rounded-full p-0 "
           onClick={() => setIsModalOpen(true)}
           aria-label="Add Charge"
         >
-          +
+          <PiPlusBold color='white' size={20}/>
         </Button>
       </div>
       {!sortedCharges || sortedCharges.length === 0 ? (
@@ -98,7 +100,7 @@ const Charges: React.FC<ChargesProps> = ({ charges, setCharges, tripId, trip }) 
             >
               <div className="flex items-center justify-between">
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">Amount: ₹{charge.amount}</p>
+                  <p className="text-sm font-medium text-gray-900">Amount: ₹{formatNumber(charge.amount)}</p>
                   <p className="text-xs text-gray-600">Type: {charge.expenseType}</p>
                 </div>
                 <div className="text-right">

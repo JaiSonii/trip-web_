@@ -109,6 +109,11 @@ body {
   }
 }
 
+.thin-scrollbar::-webkit-scrollbar{
+  width: 20px;
+
+}
+
 /* Custom table styling specifically targeting tables with class "custom-table" */
 
 .table-container {

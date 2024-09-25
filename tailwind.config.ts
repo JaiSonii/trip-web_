@@ -39,6 +39,7 @@ const config: Config = {
         lightOrangeButtonColor: '#ffcaA4',
         destructive : '#D95C2B',
         buttonTextColor : '#6F2718 ',
+        hoverColor : '#FFC49980',
 
         // Existing HSL-based Colors
         border: "hsl(var(--border))",

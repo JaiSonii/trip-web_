@@ -9,7 +9,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-lightOrangeButtonColor text-primary-foreground hover:bg-primary/90",
+        default: "bg-[#FFA500] text-primary-foreground hover:bg-primary/90",
         destructive:
           "bg-destructive text-white hover:bg-lightOrangeButtonColor+90",
         outline:
@@ -18,7 +18,7 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-lightOrangeButtonColor hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        newyork: "bg-lightOrange text-buttonTextColor hover:bg-bottomNavBarColor hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50", // Add this line
+        newyork: "bg-[#FFA500] text-white hover:bg-bottomNavBarColor hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50", // Add this line
       },
       size: {
         default: "h-10 px-4 py-2",
