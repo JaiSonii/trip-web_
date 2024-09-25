@@ -46,7 +46,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const decodedToken: any = jwt.decode(roleToken as string);
 
   const primaryMenuItems = [
-    { href: '/user', label: 'Home', icon: TfiHome },
+    { href: '/user/home', label: 'Home', icon: TfiHome },
     { href: '/user/trips', label: 'Trips', icon: TfiWorld },
     { href: `/user/expenses/truckExpense`, label: 'Expenses', icon: IoWalletOutline },
     { href: '/user/documents', label: 'Docs', icon: IoDocumentsOutline },
