@@ -41,6 +41,7 @@ const useFetchData = (tripId: string) => {
         if (!tripRes.ok) throw new Error('Failed to fetch trip details');
 
         const tripData = await tripRes.json();
+        console.log(tripData)
         setTrip(tripData.trip);
       } catch (error: any) {
         console.error('Error fetching data:', error);

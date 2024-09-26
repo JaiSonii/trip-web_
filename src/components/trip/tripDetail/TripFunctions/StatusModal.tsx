@@ -13,7 +13,7 @@ interface StatusModalProps {
 
 const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSave, dates, amount }) => {
   const [startDate, setStartDate] = useState<string>('');
-  const [podReceivedDate, setPodReceivedDate] = useState<string>('');
+  const [podReceivedDate, setPodReceivedDate] = useState<string>(new Date().toLocaleDateString());
   const [podImage, setPodImage] = useState<File | null>(null);
   const [paymentType, setPaymentType] = useState<string>('');
   const [settlementDate, setSettlementDate] = useState<string>('');

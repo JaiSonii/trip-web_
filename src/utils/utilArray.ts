@@ -242,17 +242,22 @@ export const monthMap: { [key: string]: number } = {
   December: 11
 };
 
-export const formatNumber = (num: number) => {
-  if (!num && num !== 0) return ""; // Check if num is null or undefined, but allow 0
-  const cleanNum = num.toString().replace(/[^\d]/g, ""); // Remove non-digit characters
+export const formatNumber = (num: number | string) => {
+  if (num === null || num === undefined || num === "") return ""; // Handle null, undefined, or empty string
 
-  // Format the number according to Indian numbering system (lakhs, crores)
-  const lastThree = cleanNum.slice(-3);
-  const otherNumbers = cleanNum.slice(0, cleanNum.length - 3);
+  // Convert the input to a string and remove commas (if any)
+  const cleanNum = num.toString().replace(/,/g, "");
 
-  const formattedNumber = otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ","); // Insert commas after every two digits
-  return otherNumbers ? `${formattedNumber},${lastThree}` : lastThree;
+  // Convert the cleaned string to a number
+  const numericValue = Number(cleanNum);
+  if (isNaN(numericValue)) return ""; // Handle invalid number conversion
+
+  // Format the cleaned number in Indian numbering system
+  return new Intl.NumberFormat('en-IN').format(numericValue);
 };
+
+
+
 
 
 

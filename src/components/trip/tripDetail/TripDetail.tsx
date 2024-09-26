@@ -201,7 +201,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
 
           <div className='grid grid-cols-3 gap-2'>
             <TripInfo label="Lorry" value={trip.truck || '----'} />
-            <TripInfo label="Customer" value={partyName || '----'} />
+            <TripInfo label="Driver" value={trip.driver || '----'} />
             <TripInfo label="Pending" value={`₹${formatNumber(tripBalance)}`} />
           </div>
 

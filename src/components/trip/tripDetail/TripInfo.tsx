@@ -1,3 +1,4 @@
+import DriverName from '@/components/driver/DriverName';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import React, { useState, useEffect } from 'react';
@@ -52,7 +53,7 @@ const TripInfo: React.FC<TripInfoProps> = ({ label, value, tripId, startDate }) 
             </p>
           </div>
         ) : (
-          <p className="text-2xl font-semibold text-gray-900">{value}</p>
+          <p className="text-2xl font-semibold text-gray-900">{label === 'Driver' ? <DriverName driverId={value} /> : value}</p>
         )}
         {label === 'Notes' && !isEditingNotes && (
           <Button onClick={() => setIsEditingNotes(true)}>
