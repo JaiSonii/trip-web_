@@ -47,10 +47,8 @@ const TripInfo: React.FC<TripInfoProps> = ({ label, value, tripId, startDate }) 
       </div>
       <div className="flex items-center justify-between mb-2">
         {label === 'Notes' && !isEditingNotes ? (
-          <div className="flex-1">
-            <p className="text-2xl font-semibold text-gray-900 overflow-hidden overflow-ellipsis whitespace-pre-wrap">
-              {notes}
-            </p>
+          <div className="" style={{scrollbarWidth : 'thin'}}>
+            <textarea disabled className="text-2xl font-semibold text-gray-900 overflow-auto thin-scrollbar " value={notes} />
           </div>
         ) : (
           <p className="text-2xl font-semibold text-gray-900">{label === 'Driver' ? <DriverName driverId={value} /> : value}</p>

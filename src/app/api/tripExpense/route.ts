@@ -19,7 +19,7 @@ export async function GET(req: Request) {
     await connectToDatabase();
 
     if (!month || !year) {
-        const tripExpense = await Expense.find({ user_id: user }).lean();
+        const tripExpense = await Expense.find({ user_id: user , trip_id: { $exists: true, $ne: '' }}).sort({date : -1}).lean();
         return NextResponse.json({ tripExpense, status: 200 });
     }
 

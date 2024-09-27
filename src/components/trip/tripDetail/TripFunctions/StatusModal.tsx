@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { statuses } from '@/utils/schema';
 import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 
 interface StatusModalProps {
   status: number;
@@ -12,7 +13,7 @@ interface StatusModalProps {
 }
 
 const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSave, dates, amount }) => {
-  const [startDate, setStartDate] = useState<string>('');
+  const [startDate, setStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [podReceivedDate, setPodReceivedDate] = useState<string>(new Date().toLocaleDateString());
   const [podImage, setPodImage] = useState<File | null>(null);
   const [paymentType, setPaymentType] = useState<string>('');
@@ -35,71 +36,79 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
   };
 
 
- const saveChanges = () => {
-  let data: any = {};
+  const saveChanges = () => {
+    let data: any = {};
 
-  const convertFileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onloadend = () => {
-        if (reader.result) {
-          resolve(reader.result.toString());
+    const convertFileToBase64 = (file: File): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = () => {
+          if (reader.result) {
+            resolve(reader.result.toString());
+          } else {
+            reject('Failed to convert file to Base64');
+          }
+        };
+        reader.onerror = () => reject('Error reading file');
+      });
+    };
+
+    const updateData = async () => {
+      if (statuses[status] === 'Started') {
+        dates[1] = new Date(startDate);
+        data = { dates: dates, status: status + 1 };
+      } else if (statuses[status] === 'Completed') {
+        dates[2] = new Date(podReceivedDate);
+
+        if (podImage) {
+          try {
+            const base64PodImage = await convertFileToBase64(podImage);
+            data = { dates: dates, status: status + 1, podImage: base64PodImage };
+          } catch (error) {
+            console.error('Error converting file to Base64:', error);
+          }
         } else {
-          reject('Failed to convert file to Base64');
+          data = { dates: dates, status: status + 1 };
         }
-      };
-      reader.onerror = () => reject('Error reading file');
-    });
-  };
-
-  const updateData = async () => {
-    if (statuses[status] === 'Started') {
-      dates[1] = new Date(startDate);
-      data = { dates: dates, status: status + 1 };
-    } else if (statuses[status] === 'Completed') {
-      dates[2] = new Date(podReceivedDate);
-
-      if (podImage) {
-        try {
-          const base64PodImage = await convertFileToBase64(podImage);
-          data = { dates: dates, status: status + 1, podImage: base64PodImage };
-        } catch (error) {
-          console.error('Error converting file to Base64:', error);
-        }
+      } else if (statuses[status] === 'POD Recieved') {
+        dates[3] = new Date(startDate);
+        data = { dates: dates, status: status + 1 };
+      } else if (statuses[status] === 'POD Submitted') {
+        dates[4] = new Date(settlementDate);
+        data = {
+          amount: amount,
+          paymentType,
+          receivedByDriver,
+          notes,
+          dates: dates,
+          status: status + 1,
+        };
       }
-    } else if (statuses[status] === 'POD Recieved') {
-      dates[3] = new Date(startDate);
-      data = { dates: dates, status: status + 1 };
-    } else if (statuses[status] === 'POD Submitted') {
-      dates[4] = new Date(settlementDate);
-      data = {
-        amount: amount,
-        paymentType,
-        receivedByDriver,
-        notes,
-        dates: dates,
-        status: status + 1,
-      };
-    }
 
-    onSave(data)
-    onClose()
-    // You can now use the `data` object to send the request or perform further actions
-    // Example: sending data to the server
-    // await fetch('/api/update-status', { method: 'POST', body: JSON.stringify(data) });
+      onSave(data)
+      onClose()
+      // You can now use the `data` object to send the request or perform further actions
+      // Example: sending data to the server
+      // await fetch('/api/update-status', { method: 'POST', body: JSON.stringify(data) });
+    };
+
+    updateData();
+
   };
-
-  updateData();
-  
-};
 
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-500 bg-opacity-75">
-      <div className="bg-white rounded-lg shadow-md overflow-hidden" style={{ maxWidth: '600px', width: '90%' }}>
+      <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{
+            duration: 0.5,
+            ease: [0, 0.71, 0.2, 1.01]
+          }} className="bg-white rounded-lg shadow-md overflow-hidden" style={{ maxWidth: '600px', width: '90%' }}>
         <div className="p-6">
           <h2 className="text-lg font-bold mb-4 text-bottomNavBarColor">Trip {statuses[status + 1]}</h2>
           {statuses[status] === 'Started' && (
@@ -210,7 +219,7 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
             </Button>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

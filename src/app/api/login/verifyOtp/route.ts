@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
       const token = jwt.sign(
         jwtObject,
         process.env.JWT_SECRET as string,
-        { expiresIn: '10d' }
+        { expiresIn: '30d' }
       );
       const roleToken = jwt.sign(
         { role: jwtObject.role  },
@@ -94,9 +94,9 @@ export async function POST(req: NextRequest) {
 
       response.cookies.set('auth_token', token, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
         path: '/', // Set path to the root to ensure it's accessible across the app
-        sameSite: 'strict', // CSRF protection
+        sameSite: 'strict', // CSRF protection,
+        maxAge: 30 * 24 * 60 * 60
       });
 
       

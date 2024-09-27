@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaCheck, FaTruck, FaFileInvoice, FaMoneyBill, FaCheckCircle } from 'react-icons/fa'; // Example icons
 import StatusModal from './StatusModal';
+import { Button } from '@/components/ui/button';
 
 interface StatusButtonProps {
   status: number;
@@ -37,11 +38,12 @@ const StatusButton: React.FC<StatusButtonProps> = ({ status, statusUpdate, dates
 
   return (
     <div className="w-full">
-      <div
+      <Button
         onClick={openModal}
-        className={`relative overflow-hidden rounded-md text-white font-medium text-center cursor-pointer p-2 transition-all duration-300 ease-in-out transform hover:scale-105 ${
-          status === 4 ? 'pointer-events-none opacity-50' : ''
-        }`}
+        className={`
+    ${status === 4 ? 'pointer-events-none opacity-50' : ''}
+    hover:scale-105 hover:shadow-md transition-transform duration-300 ease-in-out
+  `}
         style={{
           backgroundColor: color,
           height: '45px',
@@ -49,7 +51,7 @@ const StatusButton: React.FC<StatusButtonProps> = ({ status, statusUpdate, dates
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          transition: 'background-color 0.3s ease'
+          transition: 'background-color 0.3s ease, transform 0.3s ease',
         }}
       >
         <div
@@ -60,7 +62,8 @@ const StatusButton: React.FC<StatusButtonProps> = ({ status, statusUpdate, dates
           {icon}
           <span>{label} - {fillPercentage}%</span>
         </div>
-      </div>
+      </Button>
+
       <StatusModal
         status={status}
         isOpen={modalOpen}

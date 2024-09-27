@@ -12,6 +12,7 @@
       -ms-overflow-style: none;  /* IE and Edge */
       scrollbar-width: none;  /* Firefox */
 }
+
 }
 
 @layer base {
@@ -109,10 +110,49 @@ body {
   }
 }
 
-.thin-scrollbar::-webkit-scrollbar{
-  width: 20px;
-
+/* For Firefox */
+/* For Firefox */
+.thin-scrollbar {
+  scrollbar-width: thin; /* Makes scrollbar thin */
+  scrollbar-color: #FE8631 transparent; /* Thumb color and track color */
+  
 }
+
+/* For WebKit-based browsers (Chrome, Safari, Edge) */
+.thin-scrollbar::-webkit-scrollbar {
+  width: 8px; /* Adjust the width of the scrollbar */
+  height: 8px;
+  border-radius: 20px; /* Adjust the height of the scrollbar (for horizontal scroll) */
+}
+
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: transparent; /* Track color (background behind the thumb) */
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #FE8631; /* Scrollbar thumb color */
+  border-radius: 10px; /* Round the corners of the scrollbar thumb */
+  border: 2px solid transparent; /* Optional: Adds padding inside thumb */
+}
+
+/* Hover effect for WebKit-based browsers */
+.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #FE6E00; /* Darken thumb on hover */
+}
+
+/* Active effect for WebKit-based browsers */
+.thin-scrollbar::-webkit-scrollbar-thumb:active {
+  background-color: #FE5200; /* Darken thumb when active */
+}
+
+/* Firefox scrollbar track (for better rounding) */
+.thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #FE8631 transparent; /* Thumb color and track color */
+  scrollbar-track-border-radius: 10px; /* Rounded scrollbar for Firefox */
+}
+
+
 
 /* Custom table styling specifically targeting tables with class "custom-table" */
 

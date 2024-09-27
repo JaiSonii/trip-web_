@@ -38,7 +38,7 @@ const TruckExpense: React.FC = () => {
   const monthYear = searchParams.get('monthYear')?.split(' ');
   const [month, year] = monthYear ? monthYear : [null, null];
 
-  
+
 
   const getBook = async () => {
     try {
@@ -54,7 +54,7 @@ const TruckExpense: React.FC = () => {
 
   const handleEditExpense = async (expense: IExpense) => {
     try {
-      selected ? await handleAddCharge(expense, expense.id) : handleAddCharge(expense, '',expense.truck);
+      selected ? await handleAddCharge(expense, expense.id) : handleAddCharge(expense, '', expense.truck);
       setModalOpen(false); // Close the modal after saving
       await getBook();
     } catch (error) {
@@ -90,11 +90,9 @@ const TruckExpense: React.FC = () => {
   };
 
   return (
-    <div className="w-full h-full p-4">
+    <div className="w-full h-full">
 
-      <div className='flex items-end'>
-
-        <div className=" flex items-center gap-2">
+        <div className=" flex items-center justify-between w-full mb-1">
           <DropdownMenu>
             <DropdownMenuTrigger>
               <Button variant="outline">Select Columns</Button>
@@ -124,12 +122,10 @@ const TruckExpense: React.FC = () => {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button onClick={()=>setModalOpen(true)}>
-          Truck Expense     <IoAddCircle className='mt-1'/>
-        </Button>
+          <Button onClick={() => setModalOpen(true)}>
+            Truck Expense     <IoAddCircle className='mt-1' />
+          </Button>
         </div>
-       
-      </div>
 
 
       <div className="">
@@ -211,16 +207,16 @@ const TruckExpense: React.FC = () => {
         </Table>
       </div>
 
-      
-        <TruckExpenseModal
-          isOpen={modalOpen}
-          onClose={() => setModalOpen(false)}
-          onSave={handleEditExpense}
-          driverId={selected?.driver as string}
-          selected={selected}
-          truckPage={true}
-        />
-      
+
+      <TruckExpenseModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={handleEditExpense}
+        driverId={selected?.driver as string}
+        selected={selected}
+        truckPage={true}
+      />
+
     </div>
   );
 };

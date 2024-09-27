@@ -16,7 +16,7 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     ]
     return (
         <div>
-            <div className="flex items-center justify-around ">
+            <div className="flex items-center justify-around "style={{scrollbarWidth : 'thin'}}>
                 {tabs.map((tab) => (
                     <Link
                         key={tab.name}

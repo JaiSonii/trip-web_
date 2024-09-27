@@ -22,7 +22,7 @@ export async function PUT(req: Request, { params }: { params: { expenseId: strin
     console.log(expenseId)
 
     // Create a new instance of TripExpense with the parsed data and tripId
-    const charge = await Expense.findByIdAndUpdate(expenseId, data)
+    const charge = await Expense.findByIdAndUpdate(expenseId, data,{new : true})
     
     // charge.amount = data.amount
     // charge.date = data.date
@@ -31,9 +31,7 @@ export async function PUT(req: Request, { params }: { params: { expenseId: strin
     // charge.paymentMode = data.paymentMode
     // charge.transaction_id = data.transaction_id
     // charge.truck = data.truck
-    // charge.driver = data.driver    
-
-    await charge.save()
+    // charge.driver = data.driver   
 
     // Return a success response with the new charge
     return NextResponse.json({ status: 200, charge });

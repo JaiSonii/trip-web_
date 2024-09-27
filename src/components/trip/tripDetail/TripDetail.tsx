@@ -15,6 +15,7 @@ import EWayBillUpload from './EwayBillUpload';
 import { Button } from '@/components/ui/button';
 import { UndoIcon } from 'lucide-react';
 import { formatNumber } from '@/utils/utilArray';
+import Link from 'next/link';
 
 interface TripDetailsProps {
   trip: ITrip;
@@ -200,13 +201,19 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
           {/* <TruckHeader truck={trip.truck} driver={trip.driver} /> */}
 
           <div className='grid grid-cols-3 gap-2'>
-            <TripInfo label="Lorry" value={trip.truck || '----'} />
-            <TripInfo label="Driver" value={trip.driver || '----'} />
+            <Link href={`/user/trucks/${trip.truck}`}>
+              <TripInfo label="Lorry" value={trip.truck || '----'} />
+            </Link>
+            <Link href={`/user/drivers/${trip.driver}`}>
+              <TripInfo label="Driver" value={trip.driver || '----'} />
+            </Link>
             <TripInfo label="Pending" value={`₹${formatNumber(tripBalance)}`} />
           </div>
 
           <div className='grid grid-cols-4 gap-2'>
-            <TripInfo label="Party Name" value={partyName || '----'} />
+            <Link href={`/user/parties/${trip.party}`}>
+              <TripInfo label="Party Name" value={partyName || '----'} />
+            </Link>
             <TripInfo label="LR Number" value={trip.LR || '----'} />
             <TripInfo label="Material" value={trip.material || '----'} />
             <TripInfo label="Billing Type" value={trip.billingType || '----'} />

@@ -138,6 +138,26 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
     }
   };
 
+  const handleDeleteExpense = async (data : any) => {
+    try {
+      const res = await fetch(`/api/truckExpense/${data._id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      if (res.ok) {
+        const resData = await res.json()
+        setTruckExpenses(truckExpenses.filter((expense : any)=>expense._id === data._id))
+      } else {
+        console.log('Failed to delete');
+      }
+    } catch (error) {
+      alert('Failed to Delete Expense')
+    }
+    
+  };
+
   return (
     <div className="p-6 border rounded-lg border-lightOrange shadow-lg bg-white w-full hover:shadow-lightOrangeButtonColor transition-shadow duration-300 relative">
       <h3 className="text-2xl font-semibold mb-6 text-center text-gray-800">Profit Summary (Rs)</h3>
@@ -177,7 +197,7 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
         </span>
       </div>
       {showTruckExpenses && truckExpenses.map((expense, index) => (
-        <ProfitItem data={expense} index={index} key={expense._id as string} setOpen={setIsModalOpen} setSelectedExpense={setSelectedExpense} sign={'-'} />
+        <ProfitItem data={expense} handleDelete={handleDeleteExpense} index={index} key={expense._id as string} setOpen={setIsModalOpen} setSelectedExpense={setSelectedExpense} sign={'-'} />
       ))}
 
 

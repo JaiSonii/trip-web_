@@ -7,7 +7,7 @@ const Table = React.forwardRef<
 >(({ className, maxHeight = "100vh", ...props }, ref) => (
   <div className="relative border border-gray-300 rounded-md overflow-hidden">
     <div 
-      className="overflow-auto scrollbar-hide" 
+      className="overflow-auto scrollbar-hide thin-scrollbar" 
       style={{ 
         maxHeight,
         scrollbarWidth: 'thin',

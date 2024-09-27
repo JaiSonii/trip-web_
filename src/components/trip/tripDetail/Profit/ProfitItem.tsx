@@ -12,6 +12,7 @@ interface ProfitItemProps {
   setSelectedExpense?: any;
   disabled?: boolean;
   sign: string;
+  handleDelete? : any
 }
 
 const handleSave = async (editedExpense: any) => {
@@ -36,23 +37,9 @@ const handleSave = async (editedExpense: any) => {
   console.log(resData);
 };
 
-const ProfitItem: React.FC<ProfitItemProps> = ({ data, index, setOpen, setSelectedExpense, disabled, sign }) => {
+const ProfitItem: React.FC<ProfitItemProps> = ({ data, index, setOpen, setSelectedExpense, disabled, sign, handleDelete }) => {
   const router = useRouter();
   const [isHovered, setIsHovered] = useState<boolean>(false);
-
-  const handleDelete = async () => {
-    const res = await fetch(`/api/truckExpense/${data._id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    if (res.ok) {
-      router.refresh();
-    } else {
-      console.log('Failed to delete');
-    }
-  };
 
   return (
     <div
@@ -78,7 +65,7 @@ const ProfitItem: React.FC<ProfitItemProps> = ({ data, index, setOpen, setSelect
               <MdEdit size={20} />
             </Button>
             <Button
-              onClick={handleDelete}
+              onClick={()=>handleDelete(data)}
               className="p-2 bg-destructive text-white rounded-full transition-colors duration-200 ease-in-out hover:bg-red-600"
             >
               <MdDelete size={20} />

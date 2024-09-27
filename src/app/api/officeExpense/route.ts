@@ -17,7 +17,7 @@ export async function GET(req: Request) {
   
     if (!month || !year) {
       await connectToDatabase();
-      const expenses = await OfficeExpense.find({ user_id: user });
+      const expenses = await OfficeExpense.find({ user_id: user }).sort({date : -1}).lean();
       return NextResponse.json({ expenses, status: 200 });
     }
   
