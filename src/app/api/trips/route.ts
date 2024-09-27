@@ -25,12 +25,12 @@ export async function GET(req: Request) {
     await connectToDatabase();
 
     const url = new URL(req.url);
-    const statuses = url.searchParams.get('statuses')?.split(',').map(Number);
+    const status = url.searchParams.get('status')
 
     // Prepare query with user_id and optional statuses filter
     const query: any = { user_id: user };
-    if (statuses && statuses.length > 0) {
-      query.status = { $in: statuses };
+    if (status !== null) {
+      query.status = parseInt(status)
     }
 
     // Use an aggregation pipeline to fetch the required data, calculate balance, and join with Party collection

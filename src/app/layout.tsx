@@ -11,7 +11,7 @@ const fontSans = FontSans({
 });
 
 export const metadata: Metadata = {
-  title: "Awajahi Web - Moving India One Mile at a Time",
+  title: "Awajahi - Moving India One Mile at a Time",
   description: "Awajahi Web is transforming transportation in India, one mile at a time. Discover our services and how we are moving India efficiently and reliably.",
   keywords: ["Awajahi", "Transport", "Logistics", "India", "Moving Services", "Web Application", "Fleet Management","awajahi"],
   authors: [{ name: "Awajahi Team" }],

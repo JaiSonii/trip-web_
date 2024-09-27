@@ -19,6 +19,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { formatNumber } from '@/utils/utilArray';
 import { SlOptionsVertical } from 'react-icons/sl';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import debounce from 'lodash.debounce';
 
 // const TripBalance = ({ trip }: { trip: ITrip }) => {
 //   const [balance, setBalance] = useState(0)
@@ -53,28 +54,44 @@ const TripsPage = () => {
   const [trips, setTrips] = useState<ITrip[] | null>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedStatuses, setSelectedStatuses] = useState<number[]>([]);
+  const [selectedStatus, setSelectedStatus] = useState<number | undefined>();
   const [selectedColumns, setSelectedColumns] = useState<string[]>(columnOptions.map(col => col.value));
   const [totalBalance, setTotalBalance] = useState<number | null>(null);
   const [visibleColumns, setVisibleColumns] = useState<string[]>(columnOptions.map(col => col.label));
   const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
+  const [searchQuery, setSearchQuery] = useState('')
 
   const sortedTrips = useMemo(() => {
-    if (!trips || trips.length === 0) return []; // This line ensures that trips is not null or empty
-    let sortableTrips = [...trips as any];
+    if (!trips || trips.length === 0) return [];  // This line ensures that trips is not null or empty
+    let filteredTrips = [...trips]
+    
+    if(searchQuery){
+      const lowercaseQuery = searchQuery.toLowerCase()
+      filteredTrips = trips.filter((trip) =>
+        trip.LR.toLowerCase().includes(lowercaseQuery) ||
+        trip.partyName.toLowerCase().includes(lowercaseQuery) ||
+        trip.route.origin.toLowerCase().includes(lowercaseQuery) ||
+        trip.route.destination.toLowerCase().includes(lowercaseQuery) ||
+        new Date(trip.startDate).toLocaleDateString().includes(lowercaseQuery) ||
+        trip.amount.toString().includes(lowercaseQuery) ||
+        trip.truckHireCost.toString().includes(lowercaseQuery) ||
+        trip.balance.toString().includes(lowercaseQuery) ||
+        trip.truck.toLowerCase().includes(lowercaseQuery)
+      )
+    }
     if (sortConfig.key !== null) {
-      sortableTrips.sort((a, b) => {
-        if (a[sortConfig.key!] < b[sortConfig.key!]) {
+      filteredTrips.sort((a , b) => {
+        if (a[sortConfig.key as keyof ITrip] < b[sortConfig.key as keyof ITrip]) {
           return sortConfig.direction === 'asc' ? -1 : 1;
         }
-        if (a[sortConfig.key!] > b[sortConfig.key!]) {
+        if (a[sortConfig.key  as keyof ITrip] > b[sortConfig.key  as keyof ITrip]) {
           return sortConfig.direction === 'asc' ? 1 : -1;
         }
         return 0;
       });
     }
-    return sortableTrips;
-  }, [trips, sortConfig]);
+    return filteredTrips;
+  }, [trips, sortConfig, searchQuery]);
 
 
   const requestSort = (key: keyof ITrip) => {
@@ -92,6 +109,17 @@ const TripsPage = () => {
     return <FaSort />
   }
 
+    // Debounce the search input to reduce re-renders on each keystroke
+    const debouncedSearch = useCallback(
+      debounce((query) => setSearchQuery(query), 300),
+      []
+    );
+  
+    // Handle search input
+    const handleSearch:any = (e: React.ChangeEvent<HTMLInputElement>) => {
+      debouncedSearch(e.target.value.toLowerCase());
+    };
+
   const toggleColumn = useCallback((column: string) => {
     setVisibleColumns(prev => {
       const isVisible = prev.includes(column);
@@ -102,12 +130,12 @@ const TripsPage = () => {
 
 
 
-  const fetchTrips = useCallback(async (statuses: number[] = []) => {
+  const fetchTrips = useCallback(async (status?: number) => {
     setLoading(true);
     setError(null);
 
     try {
-      const queryParam = statuses.length > 0 ? `?statuses=${statuses.join(',')}` : '';
+      const queryParam = status !== undefined ? `?status=${status}` : '';
       const res = await fetch(`/api/trips${queryParam}`, {
         method: 'GET',
         headers: {
@@ -136,20 +164,18 @@ const TripsPage = () => {
   }, []);
 
   useEffect(() => {
-    fetchTrips(selectedStatuses);
+    fetchTrips();
   }, []);
 
-  const handleStatusSubmit = () => {
-    fetchTrips(selectedStatuses);
-  }
 
   const handleStatusChange = (value: string) => {
-    const status = parseInt(value);
-    setSelectedStatuses(prev =>
-      prev.includes(status)
-        ? prev.filter(s => s !== status)
-        : [...prev, status]
-    );
+    const status = value ? parseInt(value) : undefined;  // If value is empty, status becomes undefined
+    if(selectedStatus === status){
+      fetchTrips()
+      return
+    }
+    fetchTrips(status);  // Fetch based on status or all trips if undefined
+    setSelectedStatus((prev)=> prev === status ? undefined : status);
   };
 
   if (loading) return <Loading />;
@@ -166,6 +192,14 @@ const TripsPage = () => {
 
   return (
     <div className="w-full p-4 h-full bg-white">
+      <div className='flex w-full px-60'>
+      <input
+        type="text"
+        placeholder="Search..."
+        onChange={handleSearch}
+      />
+      </div>
+      
       <div className="flex items-center justify-between">
         <div className="flex items-center bg-lightOrange rounded-sm text-buttonTextColor p-2">
           <span>Total Balance :</span>
@@ -175,49 +209,52 @@ const TripsPage = () => {
             <span className="ml-2 text-lg font-bold animate-pulse">Calculating...</span>
           )}
         </div>
-        <div className="flex items-center space-x-4">
-          <Select onValueChange={handleStatusChange}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Select Status" />
-            </SelectTrigger>
-            <SelectContent>
-              {statuses.map((status, index) => (
-                <SelectItem key={index} value={index.toString()}>
-                  <input
-                    type="checkbox"
-                    checked={selectedStatuses.includes(index)}
-                    onChange={() => handleStatusChange(index.toString())}
-                  />
-                  <span className='text-black'>{status}</span>
-                </SelectItem>
-              ))}
-              <Button className='justify-center w-full' onClick={handleStatusSubmit}>Apply</Button>
-            </SelectContent>
-          </Select>
+        <div className='flex items-end space-x-2 p-2'>
+          <div className="flex items-center space-x-4">
+            <Select onValueChange={handleStatusChange}>
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="Select Status" />
+              </SelectTrigger>
+              <SelectContent>
+                {statuses.map((status, index) => (
+                  <SelectItem key={index} value={index.toString()} >
+                    <input
+                      type="checkbox"
+                      checked={selectedStatus === index}
+                      onChange={() => handleStatusChange(index.toString())}
+                    />
+                    <span className='text-black'>{status}</span>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="mt-4">
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button variant="outline">Select Columns</Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {columnOptions.map((col) => (
+                  <DropdownMenuItem key={col.value} asChild>
+                    <label className="flex items-center space-x-2">
+                      <input
+                        type="checkbox"
+                        checked={visibleColumns.includes(col.label)}
+                        onChange={() => toggleColumn(col.label)}
+                      />
+                      <span>{col.label}</span>
+                    </label>
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
       </div>
 
-      <div className="mt-4">
-        <DropdownMenu>
-          <DropdownMenuTrigger>
-            <Button variant="outline">Select Columns</Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            {columnOptions.map((col) => (
-              <DropdownMenuItem key={col.value} asChild>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={visibleColumns.includes(col.label)}
-                    onChange={() => toggleColumn(col.label)}
-                  />
-                  <span>{col.label}</span>
-                </label>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
+
+
 
       {(!trips || trips.length === 0) ? (
         <div className="flex justify-center items-center h-full">
@@ -250,7 +287,11 @@ const TripsPage = () => {
                     </div>
                   </TableHead>}
                   {visibleColumns.includes('Route') && <TableHead className="">Route</TableHead>}
-                  {visibleColumns.includes('Status') && <TableHead className="">Status</TableHead>}
+                  {visibleColumns.includes('Status') && <TableHead className="" onClick={()=>requestSort('status')}>
+                    <div className="flex justify-center">
+                        Start Date {getSortIcon('status')}
+                      </div>
+                    </TableHead>}
                   {visibleColumns.includes('Truck Hire Cost') && (
                     <TableHead className="" onClick={() => requestSort('truckHireCost')}>
                       <div className="flex justify-center">

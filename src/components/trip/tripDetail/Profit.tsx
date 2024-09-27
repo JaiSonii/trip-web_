@@ -139,6 +139,7 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
   };
 
   const handleDeleteExpense = async (data : any) => {
+    console.log('deleting',data)
     try {
       const res = await fetch(`/api/truckExpense/${data._id}`, {
         method: 'DELETE',
@@ -148,7 +149,8 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
       });
       if (res.ok) {
         const resData = await res.json()
-        setTruckExpenses(truckExpenses.filter((expense : any)=>expense._id === data._id))
+        setTruckExpenses(truckExpenses.filter((expense : any)=>expense._id !== resData.charge._id))
+        console.log('deleted', resData.charge)
       } else {
         console.log('Failed to delete');
       }
