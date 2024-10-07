@@ -15,6 +15,9 @@ interface ChargeModalProps {
   onClose: () => void;
   onSave: any;
   driverId: string;
+  trucks : TruckModel[]
+  drivers : IDriver[]
+  shops : any[]
   selected?: any;
   truckPage?: boolean;
 }
@@ -34,7 +37,7 @@ interface TripExpense {
   shop_id?: string;
 }
 
-const TruckExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, driverId, selected, truckPage }) => {
+const TruckExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, driverId, selected, truckPage, trucks, drivers , shops}) => {
   const [formData, setFormData] = useState<TripExpense>({
     id: selected?._id || undefined,
     partyBill: false,
@@ -54,8 +57,6 @@ const TruckExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave
 
   const [driverName, setDriverName] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Fuel & Driver');
-  const [drivers, setDrivers] = useState<IDriver[]>([]);
-  const [trucks, setTrucks] = useState<TruckModel[]>([])
 
   useEffect(() => {
     if (!selected) return;
@@ -74,49 +75,6 @@ const TruckExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave
       shop_id: selected?.shop_id || ''
     });
   }, [selected]);
-
-  const [shops, setShops] = useState<any[]>([])
-
-  const fetchshops = async () => {
-    const res = await fetch(`/api/shopkhata`)
-    const data = await res.json()
-    setShops(data.shops)
-  }
-
-  useEffect(() => {
-    if (formData.paymentMode === 'Credit') {
-      fetchshops()
-    }
-  }, [formData.paymentMode])
-
-
-
-  const fetchTripsTrucks = async () => {
-    try {
-      const [truckRes, driverRes] = await Promise.all([
-        fetch(`/api/trucks/create`),
-        fetch(`/api/drivers/create`)
-      ])
-
-      const [truckData, driverData] = await Promise.all([
-        truckRes.ok ? truckRes.json() : [],
-        driverRes.ok ? driverRes.json() : []
-      ])
-      setTrucks(truckData.trucks)
-      setDrivers(driverData.drivers)
-
-    } catch (error: any) {
-      console.error('Error fetching data:', error);
-      alert(error.message);
-    }
-  }
-
-  useEffect(() => {
-    if (pathname.includes('/expenses')) {
-      fetchTripsTrucks()
-    }
-  }, [pathname])
-
 
 
   const handleSelectChange = (name: string, value: string) => {

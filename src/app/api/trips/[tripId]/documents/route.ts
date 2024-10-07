@@ -39,7 +39,7 @@ export async function PUT(req: Request, { params }: { params: { tripId: string }
         const formdata = await req.formData();
         const file = formdata.get('file') as File;
         const docType = formdata.get('docType') as string;
-        const validity = new Date(formdata.get('validityDate') as string);
+        const validity = new Date(formdata.get('validityDate') as string) || null;
         const filename = formdata.get('filename') as string;
 
         // Validate form data

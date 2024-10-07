@@ -1,14 +1,12 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
-import { FaMapMarkerAlt, FaTruckMoving } from 'react-icons/fa';
+import {  FaTruckMoving } from 'react-icons/fa';
 import Link from 'next/link';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { calculateOfficeExpense, calculateTripExpense, calculateTruckExpense, handleAddCharge } from '@/helpers/ExpenseOperation';
-import { IExpense } from '@/utils/interface';
-import { Button } from '../ui/button';
+import { calculateOfficeExpense, calculateTripExpense, calculateTruckExpense } from '@/helpers/ExpenseOperation';
+
 import dynamic from 'next/dynamic';
-import { IoAddCircle } from 'react-icons/io5';
 import { RiHomeOfficeFill } from 'react-icons/ri';
 import { FaRoute, FaTruck } from 'react-icons/fa6';
 import { RouteIcon } from 'lucide-react';
@@ -52,27 +50,17 @@ const ExpenseLayout: React.FC<TruckLayoutProps> = ({ children }) => {
   const [tripExpense, setTripExpense] = useState(0);
   const [monthExpense, setMonthExpense] = useState(0);
   const [officeExpense, setOfficeExpense] = useState(0)
-  const [previousMonthExpense, setPreviousMonthExpense] = useState(0);
-  const [percentageIncrease, setPercentageIncrease] = useState(0);
-
-
-  const calculatePercentageIncrease = (current: number, previous: number) => {
-    if (previous === 0) return 0;
-    return ((current - previous) / previous) * 100;
-  };
 
 
 
   useEffect(() => {
     const fetchExpenses = async (value: string) => {
       setSelectedMonthYear(value);
-      router.push(`${pathname}?monthYear=${value}`);
-
-      const [month, year] = value.split(' ');
+      router.push(`${pathname}`);
       const [truckExpenses, tripExpenses, officeExpenses] = await Promise.all([
-        calculateTruckExpense(month, year),
-        calculateTripExpense(month, year),
-        calculateOfficeExpense(month, year)
+        calculateTruckExpense(),
+        calculateTripExpense(),
+        calculateOfficeExpense()
       ]);
 
       setTruckExpense(truckExpenses);
@@ -82,23 +70,6 @@ const ExpenseLayout: React.FC<TruckLayoutProps> = ({ children }) => {
       const currentMonthExpense = truckExpenses + tripExpenses + officeExpenses;
       setMonthExpense(currentMonthExpense);
 
-      // Calculate the previous month's expenses
-      const previousMonth = new Date(parseInt(year), new Date(Date.parse(month + " 1, " + year)).getMonth() - 1, 1);
-      const [prevMonth, prevYear] = [previousMonth.toLocaleString('default', { month: 'long' }), previousMonth.getFullYear().toString()];
-      console.log(prevMonth, prevYear)
-
-      const [prevTruckExpenses, prevTripExpenses, prevOfficeExpenses] = await Promise.all([
-        calculateTruckExpense(prevMonth, prevYear),
-        calculateTripExpense(prevMonth, prevYear),
-        calculateOfficeExpense(prevMonth, prevYear)
-      ]);
-
-      const previousTotalExpense = prevTruckExpenses + prevTripExpenses + prevOfficeExpenses;
-      setPreviousMonthExpense(previousTotalExpense);
-
-      // Calculate the percentage increase
-      const percentageIncrease = calculatePercentageIncrease(currentMonthExpense, previousTotalExpense);
-      setPercentageIncrease(percentageIncrease);
     };
 
     fetchExpenses(selectedMonthYear);
@@ -114,23 +85,9 @@ const ExpenseLayout: React.FC<TruckLayoutProps> = ({ children }) => {
 
   return (
     <div className="w-full h-full p-4 bg-gray-50">
-      <div className="flex flex-col lg:flex-row lg:justify-between items-start lg:items-center mb-6">
+      <div className="flex flex-col lg:flex-row lg:justify-between items-start lg:items-center mb-2">
         <div className="w-full flex justify-between">
           <h1 className="text-2xl font-bold mb-2 text-bottomNavBarColor">Expenses Overview</h1>
-          <div className="flex items-center space-x-4">
-            <Select name="monthYear" value={selectedMonthYear} onValueChange={setSelectedMonthYear}>
-              <SelectTrigger className="w-full lg:w-64">
-                <SelectValue placeholder="Select Month" />
-              </SelectTrigger>
-              <SelectContent>
-                {monthYearOptions.map((option, index) => (
-                  <SelectItem key={index} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
         </div>
       </div>
 
@@ -162,12 +119,9 @@ const ExpenseLayout: React.FC<TruckLayoutProps> = ({ children }) => {
         <div className="flex flex-col items-start border border-red-200 bg-red-50 p-3 rounded-md shadow-sm hover:shadow-md transition-all duration-200">
           <div className="flex items-center space-x-1 mb-1">
             <BsFillEmojiExpressionlessFill className="text-red-500" />
-            <span className="text-md font-medium text-red-600">Total Month Expense</span>
+            <span className="text-md font-medium text-red-600">Total Expense</span>
           </div>
           <span className="text-xl font-semibold text-red-800">₹{formatNumber(monthExpense)}</span>
-          <span className={`text-xs font-medium mt-1 ${percentageIncrease <= 0 ? 'text-green-600' : 'text-red-600'}`}>
-            {percentageIncrease >= 0 ? `+${percentageIncrease.toFixed(2)}%` : `${percentageIncrease.toFixed(2)}%`} compared to last month
-          </span>
         </div>
       </div>
 
@@ -178,7 +132,7 @@ const ExpenseLayout: React.FC<TruckLayoutProps> = ({ children }) => {
         {tabs.map((tab) => (
           <Link
             key={tab.name}
-            href={{ pathname: tab.path, query: { monthYear: selectedMonthYear } }}
+            href={tab.path}
             className={`px-4 py-2 transition duration-300 ease-in-out font-semibold rounded-t-md hover:bg-lightOrangeButtonColor ${pathname === tab.path
               ? 'border-b-2 border-lightOrange text-buttonTextColor bg-lightOrange'
               : 'border-transparent text-buttonTextColor hover:bottomNavBarColor hover:border-bottomNavBarColor'

@@ -23,7 +23,7 @@ type FormData = {
     bodyLength: number | null;
     ownership: string;
     supplier: string;
-    driver : string;
+    driver: string;
 }
 
 // Main CreateTruck component
@@ -39,7 +39,7 @@ const CreateTruck: React.FC = () => {
         bodyLength: null,
         ownership: '',
         supplier: '',
-        driver : ''
+        driver: ''
     });
 
     const [showDetails, setShowDetails] = useState<boolean>(false);
@@ -54,9 +54,9 @@ const CreateTruck: React.FC = () => {
         setSaving(true)
         const fetchSuppliersAndDriver = async () => {
             try {
-                const [supplierRes, truckRes] = await Promise.all([fetch('/api/suppliers'), fetch(`/api/drivers`) ])
+                const [supplierRes, truckRes] = await Promise.all([fetch('/api/suppliers'), fetch(`/api/drivers`)])
 
-                const [supplierData, driverData] : any= await Promise.all([supplierRes.ok ? supplierRes.json() : alert('Failed to fetch Suppliers'), truckRes.ok ? truckRes.json() : alert('Failed to fetch Trucks')]) // Parse the response body as JSON
+                const [supplierData, driverData]: any = await Promise.all([supplierRes.ok ? supplierRes.json() : alert('Failed to fetch Suppliers'), truckRes.ok ? truckRes.json() : alert('Failed to fetch Trucks')]) // Parse the response body as JSON
                 console.log(driverData)
                 setSuppliers(supplierData.suppliers);
                 setDrivers(driverData.drivers)
@@ -135,15 +135,15 @@ const CreateTruck: React.FC = () => {
                 bodyLength: null,
                 ownership: '',
                 supplier: '',
-                driver : ''
+                driver: ''
             });
             setShowDetails(false); // Optionally reset additional details state
             const data = await response.json()
-            if (data.error){
+            if (data.error) {
                 alert(data.error)
                 return
             }
-            if(nextpath){
+            if (nextpath) {
                 const current = JSON.parse(localStorage.getItem('tripData') as any)
                 current.truck = data.truck.truckNo
                 localStorage.setItem('tripData', JSON.stringify(current))
@@ -221,7 +221,7 @@ const CreateTruck: React.FC = () => {
                         />
                     )}
                     {
-                        formdata.truckType && !new Set(['Other','Tanker','Tipper']).has(formdata.truckType) &&(
+                        formdata.truckType && !new Set(['Other', 'Tanker', 'Tipper']).has(formdata.truckType) && (
                             <Button
                                 className='rounded-full w-full'
                                 type="button"
@@ -232,19 +232,20 @@ const CreateTruck: React.FC = () => {
                         )
                     }
 
-                    {showDetails && !new Set(['Other','Tanker','Tipper']).has(formdata.truckType) && (
+                    {showDetails && !new Set(['Other', 'Tanker', 'Tipper']).has(formdata.truckType) && (
                         <AdditionalDetails
                             formdata={formdata}
                             renderModelOptions={renderModelOptions}
                             handleInputChange={handleInputChange}
                         />
                     )}
-                    <Button
-                        
-                        type="submit"
-                    >
-                        Submit
-                    </Button>
+                        <Button className='w-full'
+
+                            type="submit"
+                        >
+                            Add Lorry
+                        </Button>
+
                 </form>
             </div>
         </>

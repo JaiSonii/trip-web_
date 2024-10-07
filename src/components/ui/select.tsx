@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
-import { Check, ChevronDown, ChevronUp } from "lucide-react"
+import { Check, ChevronDown, ChevronUp, X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -19,7 +19,7 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex h-10 w-full items-center justify-between rounded-full border border-lightOrange bg-white px-3 py-2 text-sm ring-lightOrange placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-lightOrange disabled:cursor-not-allowed disabled:opacity-50 text-buttonTextColor",
+      "text-gray-700 flex h-10 w-full items-center justify-between rounded-full border-black/25 border-2 bg-white px-3 py-2 text-sm ring-lightOrange placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring focus:ring-gray-300 disabled:cursor-not-allowed disabled:opacity-50",
       className
     )}
     {...props}
@@ -75,7 +75,7 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border border-lightOrange bg-white text-popover-foreground shadow-md",
+        "text-gray-700 relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border-2 border-black/25 bg-white text-popover-foreground shadow-md",
         position === "popper" &&
           "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
         className
@@ -118,7 +118,7 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none text-black focus:bg-lightOrangeButtonColor  focus:text-buttonTextColor focus:scale-105 focus:font-semibold transform duration-100 ease-in-out hover:cursor-pointer ",
+      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-8 pr-2 text-sm outline-none text-black transition-all duration-200 ease-in-out transform hover:cursor-pointer focus:bg-bottomNavBarColor focus:bg-opacity-80 focus:rounded-xl focus:text-white focus:scale-105 focus:font-semibold ",
       className
     )}
     {...props}

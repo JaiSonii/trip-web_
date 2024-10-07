@@ -256,6 +256,26 @@ export const formatNumber = (num: number | string) => {
   return new Intl.NumberFormat('en-IN').format(numericValue);
 };
 
+export const generateMonthYearOptions = () => {
+  const options = [];
+  const startDate = new Date(2023, 0, 1);
+  const currentDate = new Date();
+
+  for (let year = startDate.getFullYear(); year <= currentDate.getFullYear(); year++) {
+    const startMonth = (year === startDate.getFullYear()) ? startDate.getMonth() : 0;
+    const endMonth = (year === currentDate.getFullYear()) ? currentDate.getMonth() : 11;
+
+    for (let month = startMonth; month <= endMonth; month++) {
+      const date = new Date(year, month, 1);
+      const monthYear = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+      options.push(monthYear);
+    }
+  }
+
+
+  return options;
+};
+
 
 
 

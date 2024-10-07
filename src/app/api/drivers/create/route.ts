@@ -17,7 +17,7 @@ export async function GET(req : Request) {
   try {
     await connectToDatabase()
 
-    const drivers = await Driver.find({user_id : user}).select(['name', 'driver_id','status']).lean().exec();
+    const drivers = await Driver.find({user_id : user}).select(['name', 'driver_id','status','contactNumber']).lean().exec();
     return NextResponse.json({ drivers });
   } catch (err) {
     console.error(err);

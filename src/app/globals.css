@@ -251,7 +251,7 @@ body {
 }
 
 input:not([type="checkbox"]) {
-  @apply w-full px-3 py-2 border border-lightOrange focus:outline-none focus:ring focus:ring-lightOrange rounded-full text-sm text-gray-700 file:bg-lightOrangeButtonColor file:border-none file:rounded-lg file:px-4 file:py-2 file:cursor-pointer hover:file:bg-bottomNavBarColor hover:file:text-white;
+  @apply w-full px-3 py-2 border-2 border-black/25 focus:outline-none focus:ring-1 focus:ring-gray-300 rounded-full text-sm text-gray-700 file:bg-lightOrangeButtonColor file:border-none file:rounded-lg file:px-4 file:py-2 file:cursor-pointer hover:file:bg-bottomNavBarColor hover:file:text-white;
 }
 
 textarea {

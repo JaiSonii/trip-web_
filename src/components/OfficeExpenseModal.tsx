@@ -130,7 +130,7 @@ const OfficeExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSav
                             <input
                                 type="date"
                                 name="date"
-                                value={formData.date.toISOString().split('T')[0]}
+                                value={new Date(formData.date).toISOString().split('T')[0]}
                                 onChange={handleChange}
                                 className="w-full p-2 border border-gray-300 rounded-md"
                             />

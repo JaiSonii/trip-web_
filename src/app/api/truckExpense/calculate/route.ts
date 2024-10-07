@@ -15,14 +15,19 @@ export async function GET(req: Request) {
   const url = new URL(req.url);
   const month = url.searchParams.get('month');
   const year = url.searchParams.get('year');
-  
+
   if (!month || !year) {
     await connectToDatabase();
-    const expenses = await Expense.find({ user_id: user }).lean();
-    
+    const expenses = await Expense.find({
+      user_id: user, $or: [
+        { trip_id: { $exists: false } },
+        { trip_id: { $eq: '' } }
+      ]
+    }).lean();
+
     // Calculate the total expense
     const totalExpense = expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
-    
+
     return NextResponse.json({ expenses, totalExpense, status: 200 });
   }
 
@@ -67,7 +72,7 @@ export async function GET(req: Request) {
     // Calculate the total expense
     const totalExpense = expenses.reduce((sum, expense) => sum + (expense.amount || 0), 0);
 
-    return NextResponse.json({totalExpense, status: 200 });
+    return NextResponse.json({ totalExpense, status: 200 });
   } catch (err: any) {
     console.error('Error fetching expenses:', err);
     return NextResponse.json({ message: 'Internal Server Error', status: 500 });

@@ -3,7 +3,6 @@
 import Loading from '../loading';
 import { Button } from '@/components/ui/button';
 import { IExpense } from '@/utils/interface';
-import { useSearchParams } from 'next/navigation';
 import React, { useEffect, useState, Suspense } from 'react';
 import { MdDelete, MdEdit, MdPayment } from 'react-icons/md';
 import { FaCalendarAlt } from 'react-icons/fa';
@@ -16,18 +15,21 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 const OfficeExpense: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
-    const [maintainenceBook, setMaintainenceBook] = useState<IExpense[]>([]);
+    const [maintainenceBook, setMaintainenceBook] = useState<IExpense[] | any[]>([]);
     const [modalOpen, setModalOpen] = useState<boolean>(false);
     const [selected, setSelected] = useState<IExpense | null>(null);
 
-    const searchParams = useSearchParams();
-    const monthYear = searchParams.get('monthYear')?.split(' ');
-    const [month, year] = monthYear ? monthYear : [null, null];
+    const [month, year] = [null, null];
 
     const getBook = async () => {
         try {
             setLoading(true);
-            const res = await fetch(`/api/officeExpense?month=${month}&year=${year}`);
+            let res;
+            if (month === null || year === null) {
+                res = await fetch(`/api/officeExpense`)
+            } else {
+                res = await fetch(`/api/officeExpense?month=${month}&year=${year}`);
+            }
             if (!res.ok) throw new Error('Error fetching expenses');
             const data = await res.json();
             setMaintainenceBook(data.expenses || []);
@@ -71,7 +73,7 @@ const OfficeExpense: React.FC = () => {
                 return;
             }
             const data = await res.json();
-            setMaintainenceBook((prev) => [...prev, data.expense]);
+            getBook()
         } catch (error: any) {
             alert(error.message);
         }
@@ -96,7 +98,7 @@ const OfficeExpense: React.FC = () => {
     };
 
     useEffect(() => {
-        if (month && year) getBook();
+        getBook();
     }, [month, year]);
 
     if (loading) return <Loading />;
@@ -122,6 +124,7 @@ const OfficeExpense: React.FC = () => {
                             <TableHead className=" ">Amount</TableHead>
                             <TableHead className=" ">Expense Type</TableHead>
                             <TableHead className=" ">Payment Mode</TableHead>
+                            <TableHead className=" ">Shop</TableHead>
                             <TableHead className=" ">Notes</TableHead>
                             <TableHead className=" ">Action</TableHead>
                         </TableRow>
@@ -149,6 +152,7 @@ const OfficeExpense: React.FC = () => {
                                             <span>{expense.paymentMode}</span>
                                         </div>
                                     </TableCell>
+                                    <TableCell className="">{expense.shopName || 'N/A'}</TableCell>
                                     <TableCell className="">{expense.notes || 'N/A'}</TableCell>
 
                                     <TableCell className="">

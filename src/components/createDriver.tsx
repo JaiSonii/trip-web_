@@ -58,7 +58,7 @@ const DriverForm: React.FC<Props> = ({ onSubmit }) => {
   return (
     <form onSubmit={handleSubmit} className="w-full max-w-md mx-auto p-4 bg-white shadow-md rounded-md text-black">
       <label className="block mb-2">
-        Name:
+        Name*
         <input
           type="text"
           name="name"
@@ -69,7 +69,7 @@ const DriverForm: React.FC<Props> = ({ onSubmit }) => {
         />
       </label>
       <label className="block mb-2">
-        Contact Number:
+        Contact Number
         <input
           type="text"
           name="contactNumber"
@@ -78,7 +78,7 @@ const DriverForm: React.FC<Props> = ({ onSubmit }) => {
           className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
         />
       </label>
-      <Button type="submit" className='w-full'>
+      <Button type="submit" className='w-full justify-center'>
         Submit
       </Button>
     </form>

@@ -64,7 +64,13 @@ export const ExpenseforDriver = async (driver: string) => {
 
 export const fetchTruckExpense = async (month: any, year: any) => {
   try {
-    const res = await fetch(`/api/truckExpense?month=${month}&year=${year}`);
+    let res
+    if(month === null || year === null){
+      res = await fetch(`/api/truckExpense`)
+    }else{
+      res = await fetch(`/api/truckExpense?month=${month}&year=${year}`);
+    }
+    
     if (!res.ok) {
       throw new Error('Failed to fetch truck expenses');
     }
@@ -76,23 +82,23 @@ export const fetchTruckExpense = async (month: any, year: any) => {
   }
 };
 
-export const fetchTripExpense = async (month: any, year: any) => {
+export const fetchTripExpense = async () => {
   try {
-    const res = await fetch(`/api/tripExpense?month=${month}&year=${year}`);
+    const res = await fetch(`/api/tripExpense`)
     if (!res.ok) {
       throw new Error('Failed to fetch truck expenses');
     }
     const data = await res.json();
-    return data.combinedExpenses;
+    return data.tripExpense;
   } catch (error) {
-    console.error('Error fetching truck expenses:', error);
+    console.error('Error fetching trip expenses:', error);
     return [];
   }
 };
 
-export const calculateTruckExpense = async (month: any, year: any) => {
+export const calculateTruckExpense = async () => {
   try {
-    const res = await fetch(`/api/truckExpense/calculate?month=${month}&year=${year}`);
+    const res = await fetch(`/api/truckExpense/calculate`);
     if (!res.ok) {
       throw new Error('Failed to fetch truck expenses');
     }
@@ -104,9 +110,9 @@ export const calculateTruckExpense = async (month: any, year: any) => {
   }
 };
 
-export const calculateTripExpense = async (month: any, year: any) => {
+export const calculateTripExpense = async () => {
   try {
-    const res = await fetch(`/api/tripExpense/calculate?month=${month}&year=${year}`);
+    const res = await fetch(`/api/tripExpense/calculate`);
     if (!res.ok) {
       throw new Error('Failed to fetch truck expenses');
     }
@@ -118,9 +124,9 @@ export const calculateTripExpense = async (month: any, year: any) => {
   }
 };
 
-export const calculateOfficeExpense = async (month: any, year: any) => {
+export const calculateOfficeExpense = async () => {
   try {
-    const res = await fetch(`/api/officeExpense/calculate?month=${month}&year=${year}`);
+    const res = await fetch(`/api/officeExpense/calculate`);
     if (!res.ok) {
       throw new Error('Failed to fetch truck expenses');
     }

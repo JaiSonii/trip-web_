@@ -1,50 +1,142 @@
 'use client';
 import Loading from '../loading';
-import ExpenseModal from '@/components/trip/tripDetail/ExpenseModal';
 import { Button } from '@/components/ui/button';
-import { IExpense } from '@/utils/interface';
-import { useSearchParams, useRouter } from 'next/navigation';
-import React, { Suspense, useEffect, useState } from 'react';
+import { IDriver, IExpense, TruckModel } from '@/utils/interface';
+import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { MdDelete, MdEdit, MdPayment } from 'react-icons/md';
 import { fetchTruckExpense, handleAddCharge, handleDelete } from '@/helpers/ExpenseOperation';
-import DriverName from '@/components/driver/DriverName';
 import { icons, IconKey } from '@/utils/icons';
-import { FaCalendarAlt, FaTruck } from 'react-icons/fa';
+import { FaCalendarAlt, FaSort, FaSortDown, FaSortUp, FaTruck } from 'react-icons/fa';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { IoAddCircle } from 'react-icons/io5';
-import TruckExpenseModal from '@/components/TruckExpenseModal';
-import { formatNumber } from '@/utils/utilArray';
+import { formatNumber, generateMonthYearOptions } from '@/utils/utilArray';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import debounce from 'lodash.debounce';
+import { useRouter } from 'next/navigation';
+import { TbFilterSearch } from 'react-icons/tb';
+import dynamic from 'next/dynamic';
 
 const TruckExpense: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [maintainenceBook, setMaintainenceBook] = useState<IExpense[]>([]);
+  const [truckExpenseBook, setTruckExpenseBook] = useState<IExpense[] | any[]>([]);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [selected, setSelected] = useState<IExpense | null>(null);
+  const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
+  const [searchQuery, setSearchQuery] = useState('')
+  const [filterModalOpen, setFilterModalOpen] = useState(false)
+  const [trucks, setTrucks] = useState<TruckModel[]>([])
+  const [drivers, setDrivers] = useState<IDriver[]>([])
+  const [shops, setShops] = useState<any[]>([])
+  const router = useRouter()
+
+  const TruckExpenseModal = dynamic(()=>import('@/components/TruckExpenseModal'))
+  const ExpenseFilterModal = dynamic(()=>import('@/components/ExpenseFilterModal'))
+
+  const fetchData = async () => {
+    try {
+      const [truckres, driverres, shopres] = await Promise.all([fetch(`/api/trucks/create`), fetch('/api/drivers/create'), fetch('/api/shopkhata')])
+      const [truckData, driverData, shopData] = await Promise.all([truckres.json(), driverres.json(), shopres.json()])
+      setTrucks(truckData.trucks)
+      setDrivers(driverData.drivers)
+      setShops(shopData.shops)
+    } catch (error) {
+      alert('Some Error Occured')
+    }
+
+  }
+
+  const monthYearOptions = generateMonthYearOptions()
 
   const [visibleColumns, setVisibleColumns] = useState({
     date: true,
     amount: true,
     expenseType: true,
-    paymentMode: true,
     notes: true,
     truck: true,
-    driver: true,
     action: true,
+    ledger: true
   });
 
-  const searchParams = useSearchParams();
-  const monthYear = searchParams.get('monthYear')?.split(' ');
-  const [month, year] = monthYear ? monthYear : [null, null];
+
+  const handleFilter = async (filter: { drivers: string[], trips: string[], trucks: string[], paymentModes: string[], monYear: string[], shops: string[] }) => {
+    try {
+      setTruckExpenseBook([])
+      const res = await fetch(`/api/truckExpense?filter=${encodeURIComponent(JSON.stringify(filter))}`)
+      const data = await res.json()
+      console.log(data)
+      setTruckExpenseBook(data.truckExpense)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setFilterModalOpen(false)
+    }
+  }
+
+  const sortedExpense = useMemo(() => {
+    if (!truckExpenseBook || truckExpenseBook.length === 0) return [];  // This line ensures that truckExpenseBook is not null or empty
+    let filteredexpenses = [...truckExpenseBook]
+
+    if (searchQuery) {
+      const lowercaseQuery = searchQuery.toLowerCase()
+      filteredexpenses = truckExpenseBook.filter((expense: any) =>
+        expense.expenseType.toLowerCase().includes(lowercaseQuery) ||
+        expense.paymentMode.toLowerCase().includes(lowercaseQuery) ||
+        new Date(expense.date).toLocaleDateString().includes(lowercaseQuery) ||
+        expense.amount.toString().includes(lowercaseQuery) ||
+        expense.notes.toString().includes(lowercaseQuery) ||
+        expense.driverName.toString().includes(lowercaseQuery) ||
+        expense.truck.toLowerCase().includes(lowercaseQuery)
+      )
+    }
+    if (sortConfig.key !== null) {
+      filteredexpenses.sort((a: any, b: any) => {
+        if (a[sortConfig.key] < b[sortConfig.key]) {
+          return sortConfig.direction === 'asc' ? -1 : 1;
+        }
+        if (a[sortConfig.key] > b[sortConfig.key]) {
+          return sortConfig.direction === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
+    return filteredexpenses;
+  }, [truckExpenseBook, sortConfig, searchQuery]);
 
 
+  const requestSort = (key: any) => {
+    let direction: 'asc' | 'desc' = 'asc'
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc'
+    }
+    setSortConfig({ key, direction })
+  }
 
-  const getBook = async () => {
+  const getSortIcon = (columnName: any) => {
+    if (sortConfig.key === columnName) {
+      return sortConfig.direction === 'asc' ? <FaSortUp /> : <FaSortDown />
+    }
+    return <FaSort />
+  }
+
+  // Debounce the search input to reduce re-renders on each keystroke
+  const debouncedSearch = useCallback(
+    debounce((query) => setSearchQuery(query), 300),
+    []
+  );
+
+  // Handle search input
+  const handleSearch: any = (e: React.ChangeEvent<HTMLInputElement>) => {
+    debouncedSearch(e.target.value);
+  };
+
+
+  const getBook = async (month: string | null, year: string | null) => {
     try {
       setLoading(true);
+      console.log(month, year)
       const truckExpenses = await fetchTruckExpense(month, year);
-      setMaintainenceBook(truckExpenses);
+      setTruckExpenseBook(truckExpenses);
     } catch (error) {
       setError((error as Error).message);
     } finally {
@@ -56,15 +148,20 @@ const TruckExpense: React.FC = () => {
     try {
       selected ? await handleAddCharge(expense, expense.id) : handleAddCharge(expense, '', expense.truck);
       setModalOpen(false); // Close the modal after saving
-      await getBook();
+      router.refresh();
     } catch (error) {
       console.error(error);
     }
   };
 
   useEffect(() => {
-    if (month && year) getBook();
-  }, [month, year]);
+    // Call getBook with null for the first render
+      getBook(null, null);
+  }, [])
+
+  useEffect(() => {
+    fetchData()
+  }, [])
 
   if (loading) return <Loading />;
   if (error) return <div className="text-red-500">Error: {error}</div>;
@@ -81,18 +178,18 @@ const TruckExpense: React.FC = () => {
       date: selectAll,
       amount: selectAll,
       expenseType: selectAll,
-      paymentMode: selectAll,
       notes: selectAll,
       truck: selectAll,
-      driver: selectAll,
       action: selectAll,
+      ledger : selectAll
     });
   };
 
   return (
     <div className="w-full h-full">
 
-        <div className=" flex items-center justify-between w-full mb-1">
+      <div className=" flex items-center justify-between w-full mb-1 gap-16">
+        <div className='flex items-center space-x-2'>
           <DropdownMenu>
             <DropdownMenuTrigger>
               <Button variant="outline">Select Columns</Button>
@@ -122,29 +219,66 @@ const TruckExpense: React.FC = () => {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+          <input type='text' onChange={handleSearch} placeholder='Search...' />
+        </div>
+
+        <div className='flex items-center space-x-2'>
           <Button onClick={() => setModalOpen(true)}>
             Truck Expense     <IoAddCircle className='mt-1' />
           </Button>
+          <div className="flex items-center space-x-4">
+            <Button onClick={() => setFilterModalOpen(true)}>
+              <TbFilterSearch />
+            </Button>
+
+          </div>
+
+
         </div>
+
+      </div>
 
 
       <div className="">
         <Table className="">
           <TableHeader>
             <TableRow className="">
-              {visibleColumns.date && <TableHead className="">Date</TableHead>}
-              {visibleColumns.amount && <TableHead className="">Amount</TableHead>}
-              {visibleColumns.expenseType && <TableHead className="">Expense Type</TableHead>}
-              {visibleColumns.paymentMode && <TableHead className="">Payment Mode</TableHead>}
-              {visibleColumns.notes && <TableHead className="">Notes</TableHead>}
-              {visibleColumns.truck && <TableHead className="">Truck</TableHead>}
-              {visibleColumns.driver && <TableHead className="">Driver</TableHead>}
+              {visibleColumns.date && <TableHead onClick={() => requestSort('date')} className="">
+                <div className='flex justify-between'>
+                  Date {getSortIcon('date')}
+                </div>
+              </TableHead>}
+              {visibleColumns.amount && <TableHead onClick={() => requestSort('amount')} className="">
+                <div className='flex justify-between'>
+                  Amount {getSortIcon('amount')}
+                </div>
+              </TableHead>}
+              {visibleColumns.expenseType && <TableHead onClick={() => requestSort('expenseType')} className="">
+                <div className='flex justify-between'>
+                  Expense Type {getSortIcon('expenseType')}
+                </div>
+              </TableHead>}
+              {visibleColumns.ledger && <TableHead className="">
+                <div className='flex justify-between'>
+                  Ledger
+                </div>
+              </TableHead>}
+              {visibleColumns.notes && <TableHead onClick={() => requestSort('notes')} className="">
+                <div className='flex justify-between'>
+                  Notes {getSortIcon('notes')}
+                </div>
+              </TableHead>}
+              {visibleColumns.truck && <TableHead className="">
+                <div className='flex justify-between'>
+                  Lorry
+                </div>
+              </TableHead>}
               {visibleColumns.action && <TableHead className="">Action</TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
-            {maintainenceBook.length > 0 ? (
-              maintainenceBook.map((expense, index) => (
+            {sortedExpense.length > 0 ? (
+              sortedExpense.map((expense, index) => (
                 <TableRow key={index} className="border-t hover:bg-indigo-100 cursor-pointer transition-colors">
                   {visibleColumns.date && (
                     <TableCell className="border p-4">
@@ -163,11 +297,10 @@ const TruckExpense: React.FC = () => {
                       </div>
                     </TableCell>
                   )}
-                  {visibleColumns.paymentMode && (
+                  {visibleColumns.ledger && (
                     <TableCell className="border p-4">
-                      <div className="flex items-center space-x-2">
-                        <MdPayment className="text-green-500" />
-                        <span>{expense.paymentMode}</span>
+                      <div className="flex items-center justify-between">
+                        <p>{expense.paymentMode}</p><p className='whitespace-nowrap'> {expense.driverName || expense.shopName}</p>
                       </div>
                     </TableCell>
                   )}
@@ -180,7 +313,6 @@ const TruckExpense: React.FC = () => {
                       </div>
                     </TableCell>
                   )}
-                  {visibleColumns.driver && <TableCell className="border p-4">{expense.driver ? <DriverName driverId={expense.driver as string} /> : 'N/A'}</TableCell>}
                   {visibleColumns.action && (
                     <TableCell className="border p-4">
                       <div className="flex items-center space-x-2">
@@ -189,7 +321,7 @@ const TruckExpense: React.FC = () => {
                         </Button>
                         <Button variant="destructive" onClick={async () => {
                           await handleDelete(expense._id as string);
-                          setMaintainenceBook((prev) => prev.filter((item) => item._id !== expense._id));
+                          setTruckExpenseBook((prev) => prev.filter((item) => item._id !== expense._id));
                         }} size={"sm"}>
                           <MdDelete />
                         </Button>
@@ -215,7 +347,19 @@ const TruckExpense: React.FC = () => {
         driverId={selected?.driver as string}
         selected={selected}
         truckPage={true}
+        trucks={trucks}
+        drivers={drivers}
+        shops={shops}
       />
+      <ExpenseFilterModal
+        isOpen={filterModalOpen}
+        onClose={() => setFilterModalOpen(false)}
+        paymentModes={['Paid By Driver', 'Cash', 'Online', 'Credit']}
+        monthYearOptions={monthYearOptions}
+        handleFilter={handleFilter}
+        trucks={trucks}
+        drivers={drivers}
+        shops={shops} />
 
     </div>
   );
