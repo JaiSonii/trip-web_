@@ -129,6 +129,9 @@ export async function GET(req: Request) {
           shops: 0,
           drivers: 0
         }
+      },
+      {
+        $sort : { date : -1}
       }
     ]);
 

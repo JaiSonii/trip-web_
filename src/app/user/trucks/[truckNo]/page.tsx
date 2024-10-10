@@ -81,6 +81,8 @@ const TruckPage = () => {
           truckRes.ok? truckRes.json() : [],
           profitRes.ok? profitRes.json() : []
         ])
+
+        console.log(truckData)
         setData(truckData.truck.truckLedger);
 
         setTotalExpense(profitData.truckExpense);
@@ -200,7 +202,7 @@ const TruckPage = () => {
                 <TableCell>
                   <span className='text-red-500 font-semibold'>₹{item.expenseType ? formatNumber(item.amount) : 0}</span>
                 </TableCell>
-                <TableCell><span className='text-green-500 font-semibold'>₹{!item.expenseType ? formatNumber(item.revenue) : ''}</span></TableCell>
+                <TableCell><span className='text-green-500 font-semibold'>₹{!item.expenseType ? formatNumber(item.tripRevenue) : ''}</span></TableCell>
                 <TableCell>
                   {item.expenseType ?
                     <div className='flex space-x-2 justify-center items-center w-full p-1'>

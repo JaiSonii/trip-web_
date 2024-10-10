@@ -148,7 +148,10 @@ export async function GET(req: Request) {
                     drivers: 0,
                     trips: 0
                 }
-            }
+            },
+            {
+                $sort : { date : -1}
+              }
         ]);
         return NextResponse.json({ tripExpense, status: 200 });
     } catch (error) {
