@@ -51,7 +51,7 @@ const TripInfo: React.FC<TripInfoProps> = ({ label, value, tripId, startDate }) 
             <textarea disabled className="text-2xl font-semibold text-gray-900 overflow-auto thin-scrollbar " value={notes} />
           </div>
         ) : (
-          <p className="text-2xl font-semibold text-gray-900">{label === 'Driver' ? <DriverName driverId={value} /> : value}</p>
+          <p className="text-2xl font-semibold text-gray-900">{value}</p>
         )}
         {label === 'Notes' && !isEditingNotes && (
           <Button onClick={() => setIsEditingNotes(true)}>

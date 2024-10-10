@@ -1,7 +1,7 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { TruckModel } from '@/utils/interface';
+import { IDriver, ITrip, TruckModel } from '@/utils/interface';
 import Link from 'next/link';
 import { BsFillFuelPumpFill } from "react-icons/bs";
 import { FaTruckMoving } from "react-icons/fa6";
@@ -17,6 +17,8 @@ import { IoCloseCircleOutline, IoDocuments } from "react-icons/io5";
 import { IoAddCircle } from "react-icons/io5";
 import EditTruckModal from '../truck/EditTruckModal';
 import { motion } from 'framer-motion';
+import AddExpenseModal from '../AddExpenseModal';
+import { handleAddExpense } from '@/helpers/ExpenseOperation';
 
 interface TruckLayoutProps {
     children: React.ReactNode;
@@ -43,6 +45,10 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
     const [edit, setEdit] = useState<boolean>(false);
 
     const [showDetails, setShowDetails] = useState(false);
+    const [trucks, setTrucks] = useState<TruckModel[]>([])
+    const [trips, setTrips] = useState<ITrip[]>([])
+    const [shops, setShops] = useState<any[]>([])
+    const [drivers, setDrivers] = useState<IDriver[]>([])
 
     const toggleDetails = () => setShowDetails(!showDetails);
 
@@ -70,50 +76,6 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
         });
     }, [tabs, router]);
 
-    const handleAddCharge = async (newCharge: any, id: string | undefined) => {
-        const truckExpenseData = {
-            expenseType: newCharge.expenseType,
-            paymentMode: newCharge.paymentMode,
-            transaction_id: newCharge.transactionId || '',
-            driver: newCharge.driver || '',
-            amount: newCharge.amount,
-            date: newCharge.date,
-            notes: newCharge.notes || '',
-            truck: truckNo,
-        };
-
-        if (id) {
-            const res = await fetch(`/api/truckExpense/${id}`, {
-                method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
-            });
-            const data = await res.json();
-            if (data.status === 500) {
-                alert(data.message);
-                return;
-            }
-        }
-
-        const res = await fetch(`/api/trucks/${truckNo}/expense`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(truckExpenseData),
-        });
-        if (!res.ok) {
-            alert('Error');
-            return;
-        }
-
-        const data = await res.json();
-        if (data.status === 500 || data.status === 400) {
-            alert(data.message);
-            return;
-        }
-
-        if (truckExpenseData.expenseType === 'Fuel Expense') router.push(`/user/trucks/${truckNo}/fuel`);
-        else if (fuelAndDriverChargeTypes.has(truckExpenseData.expenseType)) router.push(`/user/trucks/${truckNo}/driverExpense`);
-        else if (maintenanceChargeTypes.has(truckExpenseData.expenseType)) router.push(`/user/trucks/${truckNo}/maintainence`);
-    };
 
     const handleEdit = async (formData: any) => {
         try {
@@ -158,13 +120,19 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
     useEffect(() => {
         const fetchTruckDetails = async () => {
             try {
-                const res = await fetch(`/api/trucks/${truckNo}`, {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' },
-                });
+                const [res, truckres, tripres,shopres, driverres] = await Promise.all([fetch(`/api/trucks/${truckNo}`),fetch('/api/trucks'),fetch('/api/trips'), fetch('/api/shopkhata'), fetch('/api/drivers/create')]);
                 if (!res.ok) throw new Error('Failed to fetch truck details');
-                const resData = await res.json();
+                const [resData,truckData,tripData,shopData,driverData] =  await Promise.all([res.ok ? res.json() : alert('Failed to fetch truck'),
+                    truckres.ok ? truckres.json() : [],
+                    tripres.ok ? tripres.json() : [],
+                    shopres.ok ? shopres.json() : [],
+                    driverres.ok ? driverres.json() : []
+                ])
                 setTruck(resData.truck);
+                setTrips(tripData.trips);
+                setShops(shopData.shops);
+                setDrivers(driverData.drivers);
+                setTrucks(truckData.trucks)
             } catch (error: any) {
                 console.error(error);
                 setError(error.message);
@@ -174,6 +142,7 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
         };
         fetchTruckDetails();
     }, [truckNo]);
+
 
     if (loading) return <Loading />;
     if (error) return <div className="text-red-500 text-center my-4">Error: {error}</div>;
@@ -290,13 +259,15 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
                 <div className="mt-4">{children}</div>
             </div>
 
-            <ExpenseModal
+            <AddExpenseModal
                 isOpen={modalOpen}
                 onClose={() => setModalOpen(false)}
-                onSave={handleAddCharge}
-                driverId=""
-                truckPage={true}
-            />
+                onSave={handleAddExpense}
+                trips={trips}
+                trucks={trucks}
+                drivers={drivers}
+                shops={shops}
+                truckNo={truckNo} driverId={''} categories={['Truck Expense', 'Trip Expense', 'Office Expense']}/>
             <EditTruckModal
                 truck={truck as TruckModel}
                 isOpen={edit}

@@ -1,6 +1,5 @@
 'use client';
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { MdDelete, MdEdit } from 'react-icons/md';
 import { Button } from '@/components/ui/button';
 import { formatNumber } from '@/utils/utilArray';
@@ -15,30 +14,8 @@ interface ProfitItemProps {
   handleDelete? : any
 }
 
-const handleSave = async (editedExpense: any) => {
-  const sanitizedData = {
-    amount: editedExpense.amount,
-    expenseType: editedExpense.expenseType,
-    paymentDate: new Date(editedExpense.paymentDate),
-    paymentType: editedExpense.paymentType,
-    receivedByDriver: editedExpense.receivedByDriver,
-    notes: editedExpense.notes,
-  };
-
-  const res = await fetch(`/api/truckExpense/${editedExpense.id}`, {
-    method: 'PATCH',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(sanitizedData),
-  });
-
-  const resData = await res.json();
-  console.log(resData);
-};
-
 const ProfitItem: React.FC<ProfitItemProps> = ({ data, index, setOpen, setSelectedExpense, disabled, sign, handleDelete }) => {
-  const router = useRouter();
+  
   const [isHovered, setIsHovered] = useState<boolean>(false);
 
   return (
@@ -65,7 +42,7 @@ const ProfitItem: React.FC<ProfitItemProps> = ({ data, index, setOpen, setSelect
               <MdEdit size={20} />
             </Button>
             <Button
-              onClick={()=>handleDelete(data)}
+              onClick={()=>handleDelete(data._id)}
               className="p-2 bg-destructive text-white rounded-full transition-colors duration-200 ease-in-out hover:bg-red-600"
             >
               <MdDelete size={20} />

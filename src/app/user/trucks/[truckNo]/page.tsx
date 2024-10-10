@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState, useCallback } from 'react';
-import {  IExpense } from '@/utils/interface';
+import {  IDriver, IExpense, ITrip, TruckModel } from '@/utils/interface';
 import { useParams, useRouter } from 'next/navigation';
 import { statuses } from '@/utils/schema';
 import dynamic from 'next/dynamic';
@@ -11,6 +11,7 @@ import { FaCalendarAlt, FaRoute } from 'react-icons/fa';
 import { GoOrganization } from 'react-icons/go';
 import { formatNumber } from '@/utils/utilArray';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { DeleteExpense, handleAddExpense, handleEditExpense } from '@/helpers/ExpenseOperation';
 
 const Loading = dynamic(() => import('./loading'), {
   ssr: false,
@@ -28,40 +29,59 @@ const TruckPage = () => {
   const [totalExpense, setTotalExpense] = useState(0);
   const [modelOpen, setModelOpen] = useState(false);
   const [selected, setSelected] = useState<IExpense | null>(null);
+  const [trucks, setTrucks] = useState<TruckModel[]>([])
+  const [trips, setTrips] = useState<ITrip[]>([])
+  const [shops, setShops] = useState<any[]>([])
+  const [drivers, setDrivers] = useState<IDriver[]>([])
 
-  const ExpenseModal = dynamic(() => import('@/components/trip/tripDetail/ExpenseModal'), {
-    ssr: false,
-    loading: () => <Loading />,
-  });
+  const AddExpenseModal = dynamic(()=>import('@/components/AddExpenseModal'), {ssr : false})
 
+  const handleExpense = async(editedExpense : IExpense)=>{
+    try {
+      if(selected){
+        const expense: any = await handleEditExpense(editedExpense, selected._id as string)
+        setData((prev)=>(
+          prev.map((item)=>item._id === expense._id? expense : item)
+        ))
+      }else{
+        const expense : any= handleAddExpense(editedExpense)
+        setData((prev) => [
+          expense, // new expense added at the beginning
+          ...prev, // spread in the previous expenses
+        ]);
+        
+      }
+    } catch (error) {
+      alert('Failed to perform expense operation')
+      console.log(error)
+    }
+  }
+
+  const handleDeleteExpense = async(id : string)=>{
+    try {
+      const expense = await DeleteExpense(id)
+      if(expense){
+        setData((prev) => prev.filter((item)=>item._id!== expense._id))
+      }
+    } catch (error) {
+      alert('Failed to Delete Expense')
+      console.log(error)
+    }
+  }
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [expenseRes, tripRes, profitRes] = await Promise.all([
-          fetch(`/api/trucks/${truckNo}/expense`),
-          fetch(`/api/trips/truck/${truckNo}`),
+        const [truckRes, profitRes] = await Promise.all([
+          fetch(`/api/trucks/${truckNo}`),
           fetch(`/api/trucks/${truckNo}/summary`)
         ]);
 
-        const [expenseData, tripData, profitData] = await Promise.all([
-          expenseRes.ok ? expenseRes.json() : [],
-          tripRes.ok ? tripRes.json() : [],
-          profitRes.ok ? profitRes.json() : []
-        ]);
-
-        // const tripDataWithPartyNames = await Promise.all(
-        //   tripData.trips.map(async (trip: any) => {
-        //     const partyName = await fetchPartyName(trip.party);
-        //     return { ...trip, partyName };
-        //   })
-        // );
-
-        const combinedData = [...expenseData, ...tripData.trips].sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-        );
-        console.log(combinedData)
-        setData(combinedData);
+        const [truckData, profitData] = await Promise.all([
+          truckRes.ok? truckRes.json() : [],
+          profitRes.ok? profitRes.json() : []
+        ])
+        setData(truckData.truck.truckLedger);
 
         setTotalExpense(profitData.truckExpense);
         setRevenue(profitData.tripRevenue);
@@ -73,56 +93,29 @@ const TruckPage = () => {
       }
     };
     fetchData();
+    const fetchTruckDetails = async () => {
+      try {
+          const [ truckres, tripres,shopres, driverres] = await Promise.all([fetch('/api/trucks'),fetch('/api/trips'), fetch('/api/shopkhata'), fetch('/api/drivers/create')]);
+          
+          const [truckData,tripData,shopData,driverData] =  await Promise.all([
+              truckres.ok ? truckres.json() : [],
+              tripres.ok ? tripres.json() : [],
+              shopres.ok ? shopres.json() : [],
+              driverres.ok ? driverres.json() : []
+          ])
+          setTrips(tripData.trips);
+          setShops(shopData.shops);
+          setDrivers(driverData.drivers);
+          setTrucks(truckData.trucks)
+      } catch (error: any) {
+          console.error(error);
+      } finally {
+          setLoading(false);
+      }
+  };
+  fetchTruckDetails();
   }, [truckNo]);
 
-  const handleDelete = useCallback(async (id: string) => {
-    try {
-      const res = await fetch(`/api/truckExpense/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!res.ok) throw new Error('Failed to delete expense');
-      setData(prevData => prevData.filter((item) => item._id !== id));
-      router.refresh();
-    } catch (error: any) {
-      console.error('Error deleting expense:', error);
-      alert(error.message);
-    }
-  }, [router]);
-
-  const handleAddCharge = useCallback(async (newCharge: any, id?: string) => {
-    try {
-      const truckExpenseData = {
-        ...newCharge,
-        truck: truckNo,
-        transaction_id: newCharge.transactionId || '',
-        driver: newCharge.driver || '',
-        notes: newCharge.notes || '',
-      };
-
-      const res = await fetch(`/api/truckExpense/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(truckExpenseData),
-      });
-      if (!res.ok) throw new Error('Failed to add charge');
-
-      const data = await res.json();
-      setData(prev => {
-        const index = prev.findIndex(item => item._id === data.charge._id);
-        prev[index] = data.charge;
-        return [...prev];
-      });
-      router.refresh();
-    } catch (error: any) {
-      console.error('Error adding charge:', error);
-      alert(error.message);
-    }
-  }, [truckNo, router]);
 
   if (loading) return <Loading />;
 
@@ -215,7 +208,7 @@ const TruckPage = () => {
                         setSelected(item);
                         setModelOpen(true);
                       }}><MdEdit /></Button>
-                      <Button onClick={() => handleDelete(item._id)} variant={'destructive'} ><MdDelete /></Button>
+                      <Button onClick={() => handleDeleteExpense(item._id)} variant={'destructive'} ><MdDelete /></Button>
                     </div> :
                     <div className='flex items-center justify-center'>
                       <Link href={`/user/trips/${item.trip_id}`}><Button variant={'outline'} >View Trip</Button></Link>
@@ -228,14 +221,17 @@ const TruckPage = () => {
           </TableBody>
         </Table>
       </div>
-      <ExpenseModal
+      <AddExpenseModal
         isOpen={modelOpen}
         onClose={() => setModelOpen(false)}
-        onSave={handleAddCharge}
-        driverId={selected?.driver || ''}
-        selected={selected}
-        truckPage={true}
-      />
+        onSave={handleExpense}
+        trips={trips}
+        trucks={trucks}
+        drivers={drivers}
+        shops={shops}
+        truckNo={truckNo as string}
+        categories={['Truck Expense', 'Trip Expense', 'Office Expense']} driverId={''}
+        selected={selected}/>
     </div>
   );
 };

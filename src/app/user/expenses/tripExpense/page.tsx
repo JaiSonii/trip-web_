@@ -3,8 +3,8 @@ import Loading from '../loading';
 import { Button } from '@/components/ui/button';
 import { IDriver, IExpense, ITrip, TruckModel } from '@/utils/interface';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { MdDelete, MdEdit, MdPayment } from 'react-icons/md';
-import { fetchTripExpense, handleAddCharge, handleDelete } from '@/helpers/ExpenseOperation';
+import { MdDelete, MdEdit, } from 'react-icons/md';
+import { fetchTripExpense, handleAddCharge, handleAddExpense, handleDelete, handleEditExpense } from '@/helpers/ExpenseOperation';
 import { icons, IconKey } from '@/utils/icons';
 import { FaCalendarAlt, FaSort, FaSortDown, FaSortUp, FaTruck } from 'react-icons/fa';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -29,10 +29,9 @@ const TripExpense: React.FC = () => {
   const [drivers, setDrivers] = useState<IDriver[]>([])
   const [shops, setShops] = useState<any[]>([])
   const [trips, setTrips] = useState<ITrip[]>([])
-  const router = useRouter()
 
-  const TripExpenseModal = dynamic(() => import('@/components/TripExpenseModal'))
-  const ExpenseFilterModal = dynamic(() => import('@/components/ExpenseFilterModal'))
+  const ExpenseFilterModal = dynamic(() => import('@/components/ExpenseFilterModal'), {ssr : false})
+  const AddExpenseModal = dynamic(()=> import('@/components/AddExpenseModal'), {ssr : false})
 
   const fetchData = async () => {
     try {
@@ -62,10 +61,10 @@ const TripExpense: React.FC = () => {
   });
 
 
-  const handleFilter = async (filter: { drivers: string[], trips: string[], trucks: string[], paymentModes: string[], monYear: string[], shops: string[] }) => {
+  const handleFilter = async (filter: { drivers: string[], trips: string[], trucks: string[], paymentModes: string[], monYear: string[], shops: string[], expenseTypes : string[] }) => {
     try {
       setTruckExpenseBook([])
-      const res = await fetch(`/api/tripExpense?filter=${encodeURIComponent(JSON.stringify(filter))}`)
+      const res = await fetch(`/api/expenses/tripExpense?filter=${encodeURIComponent(JSON.stringify(filter))}`)
       const data = await res.json()
       console.log(data)
       setTruckExpenseBook(data.tripExpense)
@@ -138,31 +137,11 @@ const TripExpense: React.FC = () => {
     try {
       setLoading(true);
       const truckExpenses = await fetchTripExpense();
-      console.log(truckExpenses)
       setTruckExpenseBook(truckExpenses);
     } catch (error) {
       setError((error as Error).message);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleEditExpense = async (expense: IExpense | any) => {
-    try {
-      const data = selected ? await handleAddCharge(expense, expense.id) : await fetch(`/api/trips/${expense.trip}/truckExpense`, {
-        method: 'POST',
-        body: JSON.stringify(expense)
-      }).then((res) => res.ok ? res.json() : alert('Failed to add Expense'));
-      selected ?
-        setTruckExpenseBook((prev) => (
-          prev.map((exp) => exp._id === data.charge._id ? ({ ...exp, ...data.charge }) : exp)
-        )) : getBook()
-
-    } catch (error) {
-      console.error(error);
-      alert('Please try again')
-    } finally {
-      setModalOpen(false);
     }
   };
 
@@ -268,7 +247,7 @@ const TripExpense: React.FC = () => {
               </TableHead>}
               {visibleColumns.ledger && <TableHead className="">
                 <div className='flex justify-between'>
-                  Ledger
+                  Payment Mode
                 </div>
               </TableHead>}
               {visibleColumns.notes && <TableHead onClick={() => requestSort('notes')} className="">
@@ -358,12 +337,17 @@ const TripExpense: React.FC = () => {
       </div>
 
 
-      <TripExpenseModal
+      <AddExpenseModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSave={handleEditExpense}
+        onSave={selected ? handleEditExpense : handleAddExpense}
         driverId={selected?.driver as string}
         selected={selected}
+        trucks={trucks}
+        drivers={drivers}
+        trips={trips}
+        shops={shops} 
+        categories={['Truck Expense', 'Trip Expense', 'Office Expense']}
       />
       <ExpenseFilterModal
         isOpen={filterModalOpen}

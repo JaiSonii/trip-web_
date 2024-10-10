@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { TripExpense } from '@/utils/interface';
-import ExpenseModal from './ExpenseModal';
+import { IDriver, IExpense, ITrip, TripExpense, TruckModel } from '@/utils/interface';
 import ProfitItem from './Profit/ProfitItem';
-import { handleAddCharge } from '@/helpers/ExpenseOperation';
+import { DeleteExpense, handleAddCharge, handleAddExpense, handleEditExpense } from '@/helpers/ExpenseOperation';
 import { Button } from '@/components/ui/button';
 import { FaChevronUp, FaChevronDown } from 'react-icons/fa';
 import { formatNumber } from '@/utils/utilArray';
+import dynamic from 'next/dynamic';
 
 interface ProfitProps {
   charges: TripExpense[];
@@ -15,6 +15,7 @@ interface ProfitProps {
   driverId: string;
   truckNo: string;
   truckCost?: number
+  tripExpense : IExpense[]
 }
 
 interface Expense {
@@ -32,37 +33,44 @@ interface Expense {
   shop_id : string
 }
 
-const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, driverId, truckNo, truckCost }) => {
+const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, driverId, truckNo, truckCost, tripExpense }) => {
   const [showTotalCharges, setShowTotalCharges] = useState<boolean>(false);
   const [showTotalDeductions, setShowTotalDeductions] = useState<boolean>(false);
   const [showTruckExpenses, setShowTruckExpenses] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [truckExpenses, setTruckExpenses] = useState<any[]>([]);
+  const [truckExpenses, setTruckExpenses] = useState<IExpense[]>(tripExpense);
   const [selectedExpense, setSelectedExpense] = useState<any>(null);
-  const [chargesAmount, setChargesAmount] = useState(0);
-  const [deduction, setDeduction] = useState(0);
-  const [expenseAmount, setExpenseAmount] = useState(0);
-  const [netProfit, setNetProfit] = useState(0);
+  const [chargesAmount, setChargesAmount] = useState<number>(0);
+  const [deduction, setDeduction] = useState<number>(0);
+  const [expenseAmount, setExpenseAmount] = useState<number>(0);
+  const [netProfit, setNetProfit] = useState<number>(0);
   const [totalCharges, setTotalCharges] = useState<any>([]);
   const [totalDeductions, setTotalDeductions] = useState<any>([]);
+  const [trips, setTrips] = useState<ITrip[]>([])
+  const [trucks, setTrucks] = useState<TruckModel[]>([])
+  const [shops, setShops] = useState<any[]>([])
+  const [drivers, setDrivers] = useState<IDriver[]>([])
   const driver = driverId;
 
-  useEffect(() => {
-    const fetchExpenses = async () => {
-      const res = await fetch(`/api/trips/${tripId}/truckExpense`);
-      if (!res.ok) {
-        alert('Error');
-        return;
-      }
-      const data = await res.json();
-      if (data.status === 500) {
-        alert(data.message);
-        return;
-      }
-      setTruckExpenses(data.charges);
-    };
-    fetchExpenses();
-  }, [tripId]);
+  const AddExpenseModal = dynamic(()=> import('@/components/AddExpenseModal'), {ssr : false})
+
+  //Reduced API Call
+  // useEffect(() => {
+  //   const fetchExpenses = async () => {
+  //     const res = await fetch(`/api/trips/${tripId}/truckExpense`);
+  //     if (!res.ok) {
+  //       alert('Error');
+  //       return;
+  //     }
+  //     const data = await res.json();
+  //     if (data.status === 500) {
+  //       alert(data.message);
+  //       return;
+  //     }
+  //     setTruckExpenses(data.charges);
+  //   };
+  //   fetchExpenses();
+  // }, [tripId]);
 
   useEffect(() => {
     let totalChargesData: TripExpense[] = [];
@@ -88,77 +96,60 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
     setNetProfit(profit);
   }, [charges, truckExpenses, amount]);
 
-  const handleExpense = async (newCharge: Expense, id: string | undefined) => {
-    const truckExpenseData = {
-      expenseType: newCharge.expenseType,
-      paymentMode: newCharge.paymentMode,
-      transaction_id: newCharge.transactionId || '',
-      driver: newCharge.paymentMode === 'Paid By Driver' ? newCharge.driver : '',
-      amount: newCharge.amount,
-      date: newCharge.date,
-      notes: newCharge.notes || '',
-      truck: truckNo,
-      shop_id  : newCharge.shop_id || ''
-    };
 
-    if (id) {
-      const result = await handleAddCharge(truckExpenseData, id, truckNo);
-      const updatedCharge = result.charge;
-      setTruckExpenses((prev) => prev.map((charge) => charge._id === updatedCharge._id ? updatedCharge : charge));
-    } else {
-      const res = await fetch(`/api/trips/${tripId}/truckExpense`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(truckExpenseData),
-      });
-      const data = await res.json();
-      setTruckExpenses(prev => [...prev, data.charge]);
+
+  useEffect(()=>{
+    const fetchExpenseData = async()=>{
+      try{
+        const [tripRes, truckres, shopres, driverres] = await Promise.all([fetch('/api/trips'), fetch('/api/trucks/'), fetch('/api/shopkhata'), fetch('/api/drivers/create')])
+        if(!tripRes.ok || !truckres.ok || !shopres.ok || !driverres.ok){
+          return
+        }
+        const [ tripdata, truckdata, shopdata, driverdata] = await Promise.all([tripRes.json(), truckres.json(), shopres.json(), driverres.json()])
+       
+        setTrips(tripdata.trips)
+        setTrucks(truckdata.trucks)
+        setShops(shopdata.shops)
+        setDrivers(driverdata.drivers)
+      }catch(error){
+        console.log(error)
+      }
     }
+    fetchExpenseData()
+  },[])
 
-    if (newCharge.partyBill) {
-      const chargesData = {
-        partyBill: newCharge.partyBill,
-        amount: newCharge.partyAmount,
-        date: new Date(newCharge.date),
-        expenseType: newCharge.expenseType,
-        notes: newCharge.notes,
-      };
-      const res = await fetch(`/api/trips/${tripId}/expenses`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(chargesData),
-      });
-      const data = await res.json();
-      setCharges((prev: TripExpense[]) => [...prev, data.newCharge]);
-      setTotalCharges((prev: TripExpense[]) => [...prev, data.newCharge]);
-    }
-  };
-
-  const handleDeleteExpense = async (data : any) => {
-    console.log('deleting',data)
+  const handleExpense = async(editedExpense : IExpense)=>{
     try {
-      const res = await fetch(`/api/truckExpense/${data._id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (res.ok) {
-        const resData = await res.json()
-        setTruckExpenses(truckExpenses.filter((expense : any)=>expense._id !== resData.charge._id))
-        console.log('deleted', resData.charge)
-      } else {
-        console.log('Failed to delete');
+      if(selectedExpense){
+        const expense: any = await handleEditExpense(editedExpense, selectedExpense._id)
+        setTruckExpenses((prev)=>(
+          prev.map((item)=>item._id === expense._id? expense : item)
+        ))
+      }else{
+        const expense : any= handleAddExpense(editedExpense)
+        setTruckExpenses((prev) => [
+          expense, // new expense added at the beginning
+          ...prev, // spread in the previous expenses
+        ]);
+        
+      }
+    } catch (error) {
+      alert('Failed to perform expense operation')
+      console.log(error)
+    }
+  }
+
+  const handleDeleteExpense = async(id : string)=>{
+    try {
+      const expense = await DeleteExpense(id)
+      if(expense){
+        setTruckExpenses((prev) => prev.filter((item)=>item._id!== expense._id))
       }
     } catch (error) {
       alert('Failed to Delete Expense')
+      console.log(error)
     }
-    
-  };
+  }
 
   return (
     <div className="p-6 border rounded-lg border-lightOrange shadow-lg bg-white w-full hover:shadow-lightOrangeButtonColor transition-shadow duration-300 relative">
@@ -203,6 +194,7 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
       ))}
 
 
+
       {truckCost != 0 &&
         <div className="py-4 mt-4 flex justify-between items-center">
           <span className="font-medium text-gray-800">Truck Hire Cost: </span>
@@ -226,11 +218,19 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
         </Button>
       </div>
 
-      <ExpenseModal
+
+      <AddExpenseModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleExpense}
         driverId={driver}
+        trucks={trucks}
+        shops={shops} 
+        drivers={drivers}
+        trips={trips}
+        categories={['Truck Expense', 'Trip Expense', 'Office Expense']}     
+        tripId={tripId} 
+        truckNo={truckNo}
         selected={selectedExpense}
       />
     </div>

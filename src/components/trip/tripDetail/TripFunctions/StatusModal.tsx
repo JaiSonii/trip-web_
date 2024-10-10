@@ -135,7 +135,7 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
                 <label className="block text-sm font-medium text-gray-700 mb-1">POD Image</label>
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/*, application/pdf"
                   onChange={handleFileChange}
                 />
               </div>

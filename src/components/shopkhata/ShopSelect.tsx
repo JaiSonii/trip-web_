@@ -6,6 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { loadingIndicator } from '../ui/LoadingIndicator';
 
 interface IShop {
   shop_id: string;
@@ -53,15 +54,18 @@ const ShopSelect: React.FC<Props> = ({ shops, formData, handleChange }) => {
               className="w-full p-2 border border-gray-300 rounded-md"
             />
           </div>
-          {filteredShops.length > 0 ? (
-            filteredShops.map((shop) => (
-              <SelectItem key={shop.shop_id} value={shop.shop_id}>
-                {shop.name}
-              </SelectItem>
-            ))
-          ) : (
-            <div className="p-2 text-gray-500">No shops found</div>
-          )}
+          {shops.length > 0 ?
+            filteredShops.length > 0 ? (
+              filteredShops.map((shop) => (
+                <SelectItem key={shop.shop_id} value={shop.shop_id}>
+                  {shop.name}
+                </SelectItem>
+              ))
+            ) : (
+              <div className="p-2 text-gray-500">No shops found</div>
+            )
+            : <p>fetching shops... {loadingIndicator}</p>}
+
         </SelectContent>
       </Select>
     </div>

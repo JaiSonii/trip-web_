@@ -2,7 +2,7 @@
 import { IDriver, ITrip, TruckModel } from '@/utils/interface'
 import React, { useEffect, useState } from 'react'
 import { Button } from './ui/button'
-import { fuelAndDriverChargeTypes, maintenanceChargeTypes } from '@/utils/utilArray'
+import { fuelAndDriverChargeTypes, maintenanceChargeTypes, officeExpenseTypes } from '@/utils/utilArray'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 
@@ -11,9 +11,9 @@ type Props = {
     paymentModes: string[]
     onClose: () => void
     isOpen: boolean // Modal open state
-    trucks: TruckModel[]
+    trucks?: TruckModel[]
     trips?: ITrip[]
-    drivers: IDriver[]
+    drivers?: IDriver[]
     shops: any[]
     handleFilter: (filter: any) => void
 }
@@ -24,6 +24,16 @@ const ExpenseFilterModal: React.FC<Props> = ({ onClose, isOpen, monthYearOptions
     const pathname = usePathname()
     let ulOptions = ['Trucks', 'Month and Year', 'Expense Type', 'Driver', 'Shop', 'Payment Mode']
     pathname === '/user/expenses/tripExpense' ? ulOptions.push('Trips') : null
+    pathname === '/user/expenses/officeExpense' ? ulOptions = ['Month and Year', 'Expense Type','Shop', 'Payment Mode'] : null
+
+    let expenseTypes = []
+    if(pathname === '/user/expenses/tripExpense'){
+        expenseTypes = Array.from(fuelAndDriverChargeTypes)
+    }else if(pathname === '/user/expenses/truckExpense'){
+        expenseTypes = Array.from(maintenanceChargeTypes)
+    }else{
+        expenseTypes = Array.from(officeExpenseTypes)
+    }
 
     // States for selected filters
     const [selectedTrucks, setSelectedTrucks] = useState<string[]>([])
@@ -34,7 +44,7 @@ const ExpenseFilterModal: React.FC<Props> = ({ onClose, isOpen, monthYearOptions
     const [selectedTrips, setSelectedTrips] = useState<string[]>([])
     const [selectedExpenses, setSelectedExpenses] = useState<string[]>([])
 
-    const [render, setRender] = useState('Trucks')
+    const [render, setRender] = useState('Month and Year')
 
 
 
@@ -106,7 +116,7 @@ const ExpenseFilterModal: React.FC<Props> = ({ onClose, isOpen, monthYearOptions
                 transition={{
                     duration: 0.5,
                     ease: [0, 0.71, 0.2, 1.01]
-                }} className="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl">
+                }} className="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl max-h-[800px]">
                 {/* Modal Header */}
                 <div className="flex justify-between items-center border-b pb-2 mb-4">
                     <h2 className="text-lg font-semibold">Expense Filter</h2>
@@ -130,8 +140,8 @@ const ExpenseFilterModal: React.FC<Props> = ({ onClose, isOpen, monthYearOptions
                         </ul>
                     </div>
                     <div className='col-span-2'>
-                        {trucks && render === 'Trucks' && (
-                            <div className='relative max-h-[400px] overflow-auto p-4 text-black font-normal text-lg'>
+                        {pathname !== '/user/expenses/officeExpense' && trucks && render === 'Trucks' && (
+                            <div className='relative h-full overflow-auto p-4 text-black font-normal text-lg'>
                                 {trucks.map(truck => (
                                     <div key={truck.truckNo} className="flex items-center space-x-2 border-b-2 border-gray-200">
                                         <input
@@ -186,7 +196,7 @@ const ExpenseFilterModal: React.FC<Props> = ({ onClose, isOpen, monthYearOptions
                             </div>
                         )}
 
-                        {drivers && render === 'Driver' && (
+                        {pathname !== '/user/expenses/officeExpense' && drivers && render === 'Driver' && (
                             <div className='relative max-h-[400px] overflow-auto p-4 text-black font-normal text-lg'>
                                 {drivers.map(driver => (
                                     <div key={driver.driver_id} className="flex items-center space-x-2 border-b-2 border-gray-200">
@@ -237,26 +247,9 @@ const ExpenseFilterModal: React.FC<Props> = ({ onClose, isOpen, monthYearOptions
                             </div>
                         )}
 
-                        {pathname === '/user/expenses/truckExpense' && render === 'Expense Type' && (
+                        {render === 'Expense Type' && (
                             <div className='relative max-h-[400px] overflow-auto p-4 text-black font-normal text-lg'>
-                                {Array.from(maintenanceChargeTypes).map((expense, index) => (
-                                    <div key={index} className="flex items-center space-x-2 border-b-2 border-gray-200">
-                                        <input
-                                            type="checkbox"
-                                            value={expense}
-                                            checked={selectedExpenses.includes(expense)}
-                                            onChange={() => handleExpenseChange(expense)}
-                                            className="accent-bottomNavBarColor hover:accent-opacity-80"
-                                        />
-                                        <label className='whitespace-nowrap'>{expense}</label>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        {pathname === '/user/expenses/tripExpense' && render === 'Expense Type' && (
-                            <div className='relative max-h-[400px] overflow-auto p-4 text-black font-normal text-lg'>
-                                {Array.from(fuelAndDriverChargeTypes).map((expense, index) => (
+                                {expenseTypes.map((expense, index) => (
                                     <div key={index} className="flex items-center space-x-2 border-b-2 border-gray-200">
                                         <input
                                             type="checkbox"

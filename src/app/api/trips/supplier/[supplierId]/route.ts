@@ -94,8 +94,7 @@ export async function GET(req: Request, params: { params: { supplierId: string }
           // Include the party name from the joined partyDetails
           partyName: '$partyDetails.name'
         }
-      },
-      { $sort: { startDate: -1 } },  // Sort by startDate in descending order
+      },  // Sort by startDate in descending order
       // Exclude unnecessary fields including accountBalance, chargeToBill, and chargeNotToBill
       {
         $project: {

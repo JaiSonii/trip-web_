@@ -103,9 +103,6 @@ export async function GET(request: Request, { params }: { params: { partyId: str
         }
       },
       { 
-        $sort: { startDate: -1 } // Sort by startDate in descending order
-      },
-      { 
         $project: {
           trip_id: 1,
           startDate: 1,

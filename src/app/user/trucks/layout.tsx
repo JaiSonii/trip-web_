@@ -18,7 +18,7 @@ const TrucksLayout = ({ children }: { children: React.ReactNode }) => {
     <div className={`${inter.className} max-h-screen flex flex-col`}>
       <div className="container mx-auto p-2 flex flex-col bg-white">
         <div className="flex items-center justify-between mb-4 border-b-2 border-gray-300 pb-2">
-          <h1 className="text-3xl font-bold text-bottomNavBarColor">{headings[pathname] || 'Lorries'}</h1>
+          <h1 className="text-3xl font-bold text-black">{headings[pathname] || 'Lorries'}</h1>
           <div className="flex space-x-4">
             {!pathname.includes('create') &&
               <Link href="/user/trucks/create">

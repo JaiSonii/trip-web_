@@ -110,8 +110,7 @@ export async function GET(req: Request) {
           // Include the party name from the joined partyDetails
           partyName: '$partyDetails.name'
         }
-      },
-      { $sort: { startDate: -1 } },  // Sort by startDate in descending order
+      }, // Sort by startDate in descending order
       // Exclude unnecessary fields including accountBalance, chargeToBill, and chargeNotToBill
       { $project: { partyDetails: 0, tripExpenses: 0, accounts: 0, chargeToBill: 0, chargeNotToBill: 0, accountBalance: 0 } }
     ]);

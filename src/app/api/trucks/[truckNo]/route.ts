@@ -6,7 +6,7 @@ import { verifyToken } from '@/utils/auth';
 
 const Truck = mongoose.models.Truck || mongoose.model<TruckModel>('Truck', truckSchema);
 const Trip = models.Trip || model('Trip', tripSchema)
-const Expense = models.Expense || model('Expense',ExpenseSchema)
+const Expense = models.Expense || model('Expense', ExpenseSchema)
 
 export async function PATCH(req: Request, { params }: { params: { truckNo: string } }) {
   const { user, error } = await verifyToken(req);
@@ -19,7 +19,7 @@ export async function PATCH(req: Request, { params }: { params: { truckNo: strin
 
     await connectToDatabase(); // Ensure this function is properly defined and imported
 
-    const truck = await Truck.findOne({user_id : user, truckNo: truckNo });
+    const truck = await Truck.findOne({ user_id: user, truckNo: truckNo });
 
     if (!truck) {
       return NextResponse.json({ message: 'No Truck Found' }, { status: 404 });
@@ -41,7 +41,7 @@ export async function PUT(req: Request, { params }: { params: { truckNo: string 
   if (error) {
     return NextResponse.json({ error }, { status: 401 });
   }
-  
+
   try {
     const { truckNo } = params;
     const data = await req.json();
@@ -83,13 +83,107 @@ export async function GET(req: Request, { params }: { params: { truckNo: string 
 
     await connectToDatabase(); // Ensure this function is properly defined and imported
 
-    const truck = await Truck.findOne({user_id : user, truckNo: truckNo });
+    const truck = await Truck.aggregate([
+      {
+        $match: {
+          user_id: user,
+          truckNo: truckNo
+        }
+      },
+      {
+        $lookup: {
+          from: 'trips',
+          localField: 'truckNo',
+          foreignField: 'truck',
+          as: 'trips'
+        }
+      },
+      {
+        $lookup: {
+          from: 'expenses',
+          localField: 'truckNo',
+          foreignField: 'truck',
+          as: 'expenses'
+        }
+      },
+      // Perform lookup to add partyName from 'parties' collection to each trip
+      {
+        $lookup: {
+          from: 'parties',
+          localField: 'trips.party_id',    // Use the party_id field from trips
+          foreignField: '_id',             // Use the _id field from parties
+          as: 'partyDetails'
+        }
+      },
+      {
+        $unwind: { path: '$partyDetails', preserveNullAndEmptyArrays: true } // Unwind to access party details
+      },
+      // Add tripRevenue to trips and rename startDate to date for uniform sorting
+      {
+        $addFields: {
+          trips: {
+            $map: {
+              input: '$trips',
+              as: 'trip',
+              in: {
+                $mergeObjects: [
+                  '$$trip',
+                  {
+                    tripRevenue: {
+                      $add: [
+                        '$$trip.amount',
+                        {
+                          $reduce: {
+                            input: '$$trip.accounts',
+                            initialValue: 0,
+                            in: {
+                              $cond: [
+                                { $eq: ['$$this.partyBill', true] },
+                                { $add: ['$$value', '$$this.amount'] },
+                                '$$value'
+                              ]
+                            }
+                          }
+                        }
+                      ]
+                    },
+                    date: '$$trip.startDate',  // Rename startDate to date
+                    partyName: '$partyDetails.partyName'  // Add partyName from lookup
+                  }
+                ]
+              }
+            }
+          }
+        }
+      },
+      // Combine trips and expenses into truckLedger array
+      {
+        $addFields: {
+          truckLedger: { $concatArrays: ['$trips', '$expenses'] }
+        }
+      },
+      // Sort the combined truckLedger array by date
+      {
+        $addFields: {
+          truckLedger: { $sortArray: { input: '$truckLedger', sortBy: { date: -1 } } }  // 1 for ascending
+        }
+      },
+      // Optionally project to return only necessary fields
+      {
+        $project: {
+          trips: 0,      // Optionally exclude original trips
+          expenses: 0,   // Optionally exclude original expenses
+          // Include other fields if necessary
+        }
+      }
+    ]);
+
 
     if (!truck) {
       return NextResponse.json({ message: 'No Truck Found' }, { status: 404 });
     }
 
-    return NextResponse.json({ truck: truck }, { status: 200 });
+    return NextResponse.json({ truck: truck[0] }, { status: 200 });
   } catch (err: any) {
     return NextResponse.json({ message: err.message }, { status: 500 });
   }
@@ -105,9 +199,9 @@ export async function DELETE(req: Request, { params }: { params: { truckNo: stri
 
     await connectToDatabase(); // Ensure this function is properly defined and imported
 
-    const foundTruck = await Truck.findOne({user_id : user, truckNo: truckNo });
-    if(foundTruck.status == 'On Trip'){
-      return NextResponse.json({message : "Truck currently on Trip", status : 400})
+    const foundTruck = await Truck.findOne({ user_id: user, truckNo: truckNo });
+    if (foundTruck.status == 'On Trip') {
+      return NextResponse.json({ message: "Truck currently on Trip", status: 400 })
     }
 
     const trips = await Trip.find({ user_id: user, truck: truckNo });
@@ -118,13 +212,13 @@ export async function DELETE(req: Request, { params }: { params: { truckNo: stri
         const destination = trip.route.destination;
         return `${origin} -> ${destination} ${new Date(trip.startDate).toISOString().split('T')[0]}`;
       }).join(', ');
-    
+
       return NextResponse.json({
         message: `Truck is associated with trips:\n ${tripDetails}`,
         status: 400
       });
     }
-    const truck = await Truck.findOneAndDelete({user_id : user, truckNo: truckNo });
+    const truck = await Truck.findOneAndDelete({ user_id: user, truckNo: truckNo });
 
     if (!truck) {
       return NextResponse.json({ message: 'No Truck Found' }, { status: 404 });

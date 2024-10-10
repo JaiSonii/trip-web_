@@ -1,11 +1,11 @@
 'use client'
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { fuelAndDriverChargeTypes, maintenanceChargeTypes } from '@/utils/utilArray';
+import { fuelAndDriverChargeTypes, maintenanceChargeTypes, officeExpenseTypes } from '@/utils/utilArray';
 import { IDriver, IExpense, ITrip, TruckModel } from '@/utils/interface';
 import { motion } from 'framer-motion';
-import { usePathname } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
 import { statuses } from '@/utils/schema';
 import DriverSelect from './trip/DriverSelect';
 import ShopSelect from './shopkhata/ShopSelect';
@@ -17,16 +17,18 @@ interface ChargeModalProps {
     driverId: string;
     selected?: any;
     truckPage?: boolean;
-    tripId?: string;
-    trucks : TruckModel[]
-    shops : any[]
-    drivers:IDriver[]
-    trips : ITrip[]
+    trucks?: TruckModel[]
+    shops: any[]
+    drivers?: IDriver[]
+    trips?: ITrip[]
+    categories: string[]
+    tripId? : string
+    truckNo? : string
 }
 
 interface TripExpense {
     id?: string;
-    trip: string;
+    trip_id: string;
     partyBill: boolean;
     amount: number;
     date: Date;
@@ -37,13 +39,13 @@ interface TripExpense {
     transactionId: string;
     driver: string;
     truck?: string
-    shop_id? : string
+    shop_id?: string
 }
 
-const TripExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, driverId, selected, truckPage, trucks, shops, drivers,trips, tripId }) => {
+const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClose, onSave, driverId, selected, truckPage, trucks, shops, drivers, trips, tripId, truckNo }) => {
     const [formData, setFormData] = useState<TripExpense>({
         id: selected?._id || undefined,
-        trip: selected?.trip_id || '',
+        trip_id: selected?.trip_id ? selected.trip_id : tripId ? tripId : '',
         partyBill: false,
         amount: selected?.amount || 0,
         date: selected?.date ? new Date(selected.date) : new Date(),
@@ -53,21 +55,26 @@ const TripExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave,
         paymentMode: selected?.paymentMode || 'Cash',
         transactionId: selected?.transaction_id || '',
         driver: driverId || '',
-        truck: selected?.truck || '',
-        shop_id : selected?.shop_id || ''
+        truck: selected?.truck || truckNo || '',
+        shop_id: selected?.shop_id || ''
     });
 
     const pathname = usePathname()
+    const truckpage = pathname === '/user/expenses/truckExpense' || pathname.startsWith('/user/trucks/')
+    const trippage = pathname === '/user/expenses/tripExpense' || pathname.startsWith('/user/trips/')
+    const officepage = pathname === '/user/expenses/officeExpense'
+
 
     const [driverName, setDriverName] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('Fuel & Driver');
-    const [trip, setTrip] = useState<ITrip>()
+    const [selectedCategory, setSelectedCategory] = useState(truckpage ? 'Truck Expense' : trippage ? 'Trip Expense' : officepage ? 'Office Expense' : '');
+    const [trip, setTrip] = useState<ITrip | undefined>()
+
 
     useEffect(() => {
         if (!selected) return;
         setFormData({
             id: selected?._id || undefined,
-            trip: selected?.trip_id || '',
+            trip_id: selected?.trip_id ? selected.trip_id : tripId ? tripId : '',
             partyBill: false,
             amount: selected?.amount || 0,
             date: selected?.date ? new Date(selected.date) : new Date(),
@@ -77,12 +84,40 @@ const TripExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave,
             paymentMode: selected?.paymentMode || 'Cash',
             transactionId: selected?.transaction_id || '',
             driver: selected?.driver || '',
-            truck: selected?.truck || '',
-            shop_id : selected?.shop_id || '',
+            truck: selected?.truck || truckNo || '',
+            shop_id: selected?.shop_id || '',
         });
     }, [selected]);
 
+    const expenseTypes = useMemo(() => {
+        setFormData((prev) => ({ ...prev, expenseType: ""}))
+        if (selectedCategory === 'Truck Expense') return Array.from(maintenanceChargeTypes)
+        else if (selectedCategory === 'Trip Expense') return Array.from(fuelAndDriverChargeTypes)
+        else if (selectedCategory === 'Office Expense') return Array.from(officeExpenseTypes)
+        if (selected) {
+            if (maintenanceChargeTypes.has(selected.expenseType)) {
+                setSelectedCategory('Truck Expense')
+                return Array.from(maintenanceChargeTypes)
+            }
+            if (fuelAndDriverChargeTypes.has(selected.expenseType)) {
+                setSelectedCategory('Trip Expense')
+                return Array.from(fuelAndDriverChargeTypes)
+            }
+            if (officeExpenseTypes.includes(selected.expenseType)) {
+                setSelectedCategory('Office Expense')
+                return officeExpenseTypes
+            }
+        }
 
+        return []
+
+    }, [selectedCategory, selected])
+
+    const paymentModes = useMemo(() => {
+        if (selectedCategory !== 'Office Expense') {
+            return ['Cash', 'Online', 'Paid By Driver', 'Credit']
+        } else return ['Cash', 'Online', 'Credit']
+    }, [selectedCategory])
 
     useEffect(() => {
         const fetchDriverName = async () => {
@@ -97,7 +132,7 @@ const TripExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave,
         };
         if (formData.paymentMode === 'Paid By Driver') fetchDriverName();
 
-  
+
     }, [formData.paymentMode, driverId]);
 
 
@@ -108,14 +143,13 @@ const TripExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave,
     }, [trip, formData.paymentMode])
 
     useEffect(() => {
-        if (formData.truck) {
-            let tempTrips = trips.filter((trip) => trip.truck === formData.truck)
-            console.log(tempTrips)
+        if (formData.truck && pathname === '/user/expenses/tripExpense') {
+            let tempTrips = trips?.filter((trip) => trip.truck === formData.truck)
             setFormData((prev) => ({
                 ...prev,
-                trip: tempTrips ? tempTrips[0]?.trip_id : ''
+                trip_id: tempTrips ? tempTrips[0]?.trip_id : ''
             }))
-            setTrip(tempTrips[0])
+            setTrip(tempTrips ? tempTrips[0] : undefined)
         }
     }, [formData.truck])
 
@@ -123,8 +157,8 @@ const TripExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave,
         setFormData((prevData) => {
             let updatedData = { ...prevData, [name]: value };
 
-            if (name === 'trip') {
-                const selectedTrip = trips.find((trip) => trip.trip_id === value);
+            if (name === 'trip_id') {
+                const selectedTrip = trips?.find((trip) => trip.trip_id === value);
                 if (selectedTrip && selectedTrip.truck) {
                     updatedData = { ...updatedData, truck: selectedTrip.truck };
                 }
@@ -145,6 +179,8 @@ const TripExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave,
         if (formData.paymentMode === 'Paid By Driver') {
             setFormData((prev) => ({ ...prev, driver: driverId }));
         }
+        if(selectedCategory === 'Truck Expense') setFormData((prev)=>({...prev, trip_id : ''}))
+        else if(selectedCategory === 'Office Expense') setFormData((prev)=>({...prev, trip_id : '', truck : ''}))
         if (selected) {
             onSave(formData, selected._id);
         } else {
@@ -159,8 +195,6 @@ const TripExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave,
             handleChange({ target: { name: e.target.name, value: '' } } as React.ChangeEvent<HTMLInputElement>);
         }
     };
-
-    const chargeTypes = selectedCategory === 'Fuel & Driver' ? Array.from(fuelAndDriverChargeTypes) : Array.from(maintenanceChargeTypes);
 
     if (!isOpen) return null;
 
@@ -179,45 +213,37 @@ const TripExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave,
                     className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl"
                 >
                     <h2 className="text-xl font-semibold mb-4">Add Expense</h2>
-
-                    <div className="flex space-x-4 mb-4 border-b-2 border-gray-200">
-                        <Button
-                            variant="link"
-                            onClick={() => setSelectedCategory('Fuel & Driver')}
-                            className={`px-4 py-2 transition duration-300 ease-in-out ${selectedCategory === 'Fuel & Driver'
-                                ? 'border-b-2 border-bottomNavBarColor text-bottomNavBarColor'
-                                : 'border-transparent text-gray-600 hover:text-bottomNavBarColor hover:border-bottomNavBarColor'
-                                }`}
-                        >
-                            Fuel & Driver
-                        </Button>
-                        {truckPage || pathname.includes('/expenses') && (
-                            <Button
-                                variant="link"
-                                onClick={() => setSelectedCategory('Maintenance')}
-                                className={`px-4 py-2 transition duration-300 ease-in-out ${selectedCategory === 'Maintenance'
-                                    ? 'border-b-2 border-bottomNavBarColor text-bottomNavBarColor'
-                                    : 'border-transparent text-gray-600 hover:text-bottomNavBarColor hover:border-bottomNavBarColor'
-                                    }`}
-                            >
-                                Maintenance
-                            </Button>
-                        )}
+                    <div className='flex justify-between gap-2'>
+                        {categories &&
+                            <div className="mb-4 w-full">
+                                <label className="block text-sm font-medium text-gray-700">Select Category</label>
+                                <Select value={selectedCategory} onValueChange={(value) => setSelectedCategory(value)}>
+                                    <SelectTrigger className="w-full">
+                                        <SelectValue>{selectedCategory || 'Select Category'}</SelectValue>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {categories.map((type) => (
+                                            <SelectItem key={type} value={type}>{type}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        }
+                        <div className="mb-4 w-full">
+                            <label className="block text-sm font-medium text-gray-700">Expense Type</label>
+                            <Select value={formData.expenseType} onValueChange={(value) => handleSelectChange('expenseType', value)}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue>{formData.expenseType || 'Select Expense Type'}</SelectValue>
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {expenseTypes.map((type) => (
+                                        <SelectItem key={type} value={type}>{type}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
                     </div>
 
-                    <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700">Expense Type</label>
-                        <Select value={formData.expenseType} onValueChange={(value) => handleSelectChange('expenseType', value)}>
-                            <SelectTrigger className="w-full">
-                                <SelectValue>{formData.expenseType || 'Select Expense Type'}</SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                                {chargeTypes.map((type) => (
-                                    <SelectItem key={type} value={type}>{type}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
-                    </div>
                     <div className='flex items-center space-x-2 '>
                         <div className="mb-4 w-1/2">
                             <label className="block text-sm font-medium text-gray-700">Amount</label>
@@ -243,38 +269,15 @@ const TripExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave,
                         </div>
                     </div>
 
-                    {pathname.includes('/expenses') && !selected && <div className='flex items-center space-x-2 '>
-
-
-                        <div className="mb-4 w-1/2">
-                            <label className="block text-sm font-medium text-gray-700">Select Truck</label>
-                            <Select value={formData.truck} onValueChange={(value) => handleSelectChange('truck', value)}>
-                                <SelectTrigger className="w-full text-black" value={formData.truck}>
-                                    <SelectValue placeholder='Select Truck' />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {trucks.map((truck) => (
-                                        <SelectItem key={truck.truckNo} value={truck.truckNo}>
-                                            <span>{truck.truckNo}</span>
-                                            <span
-                                                className={`ml-2 p-1 rounded ${truck.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
-                                            >
-                                                {truck.status}
-                                            </span>
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        <div className="mb-4 w-1/2">
+                    {selectedCategory !== 'Office Expense' && <div className='flex items-center space-x-2 '>
+                        {selectedCategory === 'Trip Expense' && <div className="mb-4 w-1/2">
                             <label className="block text-sm font-medium text-gray-700">Select Trip</label>
-                            <Select value={formData.trip} onValueChange={(value) => handleSelectChange('trip', value)}>
+                            <Select value={formData.trip_id} defaultValue={formData.trip_id} onValueChange={(value) => handleSelectChange('trip_id', value)}>
                                 <SelectTrigger className="w-full">
                                     <SelectValue placeholder='Select Trip' />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {trips.map((trip: ITrip) => (
+                                    {trips?.map((trip: ITrip) => (
                                         <SelectItem key={trip.trip_id} value={trip.trip_id}>
                                             <div className='flex items-center space-x-2 w-full'>
                                                 <span className='font-semibold w-1/2'>{trip.route.origin.split(',')[0]} &rarr; {trip.route.destination.split(',')[0]}</span>
@@ -292,12 +295,35 @@ const TripExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave,
                                     ))}
                                 </SelectContent>
                             </Select>
+                        </div>}
+
+                        <div className="mb-4 w-1/2">
+                            <label className="block text-sm font-medium text-gray-700">Select Truck</label>
+                            <Select value={formData.truck} onValueChange={(value) => handleSelectChange('truck', value)}>
+                                <SelectTrigger className="w-full text-black" value={formData.truck}>
+                                    <SelectValue placeholder='Select Truck' />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {trucks?.map((truck) => (
+                                        <SelectItem key={truck.truckNo} value={truck.truckNo}>
+                                            <span>{truck.truckNo}</span>
+                                            <span
+                                                className={`ml-2 p-1 rounded ${truck.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+                                            >
+                                                {truck.status}
+                                            </span>
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
+
+
                     </div>}
 
                     <label className="block text-sm font-medium text-gray-700">Payment Mode</label>
                     <div className="flex flex-row w-full justify-start gap-3 mb-3">
-                        {['Cash', 'Paid By Driver', 'Online','Credit'].map((type) => (
+                        {paymentModes.map((type) => (
                             <button
                                 key={type}
                                 type="button"
@@ -319,7 +345,7 @@ const TripExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave,
 
                     {formData.paymentMode === 'Paid By Driver' && truckPage && (
                         <DriverSelect
-                            drivers={drivers}
+                            drivers={drivers || []}
                             formData={formData}
                             handleChange={handleChange}
                             setFormData={setFormData}
@@ -348,19 +374,6 @@ const TripExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave,
                         />
                     )}
 
-                    {(formData.expenseType !== 'Fuel Expense' && !selected && !truckPage && !pathname.includes('expenses')) && (
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700">Add to Party Bill</label>
-                            <input
-                                type="checkbox"
-                                name="partyBill"
-                                checked={formData.partyBill}
-                                onChange={handleChange}
-                                className="p-2 border border-gray-300 rounded-md"
-                            />
-                        </div>
-                    )}
-
                     {formData.partyBill && (
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700">Party Amount</label>
@@ -386,7 +399,24 @@ const TripExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave,
                     </div>
 
                     <div className="flex justify-end gap-2">
-                        <Button variant="outline" onClick={onClose}>
+                        <Button variant="outline" onClick={() => {
+                            setFormData({
+                                id: undefined,
+                                trip_id: '',
+                                partyBill: false,
+                                amount: 0,
+                                date: new Date(),
+                                expenseType: '',
+                                notes: '',
+                                partyAmount: 0,
+                                paymentMode: 'Cash',
+                                transactionId: '',
+                                driver: '',
+                                truck: '',
+                                shop_id: ''
+                            })
+                            onClose()
+                        }}>
                             Cancel
                         </Button>
                         <Button onClick={handleSave}>
@@ -399,4 +429,4 @@ const TripExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave,
     );
 };
 
-export default TripExpenseModal;
+export default AddExpenseModal;

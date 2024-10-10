@@ -6,33 +6,29 @@ import TripStatus from './TripStatus';
 import StatusButton from './TripFunctions/StatusButton'; // Replace with your actual StatusButton component
 import ViewBillButton from './TripFunctions/ViewBill'; // Replace with your actual ViewBillButton component
 import Profit from './Profit';
-import PODViewer from './PODViewer';
 import DataList from './DataList';
 import Charges from './Charges'; // Import the Charges component
 import { fetchBalance } from '@/helpers/fetchTripBalance';
 import { fetchPartyName } from '@/helpers/fetchPartyName';
-import EWayBillUpload from './EwayBillUpload';
 import { Button } from '@/components/ui/button';
 import { UndoIcon } from 'lucide-react';
 import { formatNumber } from '@/utils/utilArray';
 import Link from 'next/link';
 
 interface TripDetailsProps {
-  trip: ITrip;
+  trip: ITrip | any;
   setTrip: any;
 }
 
 const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
-  const [partyName, setPartyName] = useState('');
   const [accounts, setAccounts] = useState<PaymentBook[]>(trip.accounts);
-  const [tripBalance, setBalance] = useState(0);
+  const [tripBalance, setBalance] = useState(trip.balance);
   const [charges, setCharges] = useState<TripExpense[]>([])
-  const [ewayBillUrl, setEwayBillUrl] = useState(trip.ewayBill)
 
   useEffect(() => {
-    const balance = async () => {
+    const balance = () => {
       if (trip) {
-        const pending = await fetchBalance(trip)
+        const pending = fetchBalance(trip)
         setBalance(pending)
       }
     }
@@ -41,26 +37,8 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
   }, [trip, charges, accounts])
 
   useEffect(() => {
-    const fetchParty = async () => {
-      try {
-        const name = await fetchPartyName(trip.party)
-        setPartyName(name);
-      } catch (error: any) {
-        console.log('Error fetching party name:', error);
-        alert(error.message)
-      }
-    };
-    const fetchCharges = async () => {
-      const response = await fetch(`/api/trips/${trip.trip_id}/expenses`);
-      const data = await response.json();
-      setCharges(data.charges);
-    }
-    if (charges) {
-      const sorted = [...charges].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      const sorted = trip.tripCharges?.sort((a : any, b : any) => new Date(b.date).getTime() - new Date(a.date).getTime());
       setCharges(sorted);
-    }
-    fetchCharges()
-    fetchParty();
   }, [trip]);
 
   const handleUndoStatus = async () => {
@@ -205,14 +183,14 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
               <TripInfo label="Lorry" value={trip.truck || '----'} />
             </Link>
             <Link href={`/user/drivers/${trip.driver}`}>
-              <TripInfo label="Driver" value={trip.driver || '----'} />
+              <TripInfo label="Driver" value={trip.driverName || '----'} />
             </Link>
             <TripInfo label="Pending" value={`₹${formatNumber(tripBalance)}`} />
           </div>
 
           <div className='grid grid-cols-4 gap-2'>
             <Link href={`/user/parties/${trip.party}`}>
-              <TripInfo label="Party Name" value={partyName || '----'} />
+              <TripInfo label="Party Name" value={trip.partyName || '----'} />
             </Link>
             <TripInfo label="LR Number" value={trip.LR || '----'} />
             <TripInfo label="Material" value={trip.material || '----'} />
@@ -250,7 +228,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
 
         {/* Right Side - Profit, Balance, and POD Viewer */}
         <div className="col-span-1 space-y-6">
-          <Profit charges={charges} truckCost={trip.truckHireCost && trip.truckHireCost} amount={trip.amount} setCharges={setCharges} tripId={trip.trip_id} driverId={trip.driver} truckNo={trip.truck} />
+          <Profit charges={charges} truckCost={trip.truckHireCost && trip.truckHireCost} amount={trip.amount} setCharges={setCharges} tripId={trip.trip_id} driverId={trip.driver} truckNo={trip.truck} tripExpense={trip.tripExpenses}/>
           <TripInfo label="Notes" value={trip.notes || 'No notes available'} tripId={trip.trip_id} />
           {/* <EWayBillUpload validity={trip.ewbValidityDate ? trip.ewbValidityDate : null} tripId={trip.trip_id} ewayBillUrl={trip.documents?.find(doc => doc.type == 'ewayBill')?.url || trip.ewayBill} setEwayBillUrl={setEwayBillUrl} />
           {trip.POD ? <PODViewer podUrl={trip.POD} /> : null} */}

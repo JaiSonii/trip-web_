@@ -17,24 +17,16 @@ export async function PUT(req: Request, { params }: { params: { expenseId: strin
     if (error) {
       return NextResponse.json({ error });
     }
-    // Parse the request body as JSON
-    let data = await req.json();
-    console.log(expenseId)
+    const formdata = await req.formData()
+    const file = formdata.get('file')
+    const expenseData = JSON.parse(formdata.get('expense') as string);
+    await connectToDatabase()
 
     // Create a new instance of TripExpense with the parsed data and tripId
-    const charge = await Expense.findByIdAndUpdate(expenseId, data,{new : true})
-    
-    // charge.amount = data.amount
-    // charge.date = data.date
-    // charge.notes = data.notes
-    // charge.expenseType = data.expenseType
-    // charge.paymentMode = data.paymentMode
-    // charge.transaction_id = data.transaction_id
-    // charge.truck = data.truck
-    // charge.driver = data.driver   
+    const charge = await Expense.findByIdAndUpdate(expenseId, expenseData, { new: true })
 
     // Return a success response with the new charge
-    return NextResponse.json({ status: 200, charge });
+    return NextResponse.json({ status: 200, expense: charge });
 
   } catch (error) {
     // Handle any errors that occur during the process
@@ -49,17 +41,17 @@ export async function DELETE(req: Request, { params }: { params: { expenseId: st
     return NextResponse.json({ error });
   }
 
-  const {expenseId} = params
+  const { expenseId } = params
 
   await connectToDatabase()
-  try{
+  try {
     const charge = await Expense.findByIdAndDelete(expenseId)
-    if(!charge){
+    if (!charge) {
       return NextResponse.json({ status: 404, message: "Charge Not Found" })
     }
-    return NextResponse.json({message : 'Deletion Success', status : 200, charge : charge})
-  }catch(error){
+    return NextResponse.json({ message: 'Deletion Success', status: 200, expense: charge })
+  } catch (error) {
     console.log(error)
-    return NextResponse.json({message : error, status : 500})
+    return NextResponse.json({ message: error, status: 500 })
   }
 }

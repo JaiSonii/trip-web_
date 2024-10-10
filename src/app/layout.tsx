@@ -4,10 +4,11 @@ import { cn } from "@/lib/utils";
 import { Roboto as FontSans } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 
+// Load Roboto font with multiple weights
 const fontSans = FontSans({
   subsets: ["latin"],
+  weight: ["100", "300", "400", "500", "700"],  // Add multiple weights as needed
   variable: "--font-sans",
-  weight: "100"
 });
 
 export const metadata: Metadata = {
@@ -21,14 +22,12 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "Awajahi - Moving India One Mile at a Time",
-    description: "Explore Awajahi Web for reliable and efficient transportation services across India.",
+    description: "Explore Awajahi for reliable and efficient transportation services across India.",
     url: "https://www.awajahi.com",
     type: "website",
     locale: "en_US",
-    
   },
 };
-
 
 export default function RootLayout({
   children,

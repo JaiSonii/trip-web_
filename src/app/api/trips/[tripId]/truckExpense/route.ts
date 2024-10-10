@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 
 const Expense = models.Expense || model('Expense', ExpenseSchema)
 
+//To be Removed
 export async function GET(req: Request, { params }: { params: { tripId: string } }) {
   const { user, error } = await verifyToken(req);
   if (error) {

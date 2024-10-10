@@ -91,13 +91,14 @@ const config: Config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
+
+      // Add Roboto font to the font family
+      fontFamily: {
+        roboto: ['Roboto', 'sans-serif'], // Define the Roboto font family
+      },
     },
   },
   plugins: [require("tailwindcss-animate")],
 };
 
 export default config;
-function rgba(arg0: number, arg1: number, arg2: number, arg3: number): string | import("tailwindcss/types/config").RecursiveKeyValuePair<string, string> {
-  throw new Error('Function not implemented.');
-}
-

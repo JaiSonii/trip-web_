@@ -11,10 +11,11 @@ interface ChargeModalProps {
     onClose: () => void;
     onSave: any;
     selected?: any
+    shops : any[]
 }
 
 
-const OfficeExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, selected }) => {
+const OfficeExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, selected, shops }) => {
     const [formData, setFormData] = useState<any>({
         amount: selected?.amount || 0,
         date: new Date(selected?.date || Date.now()),
@@ -39,19 +40,12 @@ const OfficeExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSav
         }
     }, [selected])
 
-    const [shops, setShops] = useState<any[]>([])
-
-    const fetchshops = async () => {
-        const res = await fetch(`/api/shopkhata`)
-        const data = await res.json()
-        setShops(data.shops)
-      }
-    
-      useEffect(() => {
-        if (formData.paymentMode === 'Credit') {
-          fetchshops()
+    useEffect(()=>{
+        if(formData.paymentMode !== 'Credit'){
+            setFormData({...formData, shop_id: ''})
         }
-      }, [formData.paymentMode])
+    },[formData.paymentMode])
+
 
     const handleSelectChange = (value: string) => {
         setFormData((prevData: any) => {

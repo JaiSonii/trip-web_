@@ -4,7 +4,6 @@ import { monthMap } from "@/utils/utilArray";
 import { model, models } from "mongoose";
 import { NextResponse } from "next/server";
 
-const OfficeExpense = models.OfficeExpense || model('OfficeExpense', OfficeExpenseSchema)
 const Expense = models.Expense || model('Expense', ExpenseSchema)
 
 export async function GET(req: Request) {

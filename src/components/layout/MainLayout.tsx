@@ -48,14 +48,14 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const primaryMenuItems = [
     { href: '/user/home', label: 'Home', icon: TfiHome },
     { href: '/user/trips', label: 'Trips', icon: TfiWorld },
-    { href: `/user/expenses/truckExpense`, label: 'Expenses', icon: IoWalletOutline },
+    { href: `/user/expenses`, label: 'Expenses', icon: IoWalletOutline },
     { href: '/user/documents', label: 'Docs', icon: IoDocumentsOutline },
   ];
 
   const secondaryMenuItems = [
     { href: '/user/drivers', label: 'Drivers', icon: PiSteeringWheelLight },
     { href: '/user/trucks', label: 'Lorries', icon: PiTruck },
-    { href: '/user/parties', label: 'Parties', icon: TbUsersGroup },
+    { href: '/user/parties', label: 'Customers', icon: TbUsersGroup },
     { href: '/user/suppliers', label: 'Suppliers', icon: HiOutlineUser },
     { href: '/user/shopkhata', label: 'Shop Khata', icon: PiBank },
   ];
@@ -71,7 +71,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-100">
+    <div className="flex h-screen overflow-hidden bg-[#FFFCF9]">
       {/* Primary Sidebar - fixed width, fixed position */}
       <div className="w-20 bg-bottomNavBarColor text-white h-full flex flex-col justify-between shadow-md shadow-black rounded-r-xl fixed">
         <div>
@@ -102,10 +102,10 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       </div>
 
       {/* Secondary Sidebar */}
-      <div className="ml-20 w-52 bg-[#FFFCF9] text-black h-screen overflow-y-auto flex flex-col justify-between"> {/* Adjusted width and overflow */}
+      <div className="ml-20 w-60 bg-[#FFFCF9] text-black h-screen overflow-y-auto flex flex-col justify-between"> {/* Adjusted width and overflow */}
         <div className="flex items-center justify-center py-6">
           <Image src={logo} alt="logo" width={51} height={60} priority />
-          <span className="ml-2 text-lg hidden font-semibold md:block">Awajahi</span>
+          <span className="ml-2 text-lg hidden font-semibold md:block text-black">Awajahi</span>
         </div>
         <ul className="flex-grow list-none p-0 m-0 flex-col gap-4">
           {secondaryMenuItems.map((item) => (
@@ -130,7 +130,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       </div>
 
       {/* Main Content Area */}
-      <div className={`flex-grow min-h-screen overflow-y-auto pb-4 rounded-3xl bg-white shadow-black shadow-xl my-2 ${pathname.startsWith('/user/trips/trip') ? 'thin-scrollbar' : 'no-scrollbar'} `}>
+      <div className={`w-full min-h-screen overflow-y-auto pb-4 rounded-3xl bg-white shadow-black shadow-xl my-2 ${pathname.startsWith('/user/trips/trip') ? 'thin-scrollbar' : 'no-scrollbar'} `}>
 
         {/* Render dynamic content here */}
         {children}

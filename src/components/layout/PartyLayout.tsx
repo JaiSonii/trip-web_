@@ -27,7 +27,7 @@ const PartyLayout = ({ children, partyId }: PartyLayoutProps) => {
     <div className="min-h-screen bg-gray-100 rounded-md">
       <div className="w-full h-full p-4">
         <header className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-800"><PartyName partyId={partyId} /></h1>
+          <h1 className="text-3xl font-bold text-black"><PartyName partyId={partyId} /></h1>
         </header>
         <nav className="flex mb-6 border-b-2 border-gray-200">
           {tabs.map((tab) => (

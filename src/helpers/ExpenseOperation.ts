@@ -1,8 +1,68 @@
 import { IExpense } from "@/utils/interface";
 
+export const handleAddExpense = async (expense: IExpense, file?: File) => {
+  try {
+    const formdata = new FormData()
+    formdata.append('expense', JSON.stringify(expense))
+    if (file) formdata.append('file', file)
+    const res = await fetch('/api/expenses', {
+      method: 'POST',
+      body: formdata
+    })
+    if (!res.ok) {
+      alert('Error adding expense')
+    }
+    const data = await res.json()
+    return data.expense
+  } catch (error: any) {
+    alert(error.message)
+    console.log(error)
+  }
+}
+
+export const handleEditExpense = async (expense: IExpense, id : string, file?: File) => {
+  try {
+    const formdata = new FormData()
+    formdata.append('expense', JSON.stringify(expense))
+    if (file) formdata.append('file', file)
+    const res = await fetch(`/api/expenses/${id}`, {
+      method: 'PUT',
+      body: formdata
+    })
+    if (!res.ok) {
+      alert('Error adding expense')
+    }
+    const data = await res.json()
+    return data.expense
+  } catch (error: any) {
+    alert(error.message)
+    console.log(error)
+  }
+}
+
+export const DeleteExpense = async(id : string)=>{
+  try {
+    const res = await fetch(`/api/expenses/${id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+    if (!res.ok) {
+      alert('Failed to delete expense');
+      return;
+    }
+    const data = await res.json()
+    return data.expense
+  } catch (error: any) {
+    alert(error.message)
+    console.log(error)
+  }
+}
+
 export const handleDelete = async (id: string, e?: React.MouseEvent) => {
   e?.stopPropagation(); // Prevent the row's click event from being triggered
-  const res = await fetch(`/api/truckExpense/${id}`, {
+  const res = await fetch(`/api/expenses/${id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
@@ -26,7 +86,7 @@ export const handleAddCharge = async (newCharge: any, id?: string, truckNo?: str
   };
 
   const method = id ? 'PUT' : 'POST';
-  const url = id ? `/api/truckExpense/${id}` : `/api/trucks/${truckNo}/expense`;
+  const url = id ? `/api/expenses/${id}` : `/api/trucks/${truckNo}/expense`;
 
   const res = await fetch(url, {
     method: method,
@@ -65,12 +125,12 @@ export const ExpenseforDriver = async (driver: string) => {
 export const fetchTruckExpense = async (month: any, year: any) => {
   try {
     let res
-    if(month === null || year === null){
-      res = await fetch(`/api/truckExpense`)
-    }else{
-      res = await fetch(`/api/truckExpense?month=${month}&year=${year}`);
+    if (month === null || year === null) {
+      res = await fetch(`/api/expenses/truckExpense`)
+    } else {
+      res = await fetch(`/api/expenses/truckExpense?month=${month}&year=${year}`);
     }
-    
+
     if (!res.ok) {
       throw new Error('Failed to fetch truck expenses');
     }
@@ -84,7 +144,7 @@ export const fetchTruckExpense = async (month: any, year: any) => {
 
 export const fetchTripExpense = async () => {
   try {
-    const res = await fetch(`/api/tripExpense`)
+    const res = await fetch(`/api/expenses/tripExpense`)
     if (!res.ok) {
       throw new Error('Failed to fetch truck expenses');
     }
@@ -96,47 +156,6 @@ export const fetchTripExpense = async () => {
   }
 };
 
-export const calculateTruckExpense = async () => {
-  try {
-    const res = await fetch(`/api/truckExpense/calculate`);
-    if (!res.ok) {
-      throw new Error('Failed to fetch truck expenses');
-    }
-    const data = await res.json();
-    return data.totalExpense;
-  } catch (error) {
-    console.error('Error fetching truck expenses:', error);
-    return 0;
-  }
-};
-
-export const calculateTripExpense = async () => {
-  try {
-    const res = await fetch(`/api/tripExpense/calculate`);
-    if (!res.ok) {
-      throw new Error('Failed to fetch truck expenses');
-    }
-    const data = await res.json();
-    return data.totalExpense;
-  } catch (error) {
-    console.error('Error fetching truck expenses:', error);
-    return [];
-  }
-};
-
-export const calculateOfficeExpense = async () => {
-  try {
-    const res = await fetch(`/api/officeExpense/calculate`);
-    if (!res.ok) {
-      throw new Error('Failed to fetch truck expenses');
-    }
-    const data = await res.json();
-    return data.totalExpense;
-  } catch (error) {
-    console.error('Error fetching truck expenses:', error);
-    return [];
-  }
-};
 
 
 
