@@ -20,7 +20,6 @@ import { formatNumber } from '@/utils/utilArray';
 import { SlOptionsVertical } from 'react-icons/sl';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import debounce from 'lodash.debounce';
-import { useExpenseCtx } from '@/context/context';
 
 // const TripBalance = ({ trip }: { trip: ITrip }) => {
 //   const [balance, setBalance] = useState(0)
@@ -51,10 +50,8 @@ const columnOptions = [
 ];
 
 const TripsPage = () => {
-  const ctxtrips = useExpenseCtx().trips
-  const {isLoading} = useExpenseCtx()
   const router = useRouter();
-  const [trips, setTrips] = useState<ITrip[]>(ctxtrips);
+  const [trips, setTrips] = useState<ITrip[] | null>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<number | undefined>();
@@ -151,6 +148,7 @@ const TripsPage = () => {
       }
 
       const data = await res.json();
+      console.log(data)
       setTrips(data.trips);
 
       // Calculate total balance
@@ -166,9 +164,7 @@ const TripsPage = () => {
   }, []);
 
   useEffect(() => {
-    if(trips?.length > 0) return
     fetchTrips();
-    setLoading(false)
   }, []);
 
 
@@ -182,7 +178,7 @@ const TripsPage = () => {
     setSelectedStatus((prev)=> prev === status ? undefined : status);
   };
 
-  if (loading || isLoading) return <Loading />;
+  if (loading) return <Loading />;
 
 
 
