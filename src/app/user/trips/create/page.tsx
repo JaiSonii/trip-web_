@@ -4,13 +4,14 @@ import TripForm from '@/components/trip/TripForm';
 import { IDriver, TruckModel, IParty, ITrip } from '@/utils/interface';
 import { useRouter } from 'next/navigation';
 import Loading from '../loading'; // Ensure the Loading component shows a GIF
+import { useExpenseCtx } from '@/context/context';
+import { mutate } from 'swr';
 
 const CreateTripPage: React.FC = () => {
+  const { trips, drivers, trucks } = useExpenseCtx();
   const router = useRouter();
 
   const [parties, setParties] = useState<IParty[]>([]);
-  const [trucks, setTrucks] = useState<TruckModel[]>([]);
-  const [drivers, setDrivers] = useState<IDriver[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false); // New state for saving overlay
   const [error, setError] = useState<string | null>(null);
@@ -20,45 +21,38 @@ const CreateTripPage: React.FC = () => {
     const fetchData = async () => {
       try {
         // Fetch parties, trucks, drivers
-        const [partiesRes, trucksRes, driversRes, tripsRes] = await Promise.all([
+        const [partiesRes] = await Promise.all([
           fetch('/api/parties/create'),
-          fetch('/api/trucks/create'),
-          fetch('/api/drivers/create'),
-          fetch('/api/trips')
         ]);
 
-        if (!partiesRes.ok || !trucksRes.ok || !driversRes.ok || !tripsRes.ok) {
+        if (!partiesRes.ok) {
           throw new Error('Failed to fetch data');
         }
 
-        const [partiesData, trucksData, driversData, tripsData] = await Promise.all([
-          partiesRes.json(),
-          trucksRes.json(),
-          driversRes.json(),
-          tripsRes.json()
+        const [partiesData] = await Promise.all([
+          partiesRes.json()
         ]);
 
         setParties(partiesData.parties);
-        setTrucks(trucksData.trucks);
-        setDrivers(driversData.drivers);
 
         // Find the latest trip's LR
-        if (tripsData.trips.length > 0) {
-          const latestTrip = tripsData.trips[0]; // Assuming the API returns trips sorted by date descending
-          let lrString = latestTrip.LR;
-          let num = parseInt(lrString.match(/\d+/)[0]) + 1;
-          const LR = `LRN ${typeof num === 'number' ? num : '001'}`
-          setLatestLR(LR); // Assuming 'lr' is the field containing LR in the trip object
+        if (trips && trips.length > 0) {
+          const latestTrip = trips[0]; // Assuming the API returns trips sorted by date descending
+          let lrString = latestTrip?.LR;
+          if (lrString) {
+            let num = parseInt(lrString.match(/\d+/)?.[0] || "0") + 1;
+            const LR = `LRN ${typeof num === 'number' ? num : '001'}`;
+            setLatestLR(LR); // Assuming 'LR' is the field containing LR in the trip object
+          } else {
+            setLatestLR('LRN 001');
+          }
         } else {
           setLatestLR('LRN 001'); // No trips found
         }
       } catch (err) {
         setError((err as Error).message);
       } finally {
-        // Add a delay to improve UI experience even on fast networks
-        setTimeout(() => {
-          setLoading(false);
-        }, 1000);
+        setLoading(false);
       }
     };
 
@@ -125,11 +119,13 @@ const CreateTripPage: React.FC = () => {
       }
 
       const data = await tripRes.json();
+      mutate('/api/trips')
       router.push('/user/trips');
     } catch (error) {
       console.error('Error saving trip:', error);
       alert(`An error occurred while saving the trip. Please try again.: \n${error}`);
     } finally {
+      
       setSaving(false); // Hide loading overlay
     }
   };

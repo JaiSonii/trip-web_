@@ -6,26 +6,29 @@ import { Button } from '@/components/ui/button';
 import { IExpense } from '@/utils/interface';
 import { useParams } from 'next/navigation';
 import { MdDelete, MdEdit, MdLocalGasStation, MdPayment } from 'react-icons/md';
-import { handleAddCharge, handleDelete } from '@/helpers/ExpenseOperation';
+import { DeleteExpense, handleAddCharge, handleAddExpense, handleDelete, handleEditExpense } from '@/helpers/ExpenseOperation';
 import { fetchDriverName } from '@/helpers/driverOperations';
 import TripRoute from '@/components/trip/TripRoute';
 import DriverName from '@/components/driver/DriverName';
 import { FaCalendarAlt } from 'react-icons/fa';
 import { IconKey, icons } from '@/utils/icons';
 import { formatNumber } from '@/utils/utilArray';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 // Dynamically import ExpenseModal to split the code
-const ExpenseModal = dynamic(() => import('@/components/trip/tripDetail/ExpenseModal'), {
-  loading: () => <Loading />,
-});
+
 
 const OtherExpense = () => {
   const { truckNo } = useParams();
   const [error, setError] = useState<any>();
   const [loading, setLoading] = useState<boolean>(true);
-  const [otherExpenses, setOtherExpenses] = useState<IExpense[]>([]);
+  const [otherExpenses, setOtherExpenses] = useState<IExpense[] | any[]>([]);
   const [modelOpen, setModelOpen] = useState(false);
   const [selected, setSelected] = useState<IExpense | undefined>();
+
+  const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), {
+    loading: () => <Loading />,
+  });
 
   const fetchOther = async () => {
     setLoading(true);
@@ -35,7 +38,7 @@ const OtherExpense = () => {
         throw new Error('Failed to fetch other expenses');
       }
       const data = await res.json();
-      setOtherExpenses(data);
+      setOtherExpenses(data.expenses);
     } catch (error: any) {
       console.error(error);
       alert(error.message);
@@ -48,60 +51,65 @@ const OtherExpense = () => {
     fetchOther();
   }, [truckNo]);
 
-  const handleDeleteExpense = useCallback(async (id: string, e: React.MouseEvent) => {
+  const handleDelete = async (id: string, e: React.FormEvent) => {
     e.stopPropagation();
     try {
-      await handleDelete(id, e);
-      setOtherExpenses((prev) => prev.filter((item) => item._id !== id));
-    } catch (error) {
-      console.error(error);
+      const expense = await DeleteExpense(id)
+      setOtherExpenses(otherExpenses.filter((item) => item._id !== id));
+    } catch (error: any) {
+      alert('Failed to delete expense')
+      console.log(error)
     }
-  }, []);
+  };
 
-  const handleAddExpense = useCallback(async (newCharge: any, id?: string) => {
+  const handleAddCharge = async (newCharge: any, id?: string) => {
     try {
-      const data = await handleAddCharge(newCharge, id, truckNo as string);
-      setOtherExpenses((prev) => {
-        if (id) {
-          return prev.map((item) => (item._id === id ? data.charge : item));
-        } else {
-          return [...prev, data.charge];
-        }
-      });
-    } catch (error) {
-      console.error(error);
+      if (!selected) {
+        const expense = await handleAddExpense(newCharge)
+        setOtherExpenses((prev) => [
+          expense,
+          ...prev
+        ])
+      } else {
+        const expense = await handleEditExpense(newCharge, selected._id as string)
+        setOtherExpenses((prev) => prev.map((item: any) => item._id === selected._id ? { ...item, ...expense } : item))
+      }
+    } catch (error: any) {
+      console.log(error);
+      alert(`Failed to ${selected ? 'edit' : 'add'} expense`)
     }
-  }, [truckNo]);
+  };
 
   const renderedExpenses = useMemo(() => (
     otherExpenses.map((expense, index) => (
-      <tr
+      <TableRow
         key={index}
         className="border-t hover:bg-slate-100"
       >
-        <td className="border p-4">
+        <TableCell>
           <div className='flex items-center space-x-2'>
-            <FaCalendarAlt className='text-bottomNavBarColor'/>
+            <FaCalendarAlt className='text-bottomNavBarColor' />
             <span>{new Date(expense.date).toLocaleDateString()}</span>
           </div>
-          </td>
-        <td className="border p-4">₹{formatNumber(expense.amount)}</td>
-        <td className="border p-4">
+        </TableCell>
+
+        <TableCell className="border p-4">₹{formatNumber(expense.amount)}</TableCell>
+        <TableCell className="border p-4">
           <div className="flex items-center space-x-2">
             {icons[expense.expenseType as IconKey]}
             <span>{expense.expenseType}</span>
           </div>
-        </td>
-        <td className="border p-4">
+        </TableCell>
+        <TableCell className="border p-4">
           <div className="flex items-center space-x-2">
             <MdPayment className="text-green-500" />
             <span>{expense.paymentMode}</span>
           </div>
-        </td>
-        <td className="border p-4">{expense.notes || ''}</td>
-        <td className="border p-4">{expense.driver ? <DriverName driverId={expense.driver} /> : 'N/A'}</td>
-        <td className="border p-4">{expense.trip_id ? <TripRoute tripId={expense.trip_id} /> : 'N/A'}</td>
-        <td>
+        </TableCell>
+        <TableCell className="border p-4">{expense.notes || ''}</TableCell>
+        <TableCell className="border p-4">{expense.driverName}</TableCell>
+              <TableCell className="border p-4"><span>{expense.trip_id ? <span>{expense.tripRoute?.origin.split(',')[0]} &rarr; {expense.tripRoute?.destination.split(',')[0]}</span> : "NA"}</span></TableCell>
+        <TableCell>
           <div className='flex items-center space-x-2'>
             <Button variant="outline" onClick={() => { setSelected(expense); setModelOpen(true); }}>
               <MdEdit />
@@ -111,43 +119,41 @@ const OtherExpense = () => {
             </Button>
           </div>
 
-        </td>
-      </tr>
+        </TableCell>
+      </TableRow>
     ))
-  ), [otherExpenses, handleDeleteExpense]);
+  ), [otherExpenses, handleDelete]);
 
   if (loading) return <Loading />;
 
   return (
     <div className="w-full h-full p-4">
       <div className="table-container">
-        <table className="custom-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Amount</th>
-              <th>Expense Type</th>
-              <th>PaymentMode</th>
-              <th>Notes</th>
-              <th>Driver</th>
-              <th>Trip</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table className="custom-table">
+          <TableHeader>
+            <TableRow>
+              <TableHead>Date</TableHead>
+              <TableHead>Amount</TableHead>
+              <TableHead>Expense Type</TableHead>
+              <TableHead>Payment Mode</TableHead>
+              <TableHead>Notes</TableHead>
+              <TableHead>Driver</TableHead>
+              <TableHead>Trip</TableHead>
+              <TableHead>Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {renderedExpenses}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
       {modelOpen && (
-        <ExpenseModal
+        <AddExpenseModal
           isOpen={modelOpen}
           onClose={() => setModelOpen(false)}
-          onSave={handleAddExpense}
-          driverId=''
-          selected={selected}
-          truckPage={true}
-        />
+          onSave={handleAddCharge}
+          driverId={selected?.driver || ''}
+          selected={selected} categories={['Truck Expense', 'Trip Expense', 'Office Expense']} />
       )}
     </div>
   );

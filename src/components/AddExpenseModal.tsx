@@ -9,6 +9,7 @@ import { useParams, usePathname } from 'next/navigation';
 import { statuses } from '@/utils/schema';
 import DriverSelect from './trip/DriverSelect';
 import ShopSelect from './shopkhata/ShopSelect';
+import { useExpenseCtx } from '@/context/context';
 
 interface ChargeModalProps {
     isOpen: boolean;
@@ -16,11 +17,6 @@ interface ChargeModalProps {
     onSave: any;
     driverId: string;
     selected?: any;
-    truckPage?: boolean;
-    trucks?: TruckModel[]
-    shops: any[]
-    drivers?: IDriver[]
-    trips?: ITrip[]
     categories: string[]
     tripId? : string
     truckNo? : string
@@ -42,7 +38,10 @@ interface TripExpense {
     shop_id?: string
 }
 
-const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClose, onSave, driverId, selected, truckPage, trucks, shops, drivers, trips, tripId, truckNo }) => {
+const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClose, onSave, driverId, selected, tripId, truckNo }) => {
+
+    const { trips, drivers, shops, trucks, isLoading, error } = useExpenseCtx();
+
     const [formData, setFormData] = useState<TripExpense>({
         id: selected?._id || undefined,
         trip_id: selected?.trip_id ? selected.trip_id : tripId ? tripId : '',
@@ -54,7 +53,7 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
         partyAmount: 0,
         paymentMode: selected?.paymentMode || 'Cash',
         transactionId: selected?.transaction_id || '',
-        driver: driverId || '',
+        driver: selected?.driver || driverId || '',
         truck: selected?.truck || truckNo || '',
         shop_id: selected?.shop_id || ''
     });
@@ -119,21 +118,21 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
         } else return ['Cash', 'Online', 'Credit']
     }, [selectedCategory])
 
-    useEffect(() => {
-        const fetchDriverName = async () => {
-            const result = await fetch(`/api/drivers/${driverId || trip?.driver}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            const data = await result.json();
-            setDriverName(data.name || 'Driver Not Found');
-        };
-        if (formData.paymentMode === 'Paid By Driver') fetchDriverName();
+    // useEffect(() => {
+    //     const fetchDriverName = async () => {
+    //         const result = await fetch(`/api/drivers/${driverId || trip?.driver}`, {
+    //             method: 'GET',
+    //             headers: {
+    //                 'Content-Type': 'application/json',
+    //             },
+    //         });
+    //         const data = await result.json();
+    //         setDriverName(data.name || 'Driver Not Found');
+    //     };
+    //     if (formData.paymentMode === 'Paid By Driver') fetchDriverName();
 
 
-    }, [formData.paymentMode, driverId]);
+    // }, [formData.paymentMode, driverId]);
 
 
     useEffect(() => {
@@ -335,15 +334,7 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
                         ))}
                     </div>
 
-                    {formData.paymentMode === 'Paid By Driver' && !truckPage && (
-                        <div className="mb-4">
-                            <button disabled className="block text-sm font-medium text-gray-700 border border-black rounded-md p-2 w-1/3">
-                                {driverName}
-                            </button>
-                        </div>
-                    )}
-
-                    {formData.paymentMode === 'Paid By Driver' && truckPage && (
+                    {formData.paymentMode === 'Paid By Driver' && (
                         <DriverSelect
                             drivers={drivers || []}
                             formData={formData}

@@ -1,45 +1,19 @@
 'use client'
-import React, { useEffect, useState } from 'react';
-import { TruckModel } from '@/utils/interface';
+import React, { useState } from 'react';
 import Loading from './loading';
 import { useRouter } from 'next/navigation';
 import { truckTypesIcons } from '@/utils/utilArray';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useExpenseCtx } from '@/context/context';
 
 const TrucksPage = () => {
   const router = useRouter();
 
-  const [trucks, setTrucks] = useState<TruckModel[] | null>(null);
-  const [loading, setLoading] = useState(true);
+  const {trucks, isLoading} = useExpenseCtx()
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchTrucks = async () => {
-      try {
-        const res = await fetch('/api/trucks', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
 
-        if (!res.ok) {
-          throw new Error('Failed to fetch trucks');
-        }
-
-        const data = await res.json();
-        setTrucks(data.trucks);
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-          setLoading(false);
-      }
-    };
-
-    fetchTrucks();
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return <Loading />;
   }
 

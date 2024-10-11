@@ -1,13 +1,11 @@
 'use client'
 
 import React, { useEffect, useState } from 'react';
-import PartyForm from '@/components/createParty';
-import { IParty } from '@/utils/interface';
 import { useRouter } from 'next/navigation';
 import { isValidGSTNumber } from '@/utils/validate';
-import { isValidPhone } from '@/utils/validate';
 import Loading from '@/app/user/loading'
 import ShopKhataForm from '@/components/shopkhata/ShopKhataForm';
+import { mutate } from 'swr';
 
 
 
@@ -48,11 +46,13 @@ const CreateShopPage: React.FC = () => {
             }
 
             const data = await res.json();
+            mutate('/api/shopkhata')
             router.push('/user/shopkhata');
         } catch (error) {
             console.error('Error saving party:', error);
             alert('An error occurred while saving the party. Please try again.');
         } finally {
+            
             setSaving(false)
         }
     };

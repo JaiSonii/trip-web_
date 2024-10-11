@@ -10,6 +10,8 @@ import Loading from '../loading';
 import { IExpense } from '@/utils/interface';
 import { formatNumber } from '@/utils/utilArray';
 import dynamic from 'next/dynamic';
+import { DeleteExpense, handleAddExpense, handleEditExpense } from '@/helpers/ExpenseOperation';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface TripDetails {
   [key: string]: string;
@@ -17,13 +19,13 @@ interface TripDetails {
 
 const TruckFuelBook: React.FC = () => {
   const { truckNo } = useParams();
-  const [fuelBook, setFuelBook] = useState<IExpense[]>([]);
+  const [fuelBook, setFuelBook] = useState<IExpense[] | any[]>([]);
   const [loading, setLoading] = useState(true);
   const [tripDetails, setTripDetails] = useState<TripDetails>({});
   const [modelOpen, setModelOpen] = useState(false);
   const [selected, setSelected] = useState<IExpense | undefined>(undefined);
 
-  const ExpenseModal = dynamic(()=>import('@/components/trip/tripDetail/ExpenseModal'),{ssr : false})
+  const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), { ssr: false })
 
   const fetchFuel = useCallback(async () => {
     setLoading(true);
@@ -31,7 +33,7 @@ const TruckFuelBook: React.FC = () => {
       const res = await fetch(`/api/trucks/${truckNo}/expense?type=fuel`);
       if (!res.ok) throw new Error('Failed to fetch fuel book');
       const data = await res.json();
-      setFuelBook(data);
+      setFuelBook(data.expenses);
     } catch (error: any) {
       console.error(error);
       alert(error.message);
@@ -44,115 +46,97 @@ const TruckFuelBook: React.FC = () => {
     fetchFuel();
   }, [fetchFuel]);
 
-  const handleDelete = useCallback(async (id: string, e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleDelete = async (id: string, e: React.FormEvent) => {
     e.stopPropagation();
     try {
-      const res = await fetch(`/api/truckfuel/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!res.ok) throw new Error('Failed to delete fuel');
-      setFuelBook(prevFuelBook => prevFuelBook.filter(item => item._id !== id));
+      const expense = await DeleteExpense(id)
+      setFuelBook(fuelBook.filter((item) => item._id !== id));
     } catch (error: any) {
-      console.error(error);
-      alert(error.message);
+      alert('Failed to delete expense')
+      console.log(error)
     }
-  }, []);
+  };
 
-  const handleAddCharge = useCallback(async (newCharge: any, id?: string) => {
-    const truckfuelData = {
-      ...newCharge,
-      truck: truckNo,
-      transaction_id: newCharge.transactionId || '',
-      driver: newCharge.driver || '',
-      notes: newCharge.notes || '',
-    };
-
+  const handleAddCharge = async (newCharge: any, id?: string) => {
     try {
-      const res = await fetch(`/api/truckfuel/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(truckfuelData),
-      });
-      if (!res.ok) throw new Error('Failed to add charge');
-      const data = await res.json();
-      setFuelBook(prev => {
-        const index = prev.findIndex(item => item._id === data.charge._id);
-        if (index !== -1) {
-          prev[index] = data.charge;
-          return [...prev];
-        }
-        return prev;
-      });
+      if (!selected) {
+        const expense = await handleAddExpense(newCharge)
+        setFuelBook((prev) => [
+          expense,
+          ...prev
+        ])
+      } else {
+        const expense = await handleEditExpense(newCharge, selected._id as string)
+        setFuelBook((prev) => prev.map((item: any) => item._id === selected._id ? { ...item, expense } : item))
+      }
     } catch (error: any) {
-      console.error(error);
-      alert(error.message);
+      console.log(error);
+      alert(`Failed to ${selected ? 'edit' : 'add'} expense`)
     }
-  }, [truckNo]);
+  };
 
   if (loading) return <Loading />;
 
   return (
     <div className="w-full h-full p-4">
       <div className="table-container">
-        <table className="custom-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Amount</th>
-              <th>Payment Mode</th>
-              <th>Notes</th>
-              <th>Driver</th>
-              <th>Trip</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {fuelBook?.map((fuel, index) => (
-              <tr key={index} className="border-t hover:bg-slate-100">
-                <td>
-                  <div className='flex items-center space-x-2'>
-                    <FaCalendarAlt className='text-bottomNavBarColor' />
-                    <span>{new Date(fuel.date).toLocaleDateString()}</span>
-                  </div>
-                </td>
-                <td className="border p-4">₹{formatNumber(fuel.amount)}</td>
-                <td className="border p-4">
-                  <div className="flex items-center space-x-2">
-                    <MdPayment className="text-green-500" />
-                    <span>{fuel.paymentMode}</span>
-                  </div>
-                </td>
-                <td className="border p-4">{fuel.notes || ''}</td>
-                <td className="border p-4">{fuel.driver ? <DriverName driverId={fuel.driver} /> : 'N/A'}</td>
-                <td className="border p-4">{fuel.trip_id ? <TripRoute tripId={fuel.trip_id} /> : 'N/A'}</td>
-                <td>
-                  <div className='flex items-center space-x-2'>
-                    <Button variant="outline" onClick={() => { setSelected(fuel); setModelOpen(true); }}>
-                      <MdEdit />
-                    </Button>
-                    <Button variant="destructive" onClick={(e) => handleDelete(fuel._id as string, e)}>
-                      <MdDelete />
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <Table >
+          <TableHeader>
+            <TableRow>
+              <TableHead>Date</TableHead>
+              <TableHead>Amount</TableHead>
+              <TableHead>Payment Mode</TableHead>
+              <TableHead>Notes</TableHead>
+              <TableHead>Driver</TableHead>
+              <TableHead>Trip</TableHead>
+              <TableHead>Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {fuelBook?.map((expense, index) => (
+              <TableRow
+              key={index}
+              className="border-t hover:bg-slate-100"
+            >
+              <TableCell>
+                <div className='flex items-center space-x-2'>
+                  <FaCalendarAlt className='text-bottomNavBarColor' />
+                  <span>{new Date(expense.date).toLocaleDateString()}</span>
+                </div>
+              </TableCell>
+
+              <TableCell className="border p-4">₹{formatNumber(expense.amount)}</TableCell>
+              <TableCell className="border p-4">
+                <div className="flex items-center space-x-2">
+                  <MdPayment className="text-green-500" />
+                  <span>{expense.paymentMode}</span>
+                </div>
+              </TableCell>
+              <TableCell className="border p-4">{expense.notes || ''}</TableCell>
+              <TableCell className="border p-4">{expense.driverName}</TableCell>
+              <TableCell className="border p-4"><span>{expense.trip_id ? <span>{expense.tripRoute?.origin.split(',')[0]} &rarr; {expense.tripRoute?.destination.split(',')[0]}</span> : "NA"}</span></TableCell>
+              <TableCell>
+                <div className='flex items-center space-x-2'>
+                  <Button variant="outline" onClick={() => { setSelected(expense); setModelOpen(true); }}>
+                    <MdEdit />
+                  </Button>
+                  <Button variant="destructive" onClick={(e) => handleDelete(expense._id as string, e)}>
+                    <MdDelete />
+                  </Button>
+                </div>
+
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
       </div>
-      <ExpenseModal
+      <AddExpenseModal
         isOpen={modelOpen}
         onClose={() => setModelOpen(false)}
         onSave={handleAddCharge}
         driverId={selected?.driver || ''}
-        selected={selected}
-        truckPage={true}
-      />
+        selected={selected} categories={['Truck Expense', 'Trip Expense', 'Office Expense']}      />
     </div>
   );
 };

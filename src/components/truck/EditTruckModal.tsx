@@ -12,6 +12,7 @@ import Loading from '@/app/user/trucks/loading';
 import { Button } from '../ui/button';
 import DriverSelect from '../trip/DriverSelect';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { useExpenseCtx } from '@/context/context';
 
 type FormData = {
     truckNo: string;
@@ -32,6 +33,7 @@ interface EditTruckModalProps {
 }
 
 const EditTruckModal: React.FC<EditTruckModalProps> = ({ truck, isOpen, onClose, onSave }) => {
+    const drivers = useExpenseCtx().drivers
     const router = useRouter();
     const [saving, setSaving] = useState(false);
     const [formdata, setFormdata] = useState<FormData>({
@@ -49,22 +51,19 @@ const EditTruckModal: React.FC<EditTruckModalProps> = ({ truck, isOpen, onClose,
     const [error, setError] = useState<string | null>(null);
     const [suppliers, setSuppliers] = useState<ISupplier[]>([]);
     const [loading, setLoading] = useState(true);
-    const [drivers, setDrivers] = useState<IDriver[]>([]);
 
     useEffect(() => {
         const fetchSuppliers = async () => {
             try {
-                const [supplierRes, driverRes] = await Promise.all([fetch('/api/suppliers'), fetch(`/api/drivers`)]);
+                const [supplierRes] = await Promise.all([fetch('/api/suppliers')]);
 
                 // Correct the condition to check if either request failed
-                if (!supplierRes.ok || !driverRes.ok) {
+                if (!supplierRes.ok) {
                     throw new Error('Failed to fetch data');
                 }
 
-                const [supplierData, driverData] = await Promise.all([supplierRes.json(), driverRes.json()]);
+                const [supplierData] = await Promise.all([supplierRes.json()]);
                 setSuppliers(supplierData.suppliers);
-                setDrivers(driverData.drivers);
-                console.log(driverData);
             } catch (err) {
                 setError((err as Error).message);
             } finally {

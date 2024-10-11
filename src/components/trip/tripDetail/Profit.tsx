@@ -46,10 +46,6 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
   const [netProfit, setNetProfit] = useState<number>(0);
   const [totalCharges, setTotalCharges] = useState<any>([]);
   const [totalDeductions, setTotalDeductions] = useState<any>([]);
-  const [trips, setTrips] = useState<ITrip[]>([])
-  const [trucks, setTrucks] = useState<TruckModel[]>([])
-  const [shops, setShops] = useState<any[]>([])
-  const [drivers, setDrivers] = useState<IDriver[]>([])
   const driver = driverId;
 
   const AddExpenseModal = dynamic(()=> import('@/components/AddExpenseModal'), {ssr : false})
@@ -96,27 +92,6 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
     setNetProfit(profit);
   }, [charges, truckExpenses, amount]);
 
-
-
-  useEffect(()=>{
-    const fetchExpenseData = async()=>{
-      try{
-        const [tripRes, truckres, shopres, driverres] = await Promise.all([fetch('/api/trips'), fetch('/api/trucks/'), fetch('/api/shopkhata'), fetch('/api/drivers/create')])
-        if(!tripRes.ok || !truckres.ok || !shopres.ok || !driverres.ok){
-          return
-        }
-        const [ tripdata, truckdata, shopdata, driverdata] = await Promise.all([tripRes.json(), truckres.json(), shopres.json(), driverres.json()])
-       
-        setTrips(tripdata.trips)
-        setTrucks(truckdata.trucks)
-        setShops(shopdata.shops)
-        setDrivers(driverdata.drivers)
-      }catch(error){
-        console.log(error)
-      }
-    }
-    fetchExpenseData()
-  },[])
 
   const handleExpense = async(editedExpense : IExpense)=>{
     try {
@@ -224,10 +199,6 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
         onClose={() => setIsModalOpen(false)}
         onSave={handleExpense}
         driverId={driver}
-        trucks={trucks}
-        shops={shops} 
-        drivers={drivers}
-        trips={trips}
         categories={['Truck Expense', 'Trip Expense', 'Office Expense']}     
         tripId={tripId} 
         truckNo={truckNo}

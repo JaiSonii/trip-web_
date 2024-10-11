@@ -45,10 +45,6 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
     const [edit, setEdit] = useState<boolean>(false);
 
     const [showDetails, setShowDetails] = useState(false);
-    const [trucks, setTrucks] = useState<TruckModel[]>([])
-    const [trips, setTrips] = useState<ITrip[]>([])
-    const [shops, setShops] = useState<any[]>([])
-    const [drivers, setDrivers] = useState<IDriver[]>([])
 
     const toggleDetails = () => setShowDetails(!showDetails);
 
@@ -120,19 +116,10 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
     useEffect(() => {
         const fetchTruckDetails = async () => {
             try {
-                const [res, truckres, tripres,shopres, driverres] = await Promise.all([fetch(`/api/trucks/${truckNo}`),fetch('/api/trucks'),fetch('/api/trips'), fetch('/api/shopkhata'), fetch('/api/drivers/create')]);
+                const res = await fetch(`/api/trucks/${truckNo}`);
                 if (!res.ok) throw new Error('Failed to fetch truck details');
-                const [resData,truckData,tripData,shopData,driverData] =  await Promise.all([res.ok ? res.json() : alert('Failed to fetch truck'),
-                    truckres.ok ? truckres.json() : [],
-                    tripres.ok ? tripres.json() : [],
-                    shopres.ok ? shopres.json() : [],
-                    driverres.ok ? driverres.json() : []
-                ])
+                const resData = res.ok ? await res.json() : alert('Failed to fetch truck')
                 setTruck(resData.truck);
-                setTrips(tripData.trips);
-                setShops(shopData.shops);
-                setDrivers(driverData.drivers);
-                setTrucks(truckData.trucks)
             } catch (error: any) {
                 console.error(error);
                 setError(error.message);
@@ -189,9 +176,9 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
                         </Button>
                         {openOptions && (
                             <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.2 }} className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md flex flex-col gap-2 p-2 z-10">
+                                initial={{ opacity: 0, y: -10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.2 }} className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md flex flex-col gap-2 p-2 z-20">
                                 <Button
                                     onClick={() => {
                                         setModalOpen(true);
@@ -263,11 +250,7 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
                 isOpen={modalOpen}
                 onClose={() => setModalOpen(false)}
                 onSave={handleAddExpense}
-                trips={trips}
-                trucks={trucks}
-                drivers={drivers}
-                shops={shops}
-                truckNo={truckNo} driverId={''} categories={['Truck Expense', 'Trip Expense', 'Office Expense']}/>
+                truckNo={truckNo} driverId={''} categories={['Truck Expense', 'Trip Expense', 'Office Expense']} />
             <EditTruckModal
                 truck={truck as TruckModel}
                 isOpen={edit}

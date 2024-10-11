@@ -1,6 +1,6 @@
 // DriversPage.tsx
 'use client'
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { IDriver } from '@/utils/interface';
 import Loading from './loading';
@@ -8,13 +8,14 @@ import DriverBalance from '@/components/driver/DriverBalance';
 import { FaUser, FaPhone, FaCircle, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatNumber } from '@/utils/utilArray';
+import { useExpenseCtx } from '@/context/context';
 
 const DriversPage = () => {
   const router = useRouter();
-  const [drivers, setDrivers] = useState<IDriver[] | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
+  const {drivers, isLoading} = useExpenseCtx()
 
   const sortedDrivers = useMemo(() => {
     if (!drivers || drivers.length === 0) return []; // This line ensures that trips is not null or empty
@@ -49,34 +50,9 @@ const DriversPage = () => {
     return <FaSort />
   }
 
-  useEffect(() => {
-    const fetchDrivers = async () => {
-      try {
-        const res = await fetch('/api/drivers', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (!res.ok) {
-          throw new Error('Failed to fetch drivers');
-        }
-
-        const data = await res.json();
-        setDrivers(data.drivers);
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDrivers();
-  }, []);
 
   // Handling different states
-  if (loading) {
+  if (isLoading) {
     return <Loading />;
   }
 

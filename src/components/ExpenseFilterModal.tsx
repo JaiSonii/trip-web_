@@ -5,22 +5,20 @@ import { Button } from './ui/button'
 import { fuelAndDriverChargeTypes, maintenanceChargeTypes, officeExpenseTypes } from '@/utils/utilArray'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
+import { useExpenseCtx } from '@/context/context'
 
 type Props = {
     monthYearOptions: string[]
     paymentModes: string[]
     onClose: () => void
     isOpen: boolean // Modal open state
-    trucks?: TruckModel[]
-    trips?: ITrip[]
-    drivers?: IDriver[]
-    shops: any[]
     handleFilter: (filter: any) => void
 }
 
 
 
-const ExpenseFilterModal: React.FC<Props> = ({ onClose, isOpen, monthYearOptions, paymentModes, handleFilter, trips, trucks, shops, drivers }) => {
+const ExpenseFilterModal: React.FC<Props> = ({ onClose, isOpen, monthYearOptions, paymentModes, handleFilter }) => {
+    const { trips, drivers, shops, trucks, isLoading, error } = useExpenseCtx();
     const pathname = usePathname()
     let ulOptions = ['Trucks', 'Month and Year', 'Expense Type', 'Driver', 'Shop', 'Payment Mode']
     pathname === '/user/expenses/tripExpense' ? ulOptions.push('Trips') : null

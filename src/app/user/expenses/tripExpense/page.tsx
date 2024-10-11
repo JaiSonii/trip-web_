@@ -12,7 +12,6 @@ import { IoAddCircle } from 'react-icons/io5';
 import { formatNumber, generateMonthYearOptions } from '@/utils/utilArray';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import debounce from 'lodash.debounce';
-import { useRouter } from 'next/navigation';
 import { TbFilterSearch } from 'react-icons/tb';
 import dynamic from 'next/dynamic';
 
@@ -25,27 +24,10 @@ const TripExpense: React.FC = () => {
   const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
   const [searchQuery, setSearchQuery] = useState('')
   const [filterModalOpen, setFilterModalOpen] = useState(false)
-  const [trucks, setTrucks] = useState<TruckModel[]>([])
-  const [drivers, setDrivers] = useState<IDriver[]>([])
-  const [shops, setShops] = useState<any[]>([])
-  const [trips, setTrips] = useState<ITrip[]>([])
 
   const ExpenseFilterModal = dynamic(() => import('@/components/ExpenseFilterModal'), {ssr : false})
   const AddExpenseModal = dynamic(()=> import('@/components/AddExpenseModal'), {ssr : false})
 
-  const fetchData = async () => {
-    try {
-      const [truckres, driverres, shopres, tripRes] = await Promise.all([fetch(`/api/trucks/create`), fetch('/api/drivers/create'), fetch('/api/shopkhata'), fetch(`/api/trips`)])
-      const [truckData, driverData, shopData, tripData] = await Promise.all([truckres.json(), driverres.json(), shopres.json(), tripRes.json()])
-      setTrucks(truckData.trucks)
-      setDrivers(driverData.drivers)
-      setShops(shopData.shops)
-      setTrips(tripData.trips)
-    } catch (error) {
-      alert('Some Error Occured')
-    }
-
-  }
 
   const monthYearOptions = generateMonthYearOptions()
 
@@ -148,10 +130,6 @@ const TripExpense: React.FC = () => {
   useEffect(() => {
     // Call getBook with null for the first render
     getBook();
-  }, [])
-
-  useEffect(() => {
-    fetchData()
   }, [])
 
   if (loading) return <Loading />;
@@ -343,10 +321,6 @@ const TripExpense: React.FC = () => {
         onSave={selected ? handleEditExpense : handleAddExpense}
         driverId={selected?.driver as string}
         selected={selected}
-        trucks={trucks}
-        drivers={drivers}
-        trips={trips}
-        shops={shops} 
         categories={['Truck Expense', 'Trip Expense', 'Office Expense']}
       />
       <ExpenseFilterModal
@@ -354,11 +328,7 @@ const TripExpense: React.FC = () => {
         onClose={() => setFilterModalOpen(false)}
         paymentModes={['Paid By Driver', 'Cash', 'Online', 'Credit']}
         monthYearOptions={monthYearOptions}
-        handleFilter={handleFilter}
-        trucks={trucks}
-        drivers={drivers}
-        shops={shops}
-        trips={trips} />
+        handleFilter={handleFilter} />
 
     </div>
   );

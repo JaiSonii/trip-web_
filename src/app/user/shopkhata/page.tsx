@@ -10,13 +10,12 @@ import { FaAddressBook, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
 import { formatNumber } from '@/utils/utilArray';
 import debounce from 'lodash.debounce';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useExpenseCtx } from '@/context/context';
 
 const ShopKhataPage = () => {
+  const {shops} = useExpenseCtx()
   const router = useRouter();
 
-
-
-  const [shops, setShops] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' });
@@ -80,35 +79,6 @@ const ShopKhataPage = () => {
     return filteredShops;
   }, [shops, searchQuery, sortConfig]);
 
-
-  useEffect(() => {
-    const fetchParties = async () => {
-
-      try {
-        const res = await fetch('/api/shopkhata', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (res.ok) {
-          const data = await res.json(); // Parse the response body as JSON
-          setShops(data.shops);
-          setLoading(false)
-        }
-
-
-      } catch (err) {
-
-        setError((err as Error).message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchParties();
-  }, []);
 
   if (loading) {
     return <Loading />;

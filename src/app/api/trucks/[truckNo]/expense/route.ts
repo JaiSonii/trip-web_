@@ -29,47 +29,43 @@ export async function GET(req: Request, { params }: { params: { truckNo: string 
       filter = { ...filter, expenseType: { $nin: Array.from(maintenanceChargeTypes) } };
     }
 
-    const expenses = await Expense.find(filter).sort({ date: -1 });
-    return NextResponse.json(expenses);
+    const expenses = await Expense.aggregate([
+      {
+        $match : filter
+      },
+      {
+        $lookup : {
+          from : 'trips',
+          localField : 'trip_id',
+          foreignField : 'trip_id',
+          as : 'trips'
+        }
+      },
+      {
+        $lookup : {
+          from : 'drivers',
+          localField : 'driver',
+          foreignField : 'driver_id',
+          as : 'drivers'
+        }
+      },
+      {
+        $addFields : {
+          tripRoute : { $arrayElemAt : ['$trips.route', 0] },
+          driverName : { $ifNull : [{ $arrayElemAt : ['$drivers.name', 0] }, 'N/A'] }
+        }
+      },{
+        $project : {
+          trips : 0
+        }
+      },
+      {
+        $sort : { date : -1 }
+      }
+    ]);
+    return NextResponse.json({expenses , status : 200});
   } catch (error: any) {
     console.log(error);
     return NextResponse.json({ message: error.message, status: 500 });
   }
 }
-
-
-export async function POST(req: Request, { params }: { params: { truckNo: string } }) {
-    // Connect to the database
-    await connectToDatabase();
-  
-    // Extract the tripId from the request params
-    const { truckNo } = params;
-  
-    try {
-      const { user, error } = await verifyToken(req);
-      if (error) {
-        return NextResponse.json({ error });
-      }
-      // Parse the request body as JSON
-      const data = await req.json();
-  
-      // Create a new instance of TripExpense with the parsed data and tripId
-      const newCharge = new Expense({
-        truck: truckNo,
-        ...data,
-        user_id: user
-      });
-  
-  
-      // Save the new charge to the database
-      await newCharge.save();
-  
-      // Return a success response with the new charge
-      return NextResponse.json({ status: 200, newCharge });
-  
-    } catch (error) {
-      // Handle any errors that occur during the process
-      console.error("Error creating new trip expense:", error);
-      return NextResponse.json({ status: 500, error: "Failed to create new trip expense" });
-    }
-  }

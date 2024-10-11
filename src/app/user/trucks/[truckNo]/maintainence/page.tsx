@@ -11,16 +11,19 @@ import { FaCalendarAlt } from 'react-icons/fa';
 import { IconKey, icons } from '@/utils/icons';
 import { formatNumber } from '@/utils/utilArray';
 import dynamic from 'next/dynamic';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { DeleteExpense, handleAddExpense, handleEditExpense } from '@/helpers/ExpenseOperation';
+import { Item } from '@radix-ui/react-select';
 
 const TruckMaintainenceBook = () => {
   const { truckNo } = useParams();
   const [loading, setLoading] = useState<boolean>(true);
-  const [maintainenceBook, setMaintainenceBook] = useState<IExpense[]>([]);
+  const [maintainenceBook, setMaintainenceBook] = useState<IExpense[] | any[]>([]);
   const [modelOpen, setModelOpen] = useState(false);
   const [selected, setSelected] = useState<IExpense>();
   const [error, setError] = useState<string | null>(null);
 
-  const ExpenseModal = dynamic(()=>import('@/components/trip/tripDetail/ExpenseModal'),{ssr : false})
+  const AddExpenseModal = dynamic(()=>import('@/components/AddExpenseModal'),{ssr : false})
 
   useEffect(() => {
     const fetchMaintenance = async () => {
@@ -31,7 +34,7 @@ const TruckMaintainenceBook = () => {
           throw new Error('Failed to fetch maintenance book');
         }
         const data = await res.json();
-        setMaintainenceBook(data);
+        setMaintainenceBook(data.expenses);
       } catch (error: any) {
         setError(error.message);
       } finally {
@@ -44,51 +47,29 @@ const TruckMaintainenceBook = () => {
   const handleDelete = async (id: string, e: React.FormEvent) => {
     e.stopPropagation();
     try {
-      const res = await fetch(`/api/truckExpense/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!res.ok) {
-        throw new Error('Failed to delete expense');
-      }
+      const expense = await DeleteExpense(id)
       setMaintainenceBook(maintainenceBook.filter((item) => item._id !== id));
     } catch (error: any) {
-      setError(error.message);
+      alert('Failed to delete expense')
+      console.log(error)
     }
   };
 
   const handleAddCharge = async (newCharge: any, id?: string) => {
-    const truckExpenseData = {
-      ...newCharge,
-      truck: truckNo,
-      transaction_id: newCharge.transactionId || '',
-      driver: newCharge.driver || '',
-      notes: newCharge.notes || '',
-    };
-
     try {
-      const res = await fetch(`/api/truckExpense/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(truckExpenseData),
-      });
-      if (!res.ok) {
-        throw new Error('Failed to add charge');
+      if(!selected){
+        const expense = await handleAddExpense(newCharge)
+        setMaintainenceBook((prev)=>[
+          expense,
+          ...prev
+        ])
+      }else{
+        const expense = await handleEditExpense(newCharge, selected._id as string)
+        setMaintainenceBook((prev)=>prev.map((item : any)=> item._id === selected._id ? {...item,expense} : item))
       }
-      const data = await res.json();
-      setMaintainenceBook((prev: IExpense[]) => {
-        const index = prev.findIndex(item => item._id === data.charge._id);
-        if (index !== -1) {
-          prev[index] = data.charge;
-        }
-        return [...prev];
-      });
     } catch (error: any) {
-      setError(error.message);
+      console.log(error);
+      alert(`Failed to ${selected ? 'edit' : 'add'} expense`)
     }
   };
 
@@ -98,49 +79,49 @@ const TruckMaintainenceBook = () => {
     <div className="w-full h-full p-4">
       {error && <div className="text-red-500">{error}</div>}
       <div className="table-container">
-        <table className="custom-table">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Amount</th>
-              <th>Expense Type</th>
-              <th>Payment Mode</th>
-              <th>Notes</th>
-              <th>Driver</th>
-              <th>Trip</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
+        <Table className="custom-table">
+          <TableHeader>
+            <TableRow>
+              <TableHead>Date</TableHead>
+              <TableHead>Amount</TableHead>
+              <TableHead>Expense Type</TableHead>
+              <TableHead>Payment Mode</TableHead>
+              <TableHead>Notes</TableHead>
+              <TableHead>Driver</TableHead>
+              <TableHead>Trip</TableHead>
+              <TableHead>Action</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {maintainenceBook.map((expense, index) => (
-              <tr
+              <TableRow
                 key={index}
                 className="border-t hover:bg-slate-100"
               >
-                <td>
+                <TableCell>
                   <div className='flex items-center space-x-2'>
                     <FaCalendarAlt className='text-bottomNavBarColor' />
                     <span>{new Date(expense.date).toLocaleDateString()}</span>
                   </div>
-                </td>
+                </TableCell>
 
-                <td className="border p-4">₹{formatNumber(expense.amount)}</td>
-                <td className="border p-4">
+                <TableCell className="border p-4">₹{formatNumber(expense.amount)}</TableCell>
+                <TableCell className="border p-4">
                   <div className="flex items-center space-x-2">
                     {icons[expense.expenseType as IconKey]}
                     <span>{expense.expenseType}</span>
                   </div>
-                </td>
-                <td className="border p-4">
+                </TableCell>
+                <TableCell className="border p-4">
                   <div className="flex items-center space-x-2">
                     <MdPayment className="text-green-500" />
                     <span>{expense.paymentMode}</span>
                   </div>
-                </td>
-                <td className="border p-4">{expense.notes || ''}</td>
-                <td className="border p-4">{expense.driver ? <DriverName driverId={expense.driver} /> : 'N/A'}</td>
-                <td className="border p-4">{expense.trip_id ? <TripRoute tripId={expense.trip_id} /> : 'N/A'}</td>
-                <td>
+                </TableCell>
+                <TableCell className="border p-4">{expense.notes || ''}</TableCell>
+                <TableCell className="border p-4">{expense.driverName}</TableCell>
+              <TableCell className="border p-4"><span>{expense.trip_id ? <span>{expense.tripRoute?.origin.split(',')[0]} &rarr; {expense.tripRoute?.destination.split(',')[0]}</span> : "NA"}</span></TableCell>
+                <TableCell>
                   <div className='flex items-center space-x-2'>
                     <Button variant="outline" onClick={() => { setSelected(expense); setModelOpen(true); }}>
                       <MdEdit />
@@ -150,20 +131,18 @@ const TruckMaintainenceBook = () => {
                     </Button>
                   </div>
 
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
-      <ExpenseModal
+      <AddExpenseModal
         isOpen={modelOpen}
         onClose={() => setModelOpen(false)}
         onSave={handleAddCharge}
         driverId={selected?.driver || ''}
-        selected={selected}
-        truckPage={true}
-      />
+        selected={selected} categories={['Truck Expense', 'Trip Expense', 'Office Expense']}      />
     </div>
   );
 };

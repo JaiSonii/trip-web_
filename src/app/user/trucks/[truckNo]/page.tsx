@@ -29,10 +29,6 @@ const TruckPage = () => {
   const [totalExpense, setTotalExpense] = useState(0);
   const [modelOpen, setModelOpen] = useState(false);
   const [selected, setSelected] = useState<IExpense | null>(null);
-  const [trucks, setTrucks] = useState<TruckModel[]>([])
-  const [trips, setTrips] = useState<ITrip[]>([])
-  const [shops, setShops] = useState<any[]>([])
-  const [drivers, setDrivers] = useState<IDriver[]>([])
 
   const AddExpenseModal = dynamic(()=>import('@/components/AddExpenseModal'), {ssr : false})
 
@@ -95,27 +91,6 @@ const TruckPage = () => {
       }
     };
     fetchData();
-    const fetchTruckDetails = async () => {
-      try {
-          const [ truckres, tripres,shopres, driverres] = await Promise.all([fetch('/api/trucks'),fetch('/api/trips'), fetch('/api/shopkhata'), fetch('/api/drivers/create')]);
-          
-          const [truckData,tripData,shopData,driverData] =  await Promise.all([
-              truckres.ok ? truckres.json() : [],
-              tripres.ok ? tripres.json() : [],
-              shopres.ok ? shopres.json() : [],
-              driverres.ok ? driverres.json() : []
-          ])
-          setTrips(tripData.trips);
-          setShops(shopData.shops);
-          setDrivers(driverData.drivers);
-          setTrucks(truckData.trucks)
-      } catch (error: any) {
-          console.error(error);
-      } finally {
-          setLoading(false);
-      }
-  };
-  fetchTruckDetails();
   }, [truckNo]);
 
 
@@ -227,10 +202,6 @@ const TruckPage = () => {
         isOpen={modelOpen}
         onClose={() => setModelOpen(false)}
         onSave={handleExpense}
-        trips={trips}
-        trucks={trucks}
-        drivers={drivers}
-        shops={shops}
         truckNo={truckNo as string}
         categories={['Truck Expense', 'Trip Expense', 'Office Expense']} driverId={''}
         selected={selected}/>

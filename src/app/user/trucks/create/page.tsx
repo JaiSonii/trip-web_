@@ -13,6 +13,7 @@ import { truckTypesIcons } from '@/utils/utilArray';
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectLabel, SelectValue } from '@/components/ui/select'; // Adjust the import path as necessary
 import { Button } from '@/components/ui/button';
 import DriverSelect from '@/components/trip/DriverSelect';
+import { mutate } from 'swr';
 
 // Define the types
 type FormData = {
@@ -63,6 +64,7 @@ const CreateTruck: React.FC = () => {
             } catch (err) {
                 setError((err as Error).message);
             } finally {
+                
                 setSaving(false);
                 setLoading(false);
             }
@@ -148,6 +150,7 @@ const CreateTruck: React.FC = () => {
                 current.truck = data.truck.truckNo
                 localStorage.setItem('tripData', JSON.stringify(current))
             }
+            mutate('/api/trucks')
             router.push(nextpath ? nextpath : '/user/trucks');
         } catch (error) {
             // Handle fetch errors

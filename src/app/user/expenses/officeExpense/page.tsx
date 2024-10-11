@@ -77,29 +77,6 @@ const OfficeExpense: React.FC = () => {
         }
     };
 
-    const handleSave = async (expense: any) => {
-        try {
-            const res = await fetch(`/api/expenses/officeExpense`, {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(expense),
-            });
-            if (!res.ok) {
-                alert('Error saving data');
-                return;
-            }
-            const data = await res.json();
-            setMaintainenceBook((prev) => [
-                data.expense,
-                ...prev
-            ])
-        } catch (error: any) {
-            alert(error.message);
-        }
-    };
-
     const handleDelete = async (expenseId: string) => {
         try {
             const res = await fetch(`/api/expenses/${expenseId}`, {
@@ -335,11 +312,9 @@ const OfficeExpense: React.FC = () => {
                     setSelected(null);
                 } }
                 onSave={selected ? handleEditExpense : handleAddExpense}
-                selected={selected}
-                shops={shops} driverId={''}  categories={['Truck Expense', 'Trip Expense', 'Office Expense']}            />
+                selected={selected} driverId={''}  categories={['Truck Expense', 'Trip Expense', 'Office Expense']}            />
             <ExpenseFilterModal
                 isOpen={filterModalOpen}
-                shops={shops}
                 paymentModes={['Online', 'Cash', 'Credit']}
                 handleFilter={handleFilter}
                 monthYearOptions={generateMonthYearOptions()}

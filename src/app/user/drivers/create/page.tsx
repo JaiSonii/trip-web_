@@ -5,6 +5,7 @@ import DriverForm from '@/components/createDriver';
 import { IDriver } from '@/utils/interface';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Loading from '../loading';
+import { mutate } from 'swr';
 
 
 const isValidPhone = (phone: string): boolean => {
@@ -53,6 +54,7 @@ const CreateDriverPage: React.FC = () => {
                 current.driver = data.data.driver_id
                 localStorage.setItem('tripData', JSON.stringify(current))
             }
+            mutate('/api/drivers/create')
             router.push(nextpath ? nextpath : '/user/drivers');
         } catch (error) {
             console.error('Error saving party:', error);
