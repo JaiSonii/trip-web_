@@ -5,8 +5,7 @@ import { ITrip } from '@/utils/interface';
 import { statuses } from '@/utils/schema';
 import { useRouter } from 'next/navigation';
 import Loading from './loading';
-import { fetchBalance } from '@/helpers/fetchTripBalance';
-import { FaTruck, FaRoute, FaCalendarAlt, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
+import { FaTruck, FaCalendarAlt, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
 import {
   Select,
   SelectTrigger,
@@ -20,23 +19,8 @@ import { formatNumber } from '@/utils/utilArray';
 import { SlOptionsVertical } from 'react-icons/sl';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import debounce from 'lodash.debounce';
+import { useExpenseCtx } from '@/context/context';
 
-// const TripBalance = ({ trip }: { trip: ITrip }) => {
-//   const [balance, setBalance] = useState(0)
-//   useEffect(() => {
-//     if (trip) {
-//       const balance = async () => {
-//         const pending = await fetchBalance(trip)
-//         setBalance(pending)
-//       }
-//       balance()
-//     }
-//   }, [trip])
-
-//   return (
-//     <p className='text-green-600 font-semibold text-md'>₹{formatNumber(balance)}</p>
-//   )
-// }
 
 const columnOptions = [
   { label: 'Start Date', value: 'startDate' },
@@ -50,6 +34,7 @@ const columnOptions = [
 ];
 
 const TripsPage = () => {
+  const ctxTrips = useExpenseCtx().trips
   const router = useRouter();
   const [trips, setTrips] = useState<ITrip[] | null>([]);
   const [loading, setLoading] = useState(true);
@@ -64,8 +49,8 @@ const TripsPage = () => {
   const sortedTrips = useMemo(() => {
     if (!trips || trips.length === 0) return [];  // This line ensures that trips is not null or empty
     let filteredTrips = [...trips]
-    
-    if(searchQuery){
+
+    if (searchQuery) {
       const lowercaseQuery = searchQuery.toLowerCase()
       filteredTrips = trips.filter((trip) =>
         trip.LR.toLowerCase().includes(lowercaseQuery) ||
@@ -80,11 +65,11 @@ const TripsPage = () => {
       )
     }
     if (sortConfig.key !== null) {
-      filteredTrips.sort((a , b) => {
+      filteredTrips.sort((a, b) => {
         if (a[sortConfig.key as keyof ITrip] < b[sortConfig.key as keyof ITrip]) {
           return sortConfig.direction === 'asc' ? -1 : 1;
         }
-        if (a[sortConfig.key  as keyof ITrip] > b[sortConfig.key  as keyof ITrip]) {
+        if (a[sortConfig.key as keyof ITrip] > b[sortConfig.key as keyof ITrip]) {
           return sortConfig.direction === 'asc' ? 1 : -1;
         }
         return 0;
@@ -109,16 +94,16 @@ const TripsPage = () => {
     return <FaSort />
   }
 
-    // Debounce the search input to reduce re-renders on each keystroke
-    const debouncedSearch = useCallback(
-      debounce((query) => setSearchQuery(query), 300),
-      []
-    );
-  
-    // Handle search input
-    const handleSearch:any = (e: React.ChangeEvent<HTMLInputElement>) => {
-      debouncedSearch(e.target.value.toLowerCase());
-    };
+  // Debounce the search input to reduce re-renders on each keystroke
+  const debouncedSearch = useCallback(
+    debounce((query) => setSearchQuery(query), 300),
+    []
+  );
+
+  // Handle search input
+  const handleSearch: any = (e: React.ChangeEvent<HTMLInputElement>) => {
+    debouncedSearch(e.target.value.toLowerCase());
+  };
 
   const toggleColumn = useCallback((column: string) => {
     setVisibleColumns(prev => {
@@ -148,7 +133,6 @@ const TripsPage = () => {
       }
 
       const data = await res.json();
-      console.log(data)
       setTrips(data.trips);
 
       // Calculate total balance
@@ -164,18 +148,21 @@ const TripsPage = () => {
   }, []);
 
   useEffect(() => {
-    fetchTrips();
+    if (ctxTrips.length > 0) {
+      setTrips(ctxTrips)
+      setTotalBalance(ctxTrips.reduce((acc: number, trip: ITrip) => acc + trip.balance, 0));
+    } else fetchTrips();
   }, []);
 
 
   const handleStatusChange = (value: string) => {
     const status = value ? parseInt(value) : undefined;  // If value is empty, status becomes undefined
-    if(selectedStatus === status){
+    if (selectedStatus === status) {
       fetchTrips()
       return
     }
     fetchTrips(status);  // Fetch based on status or all trips if undefined
-    setSelectedStatus((prev)=> prev === status ? undefined : status);
+    setSelectedStatus((prev) => prev === status ? undefined : status);
   };
 
   if (loading) return <Loading />;
@@ -193,13 +180,13 @@ const TripsPage = () => {
   return (
     <div className="w-full p-4 h-full bg-white">
       <div className='flex w-full px-60'>
-      <input
-        type="text"
-        placeholder="Search..."
-        onChange={handleSearch}
-      />
+        <input
+          type="text"
+          placeholder="Search..."
+          onChange={handleSearch}
+        />
       </div>
-      
+
       <div className="flex items-center justify-between">
         <div className="flex items-center bg-lightOrange rounded-sm text-buttonTextColor p-2">
           <span>Total Balance :</span>
@@ -287,11 +274,11 @@ const TripsPage = () => {
                     </div>
                   </TableHead>}
                   {visibleColumns.includes('Route') && <TableHead className="">Route</TableHead>}
-                  {visibleColumns.includes('Status') && <TableHead className="" onClick={()=>requestSort('status')}>
+                  {visibleColumns.includes('Status') && <TableHead className="" onClick={() => requestSort('status')}>
                     <div className="flex justify-center">
-                        Start Date {getSortIcon('status')}
-                      </div>
-                    </TableHead>}
+                      Start Date {getSortIcon('status')}
+                    </div>
+                  </TableHead>}
                   {visibleColumns.includes('Truck Hire Cost') && (
                     <TableHead className="" onClick={() => requestSort('truckHireCost')}>
                       <div className="flex justify-center">

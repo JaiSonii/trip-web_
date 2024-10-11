@@ -13,10 +13,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useExpenseCtx } from '@/context/context';
 
 const ShopKhataPage = () => {
-  const {shops} = useExpenseCtx()
+  const {shops, isLoading} = useExpenseCtx()
   const router = useRouter();
-
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' });
   const [searchQuery, setSearchQuery] = useState(''); // Track the search query
@@ -80,7 +78,7 @@ const ShopKhataPage = () => {
   }, [shops, searchQuery, sortConfig]);
 
 
-  if (loading) {
+  if (isLoading) {
     return <Loading />;
   }
 
@@ -119,7 +117,7 @@ const ShopKhataPage = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {shops.map((shop, index) => (
+            {filteredAndSortedShops.map((shop, index) => (
               <TableRow key={shop.shop_id as string} className="border-t w-full cursor-pointer" onClick={() => router.push(`/user/shopkhata/${shop.shop_id}`)}>
                 <TableCell>
                   <div className='flex items-center space-x-2'>
