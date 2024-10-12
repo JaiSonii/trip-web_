@@ -22,32 +22,16 @@ type Props = {
 
 const TruckSelect: React.FC<Props> = ({ trucks, formData, handleChange, setFormData }) => {
   const [supplierName, setSupplierName] = useState<string>('');
-  const [selectedTruck, setSelectedTruck] = useState<TruckModel | null>(null);
+  const [selectedTruck, setSelectedTruck] = useState<TruckModel | any>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const pathname = usePathname()
 
-  const fetchSupplierName = async (supplierId: string) => {
-    try {
-      const response = await fetch(`/api/suppliers/${supplierId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch supplier details');
-      }
-      const data = await response.json();
-      setSupplierName(data.supplier.name);
-      setFormData((prev: any) => ({
-        ...prev,
-        supplierId: data.supplier.supplier_id
-      }));
-    } catch (error) {
-      console.error('Error fetching supplier details:', error);
-    }
-  };
 
   useEffect(() => {
-    const selectedTruck = trucks.find(truck => truck.truckNo === formData.truck);
+    const selectedTruck : any = trucks.find(truck => truck.truckNo === formData.truck);
     setSelectedTruck(selectedTruck || null);
     if (selectedTruck?.supplier) {
-      fetchSupplierName(selectedTruck.supplier);
+      setSupplierName(selectedTruck.supplierName as string)
     } else {
       setSupplierName('');
       setFormData((prev: any) => ({
@@ -89,14 +73,18 @@ const TruckSelect: React.FC<Props> = ({ trucks, formData, handleChange, setFormD
               />
             </div>
             {filteredTrucks.length > 0 ? (
-              filteredTrucks.map((truck) => (
+              filteredTrucks.map((truck : any) => (
                 <SelectItem key={truck.truckNo} value={truck.truckNo}>
+                  <div className='flex justify-between w-full gap-4'>
                   <span>{truck.truckNo}</span>
                   <span
                     className={`ml-2 p-1 rounded ${truck.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
                   >
                     {truck.status}
                   </span>
+                  <span>{truck.supplierName}</span>
+                  </div>
+                  
                 </SelectItem>
               ))
             ) : (

@@ -1,7 +1,6 @@
 'use client'
 import { Button } from '@/components/ui/button'
-import { fetchBalance } from '@/helpers/fetchTripBalance'
-import { ISupplier, ITrip } from '@/utils/interface'
+import {  ITrip } from '@/utils/interface'
 import { statuses } from '@/utils/schema'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'

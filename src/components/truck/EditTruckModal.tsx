@@ -193,7 +193,7 @@ const EditTruckModal: React.FC<EditTruckModalProps> = ({ truck, isOpen, onClose,
                             <SupplierSelect
                                 suppliers={suppliers}
                                 value={formdata.supplier}
-                                onChange={handleInputChange}
+                                onChange={(value) => setFormdata({ ...formdata, supplier: value })}
                             />
                         )}
                         {formdata.truckType !== 'Other' && (

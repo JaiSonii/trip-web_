@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import Modal from './Modal';
 import { ITrip, PaymentBook } from '@/utils/interface';
 import { MdDelete, MdEdit } from 'react-icons/md';
-import { fetchBalance } from '@/helpers/fetchTripBalance';
 import { Button } from '@/components/ui/button';
 import { formatNumber } from '@/utils/utilArray';
 import { PiPlusBold } from 'react-icons/pi';
@@ -49,8 +48,7 @@ const DataList: React.FC<DataListProps> = ({ data, label, modalTitle, trip, setD
         return;
       }
       setData(resData.trip.accounts);
-      const pending = await fetchBalance(resData.trip);
-      setBalance(pending);
+      setBalance((prev: number) => prev - newItem.amount)
       setIsModalOpen(false);
       setTrip(resData.trip);
       // router.refresh();
@@ -80,7 +78,17 @@ const DataList: React.FC<DataListProps> = ({ data, label, modalTitle, trip, setD
       }
 
       setData(resData.trip.accounts);
-      setTrip(resData.trip);
+      setTrip((prev: ITrip) => ({
+        ...prev,
+        ...resData.trip,
+      }));
+      setBalance((prev: number) => {
+        if (editData) {
+          return prev + editData?.amount as number - editedItem.amount
+        } else {
+          return prev
+        }
+      })
       setEditData(null);
       setIsModalOpen(false);
     } catch (error) {
@@ -106,7 +114,11 @@ const DataList: React.FC<DataListProps> = ({ data, label, modalTitle, trip, setD
         console.log('Updated data:', updatedData);
         return updatedData;
       });
-      setTrip(resData.trip);
+      setTrip((prev: ITrip) => ({
+        ...prev,
+        ...resData.trip
+      }));
+      setBalance((prev: number) => prev + item.amount)
       // router.refresh();
     } catch (error) {
       console.log(error);
@@ -142,7 +154,7 @@ const DataList: React.FC<DataListProps> = ({ data, label, modalTitle, trip, setD
           aria-label={`Add ${label}`}
           disabled={trip.status == 4}
         >
-          <PiPlusBold color='white' size={20}/>
+          <PiPlusBold color='white' size={20} />
         </Button>
       </div>
       {!listData || listData.length === 0 ? (

@@ -1,4 +1,4 @@
-import { fetchBalance, fetchBalanceBack } from "@/helpers/fetchTripBalance";
+import { fetchBalanceBack } from "@/helpers/fetchTripBalance";
 import { verifyToken } from "@/utils/auth";
 import { ITrip } from "@/utils/interface";
 import { connectToDatabase, tripChargesSchema, tripSchema } from "@/utils/schema";

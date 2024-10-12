@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { IDriver, IExpense, TruckModel } from '@/utils/interface';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { MdDelete, MdEdit, MdPayment } from 'react-icons/md';
-import { DeleteExpense, fetchTruckExpense, handleAddCharge, handleAddExpense, handleDelete } from '@/helpers/ExpenseOperation';
+import { DeleteExpense, fetchTruckExpense, handleAddCharge, handleAddExpense, handleDelete, handleEditExpense } from '@/helpers/ExpenseOperation';
 import { icons, IconKey } from '@/utils/icons';
 import { FaCalendarAlt, FaSort, FaSortDown, FaSortUp, FaTruck } from 'react-icons/fa';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -27,8 +27,8 @@ const TruckExpense: React.FC = () => {
   const [filterModalOpen, setFilterModalOpen] = useState(false)
   const router = useRouter()
 
-  const ExpenseFilterModal = dynamic(()=>import('@/components/ExpenseFilterModal'), {ssr : false})
-  const AddExpenseModal = dynamic(()=> import('@/components/AddExpenseModal'), {ssr : false})
+  const ExpenseFilterModal = dynamic(() => import('@/components/ExpenseFilterModal'), { ssr: false })
+  const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), { ssr: false })
 
   const monthYearOptions = generateMonthYearOptions()
 
@@ -43,7 +43,7 @@ const TruckExpense: React.FC = () => {
   });
 
 
-  const handleFilter = async (filter: { drivers: string[], trips: string[], trucks: string[], paymentModes: string[], monYear: string[], shops: string[], expenseTypes :[] }) => {
+  const handleFilter = async (filter: { drivers: string[], trips: string[], trucks: string[], paymentModes: string[], monYear: string[], shops: string[], expenseTypes: [] }) => {
     try {
       const res = await fetch(`/api/expenses/truckExpense?filter=${encodeURIComponent(JSON.stringify(filter))}`)
       const data = await res.json()
@@ -127,19 +127,29 @@ const TruckExpense: React.FC = () => {
     }
   };
 
-  const handleEditExpense = async (expense: IExpense) => {
+  const handleExpense = async (expense: IExpense | any, id?: string) => {
     try {
-      selected ? await handleAddCharge(expense, expense.id) : handleAddCharge(expense, '', expense.truck);
-      setModalOpen(false); // Close the modal after saving
-      router.refresh();
+      const data = selected ? await handleEditExpense(expense, selected._id as string) : await  handleAddExpense(expense)
+      selected ?
+        setTruckExpenseBook((prev) => (
+          prev.map((exp) => exp._id === data._id ? ({ ...exp, ...data }) : exp)
+        )) : setTruckExpenseBook((prev) => [
+          data,
+          ...prev
+        ])
+
     } catch (error) {
       console.error(error);
+      alert('Please try again')
+    } finally {
+      setSelected(null)
+      setModalOpen(false);
     }
   };
 
   useEffect(() => {
     // Call getBook with null for the first render
-      getBook(null, null);
+    getBook(null, null);
   }, [])
 
   if (loading) return <Loading />;
@@ -160,7 +170,7 @@ const TruckExpense: React.FC = () => {
       notes: selectAll,
       truck: selectAll,
       action: selectAll,
-      ledger : selectAll
+      ledger: selectAll
     });
   };
 
@@ -202,7 +212,10 @@ const TruckExpense: React.FC = () => {
         </div>
 
         <div className='flex items-center space-x-2'>
-          <Button onClick={() => setModalOpen(true)}>
+          <Button onClick={() => {
+            setSelected(null)
+            setModalOpen(true)
+          }}>
             Truck Expense     <IoAddCircle className='mt-1' />
           </Button>
           <div className="flex items-center space-x-4">
@@ -322,9 +335,9 @@ const TruckExpense: React.FC = () => {
       <AddExpenseModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSave={selected ? handleEditExpense : handleAddExpense}
+        onSave={handleExpense}
         driverId={selected?.driver as string}
-        selected={selected} categories={['Truck Expense', 'Trip Expense', 'Office Expense']}      />
+        selected={selected} categories={['Truck Expense', 'Trip Expense', 'Office Expense']} />
       <ExpenseFilterModal
         isOpen={filterModalOpen}
         onClose={() => setFilterModalOpen(false)}

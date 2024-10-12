@@ -101,7 +101,6 @@ const Driver: React.FC = () => {
     return <FaSort />
   }
 
-  const ExpenseModal = dynamic(() => import('@/components/trip/tripDetail/ExpenseModal'), { ssr: false })
   const Modal = dynamic(() => import('@/components/trip/tripDetail/Modal'), { ssr: false })
 
   const handleDelete = async (account: any) => {
@@ -333,13 +332,13 @@ const Driver: React.FC = () => {
           </Table>
         </div>
       </div>
-      <ExpenseModal
+      {/* <ExpenseModal
         isOpen={expenseEdit}
         onClose={() => setExpenseEdit(false)}
         onSave={handleEditAccounts}
         driverId={selected.driver || ''}
         selected={selected}
-      />
+      /> */}
       {selected != null && <Modal
         isOpen={paymentEdit}
         onClose={() => setPaymentEdit(false)}

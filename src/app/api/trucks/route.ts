@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import mongoose, { model, models } from 'mongoose';
 import { connectToDatabase, truckSchema } from '@/utils/schema';
-import { TruckModel } from '@/utils/interface';
 import { verifyToken } from '@/utils/auth';
 import {v4 as uuidv4} from 'uuid'
 import { validateTruckNo } from '@/utils/validate';
@@ -17,7 +16,23 @@ export async function GET(req: Request) {
   try {
     await connectToDatabase()
 
-    const trucks = await Truck.find({ user_id: user }).exec();
+    const trucks = await Truck.aggregate([{
+      $match: { user_id: user },
+    },
+    {
+      $lookup : {
+        from : 'suppliers',
+        localField : 'supplier',
+        foreignField : 'supplier_id',
+        as : 'suppliers'
+      }
+    },
+    {
+      $addFields : {
+        supplierName : { $arrayElemAt : [ '$suppliers.name', 0 ] }
+      }
+    }
+  ]);
     return NextResponse.json({ trucks });
   } catch (err) {
     console.error(err);
@@ -59,7 +74,7 @@ export async function POST(req: Request) {
     const newTruck = new Truck({
       user_id: user,
       truck_id : 'truck_id' + uuidv4(),
-      truckNo: data.truckNo,
+      truckNo: data.truckNo.toUpperCase(),
       truckType: data.truckType || '',
       model: data.model || '',
       capacity: data.capacity || '',

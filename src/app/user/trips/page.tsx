@@ -37,7 +37,7 @@ const TripsPage = () => {
   const ctxTrips = useExpenseCtx().trips
   const router = useRouter();
   const [trips, setTrips] = useState<ITrip[] | null>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<number | undefined>();
   const [selectedColumns, setSelectedColumns] = useState<string[]>(columnOptions.map(col => col.value));
@@ -276,7 +276,7 @@ const TripsPage = () => {
                   {visibleColumns.includes('Route') && <TableHead className="">Route</TableHead>}
                   {visibleColumns.includes('Status') && <TableHead className="" onClick={() => requestSort('status')}>
                     <div className="flex justify-center">
-                      Start Date {getSortIcon('status')}
+                      Status {getSortIcon('status')}
                     </div>
                   </TableHead>}
                   {visibleColumns.includes('Truck Hire Cost') && (

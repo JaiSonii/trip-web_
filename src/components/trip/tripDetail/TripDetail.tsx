@@ -8,8 +8,6 @@ import ViewBillButton from './TripFunctions/ViewBill'; // Replace with your actu
 import Profit from './Profit';
 import DataList from './DataList';
 import Charges from './Charges'; // Import the Charges component
-import { fetchBalance } from '@/helpers/fetchTripBalance';
-import { fetchPartyName } from '@/helpers/fetchPartyName';
 import { Button } from '@/components/ui/button';
 import { UndoIcon } from 'lucide-react';
 import { formatNumber } from '@/utils/utilArray';
@@ -25,16 +23,16 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
   const [tripBalance, setBalance] = useState(trip.balance);
   const [charges, setCharges] = useState<TripExpense[]>([])
 
-  useEffect(() => {
-    const balance = () => {
-      if (trip) {
-        const pending = fetchBalance(trip)
-        setBalance(pending)
-      }
-    }
-    balance()
+  // useEffect(() => {
+  //   const balance = () => {
+  //     if (trip) {
+  //       const pending = fetchBalance(trip)
+  //       setBalance(pending)
+  //     }
+  //   }
+  //   balance()
 
-  }, [trip, charges, accounts])
+  // }, [trip, charges, accounts])
 
   useEffect(() => {
       const sorted = trip.tripCharges?.sort((a : any, b : any) => new Date(b.date).getTime() - new Date(a.date).getTime());

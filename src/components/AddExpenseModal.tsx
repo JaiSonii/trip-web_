@@ -18,8 +18,8 @@ interface ChargeModalProps {
     driverId: string;
     selected?: any;
     categories: string[]
-    tripId? : string
-    truckNo? : string
+    tripId?: string
+    truckNo?: string
 }
 
 interface TripExpense {
@@ -89,7 +89,7 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
     }, [selected]);
 
     const expenseTypes = useMemo(() => {
-        setFormData((prev) => ({ ...prev, expenseType: ""}))
+        setFormData((prev) => ({ ...prev, expenseType: "" }))
         if (selectedCategory === 'Truck Expense') return Array.from(maintenanceChargeTypes)
         else if (selectedCategory === 'Trip Expense') return Array.from(fuelAndDriverChargeTypes)
         else if (selectedCategory === 'Office Expense') return Array.from(officeExpenseTypes)
@@ -175,11 +175,26 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
     };
 
     const handleSave = () => {
-        if (formData.paymentMode === 'Paid By Driver') {
-            setFormData((prev) => ({ ...prev, driver: driverId }));
+        if (selectedCategory === 'Truck Expense') setFormData((prev) => ({ ...prev, trip_id: '' }))
+        else if (selectedCategory === 'Office Expense') setFormData((prev) => ({ ...prev, trip_id: '', truck: '' }))
+        const missingFields = [];
+
+        if (!formData.amount) missingFields.push("Amount");
+        if (!formData.date) missingFields.push("Date");
+        if (!formData.expenseType) missingFields.push("Expense Type");
+        if (selectedCategory === 'Truck Expense' && !formData.truck) missingFields.push("Truck");
+        if (selectedCategory === 'Trip Expense' && !formData.trip_id) missingFields.push("Trip");
+        if (formData.paymentMode === 'Credit' && !formData.shop_id) missingFields.push("Shop");
+        if (formData.paymentMode === 'Paid By Driver' && !formData.driver) missingFields.push("Driver");
+
+        if (missingFields.length > 0) {
+            alert(`Please fill in the following fields: ${missingFields.join(", ")}`);
+            return
         }
-        if(selectedCategory === 'Truck Expense') setFormData((prev)=>({...prev, trip_id : ''}))
-        else if(selectedCategory === 'Office Expense') setFormData((prev)=>({...prev, trip_id : '', truck : ''}))
+
+        if (formData.paymentMode !== 'Paid By Driver') setFormData(prev=>({...prev, driver : ''}))
+        if (formData.paymentMode !== 'Credit') setFormData(prev=>({...prev, shop_id : ''})) 
+
         if (selected) {
             onSave(formData, selected._id);
         } else {

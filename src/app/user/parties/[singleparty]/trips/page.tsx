@@ -3,12 +3,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ITrip } from '@/utils/interface';
 import { statuses } from '@/utils/schema';
-import { fetchBalance } from '@/helpers/fetchTripBalance';
 import { FaCalendarAlt, FaTruck, FaRoute, FaFileInvoiceDollar, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
 import Loading from '../loading';
-import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 import { formatNumber } from '@/utils/utilArray';
-import TripBalance from '@/components/trip/TripBalance';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 

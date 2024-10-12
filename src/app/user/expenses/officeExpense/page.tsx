@@ -36,7 +36,7 @@ const OfficeExpense: React.FC = () => {
     const [shops, setShops] = useState<any[]>([])
 
     const ExpenseFilterModal = dynamic(() => import('@/components/ExpenseFilterModal'), { ssr: false })
-    const AddExpenseModal = dynamic(()=> import('@/components/AddExpenseModal'), {ssr : false})
+    const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), { ssr: false })
 
     const handleSelectAll = (selectAll: boolean) => {
         setVisibleColumns({
@@ -74,6 +74,26 @@ const OfficeExpense: React.FC = () => {
             setError((error as Error).message);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleExpense = async (expense: IExpense | any, id?: string) => {
+        try {
+            const data = selected ? await handleEditExpense(expense, selected._id as string) : await handleAddExpense(expense)
+            selected ?
+                setMaintainenceBook((prev) => (
+                    prev.map((exp) => exp._id === data._id ? ({ ...exp, ...data }) : exp)
+                )) : setMaintainenceBook((prev) => [
+                    data,
+                    ...prev
+                ])
+
+        } catch (error) {
+            console.error(error);
+            alert('Please try again')
+        } finally {
+            setSelected(null)
+            setModalOpen(false);
         }
     };
 
@@ -219,7 +239,10 @@ const OfficeExpense: React.FC = () => {
                 </div>
 
                 <div className='flex items-center space-x-2'>
-                    <Button onClick={() => setModalOpen(true)}>
+                    <Button onClick={() => {
+                        setSelected(null)
+                        setModalOpen(true)
+                    }}>
                         Office Expense     <IoAddCircle className='mt-1' />
                     </Button>
                     <div className="flex items-center space-x-4">
@@ -310,9 +333,9 @@ const OfficeExpense: React.FC = () => {
                 onClose={() => {
                     setModalOpen(false);
                     setSelected(null);
-                } }
-                onSave={selected ? handleEditExpense : handleAddExpense}
-                selected={selected} driverId={''}  categories={['Truck Expense', 'Trip Expense', 'Office Expense']}            />
+                }}
+                onSave={handleExpense}
+                selected={selected} driverId={''} categories={['Truck Expense', 'Trip Expense', 'Office Expense']} />
             <ExpenseFilterModal
                 isOpen={filterModalOpen}
                 paymentModes={['Online', 'Cash', 'Credit']}

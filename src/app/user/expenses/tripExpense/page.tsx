@@ -1,7 +1,7 @@
 'use client';
 import Loading from '../loading';
 import { Button } from '@/components/ui/button';
-import { IDriver, IExpense, ITrip, TruckModel } from '@/utils/interface';
+import { IExpense } from '@/utils/interface';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { MdDelete, MdEdit, } from 'react-icons/md';
 import { fetchTripExpense, handleAddCharge, handleAddExpense, handleDelete, handleEditExpense } from '@/helpers/ExpenseOperation';
@@ -25,8 +25,8 @@ const TripExpense: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterModalOpen, setFilterModalOpen] = useState(false)
 
-  const ExpenseFilterModal = dynamic(() => import('@/components/ExpenseFilterModal'), {ssr : false})
-  const AddExpenseModal = dynamic(()=> import('@/components/AddExpenseModal'), {ssr : false})
+  const ExpenseFilterModal = dynamic(() => import('@/components/ExpenseFilterModal'), { ssr: false })
+  const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), { ssr: false })
 
 
   const monthYearOptions = generateMonthYearOptions()
@@ -37,13 +37,13 @@ const TripExpense: React.FC = () => {
     expenseType: true,
     notes: true,
     truck: true,
-    ledger : true,
+    ledger: true,
     action: true,
     trip: true
   });
 
 
-  const handleFilter = async (filter: { drivers: string[], trips: string[], trucks: string[], paymentModes: string[], monYear: string[], shops: string[], expenseTypes : string[] }) => {
+  const handleFilter = async (filter: { drivers: string[], trips: string[], trucks: string[], paymentModes: string[], monYear: string[], shops: string[], expenseTypes: string[] }) => {
     try {
       setTruckExpenseBook([])
       const res = await fetch(`/api/expenses/tripExpense?filter=${encodeURIComponent(JSON.stringify(filter))}`)
@@ -127,6 +127,26 @@ const TripExpense: React.FC = () => {
     }
   };
 
+  const handleExpense = async (expense: IExpense | any, id?: string) => {
+    try {
+      const data = selected ? await handleEditExpense(expense, selected._id as string) : await handleAddExpense(expense)
+      selected ?
+        setTruckExpenseBook((prev) => (
+          prev.map((exp) => exp._id === data._id ? ({ ...exp, ...data }) : exp)
+        )) : setTruckExpenseBook((prev) => [
+          data,
+          ...prev
+        ])
+
+    } catch (error) {
+      console.error(error);
+      alert('Please try again')
+    } finally {
+      setSelected(null)
+      setModalOpen(false);
+    }
+  };
+
   useEffect(() => {
     // Call getBook with null for the first render
     getBook();
@@ -193,7 +213,10 @@ const TripExpense: React.FC = () => {
         </div>
 
         <div className='flex items-center space-x-2'>
-          <Button onClick={() => setModalOpen(true)}>
+          <Button onClick={() => {
+            setSelected(null)
+            setModalOpen(true)
+          }}>
             Trip Expense     <IoAddCircle className='mt-1' />
           </Button>
           <div className="flex items-center space-x-4">
@@ -267,7 +290,7 @@ const TripExpense: React.FC = () => {
                       </div>
                     </TableCell>
                   )}
-                  
+
                   {visibleColumns.ledger && (
                     <TableCell >
                       <div className="flex items-center justify-between">
@@ -284,7 +307,7 @@ const TripExpense: React.FC = () => {
                       </div>
                     </TableCell>
                   )}
-                  
+
                   {visibleColumns.trip && <TableCell >
                     <span>{expense.tripRoute?.origin.split(',')[0]} &rarr; {expense.tripRoute?.destination.split(',')[0]} </span>
                   </TableCell>}
@@ -318,7 +341,7 @@ const TripExpense: React.FC = () => {
       <AddExpenseModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSave={selected ? handleEditExpense : handleAddExpense}
+        onSave={handleExpense}
         driverId={selected?.driver as string}
         selected={selected}
         categories={['Truck Expense', 'Trip Expense', 'Office Expense']}

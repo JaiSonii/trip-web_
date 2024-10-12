@@ -3,7 +3,7 @@ import Loading from '../loading';
 import { Button } from '@/components/ui/button';
 import { IDriver, IExpense, ITrip, TruckModel } from '@/utils/interface';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { DeleteExpense, handleAddCharge, handleAddExpense, } from '@/helpers/ExpenseOperation';
+import { DeleteExpense, handleEditExpense, handleAddExpense, } from '@/helpers/ExpenseOperation';
 
 import {  FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -63,13 +63,13 @@ const TripExpense: React.FC = () => {
     if (searchQuery) {
       const lowercaseQuery = searchQuery.toLowerCase()
       filteredexpenses = truckExpenseBook.filter((expense: any) =>
-        expense.expenseType.toLowerCase().includes(lowercaseQuery) ||
-        expense.paymentMode.toLowerCase().includes(lowercaseQuery) ||
-        new Date(expense.date).toLocaleDateString().includes(lowercaseQuery) ||
-        expense.amount.toString().includes(lowercaseQuery) ||
-        expense.notes.toString().includes(lowercaseQuery) ||
-        expense.driverName.toString().includes(lowercaseQuery) ||
-        expense.truck.toLowerCase().includes(lowercaseQuery)
+        expense.expenseType?.toLowerCase().includes(lowercaseQuery) ||
+        expense.paymentMode?.toLowerCase().includes(lowercaseQuery) ||
+        new Date(expense.date)?.toLocaleDateString().includes(lowercaseQuery) ||
+        expense.amount?.toString().includes(lowercaseQuery) ||
+        expense.notes?.toString().includes(lowercaseQuery) ||
+        expense.driverName?.toString().includes(lowercaseQuery) ||
+        expense.truck?.toLowerCase().includes(lowercaseQuery)
       )
     }
     if (sortConfig.key !== null) {
@@ -131,21 +131,32 @@ const TripExpense: React.FC = () => {
     }
   };
 
-  const handleEditExpense = async (expense: IExpense | any) => {
+  const handleDelete = async(id : string)=>{
+    try{
+      const expense = await DeleteExpense(id)
+      setTruckExpenseBook(truckExpenseBook.filter((item) => item._id!== expense._id));
+    }catch(error){
+      alert('Failed to delete expense')
+      console.log(error)
+    }
+  }
+
+  const handleExpense = async (expense: IExpense | any, id? : string) => {
     try {
-      const data = selected ? await handleAddCharge(expense, expense.id) : await fetch(`/api/expenses`, {
-        method: 'POST',
-        body: JSON.stringify(expense)
-      }).then((res) => res.ok ? res.json() : alert('Failed to add Expense'));
+      const data = selected ? await handleEditExpense(expense,selected._id as string) : await handleAddExpense(expense)
       selected ?
         setTruckExpenseBook((prev) => (
-          prev.map((exp) => exp._id === data.charge._id ? ({ ...exp, ...data.charge }) : exp)
-        )) : getBook()
+          prev.map((exp) => exp._id === data._id ? ({ ...exp, ...data }) : exp)
+        )) : setTruckExpenseBook((prev)=>[
+          data,
+          ...prev
+        ])
 
     } catch (error) {
       console.error(error);
       alert('Please try again')
     } finally {
+      setSelected(null)
       setModalOpen(false);
     }
   };
@@ -216,7 +227,10 @@ const TripExpense: React.FC = () => {
         </div>
 
         <div className='flex items-center space-x-2'>
-          <Button onClick={() => setModalOpen(true)}>
+          <Button onClick={() => {
+            setSelected(null)
+            setModalOpen(true)
+          }}>
             Add Expense
           </Button>
           <div className="flex items-center space-x-4">
@@ -230,7 +244,7 @@ const TripExpense: React.FC = () => {
       <div className="">
         <ExpenseTable 
         sortedExpense={sortedExpense}
-        handleDelete={DeleteExpense}
+        handleDelete={handleDelete}
         visibleColumns={visibleColumns}
         requestSort={requestSort}
         getSortIcon={getSortIcon}
@@ -244,7 +258,7 @@ const TripExpense: React.FC = () => {
       <AddExpenseModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        onSave={selected ? handleEditExpense : handleAddExpense}
+        onSave={handleExpense}
         driverId={selected?.driver as string}
         selected={selected}
         categories={['Truck Expense', 'Trip Expense', 'Office Expense']}

@@ -9,8 +9,6 @@ import { IoMdSettings } from "react-icons/io";
 import { RiSteering2Fill } from "react-icons/ri";
 import Loading from '@/app/user/loading';
 import { Button } from '../ui/button';
-import ExpenseModal from '../trip/tripDetail/ExpenseModal';
-import { fuelAndDriverChargeTypes, maintenanceChargeTypes } from '@/utils/utilArray';
 import { MdDelete, MdEdit, MdExpandLess, MdExpandMore } from 'react-icons/md';
 import { SlOptionsVertical } from "react-icons/sl";
 import { IoCloseCircleOutline, IoDocuments } from "react-icons/io5";

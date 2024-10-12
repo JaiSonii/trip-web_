@@ -77,7 +77,7 @@ const CreateTruck: React.FC = () => {
         const { name, value } = e.target;
         setFormdata({
             ...formdata,
-            [name]: value
+            [name]: name === 'truckNo'? value.toUpperCase() : value
         });
     }
 
@@ -189,7 +189,7 @@ const CreateTruck: React.FC = () => {
                     <input
                         type='text'
                         name='truckNo'
-                        value={formdata.truckNo}
+                        value={formdata.truckNo.toUpperCase()}
                         placeholder='Enter the Truck Number'
                         onChange={handleInputChange}
                         required
@@ -220,7 +220,7 @@ const CreateTruck: React.FC = () => {
                         <SupplierSelect
                             suppliers={suppliers}
                             value={formdata.supplier}
-                            onChange={handleInputChange}
+                            onChange={handleSelectChange}
                         />
                     )}
                     {
