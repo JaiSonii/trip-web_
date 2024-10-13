@@ -31,7 +31,7 @@ export async function GET(req: Request) {
         const allDocuments = [...trips, ...drivers, ...trucks]
             .reduce((acc, item) => acc.concat(item.documents), [])
             .sort((a: any, b: any) => new Date(b.uploadedDate).getTime() - new Date(a.uploadedDate).getTime())
-            .slice(0, 3); // Get the latest 5 documents
+            .slice(0, 5); // Get the latest 5 documents
 
         // Return the latest five documents
         return NextResponse.json({

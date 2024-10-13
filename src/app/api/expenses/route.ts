@@ -171,6 +171,7 @@ export async function POST(req: Request) {
             ...expenseData
         })
         await newExpense.save()
+        console.log(newExpense)
         return NextResponse.json({expense : newExpense,  status: 200 })
 
     } catch (error: any) {

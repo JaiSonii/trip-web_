@@ -3,9 +3,10 @@
 import Loading from '@/app/user/loading'
 import { Button } from '@/components/ui/button'
 import { ITrip } from '@/utils/interface'
-import { useParams } from 'next/navigation'
+import { useParams, usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
+import Link from 'next/link'
 
 const TripDocumentsPage = () => {
     const { tripId } = useParams() as { tripId: string };
@@ -13,8 +14,8 @@ const TripDocumentsPage = () => {
     const [loading, setLoading] = useState(true)
     const [modalOpen, setModalOpen] = useState(false)
 
-    const TripDocuments = dynamic(()=> import('@/components/trip/TripDocuments'),{ssr : false})
-    const TripDocumentUpload = dynamic(()=> import('@/components/documents/TripDocumentUpload'),{ssr : false})
+    const TripDocuments = dynamic(() => import('@/components/trip/TripDocuments'), { ssr: false })
+    const TripDocumentUpload = dynamic(() => import('@/components/documents/TripDocumentUpload'), { ssr: false })
 
     const fetchTrip = async () => {
         try {
@@ -44,37 +45,54 @@ const TripDocumentsPage = () => {
         return <Loading />
     }
 
+    const pathnamearr = usePathname().split('/')
+    console.log(pathnamearr)
+
     return (
         <div className="p-6 bg-white shadow-lg rounded-lg">
             {/* Trip Documents Section */}
-            {trip && (
-                <div>
-                    {/* Title and Upload Button */}
-                    <div className="flex items-center justify-between mb-6 border-b-2 border-gray-300 pb-2">
-                        <h1 className="text-3xl font-bold text-bottomNavBarColor">Trip Documents</h1>
-                        <Button
-                            onClick={() => setModalOpen(true)}
-                        >
-                            Upload Document
-                        </Button>
-                    </div>
 
-                    {/* Trip Documents Component */}
+            <div>
+                {/* Title and Upload Button */}
+                <div className="flex items-center justify-between mb-6 border-b-2 border-gray-300 pb-2">
+                    <h1 className="text-2xl font-semibold text-black flex items-center space-x-2">
+                        <Link href="/user/documents" className="hover:underline text-gray-800">
+                            Docs
+                        </Link>
+                        <span className="text-gray-500">{`>`}</span>
+                        <Link href="/user/documents/tripDocuments" className="hover:underline text-gray-800">
+                            Trip Docs
+                        </Link>
+                        <span className="text-gray-500">{`>`}</span>
+                        <span className="text-black">Trip...</span>
+                    </h1>
+
+                    <Button
+                        onClick={() => setModalOpen(true)}
+                    >
+                        Upload Document
+                    </Button>
+                </div>
+
+                {/* Trip Documents Component */}
+                {trip &&
                     <TripDocuments
                         startDate={new Date(trip.startDate)}
                         route={trip.route}
                         ewbValidityDate={new Date(trip.ewbValidityDate)}
                         documents={trip.documents || []}
                     />
+                }
 
-                    {/* Document Upload Modal */}
-                    {modalOpen && (
-                        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-                                <TripDocumentUpload open={modalOpen} setOpen={setModalOpen} tripId={tripId} />
-                        </div>
-                    )}
-                </div>
-            )}
+
+
+                {/* Document Upload Modal */}
+                {modalOpen && (
+                    <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+                        <TripDocumentUpload open={modalOpen} setOpen={setModalOpen} tripId={tripId} />
+                    </div>
+                )}
+            </div>
         </div>
 
 

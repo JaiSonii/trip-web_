@@ -118,21 +118,7 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
         } else return ['Cash', 'Online', 'Credit']
     }, [selectedCategory])
 
-    // useEffect(() => {
-    //     const fetchDriverName = async () => {
-    //         const result = await fetch(`/api/drivers/${driverId || trip?.driver}`, {
-    //             method: 'GET',
-    //             headers: {
-    //                 'Content-Type': 'application/json',
-    //             },
-    //         });
-    //         const data = await result.json();
-    //         setDriverName(data.name || 'Driver Not Found');
-    //     };
-    //     if (formData.paymentMode === 'Paid By Driver') fetchDriverName();
 
-
-    // }, [formData.paymentMode, driverId]);
 
 
     useEffect(() => {

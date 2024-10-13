@@ -83,10 +83,7 @@ const OfficeExpense: React.FC = () => {
             selected ?
                 setMaintainenceBook((prev) => (
                     prev.map((exp) => exp._id === data._id ? ({ ...exp, ...data }) : exp)
-                )) : setMaintainenceBook((prev) => [
-                    data,
-                    ...prev
-                ])
+                )) : getBook()
 
         } catch (error) {
             console.error(error);
@@ -288,7 +285,7 @@ const OfficeExpense: React.FC = () => {
                                     {visibleColumns.date && <TableCell className="">
                                         <div className='flex items-center space-x-2'>
                                             <FaCalendarAlt className='text-bottomNavBarColor' />
-                                            <span>{new Date(expense.date).toLocaleDateString()}</span>
+                                            <span>{new Date(expense.date).toISOString().split('T')[0]}</span>
                                         </div>
                                     </TableCell>}
                                     {visibleColumns.amount && <TableCell className="">₹{formatNumber(expense.amount)}</TableCell>}

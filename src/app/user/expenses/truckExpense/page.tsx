@@ -133,10 +133,7 @@ const TruckExpense: React.FC = () => {
       selected ?
         setTruckExpenseBook((prev) => (
           prev.map((exp) => exp._id === data._id ? ({ ...exp, ...data }) : exp)
-        )) : setTruckExpenseBook((prev) => [
-          data,
-          ...prev
-        ])
+        )) : getBook(null, null)
 
     } catch (error) {
       console.error(error);
@@ -276,7 +273,7 @@ const TruckExpense: React.FC = () => {
                     <TableCell className="border p-4">
                       <div className='flex items-center space-x-2'>
                         <FaCalendarAlt className='text-bottomNavBarColor' />
-                        <span>{new Date(expense.date).toLocaleDateString()}</span>
+                        <span>{new Date(expense.date).toISOString().split('T')[0]}</span>
                       </div>
                     </TableCell>
                   )}

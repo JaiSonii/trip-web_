@@ -71,7 +71,7 @@ const ExpenseTable: React.FC<props> = ({ expenses, visibleColumns, requestSort, 
                 <TableCell >
                   <div className='flex items-center space-x-2'>
                     <FaCalendarAlt className='text-bottomNavBarColor' />
-                    <span>{new Date(expense.date).toLocaleDateString()}</span>
+                    <span>{new Date(expense.date).toISOString().split('T')[0]}</span>
                   </div>
                 </TableCell>
               )}

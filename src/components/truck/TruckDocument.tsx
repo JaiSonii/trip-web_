@@ -5,6 +5,8 @@ import { pdfjs } from 'react-pdf';
 import { renderDocument } from '../RenderDocument';
 import { Button } from '../ui/button';
 import dynamic from 'next/dynamic';
+import RecentDocuments from '../documents/RecentDocuments';
+import Link from 'next/link';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -14,7 +16,7 @@ interface TruckDocumentProps {
 
 const TruckDocuments: React.FC<TruckDocumentProps> = ({ truckNo }) => {
 
-    const TruckDocumentUpload = dynamic(()=> import('@/components/documents/TruckDocumentUpload'),{ssr : false})
+    const TruckDocumentUpload = dynamic(() => import('@/components/documents/TruckDocumentUpload'), { ssr: false })
 
     const [documents, setDocuments] = useState<any>([]);
     const [modalOpen, setModalOpen] = useState(false)
@@ -39,21 +41,25 @@ const TruckDocuments: React.FC<TruckDocumentProps> = ({ truckNo }) => {
     return (
         <div className="p-6 bg-gray-100 min-h-screen">
             <div className="flex items-center justify-between mb-4 border-b-2 border-gray-300 pb-2">
-                <h1 className="text-3xl font-bold text-bottomNavBarColor">
-                    {truckNo}
+                <h1 className="text-2xl font-semibold text-black flex items-center space-x-2">
+                    <Link href="/user/documents" className="hover:underline text-gray-800">
+                        Docs
+                    </Link>
+                    <span className="text-gray-500">{`>`}</span>
+                    <Link href="/user/documents/truckDocuments" className="hover:underline text-gray-800">
+                        Lorry Docs
+                    </Link>
+                    <span className="text-gray-500">{`>`}</span>
+                    <span className="text-black">{truckNo}</span>
                 </h1>
-                <Button onClick={()=>setModalOpen(true)}>
+                <Button onClick={() => setModalOpen(true)}>
                     Upload Document
                 </Button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {documents.map((doc : any)=>(
-                    doc?.url && renderDocument(doc.type, doc.url)
-                ))}
-            </div>
+            <RecentDocuments docs={documents} />
             {modalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-                    <TruckDocumentUpload open={modalOpen} setOpen={setModalOpen} truckNo={truckNo}/>
+                    <TruckDocumentUpload open={modalOpen} setOpen={setModalOpen} truckNo={truckNo} />
                 </div>
             )}
         </div>

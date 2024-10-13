@@ -3,7 +3,7 @@
 import React from 'react';
 import { FaArrowRight } from 'react-icons/fa';
 import { pdfjs } from 'react-pdf';
-import { renderDocument } from '../RenderDocument';
+import dynamic from 'next/dynamic';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -18,6 +18,7 @@ interface TripDocumentProps {
 }
 
 const TripDocuments: React.FC<TripDocumentProps> = ({ documents, ewbValidityDate, route, startDate }) => {
+    const RecentDocuments = dynamic(()=>import('@/components/documents/RecentDocuments'), {ssr : false})
     // Helper function to check validity of e-way bill
     const isValid = (ewbValidityDate: Date) => {
         const today = new Date();
@@ -40,11 +41,7 @@ const TripDocuments: React.FC<TripDocumentProps> = ({ documents, ewbValidityDate
             </p>
 
             {/* Grid Layout for E-way Bill and POD */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {documents.map((doc: any)=>(
-                    doc?.url && renderDocument(doc.type, doc.url)
-                ))}
-            </div>
+            <RecentDocuments docs={documents} />
 
         </div>
     );

@@ -257,17 +257,6 @@ input:not([type="checkbox"]) {
 textarea {
   @apply w-full px-3 py-2 border border-lightOrange rounded-lg focus:outline-none focus:ring focus:ring-lightOrange;
 }
-tr{
-  @apply hover:bg-orange-100 cursor-pointer
-}
-
-td{
-  @apply border p-4
-}
-
-th{
-  @apply sticky
-}
 
 select {
   @apply cursor-pointer

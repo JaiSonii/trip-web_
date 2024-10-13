@@ -6,7 +6,7 @@ const ExpenseCtx = createContext<{
     trips: ITrip[];
     drivers: IDriver[];
     shops: any[];
-    trucks: TruckModel[];
+    trucks: TruckModel[] | any[];
     isLoading: boolean;
     error: any;
 }>({
