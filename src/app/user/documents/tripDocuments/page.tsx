@@ -2,7 +2,7 @@
 
 import { ITrip } from '@/utils/interface';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FaChevronRight, FaFolder, FaList } from 'react-icons/fa6';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -49,32 +49,32 @@ const TripDocumentsLanding = () => {
 
   const RecentDocuments = dynamic(() => import('@/components/documents/RecentDocuments'), { ssr: false });
 
-  const fetchDocuments = async () => {
-    try {
-      setLoading(true)
-      setMessage('Fetching documents...');
-      const res = await fetch(`/api/trips/documents?type=${encodeURIComponent(type as string)}`);
-      const data = res.ok ? await res.json() : setMessage('Failed to fetch documents');
-      setDocuments(data.documents);
-      console.log(data)
-      setMessage('');
-      if (data.documents.length === 0) {
-        setMessage('No documents found');
-      }
-    } catch (error) {
-      console.error(error);
-      alert('Failed to fetch documents');
-      setMessage('Failed to fetch documents');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
+  const fetchDocuments = useCallback(async () => {
     if (type) {
-      fetchDocuments();
+      try {
+        setLoading(true)
+        setMessage('Fetching documents...');
+        const res = await fetch(`/api/trips/documents?type=${encodeURIComponent(type as string)}`);
+        const data = res.ok ? await res.json() : setMessage('Failed to fetch documents');
+        setDocuments(data.documents);
+        console.log(data)
+        setMessage('');
+        if (data.documents.length === 0) {
+          setMessage('No documents found');
+        }
+      } catch (error) {
+        console.error(error);
+        alert('Failed to fetch documents');
+        setMessage('Failed to fetch documents');
+      } finally {
+        setLoading(false);
+      }
     }
   }, [type]);
+
+  useEffect(() => {
+    fetchDocuments();
+  }, [fetchDocuments]);
 
   const filteredTrips = trips.filter(
     (trip) =>

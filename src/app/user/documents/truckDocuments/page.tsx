@@ -2,7 +2,7 @@
 
 import { truckTypesIcons } from '@/utils/utilArray';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FaChevronRight, FaFileContract, FaFolder, FaFolderOpen, FaLeaf, FaList, FaRegIdCard } from 'react-icons/fa6';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -61,33 +61,34 @@ const TruckDocuments = () => {
 
 
 
-  const fetchDocuments = async () => {
-    if (type) {
-      try {
-        setMessage('fetching documents...')
-        const res = await fetch(`/api/trucks/documents?type=${encodeURIComponent(type)}`)
-        const data = res.ok ? await res.json() : setMessage('Failed to fetch documents');
-        setDocuments(data.documents)
-        setMessage('')
-        if (data.documents.length === 0) {
-          setMessage('No documents found')
-          return
-        }
-      } catch (error) {
-        alert('Failed to fetch documents')
-        console.log(error)
-        setMessage('Failed to fetch documents')
-      } finally {
-        setLoading(false)
-      }
-    }
-  }
+  const fetchDocuments = useCallback(async () => {
+    if (!type) return;
 
-  useEffect(() => {
-    if (type) {
-      fetchDocuments()
+    setMessage('Fetching documents...');
+    setLoading(true);
+
+    try {
+      const res = await fetch(`/api/drivers/documents?type=${encodeURIComponent(type)}`);
+      const data = await res.json();
+
+      if (res.ok && data.documents.length > 0) {
+        setDocuments(data.documents);
+        setMessage('');
+      } else {
+        setDocuments([]);
+        setMessage('No documents found');
+      }
+    } catch (error) {
+      console.error('Failed to fetch documents:', error);
+      setMessage('Failed to fetch documents');
+    } finally {
+      setLoading(false);
     }
   }, [type]);
+
+  useEffect(() => {
+    fetchDocuments();
+  }, [fetchDocuments]);
 
   const getTruckIcon = (truckType: string) => {
     const truckIconObj = truckTypesIcons.find((iconObj) => iconObj.type === truckType);

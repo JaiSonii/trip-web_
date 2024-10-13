@@ -2,7 +2,7 @@
 
 import { IDriver } from '@/utils/interface';
 import Link from 'next/link';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FaChevronRight, FaFolder, FaFolderOpen, FaList, FaPassport, FaRegIdCard } from 'react-icons/fa6';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,32 +50,31 @@ const DriverDocuments = () => {
   ];
 
 
-  const fetchDocuments = async () => {
-    try {
-      setMessage('fetching documents...')
-      const res = await fetch(`/api/drivers/documents?type=${encodeURIComponent(type as string)}`)
-      const data = res.ok ? await res.json() : setMessage('Falied to fetch documents');
-      setDocuments(data.documents)
-      setMessage('')
-      if (data.documents.length === 0) {
-        setMessage('No documents found')
-        return
+  const fetchDocuments = useCallback(async () => {
+    if (type) {
+      try {
+        setMessage('fetching documents...')
+        const res = await fetch(`/api/drivers/documents?type=${encodeURIComponent(type as string)}`)
+        const data = res.ok ? await res.json() : setMessage('Falied to fetch documents');
+        setDocuments(data.documents)
+        setMessage('')
+        if (data.documents.length === 0) {
+          setMessage('No documents found')
+          return
+        }
+      } catch (error) {
+        alert('Failed to fetch documents')
+        console.log(error)
+        setMessage('Falied to fetch documents')
+      } finally {
+        setLoading(false)
       }
-    } catch (error) {
-      alert('Failed to fetch documents')
-      console.log(error)
-      setMessage('Falied to fetch documents')
-    } finally {
-      setLoading(false)
     }
-  }
+  },[type])
 
   useEffect(() => {
-    if (type) {
-      fetchDocuments()
-    }
-
-  }, [type]);
+    fetchDocuments()
+  }, [fetchDocuments]);
 
   const filteredDrivers = drivers.filter((driver) =>
     driver.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
