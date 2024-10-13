@@ -3,7 +3,7 @@
 import Loading from '@/app/user/loading'
 import { Button } from '@/components/ui/button'
 import { ITrip } from '@/utils/interface'
-import { useParams, usePathname } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
@@ -44,9 +44,6 @@ const TripDocumentsPage = () => {
     if (loading) {
         return <Loading />
     }
-
-    const pathnamearr = usePathname().split('/')
-    console.log(pathnamearr)
 
     return (
         <div className="p-6 bg-white shadow-lg rounded-lg">

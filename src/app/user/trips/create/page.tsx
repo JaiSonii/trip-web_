@@ -119,7 +119,7 @@ const CreateTripPage: React.FC = () => {
       }
 
       const data = await tripRes.json();
-      mutate('/api/trips')
+      await mutate('/api/trips')
       router.push('/user/trips');
     } catch (error) {
       console.error('Error saving trip:', error);
