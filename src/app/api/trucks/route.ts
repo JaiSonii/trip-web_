@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import mongoose, { model, models } from 'mongoose';
 import { connectToDatabase, truckSchema } from '@/utils/schema';
 import { verifyToken } from '@/utils/auth';
-import {v4 as uuidv4} from 'uuid'
+import { v4 as uuidv4 } from 'uuid'
 import { validateTruckNo } from '@/utils/validate';
 
 
@@ -20,19 +20,19 @@ export async function GET(req: Request) {
       $match: { user_id: user },
     },
     {
-      $lookup : {
-        from : 'suppliers',
-        localField : 'supplier',
-        foreignField : 'supplier_id',
-        as : 'suppliers'
+      $lookup: {
+        from: 'suppliers',
+        localField: 'supplier',
+        foreignField: 'supplier_id',
+        as: 'suppliers'
       }
     },
     {
-      $addFields : {
-        supplierName : { $arrayElemAt : [ '$suppliers.name', 0 ] }
+      $addFields: {
+        supplierName: { $arrayElemAt: ['$suppliers.name', 0] }
       }
     }
-  ]);
+    ]);
     return NextResponse.json({ trucks });
   } catch (err) {
     console.error(err);
@@ -40,40 +40,46 @@ export async function GET(req: Request) {
   }
 }
 
-export async function POST(req: Request) {
-  const { user, error } = await verifyToken(req);
-  if (error) {
-    return NextResponse.json({ error });
-  }
-  try {
-    await connectToDatabase(); // Ensure database connection is established
 
-    // Parse incoming JSON data from request body
-    const data = await req.json();
-    if(!validateTruckNo(data.truckNo)){
-      return NextResponse.json({error : 'Enter the Valid Truck No'})
+export async function POST(req: Request) {
+  const { user, error } = await verifyToken(req); // Authenticate the user
+
+  if (error) {
+    return NextResponse.json({ error }, { status: 401 });
+  }
+
+  try {
+    await connectToDatabase(); // Ensure DB connection
+
+    const data = await req.json(); // Parse request body
+
+    // Validate truck number format
+    if (!validateTruckNo(data.truckNo)) {
+      return NextResponse.json({ error: 'Enter a valid Truck No' }, { status: 400 });
     }
 
     // Validate required fields
     if (!data.truckNo) {
-      throw new Error('Truck Number is required');
+      return NextResponse.json({ error: 'Truck Number is required' }, { status: 400 });
     }
     if (!data.ownership) {
-      throw new Error('Ownership type is required');
+      return NextResponse.json({ error: 'Ownership type is required' }, { status: 400 });
     }
     if (data.ownership === 'Market' && !data.supplier) {
-      throw new Error('Supplier is required for Market ownership');
+      return NextResponse.json({ error: 'Supplier is required for Market ownership' }, { status: 400 });
     }
 
-    // Create a new TruckModel instance with provided data
-    const existingTruck = await Truck.findOne({user_id : user, truckNo : data.truckNo})
-    if(existingTruck){
-      return NextResponse.json({error : 'Lorry Already Exists', status: 500 })
+    // Check if truck with the same `truckNo` exists for the same user
+    const existingTruck = await Truck.findOne({ user_id: user, truckNo: data.truckNo.toUpperCase() });
+
+    if (existingTruck) {
+      return NextResponse.json({ error: 'Lorry Already Exists', status: 400 });
     }
 
+    // Create a new truck entry
     const newTruck = new Truck({
       user_id: user,
-      truck_id : 'truck_id' + uuidv4(),
+      truck_id: 'truck_id' + uuidv4(),
       truckNo: data.truckNo.toUpperCase(),
       truckType: data.truckType || '',
       model: data.model || '',
@@ -85,22 +91,20 @@ export async function POST(req: Request) {
       trip_id: '',
       createdAt: new Date(),
       updatedAt: new Date(),
-      driver_id : data.driver
+      driver_id: data.driver || '',
     });
 
-    // Save the new truck instance to the database
+    // Save to the database
     const truck = await newTruck.save();
 
-    // Return successful response with created truck data
-    return NextResponse.json({ truck , status: 200 });
+    return NextResponse.json({ truck, status: 200 });
   } catch (error: any) {
-    // Handle errors during request processing
     console.error('Error creating truck:', error);
-    if(error.code == 11000){
-      return NextResponse.json({ error: 'Lorry Already Exists', status: 500 })
+
+    if (error.code === 11000) {
+      return NextResponse.json({ error: 'Lorry Already Exists', status: 400 });
     }
 
-    // Return error response with appropriate status code and message
     return NextResponse.json({ error: error.message || 'Failed to add lorry' }, { status: 500 });
   }
 }
