@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { getDocType } from '@/helpers/ImageOperation';
 import { createWorker } from 'tesseract.js';
 import { extractLatestDate } from '@/helpers/ImageOperation';
+import { mutate } from 'swr';
 
 interface DocumentForm {
     filename: string;
@@ -179,6 +180,7 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
                     driverId: ''
                 });
                 setOpen(false);
+                mutate('/api/documents/recent')
                 router.refresh()
             } else {
                 const errorData = await response.json();

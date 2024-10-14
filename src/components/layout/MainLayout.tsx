@@ -83,7 +83,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
                 <Link href={item.href}>
                   <div
                     className={`flex flex-col space-y-2 items-center p-4 text-lg font-semibold transition duration-300 ease-in-out rounded-md 
-                      ${pathname.startsWith(item.href) || selected === item.label ? 'bg-white text-black' : 'hover:bg-lightOrange'}`}
+                      ${pathname === (item.href) ? 'bg-white text-black' : 'hover:bg-lightOrange'}`}
                     onClick={() => setSelected(item.label)}
                   >
                     <item.icon className="mx-auto" size={28} />
@@ -117,7 +117,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
                 <Link href={item.href}>
                   <div
                     className={`flex items-center p-3 text-lg font-semibold transition duration-300 ease-in-out rounded-xl
-                    ${pathname.startsWith(item.href) || selected === item.label ? 'bg-[#FF6A00] text-white' : 'hover:bg-[#FFC49980]'}`}
+                    ${pathname === (item.href) ? 'bg-[#FF6A00] text-white' : 'hover:bg-[#FFC49980]'}`}
                     onClick={() => setSelected(item.label)}
                   >
                     <item.icon className="mr-3" size={25} />

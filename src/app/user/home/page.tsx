@@ -1,32 +1,40 @@
-'use client'
-import React from 'react';
 
-import { motion } from 'framer-motion';
+import Image from 'next/image';
+import React from 'react';
+import { FaRegCircleUser } from 'react-icons/fa6';
+import { IoNotificationsOutline } from "react-icons/io5";
+import gstLoadsIcon from '@/assets/gst-banner.png'
+import currentlyBuildingIcon from '@/assets/currently-building.png'
+import Link from 'next/link';
 
 const Page = () => {
   return (
-    <div className='flex flex-col items-center justify-center'>
+    <div className='w-full h-full p-4'>
       {/* Truck Animation */}
-      <motion.div
-        initial={{ x: '-100vw' }}  // Start from off-screen left
-        animate={{ x: 0 }}         // Move to the center
-        transition={{ type: 'spring', stiffness: 60, damping: 25 }} // Slow down as it reaches center
-        className='mr-6 px-5'
-      >
-        <iframe
-          src="https://lottie.host/embed/3d45f054-61ac-4d4e-837c-2fa3006e28cc/MeZ8JDXVB5.json"
-        ></iframe>
-      </motion.div>
+      <div className='text-black border-b-2 border-gray-400 flex justify-between pb-2'>
+        <h1 className='text-2xl font-semibold'>
+          Hey!
+        </h1>
+        <div className='flex items-center gap-4'>
+          <IoNotificationsOutline size={30} />
 
-      {/* Fade-in text after truck reaches center */}
-      <motion.p
-        initial={{ opacity: 0 }}  // Start with invisible text
-        animate={{ opacity: 1 }}  // Fade-in text
-        transition={{ duration: 1, delay: 1.5 }}  // Delay to match truck animation
-        className='text-gray-500 text-lg font-semibold text-center -top-10'
-      >
-        Currently Building...
-      </motion.p>
+          <Link href={'/user/profile'}><FaRegCircleUser size={30} className='font-normal' /></Link>
+        </div>
+
+      </div>
+
+      <div className='flex flex-col items-center space-y-4 mt-4'>
+        <Image src={gstLoadsIcon} alt='gst banner' width={1024} height={236} priority />
+        <Image src={currentlyBuildingIcon} alt='currently banner' width={620} height={260} priority />
+        <h3 className='text-[#00638F] font-semibold text-2xl text-center'>
+          We are currently building...
+        </h3>
+        <h3 className='text-[#00638F] text-xl text-center'>
+          Will be back soon!
+        </h3>
+      </div>
+
+
     </div>
   );
 };

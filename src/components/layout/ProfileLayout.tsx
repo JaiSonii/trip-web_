@@ -56,9 +56,9 @@ const ProfileLayout: React.FC<DriverLayoutProps> = ({ children }) => {
         <div className="min-h-screen bg-gray-100 rounded-md">
             <div className="w-full h-full p-4">
             <div className="flex justify-between mb-4 border-b-2 border-gray-300 pb-2">
-                <h1 className='text-4xl font-semibold text-bottomNavBarColor'>Profile</h1>
+                <h1 className='text-4xl font-semibold text-black'>Profile</h1>
                 <header className="">
-                    <h1 className="text-2xl font-bold text-bottomNavBarColor">{user?.phone}</h1>
+                    <h1 className="text-2xl font-bold text-black">{user?.phone}</h1>
                 </header>
                 </div>
                 <nav className="flex mb-6 border-b-2 border-gray-200">

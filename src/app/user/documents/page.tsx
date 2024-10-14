@@ -6,41 +6,37 @@ import { PiSteeringWheel } from 'react-icons/pi';
 import { GoOrganization } from 'react-icons/go';
 import dynamic from 'next/dynamic';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator';
+import { useRecentDocsCtx } from '@/context/recentDocs';
 
 const RecentDocuments = dynamic(() => import('@/components/documents/RecentDocuments'), { ssr: false });
 
 const DocumentsPage = () => {
-  const [recentDocs, setRecentDocs] = useState<any[]>([]);
-  const [counts, setCounts] = useState({
-    tripDocuments: 0,
-    driverDocuments: 0,
-    truckDocuments: 0
-  });
-  const [loading, setLoading] = useState(true);
+  const { documents, counts, docsLoading } = useRecentDocsCtx()
+  console.log(documents, counts, docsLoading)
   const [error, setError] = useState('');
 
-  const fetchRecentDocuments = async () => {
-    try {
-      const res = await fetch(`/api/documents/recent`);
-      if (!res.ok) {
-        throw new Error('Failed to fetch recent documents');
-      }
-      const data = await res.json();
-      if (data.documents.length === 0) {
-        setError('No recent documents found');
-        return;
-      }
+  // const fetchRecentDocuments = async () => {
+  //   try {
+  //     const res = await fetch(`/api/documents/recent`);
+  //     if (!res.ok) {
+  //       throw new Error('Failed to fetch recent documents');
+  //     }
+  //     const data = await res.json();
+  //     if (data.documents.length === 0) {
+  //       setError('No recent documents found');
+  //       return;
+  //     }
 
-      // Update both recentDocs and counts
-      setRecentDocs(data.documents);
-      setCounts(data.counts);  // Assuming `data.counts` contains {tripDocuments, driverDocuments, truckDocuments}
-    } catch (error: any) {
-      console.log(error);
-      setError('Failed to load documents');
-    } finally {
-      setLoading(false);
-    }
-  };
+  //     // Update both recentDocs and counts
+  //     setRecentDocs(data.documents);
+  //     setCounts(data.counts);  // Assuming `data.counts` contains {tripDocuments, driverDocuments, truckDocuments}
+  //   } catch (error: any) {
+  //     console.log(error);
+  //     setError('Failed to load documents');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const documentTypes = [
     {
@@ -65,9 +61,9 @@ const DocumentsPage = () => {
     }
   ];
 
-  useEffect(() => {
-    fetchRecentDocuments();
-  }, []);
+  // useEffect(() => {
+  //   fetchRecentDocuments();
+  // }, []);
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -101,9 +97,9 @@ const DocumentsPage = () => {
         <div className="mb-2">
           <h1 className="text-xl text-black font-semibold my-4">Recently Uploaded</h1>
         </div>
-        {loading && <div>{loadingIndicator}</div>}
+        {docsLoading && <div>{loadingIndicator}</div>}
         {error && <p className="text-red-500">{error}</p>}
-        {recentDocs && <RecentDocuments docs={recentDocs} />}
+        {documents && <RecentDocuments docs={documents} />}
       </div>
     </div>
   );
