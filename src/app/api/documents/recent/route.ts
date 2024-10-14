@@ -19,23 +19,51 @@ export async function GET(req: Request) {
         // Connect to the database
         await connectToDatabase();
 
-        // Query for documents across trips, drivers, and trucks
-        const [trips, drivers, trucks] = await Promise.all([
-            Trip.find({ user_id: user }).select('documents'),
-            Driver.find({ user_id: user }).select('documents'),
-            Truck.find({ user_id: user }).select('documents'),
+        // Use Promise.all for parallel queries and MongoDB aggregation to optimize the process
+        const [tripResults, driverResults, truckResults] = await Promise.all([
+            Trip.aggregate([
+                { $match: { user_id: user } },
+                { $project: { documents: 1 } },
+                { $unwind: '$documents' },
+                { $sort: { 'documents.uploadedDate': -1 } }, // Sort documents by uploadedDate
+                { $limit: 5 } // Limit to the latest 5 documents
+            ]),
+            Driver.aggregate([
+                { $match: { user_id: user } },
+                { $project: { documents: 1 } },
+                { $unwind: '$documents' },
+                { $sort: { 'documents.uploadedDate': -1 } },
+                { $limit: 5 }
+            ]),
+            Truck.aggregate([
+                { $match: { user_id: user } },
+                { $project: { documents: 1 } },
+                { $unwind: '$documents' },
+                { $sort: { 'documents.uploadedDate': -1 } },
+                { $limit: 5 }
+            ])
         ]);
 
+        // Combine and get the latest 5 documents across all collections
+        const allDocuments = [...tripResults, ...driverResults, ...truckResults]
+            .sort((a, b) => new Date(b.documents.uploadedDate).getTime() - new Date(a.documents.uploadedDate).getTime())
+            .slice(0, 5); // Get latest 5 documents across all collections
 
-        // Merge all documents into a single array and sort by validityDate in descending order (latest first)
-        const allDocuments = [...trips, ...drivers, ...trucks]
-            .reduce((acc, item) => acc.concat(item.documents), [])
-            .sort((a: any, b: any) => new Date(b.uploadedDate).getTime() - new Date(a.uploadedDate).getTime())
-            .slice(0, 5); // Get the latest 5 documents
+        // Count documents for trips, drivers, and trucks
+        const [tripDocumentsCount, driverDocumentsCount, truckDocumentsCount] = await Promise.all([
+            Trip.countDocuments({ user_id: user }),
+            Driver.countDocuments({ user_id: user }),
+            Truck.countDocuments({ user_id: user }),
+        ]);
 
-        // Return the latest five documents
+        // Return the latest 5 documents along with document counts
         return NextResponse.json({
-            documents: allDocuments,
+            documents: allDocuments.map(doc => doc.documents),
+            counts: {
+                tripDocuments: tripDocumentsCount,
+                driverDocuments: driverDocumentsCount,
+                truckDocuments: truckDocumentsCount,
+            },
             status: 200
         });
     } catch (error) {
@@ -43,3 +71,4 @@ export async function GET(req: Request) {
         return NextResponse.json({ error: 'Internal Server Error', status: 500 });
     }
 }
+

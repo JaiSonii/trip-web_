@@ -68,11 +68,11 @@ const TruckDocuments = () => {
     setLoading(true);
 
     try {
-      const res = await fetch(`/api/drivers/documents?type=${encodeURIComponent(type)}`);
+      const res = await fetch(`/api/trucks/documents?type=${encodeURIComponent(type)}`);
       const data = await res.json();
-
       if (res.ok && data.documents.length > 0) {
         setDocuments(data.documents);
+        
         setMessage('');
       } else {
         setDocuments([]);
@@ -107,8 +107,8 @@ const TruckDocuments = () => {
 
   const filteredDocs = documents?.filter(
     (doc) =>
-      doc.truckNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      doc.truckType.toLowerCase().includes(searchTerm.toLowerCase())
+      doc.truckNo.toLowerCase().includes(searchTerm?.toLowerCase()) ||
+      doc.truckType.toLowerCase().includes(searchTerm?.toLowerCase())
   );
 
   return (
@@ -181,7 +181,7 @@ const TruckDocuments = () => {
                   key={truck.truckNo}
                 >
                   <div
-                    className={`bg-white p-6 rounded-xl hover:shadow-md border border-gray-300 transition-shadow duration-300 ease-in-out hover:bg-gray-50 cursor-pointer ${viewMode === 'grid' ? 'h-full flex justify-between items-center' : 'flex items-center space-x-4'}`}
+                    className={`bg-white p-6 rounded-xl hover:shadow-md border border-gray-300 transition-all duration-300 ease-in-out hover:bg-gray-50 cursor-pointer ${viewMode === 'grid' ? 'h-full flex justify-between items-center' : 'flex items-center space-x-4'}`}
                   >
                     <div className="flex-shrink-0">
                       <Image

@@ -149,7 +149,7 @@ const DriverDocuments = () => {
                   key={driver.driver_id}
                 >
                   <div
-                    className={`bg-white p-6 rounded-xl hover:shadow-lg border border-gray-300 transition-shadow duration-300 ease-in-out hover:bg-gray-50 cursor-pointer ${viewMode === 'grid' ? 'h-full flex justify-between items-center space-x-4' : 'flex items-center space-x-6 w-full px-8 py-6'}`}
+                    className={`bg-white p-6 rounded-xl hover:shadow-lg border border-gray-300 transition-all duration-300 ease-in-out hover:bg-gray-50 cursor-pointer ${viewMode === 'grid' ? 'h-full flex justify-between items-center space-x-4' : 'flex items-center space-x-6 w-full px-8 py-6'}`}
                   >
                     {/* Folder Icon */}
                     <div className="flex-shrink-0">
