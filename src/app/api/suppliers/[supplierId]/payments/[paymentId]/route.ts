@@ -28,7 +28,7 @@ export async function DELETE(req: Request, { params }: { params: { paymentId: st
         }
 
         // Return the deleted account with a success status
-        return NextResponse.json({ deletedAccount: account, status: 200 });
+        return NextResponse.json({ payment: account, status: 200 });
     } catch (error) {
         console.error('Error deleting payment:', error);
         // Return an internal server error status

@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import Loading from '../loading';
+import Link from 'next/link';
+import { useParty } from '@/context/partyContext';
 
 interface Party {
   address: string;
@@ -17,26 +19,24 @@ interface Party {
 
 const PartyDetails = () => {
   const router = useRouter();
-  const { singleparty } = useParams();
-  const [party, setParty] = useState<Party | null>(null);
-  const [loading, setLoading] = useState(true);
+  const {party, setParty, loading} = useParty()
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
-  const fetchPartyDetails = async (partyId: string) => {
-    try {
-      const res = await fetch(`/api/parties/${partyId}`);
-      if (!res.ok) {
-        throw new Error('Failed to fetch party details');
-      }
-      const data = await res.json();
-      setParty(data.party);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const fetchPartyDetails = async (partyId: string) => {
+  //   try {
+  //     const res = await fetch(`/api/parties/${partyId}`);
+  //     if (!res.ok) {
+  //       throw new Error('Failed to fetch party details');
+  //     }
+  //     const data = await res.json();
+  //     setParty(data.party);
+  //   } catch (err: any) {
+  //     setError(err.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (party) {
@@ -53,7 +53,13 @@ const PartyDetails = () => {
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify(party),
+          body: JSON.stringify({
+            name: party.name,
+            contactPerson: party.contactPerson,
+            contactNumber: party.contactNumber,
+            address: party.address,
+            gstNumber: party.gstNumber,
+          }),
         });
         if (!res.ok) {
           throw new Error('Failed to update party details');
@@ -64,7 +70,7 @@ const PartyDetails = () => {
       } catch (err: any) {
         alert(err.message)
       }finally{
-        fetchPartyDetails(singleparty as string)
+        
       }
     }
   };
@@ -89,11 +95,6 @@ const PartyDetails = () => {
     }
   };
 
-  useEffect(() => {
-    if (singleparty) {
-      fetchPartyDetails(singleparty as string);
-    }
-  }, [singleparty]);
 
   if (loading) return <Loading />;
   if (error) return <div>Error: {error}</div>;
@@ -119,7 +120,7 @@ const PartyDetails = () => {
             <input
               type="text"
               name="contactPerson"
-              value={party.contactPerson || ''}
+              value={party.contactPerson}
               onChange={handleInputChange}
               className="border border-gray-300 rounded-md p-2"
               disabled={!isEditing}
@@ -141,7 +142,7 @@ const PartyDetails = () => {
             <input
               type="text"
               name="gstNumber"
-              value={party.gstNumber || ''}
+              value={party.gstNumber}
               onChange={handleInputChange}
               className="border border-gray-300 rounded-md p-2"
               disabled={!isEditing}
@@ -152,7 +153,7 @@ const PartyDetails = () => {
             <input
               type="text"
               name="address"
-              value={party.address || ''}
+              value={party.address}
               onChange={handleInputChange}
               className="border border-gray-300 rounded-md p-2"
               disabled={!isEditing}
@@ -168,11 +169,11 @@ const PartyDetails = () => {
               ) : (
                 <Button type="button" variant="outline" onClick={() => setIsEditing(true)}>Edit</Button>
               )}
-              <Button type="button" onClick={() => router.push('/user/parties')}>Back to Parties List</Button>
+              <Link href='/user/parties'><Button type="button" >Back to Parties List</Button></Link>
             </div>
-            <div className='mt-6 flex space-x-4'>
+            {/* <div className='mt-6 flex space-x-4'>
               <Button type="button" variant="destructive" onClick={handleDelete}>Delete</Button>
-            </div>
+            </div> */}
           </div>
         </form>
       )}

@@ -8,6 +8,7 @@ import { MdEdit, MdDelete, MdClose } from 'react-icons/md';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import Loading from '../loading';
+import { mutate } from 'swr';
 
 // Dynamically import components
 const TripDetails = dynamic(() => import('@/components/trip/tripDetail/TripDetail'), {

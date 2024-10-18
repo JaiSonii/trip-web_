@@ -5,14 +5,14 @@ import { IParty } from '@/utils/interface';
 
 import { v4 as uuidv4 } from 'uuid'
 
-import { fetchCookie, verifyToken } from '@/utils/auth';
+import {  verifyToken } from '@/utils/auth';
 
 const Party = models.Party || model('Party', partySchema);
 
 export async function GET(req: Request) {
   const { user, error } = await verifyToken(req);
   if (error) {
-    return NextResponse.json({ error });
+    return NextResponse.redirect(new URL('/api/logout', req.url));
   }
 
 

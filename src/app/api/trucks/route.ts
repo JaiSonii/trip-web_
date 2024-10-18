@@ -20,26 +20,38 @@ export async function GET(req: Request) {
         $match: { user_id: user }, // Filter trucks by user_id
       },
       {
+        // Optimize supplier lookup to only return necessary fields
         $lookup: {
-          from: 'suppliers', // Join with the Supplier collection
+          from: 'suppliers',
           localField: 'supplier',
           foreignField: 'supplier_id',
+          pipeline: [
+            { $project: { name: 1 } }, // Only get the supplier name
+          ],
           as: 'suppliers',
         },
       },
       {
+        // Optimize driver lookup to only return necessary fields
         $lookup: {
           from: 'drivers',
           localField: 'driver_id',
           foreignField: 'driver_id',
+          pipeline: [
+            { $project: { name: 1 } }, // Only get the driver name
+          ],
           as: 'drivers',
         },
       },
       {
+        // Optimize trips lookup to only return relevant trip fields
         $lookup: {
-          from: 'trips', // Join with the Trip collection
+          from: 'trips',
           localField: 'truckNo',
           foreignField: 'truck',
+          pipeline: [
+            { $project: { trip_id: 1, party: 1, route: 1, startDate: 1, status: 1 } },
+          ],
           as: 'trips',
         },
       },
@@ -50,10 +62,14 @@ export async function GET(req: Request) {
         },
       },
       {
+        // Optimize party lookup for trips, only fetching necessary fields
         $lookup: {
-          from: 'parties', // Join with the Party collection
+          from: 'parties',
           localField: 'trips.party',
           foreignField: 'party_id',
+          pipeline: [
+            { $project: { name: 1 } }, // Only get the party name
+          ],
           as: 'partyDetails',
         },
       },
@@ -65,7 +81,7 @@ export async function GET(req: Request) {
       },
       {
         $group: {
-          _id: '$_id', // Group by truck to merge trips data
+          _id: '$_id', // Group by truck
           truckNo: { $first: '$truckNo' },
           truckType: { $first: '$truckType' },
           model: { $first: '$model' },
@@ -75,6 +91,7 @@ export async function GET(req: Request) {
           status: { $first: '$status' },
           driver_id: { $first: '$driver_id' },
           supplierName: { $first: { $arrayElemAt: ['$suppliers.name', 0] } },
+          driverName: { $first: { $arrayElemAt: ['$drivers.name', 0] } }, // Extract driver name
           supplier: { $first: '$supplier' },
           trips: {
             $push: {
@@ -85,7 +102,6 @@ export async function GET(req: Request) {
               status: '$trips.status',
             },
           },
-          driverName: { $first: { $arrayElemAt: ['$drivers.name', 0] } }, // Extract driver name
         },
       },
       {
@@ -93,19 +109,23 @@ export async function GET(req: Request) {
           trips: {
             $sortArray: { input: '$trips', sortBy: { startDate: -1 } }, // Sort trips by startDate descending
           },
+        },
+      },
+      {
+        $addFields: {
           latestTrip: {
-            $arrayElemAt: ['$trips', 0], // Extract the latest trip
+            $arrayElemAt: ['$trips', 0], // Extract the latest trip after sorting
           },
         },
       },
       {
-        $sort: { 'latestTrip.startDate': -1 }, // Sort trucks by the latest trip date descending
+        $sort: { 'latestTrip.startDate': -1 }, // Sort trucks by latest trip date
       },
       {
-        $project: {
-          trips: 0, // Exclude trips if only latestTrip is needed
-        },
-      },
+        $project : {
+          trips : 0
+        }
+      }
     ]);
 
 

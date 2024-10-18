@@ -1,15 +1,13 @@
-export const DeleteAccount = async (accountId: string, tripId: string) => {
+export const DeleteAccount = async (accountId: string, tripId: string, partyId : string) => {
   try {
-    const res = await fetch(`/api/trips/${tripId}/accounts/${accountId}`, {
+    const res = await fetch(`/api/parties/${partyId}/payments/${accountId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json'
       }
     })
     const data = await res.json()
-    console.log(data)
-    let deletedAccount = data.trip.accounts.filter((acc: any) => acc.paymentBook_id == accountId)
-    return deletedAccount
+    return data.payment
   } catch (error) {
     console.log(error)
     return error
@@ -26,14 +24,14 @@ export const fetchTripRoute = async (tripId: string) => {
   }
 }
 
-export const handleEditAccount = async (editedItem: any, tripId: string) => {
+export const handleEditAccount = async (editedItem: any, tripId: string, partyId : string) => {
   try {
-    const res = await fetch(`/api/trips/${tripId}/accounts/${editedItem.id}`, {
-      method: 'PATCH',
+    const res = await fetch(`/api/parties/${tripId}/payments/${editedItem.id}`, {
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ account: editedItem }),
+      body: JSON.stringify(editedItem),
     });
     if (!res.ok) {
       throw new Error('Failed to edit item');
@@ -44,7 +42,7 @@ export const handleEditAccount = async (editedItem: any, tripId: string) => {
       alert(resData.message);
       return;
     }
-    return resData.trip
+    return resData.payment
   } catch (error) {
     console.log(error);
     return { error: error }

@@ -53,17 +53,30 @@ const AddPaymentModal = ({ isOpen, onClose, onSave, supplierId }: AddPaymentModa
     }, [isOpen, supplierId]);
 
     const handleSave = () => {
-        const payments = Object.entries(tripAllocations).map(([tripId, allocatedAmount]) => ({
-            supplier_id: supplierId, // Assign the appropriate supplier_id
-            amount: allocatedAmount,
-            paymentMode,
-            date,
-            notes,
-            refNo,
-            trip_id: tripId, // Include trip_id in the payment object
-        }));
+        // If tripAllocations is empty, create a single payment entry without trip_id
+        const payments = Object.entries(tripAllocations).length > 0
+            ? Object.entries(tripAllocations).map(([tripId, allocatedAmount]) => ({
+                supplier_id: supplierId, // Assign the appropriate supplier_id
+                amount: allocatedAmount,
+                paymentMode,
+                date,
+                notes,
+                refNo,
+                trip_id: tripId || '', // Include trip_id if available
+            }))
+            : [{
+                supplier_id: supplierId, // Assign the appropriate supplier_id
+                amount: typeof amount === 'number' ? amount : 0, // Use the entered amount
+                paymentMode,
+                date,
+                notes,
+                refNo,
+            }];
+
+        // Call onSave with the constructed payments array
         onSave(payments as any);
     };
+
 
     const getRefNoLabel = () => {
         switch (paymentMode) {
@@ -79,7 +92,7 @@ const AddPaymentModal = ({ isOpen, onClose, onSave, supplierId }: AddPaymentModa
     };
 
     const openTripAllocationModal = () => {
-        if(!amount) return alert('Enter Amount')
+        if (!amount) return alert('Enter Amount')
         setIsTripAllocationModalOpen(true);
     };
 

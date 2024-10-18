@@ -3,6 +3,7 @@
 import { useParams } from 'next/navigation';
 import Loading from '../loading';
 import SupplierLayout from '@/components/layout/SupplierLayout';
+import { SupplierProvider } from '@/context/supplierContext';
 
 interface PartyLayoutProps {
   children: React.ReactNode;
@@ -17,9 +18,11 @@ const Layout: React.FC<PartyLayoutProps> = ({ children }) => {
   }
 
   return (
-    <SupplierLayout supplierId={supplierId as string}>
+    <SupplierProvider supplierId={supplierId as string}>
+    <SupplierLayout>
       {children}
     </SupplierLayout>
+    </SupplierProvider>
   );
 };
 

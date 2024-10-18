@@ -9,18 +9,18 @@ import Loading from '../../loading'
 import { FaCalendarAlt, FaTruck, FaRoute, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa'
 import { formatNumber } from '@/utils/utilArray'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { useSupplier } from '@/context/supplierContext'
 
 
 const SupplierDetailPage = () => {
 
-    const { supplierId } = useParams()
-    const [trips, setTrips] = useState<ITrip[]>([])
-    const [loading, setLoading] = useState(true)
+    const {supplier, setSupplier, loading} = useSupplier()
+    console.log(supplier)
     const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
 
     const sortedTrips = useMemo(() => {
-      if (!trips || trips.length === 0) return []; // This line ensures that trips is not null or empty
-      let sortableTrips = [...trips as any];
+      if (!supplier?.supplierTripAccounts || supplier?.suppplierTripAccounts?.length === 0) return []; // This line ensures that trips is not null or empty
+      let sortableTrips = [...supplier.supplierTripAccounts as any];
       if (sortConfig.key !== null) {
         sortableTrips.sort((a, b) => {
           if (a[sortConfig.key!] < b[sortConfig.key!]) {
@@ -33,7 +33,7 @@ const SupplierDetailPage = () => {
         });
       }
       return sortableTrips;
-    }, [trips, sortConfig]);
+    }, [supplier, sortConfig]);
   
   
     const requestSort = (key: keyof ITrip) => {
@@ -51,24 +51,24 @@ const SupplierDetailPage = () => {
       return <FaSort />
     }
 
-    const fetchSupplierTrips = async (supplierId: string) => {
-        const res = await fetch(`/api/trips/supplier/${supplierId}`, {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        const data = await res.json()
-        console.log(data)
-        setTrips(data.trips)
-        setLoading(false)
-    }
+    // const fetchSupplierTrips = async (supplierId: string) => {
+    //     const res = await fetch(`/api/trips/supplier/${supplierId}`, {
+    //         method: 'GET',
+    //         headers: {
+    //             'Content-Type': 'application/json'
+    //         }
+    //     })
+    //     const data = await res.json()
+    //     console.log(data)
+    //     setTrips(data.trips)
+    //     setLoading(false)
+    // }
 
-    useEffect(() => {
-        if (supplierId) {
-            fetchSupplierTrips(supplierId as string)
-        }
-    }, [supplierId])
+    // useEffect(() => {
+    //     if (supplierId) {
+    //         fetchSupplierTrips(supplierId as string)
+    //     }
+    // }, [supplierId])
 
     if (loading) {
         return <Loading />
@@ -97,9 +97,9 @@ const SupplierDetailPage = () => {
                                 Status {getSortIcon('status')}
                                 </div>
                             </TableHead>
-                            <TableHead  onClick={()=> requestSort('balance')}>
+                            <TableHead  onClick={()=> requestSort('amount')}>
                             <div className='flex justify-between'>
-                                Trip Balance {getSortIcon('balance')}
+                                Trip Amount {getSortIcon('amount')}
                                 </div>
                             </TableHead>
                             <TableHead className='border p-2'>Action</TableHead>
@@ -107,11 +107,12 @@ const SupplierDetailPage = () => {
                     </TableHeader>
                     <TableBody>
                         {sortedTrips.map((trip, index) => (
+                            trip.type === 'trip' &&
                             <TableRow key={index} className="border-t hover:bg-slate-100 cursor-pointer">
                                 <TableCell className="border p-4">
                                 <div className='flex items-center space-x-2'>
                                     <FaCalendarAlt className="text-bottomNavBarColor" />
-                                    <span>{new Date(trip.startDate).toLocaleDateString()}</span>
+                                    <span>{new Date(trip.date).toLocaleDateString()}</span>
                                     </div>
                                 </TableCell>
                                 <TableCell className="border p-4 ">
@@ -137,7 +138,7 @@ const SupplierDetailPage = () => {
                                         </div>
                                     </div>
                                 </TableCell>
-                                <TableCell><span className='font-semibold text-green-500'>₹{formatNumber(trip.balance)}</span></TableCell>
+                                <TableCell><span className='font-semibold text-green-500'>₹{formatNumber(trip.amount)}</span></TableCell>
                                 <TableCell><Link href={`/user/trips/${trip.trip_id}`}><Button variant='outline'>View Trip</Button></Link></TableCell>
 
                             </TableRow>

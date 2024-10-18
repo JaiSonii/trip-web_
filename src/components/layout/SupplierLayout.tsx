@@ -1,16 +1,18 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { FaBook, FaTruckMoving, FaEdit, FaTrashAlt, FaPlusCircle } from 'react-icons/fa';
 import { Button } from '../ui/button';
 import EditSupplierModal from '../supplier/EditSupplierModal';
 import AddPaymentModal from '../supplier/AddPaymentModal';
 import SupplierBalance from '../supplier/SupplierBalance';
+import { useSupplier } from '@/context/supplierContext';
+import Loading from '@/app/user/suppliers/loading';
+import { formatNumber } from '@/utils/utilArray';
 
 interface TruckLayoutProps {
     children: React.ReactNode;
-    supplierId: string;
 }
 
 export interface ISupplier {
@@ -30,11 +32,13 @@ export interface ISupplierAccount {
     refNo: string;
 }
 
-const SupplierLayout = ({ children, supplierId }: TruckLayoutProps) => {
-    
+const SupplierLayout = ({ children }: TruckLayoutProps) => {
+
+    const { supplier, setSupplier, loading } = useSupplier()
+
     const router = useRouter();
     const pathname = usePathname();
-    const [supplier, setSupplier] = useState<ISupplier | null>(null);
+    const { supplierId } = useParams()
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isAddPaymentModalOpen, setIsAddPaymentModalOpen] = useState(false);
 
@@ -43,27 +47,27 @@ const SupplierLayout = ({ children, supplierId }: TruckLayoutProps) => {
         { logo: <FaBook />, name: 'Passbook', path: `/user/suppliers/${supplierId}/passbook` },
     ];
 
-    useEffect(() => {
-        tabs.forEach(tab => {
-            router.prefetch(tab.path);
-        });
+    // useEffect(() => {
+    //     tabs.forEach(tab => {
+    //         router.prefetch(tab.path);
+    //     });
 
-        // Fetch supplier details
-        const fetchSupplierDetails = async () => {
-            try {
-                const response = await fetch(`/api/suppliers/${supplierId}`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch supplier details');
-                }
-                const data = await response.json();
-                setSupplier(data.supplier);
-            } catch (error) {
-                console.error(error);
-            }
-        };
+    //     // Fetch supplier details
+    //     const fetchSupplierDetails = async () => {
+    //         try {
+    //             const response = await fetch(`/api/suppliers/${supplierId}`);
+    //             if (!response.ok) {
+    //                 throw new Error('Failed to fetch supplier details');
+    //             }
+    //             const data = await response.json();
+    //             setSupplier(data.supplier);
+    //         } catch (error) {
+    //             console.error(error);
+    //         }
+    //     };
 
-        fetchSupplierDetails();
-    }, [supplierId]);
+    //     fetchSupplierDetails();
+    // }, [supplierId]);
 
     const handleEditSupplier = () => {
         setIsEditModalOpen(true);
@@ -104,7 +108,10 @@ const SupplierLayout = ({ children, supplierId }: TruckLayoutProps) => {
             if (!response.ok) {
                 throw new Error('Failed to update supplier');
             }
-            setSupplier(updatedSupplier);
+            setSupplier((prev: any) => ({
+                ...prev,
+                ...updatedSupplier
+            }));
             setIsEditModalOpen(false);
             alert('Supplier updated successfully');
         } catch (error) {
@@ -121,20 +128,40 @@ const SupplierLayout = ({ children, supplierId }: TruckLayoutProps) => {
                 },
                 body: JSON.stringify(payments),
             });
+
             if (!response.ok) {
-                alert('Failed to add payment')
+                alert('Failed to add payment');
                 throw new Error('Failed to add payment');
             }
+
+            const data = await response.json();
+            let savedBal = 0
+            const saved = data.payments.map((item: any) => {
+                savedBal += item.amount
+                return {
+                    ...item,
+                    type: 'payment',
+                }
+            });
+
             setIsAddPaymentModalOpen(false);
+            // Update supplier's `supplierTripAccounts` by concatenating the new payments
+            setSupplier((prev: any) => ({
+                ...prev,
+                supplierTripAccounts: [...saved, ...prev.supplierTripAccounts], // Concatenate the new payments with existing data
+                balance: prev.balance + savedBal
+            }));
             alert('Payment added successfully');
-            if(pathname.includes('passbook')) router.refresh()
-            else router.push(`/user/suppliers/${supplierId}/passbook`)
-            // You might want to fetch the updated supplier details here
-        } catch (error : any) {
-            alert(error.message)
+
+            // You might want to fetch the updated supplier details here if needed
+        } catch (error: any) {
+            alert(error.message);
             console.error('Failed to add payment:', error);
         }
     };
+
+
+    if (loading) return <Loading />
 
     return (
         <div className="w-full h-full p-4 bg-gray-50 rounded-lg shadow-sm">
@@ -143,7 +170,7 @@ const SupplierLayout = ({ children, supplierId }: TruckLayoutProps) => {
                     <div>
                         <h1 className="text-3xl font-bold">{supplier?.name}</h1>
                         <p className="text-gray-600">{supplier?.contactNumber}</p>
-                        <p className="text-lg font-semibold p-2">Balance: <SupplierBalance supplierId={supplierId}/></p>
+                        <p className="text-lg font-semibold p-2 flex items-center space-x-2">Balance: <p className={`font-semibold ml-2 ${supplier.balance >= 0 ? 'text-green-500' : "text-red-500"}`}>{formatNumber(supplier.balance)}</p></p>
                     </div>
                     <div className="flex space-x-2">
                         <Button variant="outline" onClick={handleEditSupplier}>
@@ -189,7 +216,7 @@ const SupplierLayout = ({ children, supplierId }: TruckLayoutProps) => {
                         onSave={handleSaveSupplier}
                     />
                     <AddPaymentModal
-                    supplierId={supplierId}
+                        supplierId={supplierId as string}
                         isOpen={isAddPaymentModalOpen}
                         onClose={() => setIsAddPaymentModalOpen(false)}
                         onSave={handleSavePayment}

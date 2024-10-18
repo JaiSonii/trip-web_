@@ -19,25 +19,30 @@ interface DataListProps {
 const DataList: React.FC<DataListProps> = ({ data, label, modalTitle, trip, setData, setBalance, setTrip }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editData, setEditData] = useState<PaymentBook | null>(null);
-  const [listData, setListData] = useState<PaymentBook[]>([]);
+  const [listData, setListData] = useState<PaymentBook[] >([]);
   const [expandedItem, setExpandedItem] = useState<number | null>(null);
 
   useEffect(() => {
     const temp = data.filter((account) => account.accountType === label);
     const sortedData = temp.sort(
-      (a, b) => new Date(b.paymentDate).getTime() - new Date(a.paymentDate).getTime()
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
     setListData(sortedData);
   }, [data, label]);
 
   const handleAddItem = async (newItem: any) => {
+    const itemtosend = {
+      ...newItem,
+      trip_id : trip.trip_id,
+      driver_id : newItem.receivedByDriver ? trip.driver : null
+    }
     try {
-      const res = await fetch(`/api/trips/${trip.trip_id}`, {
-        method: 'PATCH',
+      const res = await fetch(`/api/parties/${trip.party}/payments`, {
+        method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ data: { account: newItem } }),
+        body: JSON.stringify(itemtosend),
       });
       if (!res.ok) {
         throw new Error('Failed to add new item');
@@ -47,10 +52,13 @@ const DataList: React.FC<DataListProps> = ({ data, label, modalTitle, trip, setD
         alert(resData.message);
         return;
       }
-      setData(resData.trip.accounts);
+      setData((prev) : any=>[
+        resData.payment,
+        ...prev
+      ]);
       setBalance((prev: number) => prev - newItem.amount)
       setIsModalOpen(false);
-      setTrip(resData.trip);
+      // setTrip();
       // router.refresh();
     } catch (error) {
       console.log(error);
@@ -59,12 +67,15 @@ const DataList: React.FC<DataListProps> = ({ data, label, modalTitle, trip, setD
 
   const handleEditItem = async (editedItem: any) => {
     try {
-      const res = await fetch(`/api/trips/${trip.trip_id}/accounts/${editedItem.id}`, {
-        method: 'PATCH',
+      const res = await fetch(`/api/parties/${trip.party}/payments/${editedItem.id}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ account: editedItem }),
+        body: JSON.stringify({
+          ...editedItem,
+          driver_id : editedItem.receivedByDriver === true ? trip.driver : null
+        } ),
       });
       if (!res.ok) {
         throw new Error('Failed to edit item');
@@ -77,11 +88,11 @@ const DataList: React.FC<DataListProps> = ({ data, label, modalTitle, trip, setD
         return;
       }
 
-      setData(resData.trip.accounts);
-      setTrip((prev: ITrip) => ({
-        ...prev,
-        ...resData.trip,
-      }));
+      setData((prev : any)=>prev.map((item : any)=>item._id === resData.payment._id ? resData.payment : item));
+      // setTrip((prev: ITrip) => ({
+      //   ...prev,
+      //   ...resData.trip,
+      // }));
       setBalance((prev: number) => {
         if (editData) {
           return prev + editData?.amount as number - editedItem.amount
@@ -98,19 +109,18 @@ const DataList: React.FC<DataListProps> = ({ data, label, modalTitle, trip, setD
 
   const handleDeleteItem = async (item: PaymentBook) => {
     try {
-      const res = await fetch(`/api/trips/${trip.trip_id}/accounts/${item._id}`, {
+      const res = await fetch(`/api/parties/${trip.party}/payments/${item._id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ data: { account: item, delete: true } }),
+        }
       });
       if (!res.ok) {
         throw new Error('Failed to delete item');
       }
       const resData = await res.json();
-      setData((prev: PaymentBook[]) => {
-        const updatedData = prev.filter((acc) => acc._id !== item._id);
+      setData((prev: PaymentBook[] | any) => {
+        const updatedData = prev.filter((acc : any) => acc._id !== item._id);
         console.log('Updated data:', updatedData);
         return updatedData;
       });
@@ -173,13 +183,13 @@ const DataList: React.FC<DataListProps> = ({ data, label, modalTitle, trip, setD
                   <p className="text-xs text-gray-600">{item.paymentType}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-xs text-gray-600">Date: {new Date(item.paymentDate).toLocaleDateString()}</p>
+                  <p className="text-xs text-gray-600">Date: {new Date(item.date).toLocaleDateString()}</p>
                 </div>
               </div>
               {expandedItem === index && (
                 <div className="mt-4 bg-gray-100 p-4 rounded-md border border-gray-300">
                   <p className="text-xs text-gray-600">
-                    Received by Driver: {item.receivedByDriver ? 'Yes' : 'No'}
+                    Received by Driver: {item.driver_id ? 'Yes' : 'No'}
                   </p>
                   {item.notes && (
                     <p className="text-xs text-gray-600 mb-2">Notes: {item.notes}</p>

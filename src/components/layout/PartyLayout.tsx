@@ -1,9 +1,14 @@
 // components/parties/PartyLayout.tsx
 'use client'
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import PartyName from '../party/PartyName';
+import { useParty } from '@/context/partyContext';
+import Loading from '@/app/user/parties/loading';
+import { Button } from '../ui/button';
+import dynamic from 'next/dynamic';
+import { PaymentBook } from '@/utils/interface';
 
 interface PartyLayoutProps {
   children: React.ReactNode;
@@ -11,8 +16,12 @@ interface PartyLayoutProps {
 }
 
 const PartyLayout = ({ children, partyId }: PartyLayoutProps) => {
-  const router = useRouter();
   const pathname = usePathname();
+  const {party, setParty, loading} = useParty()
+  console.log(party)
+  const [isOpen , setIsOpen] = useState(false)
+
+  const PaymentModal = dynamic(()=>import('@/components/party/PaymentModal'))
 
 
 
@@ -23,11 +32,41 @@ const PartyLayout = ({ children, partyId }: PartyLayoutProps) => {
     { name: 'Party Details', path: `/user/parties/${partyId}/details` },
   ];
 
+  const handlePayment = async(payment : PaymentBook | any)=>{
+    try {
+      const res = await fetch(`/api/parties/${party.party_id}/payments`,{
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payment),
+      })
+      if(!res.ok){
+        throw new Error('Failed to add payment')
+      }
+      const data = await res.json()
+      const newpayment = {  ...data.payment, type : 'payment', description : data.payment.accountType,}
+      setParty((prev : any)=>({
+        ...prev,
+        items : [newpayment, ...party.items]
+      }))
+      alert('payment added successfully')
+    } catch (error) {
+      alert('failed to add payment')
+    }
+  }
+
+
+  if(loading){
+    return <Loading />
+  }
+
   return (
     <div className="min-h-screen bg-gray-100 rounded-md">
       <div className="w-full h-full p-4">
-        <header className="mb-6">
-          <h1 className="text-3xl font-bold text-black"><PartyName partyId={partyId} /></h1>
+        <header className="mb-6 flex justify-between">
+          <h1 className="text-3xl font-bold text-black">{party.name}</h1>
+          <Button onClick={()=>setIsOpen(true)}>Add Payment</Button>
         </header>
         <nav className="flex mb-6 border-b-2 border-gray-200">
           {tabs.map((tab) => (
@@ -47,6 +86,10 @@ const PartyLayout = ({ children, partyId }: PartyLayoutProps) => {
           {children}
         </main>
       </div>
+      <PaymentModal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)} onSave={handlePayment} modalTitle={'Payment'} accountType={'Payments'}      
+      />
     </div>
   );
 };

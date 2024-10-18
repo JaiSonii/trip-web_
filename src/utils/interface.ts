@@ -30,8 +30,9 @@ export interface PaymentBook extends Document{
   amount: number;
   paymentType: 'Cash' | 'Cheque' | 'Online Transfer';
   receivedByDriver: boolean;
-  paymentDate: Date;
+  date: Date;
   notes?: string;
+  driver_id? : string
 }
 
 interface Route {

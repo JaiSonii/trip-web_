@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { MdDelete, MdEdit } from "react-icons/md";
 import { IDriver, IDriverAccount, IExpense, PaymentBook } from '@/utils/interface';
 import Loading from '../loading';
-import { ExpenseforDriver } from '@/helpers/ExpenseOperation';
+import { DeleteExpense, ExpenseforDriver, handleEditExpense } from '@/helpers/ExpenseOperation';
 import { handleDelete as DeleteForExpense } from '@/helpers/ExpenseOperation';
 import { DeleteAccount } from '@/helpers/TripOperation';
 import { deleteDriverAccount, EditDriverAccount } from '@/helpers/driverOperations';
@@ -17,21 +17,26 @@ import Link from 'next/link';
 import { formatNumber } from '@/utils/utilArray';
 import dynamic from 'next/dynamic';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useDriver } from '@/context/driverContext';
 
 const Driver: React.FC = () => {
-  const router = useRouter();
   const { driverId } = useParams();
 
-  const [driver, setDriver] = useState<IDriver>();
-  const [loading, setLoading] = useState(true);
+  const { driver, loading, setDriver } = useDriver()
   const [error, setError] = useState<string | null>(null);
-  const [accounts, setAccounts] = useState<IExpense[] | PaymentBook[] | any[]>([]);
-  const [driverAccounts, setDriverAccounts] = useState<IDriverAccount[]>([])
+  const [accounts, setAccounts] = useState<IExpense[] | PaymentBook[] | any[]>(driver?.driverExpAccounts);
   const [expenseEdit, setExpenseEdit] = useState(false);
   const [paymentEdit, setPaymentEdit] = useState(false);
   const [accountEdit, setAccountEdit] = useState(false);
   const [selected, setSelected] = useState<any>([]);
   const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
+
+  useEffect(() => {
+    setAccounts(driver?.driverExpAccounts)
+  }, [driver])
+
+  const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), { ssr: false })
+
 
   const sortedAccounts = useMemo(() => {
     if (!accounts || accounts.length === 0) return []; // Ensure accounts is not null or empty
@@ -104,143 +109,179 @@ const Driver: React.FC = () => {
   const Modal = dynamic(() => import('@/components/trip/tripDetail/Modal'), { ssr: false })
 
   const handleDelete = async (account: any) => {
-    if (account.expenseType) {
-      const result = await DeleteForExpense(account._id);
-      setAccounts(prev => prev.filter(acc => acc._id !== account._id));
-    } else if (account.accountType) {
-      try {
-        const deleted = await DeleteAccount(account._id, account.tripId);
-        setAccounts(prev => prev.filter(acc => acc.paymentBook_id !== deleted.paymentBook_id));
-      } catch (error) {
-        console.log(error);
-        alert(error);
-      }
-    } else {
-      try {
+    let balance = driver.balance
+    try {
+      let deletedAccount: any;
+
+      if (account.expenseType) {
+        deletedAccount = await DeleteExpense(account._id);
+        setAccounts(prev => prev.filter(acc => acc._id !== deletedAccount._id));
+        balance += deletedAccount.amount
+      } else if (account.accountType) {
+        deletedAccount = await DeleteAccount(account._id, account.trip_id, account.party_id);
+        setAccounts(prev => prev.filter(acc => acc.paymentBook_id !== deletedAccount.paymentBook_id));
+        balance += deletedAccount.amount
+      } else {
         const data = await deleteDriverAccount(driverId as string, account.account_id);
-        const deletedDriver = data.driver;
+        deletedAccount = data.driver;
         setAccounts(prev => prev.filter(acc => acc.account_id !== account.account_id));
-      } catch (error: any) {
-        console.log(error);
-        alert(error);
-      }
-    }
-  };
-
-  const fetchDriverDetails = async () => {
-    try {
-      const response = await fetch(`/api/drivers/${driverId}`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch driver');
+        balance = balance - account.got + account.gave
       }
 
-      const result = await response.json();
-      setDriver(result);
-      setDriverAccounts(result.accounts);
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchTrips = async () => {
-    try {
-      const res = await fetch(`/api/trips/driver/${driverId}/accounts`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to fetch trips');
-      }
-
-      const data = await res.json();
-      return data.accounts;
-    } catch (err) {
-      setError((err as Error).message);
-      console.log(err)
-      return [];
-    }
-  };
-
-  const fetchTruckExpenses = async () => {
-    try {
-      const truckExpense = await ExpenseforDriver(driverId as string);
-      const formattedTruckExpenses = truckExpense.map((expense: IExpense) => ({
-        ...expense,
-        date: expense.date,
-        type: 'truck',
+      // Update driverExpAccounts in driver state with the updated accounts
+      setDriver((prev: any) => ({
+        ...prev,
+        driverExpAccounts: accounts.filter(acc => acc.account_id !== account.account_id),
+        balance : balance
       }));
-      return formattedTruckExpenses;
-    } catch (err) {
-      setError((err as Error).message);
-      return [];
+    } catch (error) {
+      console.error(error);
+      alert(error);
     }
   };
 
-  const fetchAllData = async () => {
-    setLoading(true);
-    const accountsData = await fetchTrips();
-    const truckExpensesData = await fetchTruckExpenses();
-    const allAccounts = [
-      ...accountsData,
-      ...truckExpensesData,
-      ...driverAccounts,
-    ];
 
-    setAccounts(allAccounts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
-    setLoading(false);
-  };
+  // const fetchDriverDetails = async () => {
+  //   try {
+  //     const response = await fetch(`/api/drivers/${driverId}`, {
+  //       method: 'GET',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error('Failed to fetch driver');
+  //     }
+
+  //     const result = await response.json();
+  //     setDriver(result);
+  //     setDriverAccounts(result.accounts);
+  //   } catch (err: any) {
+  //     setError(err.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // const fetchTrips = async () => {
+  //   try {
+  //     const res = await fetch(`/api/trips/driver/${driverId}/accounts`, {
+  //       method: 'GET',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //     });
+
+  //     if (!res.ok) {
+  //       throw new Error('Failed to fetch trips');
+  //     }
+
+  //     const data = await res.json();
+  //     return data.accounts;
+  //   } catch (err) {
+  //     setError((err as Error).message);
+  //     console.log(err)
+  //     return [];
+  //   }
+  // };
+
+  // const fetchTruckExpenses = async () => {
+  //   try {
+  //     const truckExpense = await ExpenseforDriver(driverId as string);
+  //     const formattedTruckExpenses = truckExpense.map((expense: IExpense) => ({
+  //       ...expense,
+  //       date: expense.date,
+  //       type: 'truck',
+  //     }));
+  //     return formattedTruckExpenses;
+  //   } catch (err) {
+  //     setError((err as Error).message);
+  //     return [];
+  //   }
+  // };
+
+  // const fetchAllData = async () => {
+  //   setLoading(true);
+  //   const accountsData = await fetchTrips();
+  //   const truckExpensesData = await fetchTruckExpenses();
+  //   const allAccounts = [
+  //     ...accountsData,
+  //     ...truckExpensesData,
+  //     ...driverAccounts,
+  //   ];
+
+  //   setAccounts(allAccounts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()));
+  //   setLoading(false);
+  // };
 
   const handleEditAccounts = async (account: any) => {
-    if (account.expenseType) {
-      // Handle expense edit logic
-      console.log(account)
-      const result = await EditExpense(account, selected._id, selected.truck)
-      if (result.error) {
-        alert(error)
-        return
-      }
-      const editedAccount = result
-      setAccounts(prev => prev.map((acc: any) => acc._id === selected._id ? { ...acc, ...result } : acc));
+    try {
+      // Create a variable to store the updated accounts
+      let updatedAccounts: any[] = [...accounts];
+      let updatedAccount: any;
+      let balance : number = driver.balance
 
-    } else if (account.accountType) {
-      // Handle payment edit logic
-      // console.log(selected)
-      // console.log(account)
-      const result = await handleEditAccount(account, selected.tripId)
-      if (result.error) {
-        alert(error)
-        return
-      }
-      router.refresh()
-    } else {
-      try {
+      if (account.expenseType) {
+        // Handle expense edit logic
+        const expense = await handleEditExpense(account, selected._id);
+        balance += selected.amount
+        updatedAccount = expense;
+
+        updatedAccounts = updatedAccounts.filter(acc => acc._id !== expense._id);
+       
+        if (expense.driver === selected.driver) {
+          updatedAccounts.push({ ...expense });
+          balance -= expense.amount
+        }
+
+      } else if (account.accountType) {
+        // Handle payment edit logic
+        const result = await handleEditAccount(account, selected.trip_id, selected.party_id);
+        if (result.error) {
+          alert(result.error);
+          return;
+        }
+        updatedAccount = result;
+        balance = balance - (selected.amount - result.amount)
+
+        updatedAccounts = updatedAccounts.map(acc =>
+          acc._id === result._id ? { ...acc, ...updatedAccount } : acc
+        );
+
+      } else {
+        // Handle driver account edit logic
         const data = await EditDriverAccount(driverId as string, account, selected.account_id);
-        setAccounts(prev => prev.map((acc: any) => acc.account_id === selected.account_id ? { ...acc, ...data } : acc));
-      } catch (error) {
-        alert(error);
+        updatedAccount = data;
+        balance = balance - (selected.got - updatedAccount.got + updatedAccount.gave - selected.gave)
+        updatedAccounts = updatedAccounts.map(acc =>
+          acc.account_id === updatedAccount.account_id ? { ...acc, ...updatedAccount } : acc
+        );
       }
+
+      // Now update the accounts and driverExpAccounts using updatedAccounts
+      setAccounts(updatedAccounts);
+      setDriver((prev: any) => ({
+        ...prev,
+        balance : balance,
+        driverExpAccounts: updatedAccounts.map(acc => ({ ...acc })), // Ensure driverExpAccounts is synced
+      }));
+
+    } catch (error) {
+      console.error(error);
+      alert('Failed to Edit Account');
     }
-    fetchAllData()
   };
 
-  useEffect(() => {
-    fetchDriverDetails();
-  }, [driverId]);
 
-  useEffect(() => {
-    fetchAllData();
-  }, [driverId, driverAccounts]);
+
+  // useEffect(() => {
+  //   fetchDriverDetails();
+  // }, [driverId]);
+
+  // useEffect(() => {
+  //   fetchAllData();
+  // }, [driverId, driverAccounts]);
 
   if (loading) {
     return <Loading />;
@@ -297,8 +338,8 @@ const Driver: React.FC = () => {
                       {account.trip_id && <Button variant={"link"} className='text-red-500 pt-1 rounded-lg'><Link href={`/user/trips/${account.trip_id}`}>from a trip</Link></Button>}
                     </div>
                   </TableCell>
-                  <TableCell><span className='text-red-600 font-semibold'>₹{formatNumber(account.gave) || (account.type === 'truck' && formatNumber(account.amount)) || 0}</span></TableCell>
-                  <TableCell ><span className='text-green-600 font-semibold'>₹{formatNumber(account.got) || (account.type !== 'truck' && formatNumber(account.amount)) || 0}</span></TableCell>
+                  <TableCell><span className='text-red-600 font-semibold'>₹{formatNumber(account.gave) || (account.expenseType && formatNumber(account.amount)) || 0}</span></TableCell>
+                  <TableCell ><span className='text-green-600 font-semibold'>₹{formatNumber(account.got) || (account.paymentType && formatNumber(account.amount)) || 0}</span></TableCell>
                   <TableCell>
                     <div className='flex flex-row gap-2 items-center w-full'>
                       <Button
@@ -339,6 +380,13 @@ const Driver: React.FC = () => {
         driverId={selected.driver || ''}
         selected={selected}
       /> */}
+      <AddExpenseModal
+        isOpen={expenseEdit}
+        onClose={() => setExpenseEdit(false)}
+        onSave={handleEditAccounts}
+        driverId={driverId as string}
+        selected={selected} categories={['Truck Expense', 'Trip Expense']} />
+
       {selected != null && <Modal
         isOpen={paymentEdit}
         onClose={() => setPaymentEdit(false)}

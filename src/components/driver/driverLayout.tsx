@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+'use client'
+import React, { useEffect, useState } from 'react';
 import DriverActions from './driverActions';
 import DriverModal from './driverModal';
 import { IDriver } from '@/utils/interface';
@@ -9,23 +10,59 @@ import DriverBalance from './DriverBalance';
 import Link from 'next/link';
 import { FaTruckMoving, FaMapMarkerAlt } from 'react-icons/fa';
 import { IoDocuments } from 'react-icons/io5';
+import { loadingIndicator } from '../ui/LoadingIndicator';
+import { useDriver } from '@/context/driverContext';
+import Loading from '@/app/user/loading';
+
 
 interface DriverLayoutProps {
-  name: string;
-  status: string;
   driverId: string;
   onDriverUpdate: (driver: IDriver) => void;
-  contactNumber: string;
   children: React.ReactNode
 }
 
-const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onDriverUpdate, contactNumber, children }) => {
-  const router = useRouter();
+
+
+const DriverLayout: React.FC<DriverLayoutProps> = ({ driverId, onDriverUpdate, children }) => {
+
+  const { driver, loading, setDriver } = useDriver()
+  console.log(driver)
+  
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'gave' | 'got' | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [edit, setEdit] = useState<boolean>(false);
+  const router = useRouter();
+
+  // const fetchDriverDetails = async () => {
+  //   try {
+  //     const response = await fetch(`/api/drivers/${driverId}`, {
+  //       method: 'GET',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //     });
+
+  //     if (!response.ok) {
+  //       throw new Error('Failed to fetch driver');
+  //     }
+
+  //     const result = await response.json();
+  //     setDriver(result.driver);
+  //   } catch (err: any) {
+  //     setError(err.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // useEffect(() => {
+  //   if (driverId) {
+  //     fetchDriverDetails()
+  //   }
+  // }, [driverId])
+
 
   const tabs = [
     { logo: <FaTruckMoving />, name: 'Driver Accounts', path: `/user/drivers/${driverId}` },
@@ -66,6 +103,11 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onD
       }
 
       const data = await response.json();
+      setDriver((prev : any)=>({
+        ...prev,
+        driverExpAccounts : [driver.accounts[driver.accounts.length -1], ...prev.driverExpAccounts],
+        balance : prev.balance - driver.accounts[driver.accounts.length -1].got + driver.accounts[driver.accounts.length -1].gave 
+      }))
       onDriverUpdate(data.driver);
 
       console.log(`Confirm ${modalType} clicked with amount: ${amount}, reason: ${reason}, date: ${date}`);
@@ -73,7 +115,7 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onD
     } catch (error: any) {
       console.error('Failed to update driver:', error);
       setError(error.message);
-    }finally{
+    } finally {
       router.refresh()
     }
   };
@@ -133,20 +175,22 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onD
     }
   };
 
+  if (loading) return <Loading />
+
   return (
-    <div className='flex flex-col gap-2 justify-start'>
+    <div className='flex flex-col gap-2 justify-start text-black'>
       <div className="flex items-center justify-between p-4 bg-gray-200 rounded-sm">
         <div className="flex items-center gap-2">
           <h1 className="text-3xl font-bold mr-5 cursor-pointer" >
-            {name}
+            {driver?.name}
           </h1>
-          <span className="ml-2 text-lg text-gray-700">{contactNumber}</span>
-          {status === 'Available' && (
+          <span className="ml-2 text-lg text-gray-700">{driver?.contactNumber}</span>
+          {driver?.status === 'Available' && (
             <svg style={{ width: '20px', height: '20px' }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
               <path fill="#4caf50" d="M44,24c0,11-9,20-20,20S4,35,4,24S13,4,24,4S44,13,44,24z"></path>
             </svg>
           )}
-          {status}
+          {driver?.status}
         </div>
         <div className="flex items-center">
           <DriverActions onGaveClick={() => openModal('gave')} onGotClick={() => openModal('got')} />
@@ -156,12 +200,12 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onD
         <DriverModal open={modalOpen} onClose={closeModal} type={modalType} onConfirm={handleConfirm} />
         {error && <div className="text-red-500 mt-2">{error}</div>}
         {edit && (
-          <EditDriverModal name={name} driverId={driverId} handleEdit={handleEditDriver} onCancel={() => setEdit(false)} contactNumber={contactNumber} />
+          <EditDriverModal name={driver?.name} driverId={driverId} handleEdit={handleEditDriver} onCancel={() => setEdit(false)} contactNumber={driver?.contactNumber} />
         )}
       </div>
       <div>
         <div className="flex items-center justify-between p-3 bg-gray-200 rounded-sm w-fit">
-          <span className="text-2xl">Driver Balance: <DriverBalance driverId={driverId} /></span> {/* Display balance */}
+          <span className="text-2xl">Driver Balance: {driver?.balance}</span> {/* Display balance */}
         </div>
         <div className="flex border-b-2 border-lightOrange mb-4 mt-2">
           {tabs.map((tab) => (
@@ -180,7 +224,13 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ name, status, driverId, onD
             </Link>
           ))}
         </div>
-        <div className="mt-4">{children}</div>
+        <div className="mt-4">
+          {driver ? (
+            React.cloneElement(children as React.ReactElement, { driver })
+          ) : (
+            loadingIndicator
+          )}
+        </div>
       </div>
     </div>
 

@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { UndoIcon } from 'lucide-react';
 import { formatNumber } from '@/utils/utilArray';
 import Link from 'next/link';
+import { mutate } from 'swr';
 
 interface TripDetailsProps {
   trip: ITrip | any;
@@ -19,7 +20,7 @@ interface TripDetailsProps {
 }
 
 const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
-  const [accounts, setAccounts] = useState<PaymentBook[]>(trip.accounts);
+  const [accounts, setAccounts] = useState<PaymentBook[]>(trip.tripAccounts);
   const [tripBalance, setBalance] = useState(trip.balance);
   const [charges, setCharges] = useState<TripExpense[]>([])
 
@@ -73,8 +74,8 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
         throw new Error('Failed to settle amount');
       }
       const resData = await res.json();
-      console.log(resData)
       setTrip(resData.trip);
+      mutate('/api/trips')
     } catch (error) {
       alert(error)
       console.log('Error settling amount:', error);
@@ -96,6 +97,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
       }
       const resData = await res.json();
       setTrip(resData.trip);
+      mutate('/api/trips')
     } catch (error) {
       alert(error)
       console.log('Error settling amount:', error);
@@ -187,7 +189,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
           </div>
 
           <div className='grid grid-cols-4 gap-2'>
-            <Link href={`/user/parties/${trip.party}`}>
+            <Link href={`/user/parties/${trip.party}/trips`}>
               <TripInfo label="Party Name" value={trip.partyName || '----'} />
             </Link>
             <TripInfo label="LR Number" value={trip.LR || '----'} />

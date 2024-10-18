@@ -20,6 +20,7 @@ import { SlOptionsVertical } from 'react-icons/sl';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import debounce from 'lodash.debounce';
 import { useExpenseCtx } from '@/context/context';
+import { mutate } from 'swr';
 
 
 const columnOptions = [
@@ -34,6 +35,7 @@ const columnOptions = [
 ];
 
 const TripsPage = () => {
+  mutate('/api/trips')
   const ctxTrips = useExpenseCtx().trips
   const router = useRouter();
   const [trips, setTrips] = useState<ITrip[] | null>([]);

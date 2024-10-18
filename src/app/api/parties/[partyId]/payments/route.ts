@@ -1,0 +1,28 @@
+import { verifyToken } from "@/utils/auth";
+import { connectToDatabase, PartyPaymentSchema } from "@/utils/schema";
+import { model, models } from "mongoose";
+import { NextResponse } from "next/server";
+
+const PartyPayment = models.PartyPayment || model('PartyPayment', PartyPaymentSchema)
+
+export async function POST(req : Request, {params} : {params : {partyId : string}}){
+    try {
+        const {user, error} = await verifyToken(req)
+        if(!user || error){
+            return NextResponse.redirect('/api/logout')
+        }
+        const data = await req.json()
+        const {partyId} = params
+        await connectToDatabase()
+        const payment = new PartyPayment({
+            user_id : user,
+            party_id : partyId,
+            ...data
+        })
+        await payment.save()
+        return NextResponse.json({payment, status : 200})
+    } catch (error) {
+        console.log(error)
+        return NextResponse.json({error, status : 500})
+    }
+}

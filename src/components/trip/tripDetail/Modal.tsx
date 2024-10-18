@@ -12,12 +12,12 @@ interface ModalProps {
     amount: number;
     paymentType: 'Cash' | 'Cheque' | 'Online Transfer';
     receivedByDriver: boolean;
-    paymentDate: Date; // Ensure paymentDate is of type Date
+    date: Date; // Ensure date is of type Date
     notes?: string;
   }) => void;
   modalTitle: string;
   accountType: string;
-  editData?: PaymentBook | null;
+  editData?: PaymentBook | any;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -31,23 +31,23 @@ const Modal: React.FC<ModalProps> = ({
   const [formState, setFormState] = useState({
     amount: editData?.amount || 0,
     paymentType: editData?.paymentType || 'Cash' as 'Cash' | 'Cheque' | 'Online Transfer',
-    receivedByDriver: editData?.receivedByDriver || false,
-    paymentDate: new Date(editData?.paymentDate || Date.now()).toISOString().split('T')[0],
+    receivedByDriver: editData?.driver_id ? true : false,
+    date: new Date(editData?.date || Date.now()).toISOString().split('T')[0],
     notes: editData?.notes || ''
   });
 
   useEffect(() => {
     if (editData) {
-      const formattedDate = (editData.paymentDate instanceof Date)
-        ? editData.paymentDate.toISOString().split('T')[0]
-        : (editData.paymentDate && !isNaN(new Date(editData.paymentDate).getTime()))
-          ? new Date(editData.paymentDate).toISOString().split('T')[0]
+      const formattedDate = (editData.date instanceof Date)
+        ? editData.date.toISOString().split('T')[0]
+        : (editData.date && !isNaN(new Date(editData.date).getTime()))
+          ? new Date(editData.date).toISOString().split('T')[0]
           : '';
       setFormState({
         amount: editData.amount,
         paymentType: editData.paymentType,
-        receivedByDriver: editData.receivedByDriver,
-        paymentDate: formattedDate,
+        receivedByDriver: editData.driver_id ? true : false,
+        date: formattedDate,
         notes: editData.notes || ''
       });
     }
@@ -69,7 +69,7 @@ const Modal: React.FC<ModalProps> = ({
       amount: formState.amount,
       paymentType: formState.paymentType,
       receivedByDriver: formState.receivedByDriver,
-      paymentDate: new Date(formState.paymentDate), // Convert paymentDate string to Date object
+      date: new Date(formState.date), // Convert date string to Date object
       notes: formState.notes,
     });
     onClose();
@@ -134,8 +134,8 @@ const Modal: React.FC<ModalProps> = ({
               <label className="block text-sm font-medium text-gray-700">Payment Date</label>
               <input
                 type="date"
-                name="paymentDate"
-                value={formState.paymentDate}
+                name="date"
+                value={formState.date}
                 onChange={handleChange}
                 className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                 required

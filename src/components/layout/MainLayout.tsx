@@ -26,15 +26,15 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const [phone, setPhone] = useState<string | null>('');
   const [user, setUser] = useState<any>(null);
 
-  useEffect(() => {
-    const fetchPhone = async () => {
-      const response = await fetch('/api/login');
-      const data = await response.json();
-      setUser(data.user);
-      setPhone(data.user.phone);
-    };
-    fetchPhone();
-  }, []);
+  // useEffect(() => {
+  //   const fetchPhone = async () => {
+  //     const response = await fetch('/api/login');
+  //     const data = await response.json();
+  //     setUser(data.user);
+  //     setPhone(data.user.phone);
+  //   };
+  //   fetchPhone();
+  // }, []);
 
   useEffect(() => {
     const initialSelected = primaryMenuItems.find(item => pathname.startsWith(item.href));

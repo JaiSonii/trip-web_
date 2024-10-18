@@ -37,14 +37,14 @@ const EditTruckModal: React.FC<EditTruckModalProps> = ({ truck, isOpen, onClose,
     const router = useRouter();
     const [saving, setSaving] = useState(false);
     const [formdata, setFormdata] = useState<FormData>({
-        truckNo: truck.truckNo || '',
-        truckType: truck.truckType || '',
-        model: truck.model || '',
-        capacity: truck.capacity || '',
-        bodyLength: truck.bodyLength as any || '',
-        ownership: truck.ownership || '',
-        supplier: truck.supplier || '',
-        driver_id: truck.driver_id || ''
+        truckNo: truck?.truckNo || '',
+        truckType: truck?.truckType || '',
+        model: truck?.model || '',
+        capacity: truck?.capacity || '',
+        bodyLength: truck?.bodyLength as any || '',
+        ownership: truck?.ownership || '',
+        supplier: truck?.supplier || '',
+        driver_id: truck?.driver_id || ''
     });
 
     const [showDetails, setShowDetails] = useState<boolean>(false);

@@ -62,6 +62,14 @@ export async function GET(req: Request, { params }: { params: { tripId: string }
         }
       },
       {
+        $lookup : {
+          from : 'partypayments',
+          localField: 'trip_id',
+          foreignField : 'trip_id',
+          as : 'tripAccounts'
+        }
+      },
+      {
         $addFields: {
           // Calculate the final balance based on the fetchBalance logic
           balance: {
@@ -70,7 +78,7 @@ export async function GET(req: Request, { params }: { params: { tripId: string }
                 accountBalance: {
                   $sum: {
                     $map: {
-                      input: '$accounts',
+                      input: '$tripAccounts',
                       as: 'account',
                       in: '$$account.amount'
                     }

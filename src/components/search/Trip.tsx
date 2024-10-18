@@ -72,7 +72,7 @@ const Trip: React.FC<tripProps> = ({ trips }) => {
                                                 <p className="text-xs text-buttonTextColor">Amount: {item.amount}</p>
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-xs text-buttonTextColor">Date: {new Date(item.paymentDate).toLocaleDateString()}</p>
+                                                <p className="text-xs text-buttonTextColor">Date: {new Date(item.date).toLocaleDateString()}</p>
                                             </div>
                                         </div>
                                         <div className="mt-2 bg-gray-100 p-2 rounded-md border border-gray-300 text-xs">

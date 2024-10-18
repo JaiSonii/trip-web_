@@ -51,10 +51,22 @@ export async function GET(req: Request) {
 
         // Count documents for trips, drivers, and trucks
         const [tripDocumentsCount, driverDocumentsCount, truckDocumentsCount] = await Promise.all([
-            Trip.countDocuments({ user_id: user }),
-            Driver.countDocuments({ user_id: user }),
-            Truck.countDocuments({ user_id: user }),
+            Trip.aggregate([
+                { $match: { user_id: user } },
+                { $group: { _id: null, count: { $sum: { $size: { '$ifNull': ["$documents", []] } } } } },
+            ]).then(res => res[0]?.count || 0),
+
+            Driver.aggregate([
+                { $match: { user_id: user } },
+                { $group: { _id: null, count: { $sum: { $size: { '$ifNull': ["$documents", []] } } } } },
+            ]).then(res => res[0]?.count || 0),
+
+            Truck.aggregate([
+                { $match: { user_id: user } },
+                { $group: { _id: null, count: { $sum: { $size: { '$ifNull': ["$documents", []] } } } } },
+            ]).then(res => res[0]?.count || 0),
         ]);
+
 
         // Return the latest 5 documents along with document counts
         return NextResponse.json({
