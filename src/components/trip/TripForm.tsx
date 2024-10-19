@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { PartySelect } from './PartySelect';
 import TruckSelect from './TruckSelect';
 import DriverSelect from './DriverSelect';
@@ -42,19 +42,16 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr }) =
     });
 
     useEffect(() => {
-        if (localStorage.getItem('tripData')) {
-            const savedItem = JSON.parse(localStorage.getItem('tripData') as any)
-            setFormData(JSON.parse(localStorage.getItem('tripData') as any))
+        const tripData = localStorage.getItem('tripData');
+        if (tripData) {
+            const savedItem = JSON.parse(tripData);
             setFormData((prev) => ({
                 ...prev,
-                party: savedItem.party,
-                truck: savedItem.truck,
-                driver: savedItem.driver,
-                supplierId: savedItem.supplierId
-            }))
-
+                ...savedItem,
+            }));
         }
-    }, [])
+    }, []);
+
 
     const [file, setFile] = useState<File | null>(null)
 
@@ -62,16 +59,24 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr }) =
     const [selectedTruck, setSelectedTruck] = useState<TruckModel | undefined>(undefined);
     const [hasSupplier, setHasSupplier] = useState(false);
     const [fileLoading, setFileLoading] = useState(false)
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB in bytes
 
     const handleFileChange = async (e: any) => {
-        const uplaodedFile = e.target.files[0];
-        setFile(uplaodedFile);
+        const uploadedFile = e.target.files[0];
+
+        // Check file size
+        if (uploadedFile && uploadedFile.size > MAX_FILE_SIZE) {
+            alert(`File size exceeds the maximum limit of ${MAX_FILE_SIZE / (1024 * 1024)} MB.`);
+            return;
+        }
+
+        setFile(uploadedFile);
         setFormData((prev) => ({
             ...prev,
-            file: uplaodedFile
-        }))
-
+            file: uploadedFile
+        }));
     };
+
 
 
 
@@ -124,12 +129,24 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr }) =
 
     };
 
+    const worker = useRef<null | any>(null);
+
+    useEffect(() => {
+        const initWorker = async () => {
+            worker.current = await createWorker('eng');
+        };
+        initWorker();
+        return () => {
+            if (worker.current) worker.current.terminate();
+        };
+    }, []);
+
     const extractTextFromImage = async (file: File): Promise<string> => {
-        const worker = await createWorker('eng');
-        const { data: { text } } = await worker.recognize(file);
-        await worker.terminate();
+        if (!worker.current) return '';
+        const { data: { text } } = await worker.current.recognize(file);
         return text;
     };
+
 
     const submitEwayBill = async () => {
         if (!file) return;
@@ -215,7 +232,7 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr }) =
             return;
         }
 
-        if(!formData.supplierId && !formData.driver){
+        if (!formData.supplierId && !formData.driver) {
             alert('Driver Needs to be assigned!')
             return
         }
@@ -361,10 +378,7 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr }) =
                     </div>
                 )}
 
-                <Button
-                    className='w-full'
-                    type="submit"
-                >
+                <Button className='w-full' type="submit" disabled={fileLoading}>
                     Submit
                 </Button>
             </form>

@@ -10,6 +10,7 @@ import {
 import { Button } from '../ui/button';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { PiPlusBold } from 'react-icons/pi';
 
 type Props = {
   trucks: TruckModel[];
@@ -62,8 +63,8 @@ const TruckSelect: React.FC<Props> = ({ trucks, formData, handleChange, setFormD
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select Lorry" />
           </SelectTrigger>
-          <SelectContent>
-            <div className="p-2">
+          <SelectContent className='max-h-[300px]'>
+            <div className="flex items-center justify-between gap-2 p-2">
               <input
                 type="text"
                 placeholder="Search..."
@@ -71,6 +72,13 @@ const TruckSelect: React.FC<Props> = ({ trucks, formData, handleChange, setFormD
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md"
               />
+              <Button className="rounded-full w-8 h-8 p-0" onClick={()=>{
+              localStorage.setItem('tripData',JSON.stringify(formData))
+            }}>
+            <Link href={{pathname : `/user/trucks/create`, query : {
+              nextpath : pathname
+            }}}><PiPlusBold /></Link>
+            </Button>
             </div>
             {filteredTrucks.length > 0 ? (
               filteredTrucks.map((truck : any) => (
@@ -90,13 +98,7 @@ const TruckSelect: React.FC<Props> = ({ trucks, formData, handleChange, setFormD
             ) : (
               <div className="p-2 text-gray-500">No lorries found</div>
             )}
-            <Button variant={'ghost'} className="w-full" onClick={()=>{
-              localStorage.setItem('tripData',JSON.stringify(formData))
-            }}>
-            <Link href={{pathname : `/user/trucks/create`, query : {
-              nextpath : pathname
-            }}}>Add New Lorry</Link>
-            </Button>
+            
           </SelectContent>
         </Select>
       </label>

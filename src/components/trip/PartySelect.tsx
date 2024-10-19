@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/select";
 import Link from "next/link";
 import { Button } from "../ui/button";
+import { PiPlusBold } from "react-icons/pi";
 
 interface PartySelectProps {
   parties: IParty[];
@@ -36,13 +37,13 @@ const PartySelect: React.FC<PartySelectProps> = ({ parties, formData, handleChan
   return (
     <div>
       <label className="block w-full">
-      <label className="block text-sm text-gray-700">Customer</label>
+        <label className="block text-sm text-gray-700">Customer</label>
         <Select name="party" defaultValue={formData.party} onValueChange={handleSelectChange}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select Customer" />
           </SelectTrigger>
-          <SelectContent>
-            <div className="p-2">
+          <SelectContent className="max-h-[300px]">
+            <div className="p-2 flex items-center justify-between gap-2">
               <input
                 type="text"
                 placeholder="Search..."
@@ -50,6 +51,15 @@ const PartySelect: React.FC<PartySelectProps> = ({ parties, formData, handleChan
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md"
               />
+              <Button  className="rounded-full w-8 h-8 p-0" onClick={() => {
+                localStorage.setItem('tripData', JSON.stringify(formData))
+              }}>
+                <Link href={{
+                  pathname: `/user/parties/create`, query: {
+                    nextpath: `/user/trips/create`
+                  }
+                }}><PiPlusBold /></Link>
+              </Button>
             </div>
             {filteredParties.length > 0 ? (
               filteredParties.map((party) => (
@@ -58,14 +68,8 @@ const PartySelect: React.FC<PartySelectProps> = ({ parties, formData, handleChan
             ) : (
               <div className="p-2 text-gray-500">No customers found</div>
             )}
-            <Button variant={'ghost'} className="w-full" onClick={()=>{
-              localStorage.setItem('tripData',JSON.stringify(formData))
-            }}>
-            <Link href={{pathname : `/user/parties/create`, query : {
-              nextpath : `/user/trips/create`
-            }}}>Add New Customer</Link>
-            </Button>
-            
+
+
           </SelectContent>
         </Select>
       </label>
@@ -73,4 +77,4 @@ const PartySelect: React.FC<PartySelectProps> = ({ parties, formData, handleChan
   );
 };
 
-export {PartySelect};
+export { PartySelect };

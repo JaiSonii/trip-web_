@@ -10,6 +10,7 @@ import {
 import { Button } from '../ui/button';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { PiPlusBold } from 'react-icons/pi';
 
 type Props = {
   drivers: IDriver[];
@@ -43,8 +44,8 @@ const DriverSelect: React.FC<Props> = ({ drivers, formData, handleChange }) => {
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select Driver" />
           </SelectTrigger>
-          <SelectContent>
-            <div className="p-2">
+          <SelectContent className='max-h-[300px]'>
+            <div className="flex items-center justify-between gap-2 p-2">
               <input
                 type="text"
                 placeholder="Search..."
@@ -52,6 +53,13 @@ const DriverSelect: React.FC<Props> = ({ drivers, formData, handleChange }) => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md"
               />
+              <Button className="rounded-full w-8 h-8 p-0" onClick={()=>{
+              localStorage.setItem('tripData',JSON.stringify(formData))
+            }}>
+            <Link href={{pathname : `/user/drivers/create`, query : {
+              nextpath : pathname
+            }}}><PiPlusBold /></Link>
+            </Button>
             </div>
             {filteredDrivers.length > 0 ? (
               filteredDrivers.map((driver) => (
@@ -67,13 +75,7 @@ const DriverSelect: React.FC<Props> = ({ drivers, formData, handleChange }) => {
             ) : (
               <div className="p-2 text-gray-500">No drivers found</div>
             )}
-            <Button variant={'ghost'} className="w-full" onClick={()=>{
-              localStorage.setItem('tripData',JSON.stringify(formData))
-            }}>
-            <Link href={{pathname : `/user/drivers/create`, query : {
-              nextpath : pathname
-            }}}>Add New Driver</Link>
-            </Button>
+            
           </SelectContent>
         </Select>
     </div>

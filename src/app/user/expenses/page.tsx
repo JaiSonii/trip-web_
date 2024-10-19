@@ -141,7 +141,7 @@ const TripExpense: React.FC = () => {
     }
   }
 
-  const handleExpense = async (expense: IExpense | any, id? : string) => {
+  const handleExpense = async (expense: IExpense | any, id? : string,) => {
     try {
       const data = selected ? await handleEditExpense(expense,selected._id as string) : await handleAddExpense(expense)
       selected ?

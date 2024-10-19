@@ -350,7 +350,8 @@ ExpenseSchema = new Schema({
     type : Date,
     required : true
   },
-  notes : String
+  notes : String,
+  url : String
 })
 
 export const supplierAccountSchema = new Schema({
