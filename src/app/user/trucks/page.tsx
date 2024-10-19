@@ -12,12 +12,13 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import debounce from 'lodash.debounce';
 import TripCard from '@/components/TripCard';
+import { mutate } from 'swr';
 
 const TrucksPage = () => {
+  mutate('/api/trucks')
   const router = useRouter();
 
   const { trucks, isLoading } = useExpenseCtx()
-  console.log(trucks)
   const [error, setError] = useState<string | null>(null);
   const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
   const [searchQuery, setSearchQuery] = useState('')

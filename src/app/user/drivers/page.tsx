@@ -10,8 +10,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { formatNumber } from '@/utils/utilArray';
 import { useExpenseCtx } from '@/context/context';
 import debounce from 'lodash.debounce';
+import { mutate } from 'swr';
 
 const DriversPage = () => {
+  mutate('/api/drivers')
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

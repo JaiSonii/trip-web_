@@ -11,8 +11,10 @@ import { formatNumber } from '@/utils/utilArray';
 import debounce from 'lodash.debounce';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useExpenseCtx } from '@/context/context';
+import { mutate } from 'swr';
 
 const ShopKhataPage = () => {
+  mutate('/api/shopkhata')
   const {shops, isLoading} = useExpenseCtx()
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
