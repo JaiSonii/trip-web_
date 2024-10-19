@@ -81,7 +81,7 @@ export const BillingInfo: React.FC<BillingInfoProps> = ({ formData, handleChange
               />
             </label>
             <label className="block">
-              <span className="text-gray-700">Total {formData.billingType.split(" ")[1]}s</span>
+              <span className="text-gray-700">Total {formData.billingType?.split(" ")[1]}s</span>
               <input
                 className="w-full p-2 border border-gray-300 rounded-md mb-4"
                 type="number"

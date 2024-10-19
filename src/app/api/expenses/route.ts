@@ -1,3 +1,4 @@
+import { uploadFileToS3 } from "@/helpers/fileOperation";
 import { verifyToken } from "@/utils/auth";
 import { IExpense } from "@/utils/interface";
 import { connectToDatabase, ExpenseSchema } from "@/utils/schema";
@@ -163,13 +164,22 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Unauthorized User", status: 401 })
         }
         const formdata = await req.formData()
-        const file = formdata.get('file')
+        const file = formdata.get('file') as File
+       
         const expenseData = JSON.parse(formdata.get('expense') as string);
         await connectToDatabase()
         const newExpense = new Expense({
             user_id : user,
             ...expenseData
         })
+        const fileBuffer = Buffer.from(await file.arrayBuffer());
+        const fileName = `expenses/${newExpense._id}`;
+        const contentType = file.type;
+
+        // Upload file to S3
+        const s3FileName = await uploadFileToS3(fileBuffer, fileName, contentType);
+        const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3FileName}${contentType === 'application/pdf' ? '.pdf' : ''}`;
+        newExpense.url = fileUrl;
         await newExpense.save()
         console.log(newExpense)
         return NextResponse.json({expense : newExpense,  status: 200 })

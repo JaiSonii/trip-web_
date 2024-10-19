@@ -97,29 +97,36 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ driverId, onDriverUpdate, c
           date,
         }),
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to update driver');
       }
-
+  
       const data = await response.json();
-      setDriver((prev : any)=>({
-        ...prev,
-        driverExpAccounts : [driver.accounts[driver.accounts.length -1], ...prev.driverExpAccounts],
-        balance : prev.balance - driver.accounts[driver.accounts.length -1].got + driver.accounts[driver.accounts.length -1].gave 
-      }))
-      onDriverUpdate(data.driver);
-
+  
+      // Update the driver state
+      setDriver((prev: any) => {
+        const latestAccount = data.accounts[data.accounts.length - 1]; // Get the last account entry from the updated response
+        const newBalance =
+          prev.balance - (latestAccount.got || 0) + (latestAccount.gave || 0); // Update balance correctly
+  
+        return {
+          ...prev,
+          driverExpAccounts: [latestAccount, ...prev.driverExpAccounts], // Add the latest entry to the accounts
+          balance: newBalance, // Set the updated balance
+        };
+      });
+  
       console.log(`Confirm ${modalType} clicked with amount: ${amount}, reason: ${reason}, date: ${date}`);
-      closeModal();
+      closeModal(); // Close the modal after confirming
     } catch (error: any) {
       console.error('Failed to update driver:', error);
-      setError(error.message);
+      setError(error.message); // Set error message if something goes wrong
     } finally {
-      router.refresh()
+      router.refresh(); // Refresh the page after updating
     }
   };
-
+  
   const handleEditDriver = async (driverName: string, mobileNumber: string) => {
     const updatedDriver: Partial<IDriver> = {
       name: driverName,

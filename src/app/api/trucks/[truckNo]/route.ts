@@ -110,8 +110,8 @@ export async function GET(req: Request, { params }: { params: { truckNo: string 
       {
         $lookup: {
           from: 'parties',
-          localField: 'trips.party_id',    // Use the party_id field from trips
-          foreignField: '_id',             // Use the _id field from parties
+          localField: 'trips.party',    // Use the party_id field from trips
+          foreignField: 'party_id',             // Use the _id field from parties
           as: 'partyDetails'
         }
       },
@@ -148,7 +148,8 @@ export async function GET(req: Request, { params }: { params: { truckNo: string 
                       ]
                     },
                     date: '$$trip.startDate',  // Rename startDate to date
-                    partyName: '$partyDetails.partyName'  // Add partyName from lookup
+                    partyName: '$partyDetails.name',  // Add partyName from lookup
+                    type : 'trip'
                   }
                 ]
               }

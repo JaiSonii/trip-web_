@@ -6,43 +6,49 @@ interface DriverModalProps {
   open: boolean;
   onClose: () => void;
   type: 'gave' | 'got' | null;
-  onConfirm: any
+  onConfirm: any;
   selected?: any;
 }
 
 const DriverModal: React.FC<DriverModalProps> = ({ open, onClose, type, onConfirm, selected }) => {
   const [amount, setAmount] = useState<number>(0);
   const [reason, setReason] = useState<string>('');
-  const [date, setDate] = useState<string>('');
+  const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]); // Store date in ISO format
   const [otherReason, setOtherReason] = useState<string>('');
 
   useEffect(() => {
     if (selected) {
       setAmount(selected.gave ? selected.gave : selected.got || 0);
       setReason(selected.reason || '');
-      setDate(selected.date ? new Date(selected.date).toISOString().split('T')[0] : '');
+      setDate(selected.date ? new Date(selected.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]);
       setOtherReason('');
     }
   }, [selected]);
 
   const handleConfirm = () => {
     const finalReason = reason === 'Other' ? otherReason : reason;
-    if(selected){
+
+    if (!amount || !finalReason || !date) {
+      alert('Please fill in all the details');
+      return;
+    }
+
+    if (selected) {
       onConfirm({
-        gave : selected.gave ? amount : 0,
-        got : selected.got ? amount : 0,
-        reason : finalReason,
-        date : date
-      })
-    }else{
+        gave: selected.gave ? amount : 0,
+        got: selected.got ? amount : 0,
+        reason: finalReason,
+        date: date,
+      });
+    } else {
       onConfirm(amount, finalReason, date);
     }
-    
-    onClose()
+
+    onClose();
     setAmount(0);
     setReason('');
     setOtherReason('');
-    setDate('');
+    setDate(new Date().toISOString().split('T')[0]);
   };
 
   const handleCancel = () => {
@@ -60,7 +66,7 @@ const DriverModal: React.FC<DriverModalProps> = ({ open, onClose, type, onConfir
             <h2 className="text-xl font-bold mb-4">{type === 'gave' ? 'Driver Gave' : 'Driver Got'}</h2>
             <form>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Amount</label>
+                <label className="block text-sm font-medium text-gray-700">Amount*</label>
                 <input
                   type="number"
                   className="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
@@ -70,7 +76,7 @@ const DriverModal: React.FC<DriverModalProps> = ({ open, onClose, type, onConfir
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Reason</label>
+                <label className="block text-sm font-medium text-gray-700">Reason*</label>
                 <select
                   className="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
                   value={reason}
@@ -96,11 +102,11 @@ const DriverModal: React.FC<DriverModalProps> = ({ open, onClose, type, onConfir
                 )}
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700">Date</label>
+                <label className="block text-sm font-medium text-gray-700">Date*</label>
                 <input
                   type="date"
                   className="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50"
-                  value={date}
+                  value={date} // Ensure date is in ISO format 'YYYY-MM-DD'
                   onChange={(e) => setDate(e.target.value)}
                   required
                 />
@@ -108,8 +114,7 @@ const DriverModal: React.FC<DriverModalProps> = ({ open, onClose, type, onConfir
               <div className="flex justify-end gap-2">
                 <Button onClick={handleConfirm}>Confirm</Button>
                 <Button
-                  variant={'ghost'}
-                  className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded"
+                  variant={'outline'}
                   onClick={handleCancel}
                 >
                   Cancel

@@ -210,7 +210,7 @@ const SinglePartyPassbook = () => {
 
 
 
-              <TableCell><span className='text-green-500 font-semibold'>₹{formatNumber(acc.amount)}</span></TableCell>
+              <TableCell><span className='text-green-500 font-semibold'>{acc.type === 'payment' && `₹${formatNumber(acc.amount)}`}</span></TableCell>
               <TableCell><span className='text-green-500 font-semibold'>₹{acc.accountType ? '' : formatNumber(acc.revenue)}</span></TableCell>
               <TableCell>
                 <div>

@@ -84,8 +84,8 @@ const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr }) =
             ...prev,
             startDate: new Date(tripData.startDate),
             route: {
-                origin: tripData.origin.split('\n')[0],
-                destination: tripData.destination.split('\n')[0],
+                origin: tripData?.origin?.split('\n')[0],
+                destination: tripData?.destination?.split('\n')[0],
             },
             truck: tripData.truckNo,
             ewbValidity: tripData.validity,

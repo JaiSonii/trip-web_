@@ -80,7 +80,7 @@ const SinglePartyTrips = () => {
             <TableHead>Status</TableHead>
             <TableHead onClick={() => requestSort('balance')}>
               <div className='flex justify-between'>
-                Party Balance {getSortIcon('balance')}
+                Amount {getSortIcon('amount')}
               </div>
             </TableHead>
           </TableRow>
@@ -122,7 +122,7 @@ const SinglePartyTrips = () => {
               <TableCell className="border p-4">
                 <div className='flex items-center space-x-2'>
                   <FaFileInvoiceDollar className="text-bottomNavBarColor" />
-                  <span className='text-green-500 font-semibold'>₹{formatNumber(trip?.balance)}</span>
+                  <span className='text-green-500 font-semibold'>₹{formatNumber(trip?.amount)}</span>
                 </div>
               </TableCell>
             </TableRow>

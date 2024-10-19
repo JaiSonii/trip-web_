@@ -7,23 +7,32 @@ import { statuses } from '@/utils/schema';
 import { FaCalendarAlt, FaTruck, FaRoute, FaFileInvoiceDollar, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatNumber } from '@/utils/utilArray';
+import { useTruck } from '@/context/truckContext';
+import Loading from '../loading'
 
 // Dynamically import the Loading component
-const Loading = dynamic(() => import('../loading'), {
-  loading: () => <div>Loading...</div>,
-});
+
 
 const TruckTripsPage = () => {
+  const {truck, setTruck, loading} = useTruck()
   const router = useRouter();
   const { truckNo } = useParams();
-  const [trips, setTrips] = useState<ITrip[]>([]);
-  const [loading, setLoading] = useState(true);
+  
   const [error, setError] = useState<string | null>(null);
   const [parties, setParties] = useState<IParty[]>([]);
   const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
 
+  const trips = useMemo(()=>{
+    let filteredTrips: any = []
+    if (!truck?.truckLedger || truck?.truckLedger?.length === 0) return []; 
+    truck.truckLedger.map((item : any)=>{
+      if(item.type === 'trip') filteredTrips.push(item)
+    })
+    return filteredTrips
+  },[truck])
+
   const sortedTrips = useMemo(() => {
-    if (!trips || trips.length === 0) return []; // This line ensures that trips is not null or empty
+    if (!truck?.truckLedger || truck?.truckLedger?.length === 0) return []; // This line ensures that trips is not null or empty
     let sortableTrips = [...trips as any];
     if (sortConfig.key !== null) {
       sortableTrips.sort((a, b) => {
@@ -55,42 +64,41 @@ const TruckTripsPage = () => {
     return <FaSort />
   }
 
-  useEffect(() => {
-    const fetchTrips = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch(`/api/trips/truck/${truckNo}`);
-        if (!res.ok) {
-          throw new Error('Failed to fetch trips');
-        }
-        const data = await res.json();
-        setTrips(data.trips);
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchTrips = async () => {
+  //     try {
+  //       const res = await fetch(`/api/trips/truck/${truckNo}`);
+  //       if (!res.ok) {
+  //         throw new Error('Failed to fetch trips');
+  //       }
+  //       const data = await res.json();
+  //       setTrips(data.trips);
+  //     } catch (err) {
+  //       setError((err as Error).message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    const fetchParties = async () => {
-      setLoading(true);
-      try {
-        const res = await fetch('/api/parties');
-        if (!res.ok) {
-          throw new Error('Failed to fetch parties');
-        }
-        const data = await res.json();
-        setParties(data.parties);
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  //   const fetchParties = async () => {
+  //     setLoading(true);
+  //     try {
+  //       const res = await fetch('/api/parties');
+  //       if (!res.ok) {
+  //         throw new Error('Failed to fetch parties');
+  //       }
+  //       const data = await res.json();
+  //       setParties(data.parties);
+  //     } catch (err) {
+  //       setError((err as Error).message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    fetchTrips();
-    fetchParties();
-  }, [truckNo]);
+  //   fetchTrips();
+  //   fetchParties();
+  // }, [truckNo]);
 
   const renderedTrips = useMemo(() => (
     sortedTrips.map((trip, index) => (
@@ -128,12 +136,6 @@ const TruckTripsPage = () => {
             </div>
           </div>
         </TableCell>
-        <TableCell className="border p-4">
-          <div className='flex items-center space-x-2'>
-            <FaFileInvoiceDollar className="text-[rgb(247,132,50)]" />
-            <span className='text-green-500 font-semibold'>₹{formatNumber(trip.balance)}</span>
-          </div>
-        </TableCell>
       </TableRow>
     ))
   ), [trips, parties, router]);
@@ -165,9 +167,6 @@ const TruckTripsPage = () => {
                   Status{getSortIcon('status')}
                 </div>
               </TableHead>
-              <TableHead onClick={() => requestSort('balance')}><div className='flex justify-between'>
-                Party Balance {getSortIcon('balance')}
-              </div></TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

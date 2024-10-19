@@ -1,6 +1,6 @@
 'use client';
 import React, { useEffect, useState, useRef } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname, useParams } from 'next/navigation';
 import { IDriver, ITrip, TruckModel } from '@/utils/interface';
 import Link from 'next/link';
 import { BsFillFuelPumpFill } from "react-icons/bs";
@@ -17,15 +17,17 @@ import EditTruckModal from '../truck/EditTruckModal';
 import { motion } from 'framer-motion';
 import AddExpenseModal from '../AddExpenseModal';
 import { handleAddExpense } from '@/helpers/ExpenseOperation';
+import { useTruck } from '@/context/truckContext';
 
 interface TruckLayoutProps {
     children: React.ReactNode;
-    truckNo: string;
 }
 
-const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
+const TruckLayout = ({ children}: TruckLayoutProps) => {
+    const {truck, setTruck, loading} = useTruck()
     const router = useRouter();
     const pathname = usePathname();
+    const {truckNo} = useParams()
     const tabs = [
         { logo: <FaTruckMoving />, name: 'Trip Book', path: `/user/trucks/${truckNo}/trips` },
         { logo: <BsFillFuelPumpFill />, name: 'Fuel Book', path: `/user/trucks/${truckNo}/fuel` },
@@ -34,8 +36,7 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
         { logo: <IoDocuments />, name: 'Documents', path: `/user/trucks/${truckNo}/documents` },
     ];
 
-    const [truck, setTruck] = useState<TruckModel | null>(null);
-    const [loading, setLoading] = useState<boolean>(true);
+
     const [error, setError] = useState<string | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [openOptions, setOpenOptions] = useState(false);
@@ -111,22 +112,6 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
         router.push('/user/trucks');
     };
 
-    useEffect(() => {
-        const fetchTruckDetails = async () => {
-            try {
-                const res = await fetch(`/api/trucks/${truckNo}`);
-                if (!res.ok) throw new Error('Failed to fetch truck details');
-                const resData = res.ok ? await res.json() : alert('Failed to fetch truck')
-                setTruck(resData.truck);
-            } catch (error: any) {
-                console.error(error);
-                setError(error.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchTruckDetails();
-    }, [truckNo]);
 
 
     if (loading) return <Loading />;
@@ -248,7 +233,7 @@ const TruckLayout = ({ children, truckNo }: TruckLayoutProps) => {
                 isOpen={modalOpen}
                 onClose={() => setModalOpen(false)}
                 onSave={handleAddExpense}
-                truckNo={truckNo} driverId={''} categories={['Truck Expense', 'Trip Expense', 'Office Expense']} />
+                truckNo={truckNo as string} driverId={''} categories={['Truck Expense', 'Trip Expense', 'Office Expense']} />
             <EditTruckModal
                 truck={truck as TruckModel}
                 isOpen={edit}

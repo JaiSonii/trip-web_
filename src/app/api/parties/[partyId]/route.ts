@@ -39,9 +39,6 @@ export async function GET(req: Request, { params }: { params: { partyId: string 
         }
       },
       {
-        $unwind: { path: '$trips', preserveNullAndEmptyArrays: true }
-      },
-      {
         $lookup: {
           from: 'tripcharges',
           localField: 'trips.trip_id',
@@ -51,47 +48,93 @@ export async function GET(req: Request, { params }: { params: { partyId: string 
       },
       {
         $addFields: {
-          balance: {
-            $let: {
-              vars: {
-                accountBalance: { $sum: { $map: { input: '$partyPayments', as: 'payment', in: '$$payment.amount' } } },
-                chargeToBill: {
-                  $sum: { $filter: { input: '$tripCharges', as: 'charge', cond: { $eq: ['$$charge.partyBill', true] } } }
-                },
-                chargeNotToBill: {
-                  $sum: { $filter: { input: '$tripCharges', as: 'charge', cond: { $eq: ['$$charge.partyBill', false] } } }
-                }
-              },
+          trips: {
+            $map: {
+              input: '$trips',
+              as: 'trip',
               in: {
-                $subtract: [
-                  { $add: ['$trips.amount', '$$chargeToBill'] },
-                  { $add: ['$$accountBalance', '$$chargeNotToBill'] }
-                ]
+                type: 'trip',
+                date: '$$trip.startDate',
+                description: '$$trip.route',
+                status: '$$trip.status',
+                trip_id: '$$trip.trip_id',
+                truck: '$$trip.truck',
+                amount : '$$trip.amount',
+                revenue: {
+                  $let: {
+                    vars: {
+                      chargeToBill: {
+                        $sum: {
+                          $filter: {
+                            input: '$tripCharges',
+                            as: 'charge',
+                            cond: { $eq: ['$$charge.partyBill', true] }
+                          }
+                        }
+                      },
+                      chargeNotToBill: {
+                        $sum: {
+                          $filter: {
+                            input: '$tripCharges',
+                            as: 'charge',
+                            cond: { $eq: ['$$charge.partyBill', false] }
+                          }
+                        }
+                      }
+                    },
+                    in: {
+                      $subtract: [
+                        { $add: ['$$trip.amount', '$$chargeToBill'] },
+                        '$$chargeNotToBill'
+                      ]
+                    }
+                  }
+                },
+                totalPayments: {
+                  $let: {
+                    vars: {
+                      matchingPayments: {
+                        $filter: {
+                          input: '$partyPayments',
+                          as: 'payment',
+                          cond: { $eq: ['$$payment.trip_id', '$$trip.trip_id'] }
+                        }
+                      }
+                    },
+                    in: { $sum: '$$matchingPayments.amount' }
+                  }
+                }
               }
             }
           },
-          revenue: {
-            $let: {
-              vars: {
-                accountBalance: { $sum: { $map: { input: '$partyPayments', as: 'payment', in: '$$payment.amount' } } }
-              },
-              in: { $add: ['$trips.amount', '$$accountBalance'] }
+          partyPayments: {
+            $map: {
+              input: '$partyPayments',
+              as: 'payment',
+              in: {
+                type: 'payment',
+                date: '$$payment.date',
+                amount: '$$payment.amount',
+                description: 'Payment',
+                paymentType: '$$payment.paymentType',
+                trip_id: { $ifNull: ['$$payment.trip_id', null] }
+              }
             }
-          },
-          type: { $literal: 'trip' },
-          date: '$trips.startDate',
-          description: '$trips.route',
-          trip_id: '$trips.trip_id',
-          truck: '$trips.truck',
-          status: '$trips.status'
+          }
         }
       },
       {
+        // Combine `trips` and `partyPayments` into a single array
         $addFields: {
-          hasValidTrip: { $and: [{ $ne: ['$trip_id', null] }, { $ne: ['$revenue', null] }] }
+          items: { $concatArrays: ['$trips', '$partyPayments'] }
         }
       },
       {
+        // Sort by date descending
+        $sort: { 'items.date': -1 }
+      },
+      {
+        // Group final result
         $group: {
           _id: '$_id',
           party_id: { $first: '$party_id' },
@@ -100,35 +143,12 @@ export async function GET(req: Request, { params }: { params: { partyId: string 
           contactPerson: { $first: '$contactPerson' },
           address: { $first: '$address' },
           gstNumber: { $first: '$gstNumber' },
-          items: {
-            $push: {
-              _id: '$_id',
-              type: '$type',
-              date: { $ifNull: ['$date', null] },
-              amount: { $ifNull: ['$amount', 0] },
-              description: { $ifNull: ['$description', ''] },
-              status: { $ifNull: ['$status', ''] },
-              balance: { $ifNull: ['$balance', null] },
-              revenue: { $ifNull: ['$revenue', null] },
-              trip_id: { $ifNull: ['$trip_id', null] },
-              truck: { $ifNull: ['$truck', null] }
-            }
-          }
-        }
-      },
-      {
-        // Filter out items where `hasValidTrip` is false (no valid trip data)
-        $addFields: {
-          items: {
-            $filter: {
-              input: '$items',
-              as: 'item',
-              cond: { $ne: ['$$item.trip_id', null] }
-            }
-          }
+          items: { $first: '$items' }  // Keep sorted items
         }
       }
     ]);
+
+
 
 
     if (!parties) {

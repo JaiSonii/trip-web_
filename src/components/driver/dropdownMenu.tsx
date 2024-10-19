@@ -35,12 +35,12 @@ const DropdownMenu: React.FC<DropdownMenuProps> = ({ onEditClick, onDeleteClick 
           >
             <MdEdit style={{ width: '20px', height: '20px' }} /> Edit
           </Button>
-          <Button
+          {/* <Button
             variant={'destructive'}
             onClick={onDeleteClick}
           >
             <MdDeleteForever style={{ width: '20px', height: '20px' }} /> Delete
-          </Button>
+          </Button> */}
         </motion.div>
       )}
     </div>

@@ -11,6 +11,7 @@ import { GoOrganization } from 'react-icons/go';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import debounce from 'lodash.debounce';
+import TripCard from '@/components/TripCard';
 
 const TrucksPage = () => {
   const router = useRouter();
@@ -171,56 +172,14 @@ const TrucksPage = () => {
                   </TableCell>
                   <TableCell>
                     {truck.latestTrip && Object.keys(truck.latestTrip).length > 0 ? (
-                      <Link href={`/user/trips/${truck.latestTrip.trip_id}`} onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center gap-4 p-2 bg-white rounded-lg border-none">
-                          {/* Route and Party Info */}
-                          <div className="flex flex-col justify-center space-y-1 pr-4">
-                            <div className="flex items-center space-x-2">
-                              <FaRoute className="text-bottomNavBarColor text-base" />
-                              <span className="font-semibold text-sm text-gray-800">
-                                {truck.latestTrip.route?.origin.split(',')[0]} &rarr; {truck.latestTrip.route?.destination.split(',')[0]}
-                              </span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <GoOrganization className="text-bottomNavBarColor text-base" />
-                              <span className="text-xs text-gray-600">
-                                {truck.latestTrip.partyName || 'NA'}
-                              </span>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <span className="text-xs text-gray-500">
-                                {new Date(truck.latestTrip.startDate).toLocaleDateString('en-US', {
-                                  day: 'numeric',
-                                  month: 'short',
-                                  year: 'numeric',
-                                })}
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Status Info */}
-                          <div className="flex flex-col justify-between items-start flex-grow pl-4">
-                            <span className="font-semibold text-sm text-gray-600">
-                              {statuses[truck.latestTrip.status as number]}
-                            </span>
-                            <div className="w-full bg-gray-200 h-2 rounded overflow-hidden mt-1">
-                              <div
-                                className={`h-full transition-width duration-500 rounded ${truck.latestTrip.status === 0
-                                  ? 'bg-red-500'
-                                  : truck.latestTrip.status === 1
-                                    ? 'bg-yellow-500'
-                                    : truck.latestTrip.status === 2
-                                      ? 'bg-blue-500'
-                                      : truck.latestTrip.status === 3
-                                        ? 'bg-green-500'
-                                        : 'bg-green-800'
-                                  }`}
-                                style={{ width: `${(truck.latestTrip.status + 1) * 20}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                        </div>
-                      </Link>
+                      <TripCard
+                        key={truck.latestTrip.trip_id}
+                        tripId={truck.latestTrip.trip_id}
+                        route={truck.latestTrip.route}
+                        partyName={truck.latestTrip.partyName}
+                        status={truck.latestTrip.status}
+                        statuses={statuses}
+                      />
                     ) : (
                       'NA'
                     )}

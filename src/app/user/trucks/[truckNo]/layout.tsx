@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Loading from '../loading';
 import TruckLayout from '@/components/layout/TruckLayout';
+import { TruckProvider } from '@/context/truckContext';
 
 interface PartyLayoutProps {
   children: React.ReactNode;
@@ -35,9 +36,11 @@ const Layout: React.FC<PartyLayoutProps> = ({ children }) => {
   }
 
   return (
-    <TruckLayout truckNo={truckNo as string}>
+    <TruckProvider truckNo={truckNo as string}>
+    <TruckLayout>
       {children}
     </TruckLayout>
+    </TruckProvider>
   );
 };
 
