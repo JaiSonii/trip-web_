@@ -69,7 +69,7 @@ export async function GET(req: Request, { params }: { params: { driverId: string
                     route: '$$trip.route',
                     LR: '$$trip.LR',
                     party_id: '$$trip.party',
-                    trip_id: '$$trip._id',
+                    trip_id: '$$trip.trip_id',
                     truck: '$$trip.truck',
                     startDate: '$$trip.startDate',
                     status: '$$trip.status'
