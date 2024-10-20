@@ -207,7 +207,7 @@ const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo }) => {
                 duration: 0.5,
                 ease: [0, 0.71, 0.2, 1.01]
             }} className="w-full max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md flex flex-col">
-            <h1 className="text-2xl font-bold mb-4 text-bottomNavBarColor">Upload Document</h1>
+            <h1 className="text-2xl font-semibold mb-4 text-black">Upload Document</h1>
 
             {/* Loading indicator */}
             {loading && (
@@ -262,7 +262,7 @@ const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo }) => {
                         name="file"
                         onChange={handleFileChange}
                         className="w-full mt-1 p-2 border rounded"
-                        accept="application/pdf"
+                        accept="application/pdf, image/*"
                         required
                     />
                 </div>

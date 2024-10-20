@@ -251,8 +251,9 @@ body {
 }
 
 input:not([type="checkbox"]) {
-  @apply w-full px-3 py-2 border-2 border-black/25 focus:outline-none focus:ring-1 focus:ring-gray-300 rounded-full text-sm text-gray-700 file:bg-lightOrangeButtonColor file:border-none file:rounded-lg file:px-4 file:py-2 file:cursor-pointer hover:file:bg-bottomNavBarColor hover:file:text-white;
+  @apply w-full px-3 py-2 border-2 border-black/25 focus:outline-none focus:ring-1 focus:ring-gray-300 rounded-full text-sm text-gray-700 file:bg-lightOrangeButtonColor file:border-none file:rounded-lg file:px-2 file:py-1 file:cursor-pointer hover:file:bg-bottomNavBarColor hover:file:text-white;
 }
+
 
 textarea {
   @apply w-full px-3 py-2 border border-lightOrange rounded-lg focus:outline-none focus:ring focus:ring-lightOrange;
@@ -265,9 +266,8 @@ select {
   p-2
   border
   rounded
-  border-lightOrange
-  focus:ring-2 focus:ring-lightOrange focus:border-lightOrange
-  hover:border-primaryOrange
+  border-black/25
+  focus:ring-1 focus:ring-gray-300 
   transition-all
   duration-200
   ease-in-out

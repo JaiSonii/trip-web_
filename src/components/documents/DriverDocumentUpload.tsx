@@ -102,39 +102,39 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
                 if (e.target.files[0].type.includes('image/')) {
                     const text = await extractTextFromImage(e.target.files[0]);
                     const type = getDocType(text)
-                    const validity : string = extractLatestDate(text) as any
+                    const validity: string = extractLatestDate(text) as any
                     setFormData((prev) => ({
                         ...prev,
                         docType: types.has(type) ? type : 'Other',
-                        validityDate : new Date(validity || Date.now()).toISOString().split('T')[0]
+                        validityDate: new Date(validity || Date.now()).toISOString().split('T')[0]
                     }))
                     setLoading(false)
                     return
                 } else {
-                const res = await fetch(`/api/documents/validate`, {
-                    method: 'POST',
-                    body: fileData,
-                });
+                    const res = await fetch(`/api/documents/validate`, {
+                        method: 'POST',
+                        body: fileData,
+                    });
 
-                setLoading(false);
+                    setLoading(false);
 
-                if (!res.ok) {
-                    setError('Failed to get validity and docType. Please enter manually.');
-                    return;
+                    if (!res.ok) {
+                        setError('Failed to get validity and docType. Please enter manually.');
+                        return;
+                    }
+
+                    const data = await res.json();
+                    if (data.status === 402) {
+                        setError(data.error)
+                        return
+                    }
+                    setFormData({
+                        ...formData,
+                        file: e.target.files[0],
+                        validityDate: new Date(data.validity).toISOString().split('T')[0],
+                        docType: types.has(data.docType) ? data.docType : 'Other',
+                    });
                 }
-
-                const data = await res.json();
-                if(data.status === 402){
-                    setError(data.error)
-                    return
-                }
-                setFormData({
-                    ...formData,
-                    file : e.target.files[0],
-                    validityDate: new Date(data.validity).toISOString().split('T')[0],
-                    docType: types.has(data.docType) ? data.docType : 'Other',
-                });
-            }
             } catch (error) {
                 setLoading(false);
                 setError('Error occurred while validating document. Please enter manually');
@@ -204,7 +204,7 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
                 duration: 0.5,
                 ease: [0, 0.71, 0.2, 1.01]
             }} className="w-full max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md flex flex-col">
-            <h1 className="text-2xl font-bold mb-4 text-bottomNavBarColor">Upload Document</h1>
+            <h1 className="text-2xl font-semibold mb-4 text-black">Upload Document</h1>
 
             {/* Loading indicator */}
             {loading && (
@@ -260,7 +260,7 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
                         name="file"
                         onChange={handleFileChange}
                         className="w-full mt-1 p-2 border rounded"
-                        accept="application/pdf"
+                        accept="application/pdf, image/*"
                         required
                     />
                 </div>

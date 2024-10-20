@@ -112,6 +112,7 @@ export async function GET(req: Request, { params }: { params: { partyId: string 
               input: '$partyPayments',
               as: 'payment',
               in: {
+                _id : '$$payment._id',
                 type: 'payment',
                 date: '$$payment.date',
                 amount: '$$payment.amount',

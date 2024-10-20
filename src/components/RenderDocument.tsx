@@ -1,34 +1,31 @@
 'use client'
 
 import Link from "next/link";
-import { Document, Page, pdfjs } from 'react-pdf'
 import Image from "next/image";
 
 const isPdf = (fileName: string) => {
     return fileName?.toLowerCase().endsWith('.pdf');
 };
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
-
 export const renderDocument = (documentUrl: string) => {
     return (
-        <Link href={documentUrl.split('.pdf')[0]} target="_blank" rel="noopener noreferrer">
-            <div className="relative overflow-hidden h-40 w-full rounded-lg border border-gray-300 transition-shadow duration-200 group">
+        <Link href={documentUrl} target="_blank" rel="noopener noreferrer">
+            <div className="relative overflow-hidden h-40 rounded-lg border border-gray-300 transition-shadow duration-200 group w-[200px]">
                 {isPdf(documentUrl) ? (
-                    <div className="flex justify-center items-center h-full w-full group-hover:opacity-90">
-                        <Document
-                            file={documentUrl.split('.pdf')[0]}
-                            onLoadError={console.error}
+                    <div className="flex justify-center items-center h-full w-full group-hover:opacity-90 overflow-y-hidden overflow-x-hidden">
+                        {/* Render PDF using iframe */}
+                        <iframe
+                            src={documentUrl.split('.pdf')[0]}
                             className="w-full h-full"
-                        >
-                            <Page pageNumber={1} scale={0.4} className="w-full h-full" />
-                        </Document>
+                            title="PDF Preview"
+                        />
                     </div>
                 ) : (
                     <div className="flex justify-center items-center h-full w-full">
+                        {/* Render Image for image file types */}
                         <Image
                             src={documentUrl}
-                            alt={''}
+                            alt='Document preview'
                             className="rounded-md object-cover w-full h-full"
                             height={160}
                             width={160}
@@ -39,4 +36,4 @@ export const renderDocument = (documentUrl: string) => {
             </div>
         </Link>
     );
-}
+};

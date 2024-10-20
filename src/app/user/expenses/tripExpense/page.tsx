@@ -127,9 +127,9 @@ const TripExpense: React.FC = () => {
     }
   };
 
-  const handleExpense = async (expense: IExpense | any, id?: string) => {
+  const handleExpense = async (expense: IExpense | any, id?: string, file? : File | null) => {
     try {
-      const data = selected ? await handleEditExpense(expense, selected._id as string) : await handleAddExpense(expense)
+      const data = selected ? await handleEditExpense(expense, selected._id as string, file) : await handleAddExpense(expense, file)
       selected ?
         setTruckExpenseBook((prev) => (
           prev.map((exp) => exp._id === data._id ? ({ ...exp, ...data }) : exp)

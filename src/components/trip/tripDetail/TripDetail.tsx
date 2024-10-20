@@ -20,7 +20,7 @@ interface TripDetailsProps {
 }
 
 const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
-  const [accounts, setAccounts] = useState<PaymentBook[]>(trip.tripAccounts);
+  const [accounts, setAccounts] = useState<PaymentBook[]>([]);
   const [tripBalance, setBalance] = useState(trip.balance);
   const [charges, setCharges] = useState<TripExpense[]>([])
 
@@ -36,8 +36,9 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
   // }, [trip, charges, accounts])
 
   useEffect(() => {
-      const sorted = trip.tripCharges?.sort((a : any, b : any) => new Date(b.date).getTime() - new Date(a.date).getTime());
-      setCharges(sorted);
+    const sorted = trip.tripCharges?.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    setCharges(sorted);
+    setAccounts(trip?.tripAccounts)
   }, [trip]);
 
   const handleUndoStatus = async () => {
@@ -74,8 +75,10 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
         throw new Error('Failed to settle amount');
       }
       const resData = await res.json();
-      setTrip(resData.trip);
-      mutate('/api/trips')
+      setTrip((prev: ITrip | any) => ({
+        ...prev,
+        ...resData.trip
+      }));
     } catch (error) {
       alert(error)
       console.log('Error settling amount:', error);
@@ -96,8 +99,10 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
         throw new Error('Failed to settle amount');
       }
       const resData = await res.json();
-      setTrip(resData.trip);
-      mutate('/api/trips')
+      setTrip((prev: ITrip | any) => ({
+        ...prev,
+        ...resData.trip
+      }));
     } catch (error) {
       alert(error)
       console.log('Error settling amount:', error);
@@ -156,7 +161,10 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
         }
         const resData = await res.json();
         setAccounts(resData.trip.accounts);
-        setTrip(resData.trip)
+        setTrip((prev : ITrip | any)=>({
+          ...prev,
+          ...resData.trip
+        }));
       } catch (error: any) {
         alert(error.message);
         console.log(error);
@@ -228,7 +236,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
 
         {/* Right Side - Profit, Balance, and POD Viewer */}
         <div className="col-span-1 space-y-6">
-          <Profit charges={charges} truckCost={trip.truckHireCost && trip.truckHireCost} amount={trip.amount} setCharges={setCharges} tripId={trip.trip_id} driverId={trip.driver} truckNo={trip.truck} tripExpense={trip.tripExpenses}/>
+          <Profit charges={charges} truckCost={trip.truckHireCost && trip.truckHireCost} amount={trip.amount} setCharges={setCharges} tripId={trip.trip_id} driverId={trip.driver} truckNo={trip.truck} tripExpense={trip.tripExpenses} />
           <TripInfo label="Notes" value={trip.notes || 'No notes available'} tripId={trip.trip_id} />
           {/* <EWayBillUpload validity={trip.ewbValidityDate ? trip.ewbValidityDate : null} tripId={trip.trip_id} ewayBillUrl={trip.documents?.find(doc => doc.type == 'ewayBill')?.url || trip.ewayBill} setEwayBillUrl={setEwayBillUrl} />
           {trip.POD ? <PODViewer podUrl={trip.POD} /> : null} */}

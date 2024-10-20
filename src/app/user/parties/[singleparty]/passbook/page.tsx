@@ -35,6 +35,7 @@ interface IAccount {
 const SinglePartyPassbook = () => {
   const { party, setParty, loading } = useParty()
   const router = useRouter();
+  console.log(party)
 
   const [error, setError] = useState<string | null>(null);
   const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })

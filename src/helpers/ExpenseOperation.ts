@@ -1,6 +1,6 @@
 import { IExpense } from "@/utils/interface";
 
-export const handleAddExpense = async (expense: IExpense, file?: File) => {
+export const handleAddExpense = async (expense: IExpense, file?: File | null) => {
   try {
     const formdata = new FormData()
     formdata.append('expense', JSON.stringify(expense))
@@ -20,7 +20,7 @@ export const handleAddExpense = async (expense: IExpense, file?: File) => {
   }
 }
 
-export const handleEditExpense = async (expense: IExpense, id : string, file?: File) => {
+export const handleEditExpense = async (expense: IExpense, id : string, file?: File | null) => {
   try {
     const formdata = new FormData()
     formdata.append('expense', JSON.stringify(expense))

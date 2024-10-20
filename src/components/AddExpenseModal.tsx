@@ -10,6 +10,8 @@ import { statuses } from '@/utils/schema';
 import DriverSelect from './trip/DriverSelect';
 import ShopSelect from './shopkhata/ShopSelect';
 import { useExpenseCtx } from '@/context/context';
+import { renderDocument } from './RenderDocument';
+import Image from 'next/image';
 
 interface ChargeModalProps {
     isOpen: boolean;
@@ -67,6 +69,20 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
     const [driverName, setDriverName] = useState('');
     const [selectedCategory, setSelectedCategory] = useState(truckpage ? 'Truck Expense' : trippage ? 'Trip Expense' : officepage ? 'Office Expense' : '');
     const [trip, setTrip] = useState<ITrip | undefined>()
+    const [file, setFile] = useState<File | null>()
+    const [fileUrl, setFileUrl] = useState<string | null>(selected?.url || null);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const selectedFile = e.target.files ? e.target.files[0] : null;
+        setFile(selectedFile);
+
+        // Create a URL for the selected file to preview it
+        if (selectedFile) {
+            setFileUrl(URL.createObjectURL(selectedFile));
+        } else {
+            setFileUrl(null);
+        }
+    };
 
 
     useEffect(() => {
@@ -86,6 +102,7 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
             truck: selected?.truck || truckNo || '',
             shop_id: selected?.shop_id || '',
         });
+        setFile(selected?.url || null)
     }, [selected]);
 
     const expenseTypes = useMemo(() => {
@@ -178,13 +195,14 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
             return
         }
 
-        if (formData.paymentMode !== 'Paid By Driver') setFormData(prev=>({...prev, driver : ''}))
-        if (formData.paymentMode !== 'Credit') setFormData(prev=>({...prev, shop_id : ''})) 
+        if (formData.paymentMode !== 'Paid By Driver') setFormData(prev => ({ ...prev, driver: '' }))
+        if (formData.paymentMode !== 'Credit') setFormData(prev => ({ ...prev, shop_id: '' }))
+
 
         if (selected) {
-            onSave(formData, selected._id);
+            onSave(formData, selected._id, file);
         } else {
-            onSave(formData);
+            onSave(formData, '', file);
         }
 
         onClose();
@@ -213,6 +231,53 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
                     className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl"
                 >
                     <h2 className="text-xl font-semibold mb-4">Add Expense</h2>
+                    <div className={`mb-4 grid ${file && fileUrl ? 'grid-cols-3 gap-6' : 'grid-cols-2'} items-start`}>
+                        <div className='col-span-2'>
+                            <label className='text-gray-700 text-sm font-semibold mb-1 block'>
+                                Expense Receipt
+                            </label>
+                            <input
+                                type='file'
+                                accept='application/pdf,image/*'
+                                onChange={handleFileChange}
+
+                            />
+                            <p className='text-xs text-gray-500 mt-1'>
+                                Supported formats: PDF, JPG, PNG
+                            </p>
+                        </div>
+
+                        {/* Preview section */}
+                        {file && fileUrl && (
+                            <div className='col-span-1 flex justify-center items-start'>
+                                <div className='border border-gray-300 shadow-lg rounded-lg p-1 bg-white -top-6'>
+                                    {file.type?.startsWith('image/') || fileUrl.endsWith('.jpg') || fileUrl.endsWith('.png') ? (
+                                        <Image
+                                            src={fileUrl}
+                                            width={120}
+                                            height={120}
+                                            alt='Preview'
+                                            className='rounded-md shadow-md'
+                                        />
+                                    ) : (
+                                        <iframe
+                                            src={fileUrl.split('.pdf')[0]}
+                                            width='120'
+                                            height='120'
+                                            className='border border-gray-300 rounded-md shadow-md'
+                                            title='PDF Preview'
+                                        />
+                                    )}
+                                    <p className='text-xs text-gray-500 text-center mt-2'>
+                                        {file.name?.length > 20 ? file.name.slice(0, 20) + '...' : file.name || 'Document'}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                    </div>
+
+
                     <div className='flex justify-between gap-2'>
                         {categories &&
                             <div className="mb-4 w-full">
