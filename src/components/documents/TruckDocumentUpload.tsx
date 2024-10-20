@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '../ui/button';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator'; // Ensure this component is available
 import { TruckModel } from '@/utils/interface';
@@ -9,6 +9,7 @@ import { createWorker } from 'tesseract.js';
 import { getDocType } from '@/helpers/ImageOperation';
 import { extractLatestDate } from '@/helpers/ImageOperation';
 import { mutate } from 'swr';
+import { useExpenseCtx } from '@/context/context';
 
 interface DocumentForm {
     filename: string;
@@ -25,6 +26,7 @@ type Props = {
 };
 
 const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo }) => {
+    const { trucks } = useExpenseCtx()
     const [formData, setFormData] = useState<DocumentForm>({
         filename: '',
         validityDate: new Date().toISOString().split('T')[0],
@@ -36,36 +38,27 @@ const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-    const [trucks, setTrucks] = useState<TruckModel[]>([]);
-    const [filteredTrucks, setFilteredTrucks] = useState<TruckModel[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const router = useRouter()
-
-    useEffect(() => {
-        const fetchTrucks = async () => {
-            try {
-                const res = await fetch(`/api/trucks`);
-                const data = await res.json();
-                setTrucks(data.trucks);
-                setFilteredTrucks(data.trucks);
-            } catch (error) {
-                setError('Failed to fetch trucks');
-            }
-        };
-        fetchTrucks();
-    }, []);
-
     // Filter trucks based on search term
-    useEffect(() => {
+
+    const filteredTrucks = useMemo(() => {
+        if (!trucks || trucks.length === 0) return []
+        let filtered = [...trucks]
         if (searchTerm) {
-            setFilteredTrucks(trucks.filter((truck) =>
-                truck.truckNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                truck.truckType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                truck.status.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                truck.ownership.toLowerCase().includes(searchTerm.toLowerCase())
-            ));
+            let lowercaseQuery = searchTerm.toLocaleLowerCase()
+            filtered = trucks.filter((truck) =>
+                truck.truckNo.toLowerCase().includes(lowercaseQuery) ||
+                truck.truckType.toLowerCase().includes(lowercaseQuery) ||
+                truck.status.toLowerCase().includes(lowercaseQuery) ||
+                truck.ownership.toLowerCase().includes(lowercaseQuery)
+            )
+
         }
-    }, [searchTerm, trucks]);
+        return filtered
+    }, [trucks, searchTerm])
+
+
 
     // Handle option selection for lorry (trip)
     const handleOptionSelect = (value: string) => {
@@ -92,7 +85,7 @@ const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo }) => {
     // Handle file change
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const fileData = new FormData();
-        const types = new Set(['Permit', 'Insurance', 'Registration Certificate', 'Pollution'])
+        const types = new Set(['Permit', 'Insurance', 'Registration Certificate', 'Pollution', 'Tax', 'Fitness Certificate'])
         if (e.target.files) {
             setFormData({
                 ...formData,
@@ -105,11 +98,11 @@ const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo }) => {
                 if (e.target.files[0].type.includes('image/')) {
                     const text = await extractTextFromImage(e.target.files[0]);
                     const type = getDocType(text)
-                    const validity : string = extractLatestDate(text) as any
+                    const validity: string = extractLatestDate(text) as any
                     setFormData((prev) => ({
                         ...prev,
                         docType: types.has(type) ? type : 'Other',
-                        validityDate : new Date(validity || Date.now()).toISOString().split('T')[0]
+                        validityDate: new Date(validity || Date.now()).toISOString().split('T')[0]
                     }))
                     setLoading(false)
                     return
@@ -295,6 +288,7 @@ const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo }) => {
                         <option value="Insurance">Insurance</option>
                         <option value="Pollution Certificate">Pollution Certificate</option>
                         <option value="Fitness Certificate">Fitness Certificate</option>
+                        <option value="Tax">Tax</option>
                         <option value="Other">Other</option>
                     </select>
                 </div>

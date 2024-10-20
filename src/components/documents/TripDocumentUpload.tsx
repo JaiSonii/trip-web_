@@ -1,15 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '../ui/button';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator'; // Ensure this component is available
-import { ITrip } from '@/utils/interface';
+import { ITrip, TruckModel } from '@/utils/interface';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { motion } from 'framer-motion'
-import { statuses } from '@/utils/schema';
 import { useRouter } from 'next/navigation';
 import { createWorker } from 'tesseract.js';
 import { getDocType } from '@/helpers/ImageOperation';
 import { extractLatestDate } from '@/helpers/ImageOperation';
 import { mutate } from 'swr';
+import { statuses } from '@/utils/schema';
+import { useExpenseCtx } from '@/context/context';
 
 interface DocumentForm {
     filename: string;
@@ -25,7 +26,9 @@ type Props = {
     setOpen: (open: boolean) => void;
 };
 
-const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId }) => {
+const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId }) => {
+    const { trips } = useExpenseCtx()
+    console.log(trips)
     const [formData, setFormData] = useState<DocumentForm>({
         filename: '',
         validityDate: new Date().toISOString().split('T')[0],
@@ -37,47 +40,44 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-    const [trips, setTrips] = useState<ITrip[]>([]);
-    const [filteredTrips, setFilteredTrips] = useState<ITrip[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const router = useRouter()
 
-    useEffect(() => {
-        const fetchTrips = async () => {
-            try {
-                const res = await fetch(`/api/trips`);
-                const data = await res.json();
-                setTrips(data.trips);
-                setFilteredTrips(data.trips);
-            } catch (error) {
-                setError('Failed to fetch trips');
-            }
-        };
-        fetchTrips();
-    }, []);
-
-    // Filter trips based on search term
-    useEffect(() => {
+    // Filter trucks based on search term
+    const filteredTrips = useMemo(() => {
+        if (!trips || trips.length === 0) return []
+        let filtered = [...trips]
         if (searchTerm) {
-            setFilteredTrips(trips.filter((trip) =>
-                trip.route.origin.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                trip.route.destination.toLowerCase().includes(searchTerm.toLowerCase())
-            ));
+            const lowercaseQuery = searchTerm.toLowerCase()
+            filtered = trips.filter((trip) =>
+                trip.LR.toLowerCase().includes(lowercaseQuery) ||
+                trip.partyName.toLowerCase().includes(lowercaseQuery) ||
+                trip.route.origin.toLowerCase().includes(lowercaseQuery) ||
+                trip.route.destination.toLowerCase().includes(lowercaseQuery) ||
+                new Date(trip.startDate).toLocaleDateString().includes(lowercaseQuery) ||
+                trip.amount.toString().includes(lowercaseQuery) ||
+                trip.truckHireCost.toString().includes(lowercaseQuery) ||
+                trip.balance.toString().includes(lowercaseQuery) ||
+                trip.truck.toLowerCase().includes(lowercaseQuery)
+            )
         }
-    }, [searchTerm, trips]);
+        return filtered
+    }, [trips, searchTerm])
+
 
     // Handle option selection for lorry (trip)
     const handleOptionSelect = (value: string) => {
         setFormData((prev) => ({ ...prev, tripId: value }));
     };
 
+
     // Handle input changes
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormData({
-            ...formData,
+        setFormData((prevFormData) => ({
+            ...prevFormData,
             [name]: value,
-        });
+        }));
     };
 
     const extractTextFromImage = async (file: File): Promise<string> => {
@@ -89,8 +89,9 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId }) => {
 
     // Handle file change
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const types = new Set(['E-Way Bill', 'POD', 'Bilty'])
+        e.preventDefault()
         const fileData = new FormData();
+        const types = new Set(['E-Way Bill', 'POD', 'Bilty'])
         if (e.target.files) {
             setFormData({
                 ...formData,
@@ -99,16 +100,15 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId }) => {
 
             fileData.append('file', e.target.files[0] as File);
             setLoading(true);
-
             try {
                 if (e.target.files[0].type.includes('image/')) {
                     const text = await extractTextFromImage(e.target.files[0]);
                     const type = getDocType(text)
-                    const validity : string= extractLatestDate(text) as any
+                    const validity: string = extractLatestDate(text) as any
                     setFormData((prev) => ({
                         ...prev,
                         docType: types.has(type) ? type : 'Other',
-                        validityDate : new Date(validity || Date.now()).toISOString().split('T')[0]
+                        validityDate: new Date(validity || Date.now()).toISOString().split('T')[0]
                     }))
                     setLoading(false)
                     return
@@ -132,8 +132,8 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId }) => {
                     }
                     setFormData({
                         ...formData,
-                        validityDate: new Date(data.validity).toISOString().split('T')[0],
                         file: e.target.files[0],
+                        validityDate: new Date(data.validity).toISOString().split('T')[0],
                         docType: types.has(data.docType) ? data.docType : 'Other',
                     });
                 }
@@ -181,7 +181,7 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId }) => {
                     file: null,
                     tripId: ''
                 });
-                setOpen(false);
+                setOpen(false)
                 mutate('/api/documents/recent')
                 router.refresh()
             } else {
@@ -363,4 +363,4 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId }) => {
     );
 };
 
-export default TripDocumentUpload;
+export default TruckDocumentUpload;

@@ -1,6 +1,6 @@
 'use client'
 import React from 'react'
-import { renderDocument } from '../RenderDocument'
+import RenderDocument from '../RenderDocument'
 type props = {
     docs: any[]
 }
@@ -38,36 +38,34 @@ const RecentDocuments: React.FC<props> = ({ docs }) => {
                 <tbody className="bg-white divide-y divide-gray-100">
                     {docs?.map((doc: any, index: number) => (
                         <tr key={index} className="hover:bg-gray-50">
-                            <td className="py-2 px-4 border-b-2 border-gray-300">
-                                <div className="flex items-center space-x-2">
-                                    {renderDocument(doc.url)}
-                                    <p className="text-sm text-gray-600">{doc.filename}</p>
-                                    {doc.trip_id &&
-                                        <div className="text-gray-700">
-                                            <p><strong className='font-semibold'>LR Number:</strong> {doc.LR}</p>
-                                            <p><strong className='font-semibold'>Truck:</strong> {doc.truck}</p>
-                                            <p><strong className='font-semibold'>Route:</strong> {doc.route.origin} &rarr; {doc.route.destination}</p>
-                                            <p><strong className='font-semibold'>Start Date:</strong> {new Date(doc.startDate as string).toLocaleDateString()}</p>
+                            <td className="py-2 px-3 border-b border-gray-200 text-sm">
+                                <div className="flex items-center space-x-3">
+                                    {/* Render Document */}
+                                    <div className="flex-shrink-0"><RenderDocument documentUrl={doc.url} /></div>
 
-                                        </div>
-                                    }
-
-
-
+                                    {/* Document Details */}
+                                    <div className="flex flex-col space-y-1">
+                                        <p className="font-semibold text-gray-800">{doc.filename}</p>
+                                        {doc.trip_id && (
+                                            <div className="text-xs text-gray-600">
+                                                <p><span className="font-medium">LR:</span> {doc.LR}</p>
+                                                <p><span className="font-medium">Truck:</span> {doc.truck}</p>
+                                                <p><span className="font-medium">Route:</span> {doc.route.origin} &rarr; {doc.route.destination}</p>
+                                                <p><span className="font-medium">Start Date:</span> {new Date(doc.startDate).toLocaleDateString()}</p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </td>
-                            <td className="py-2 px-4 text-sm text-gray-500 border-b-2 border-gray-300">
-                                {doc.type}
-                            </td>
-                            <td className="py-2 px-4 text-sm text-gray-500 border-b-2 border-gray-300">
-                                {new Date(doc.uploadedDate).toLocaleDateString('en-IN')}
-                            </td>
-                            <td className="py-2 px-4 text-sm text-gray-500 border-b-2 border-gray-300">
+                            <td className="py-2 px-3 text-sm text-gray-500 border-b border-gray-200">{doc.type}</td>
+                            <td className="py-2 px-3 text-sm text-gray-500 border-b border-gray-200">{new Date(doc.uploadedDate).toLocaleDateString('en-IN')}</td>
+                            <td className="py-2 px-3 text-sm text-gray-500 border-b border-gray-200">
                                 {doc.validityDate ? new Date(doc.validityDate).toLocaleDateString('en-IN') : 'NA'}
                             </td>
                         </tr>
                     ))}
                 </tbody>
+
             </table>
 
 

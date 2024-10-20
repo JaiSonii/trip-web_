@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '../ui/button';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator'; // Ensure this component is available
 import { IDriver } from '@/utils/interface';
@@ -9,6 +9,7 @@ import { getDocType } from '@/helpers/ImageOperation';
 import { createWorker } from 'tesseract.js';
 import { extractLatestDate } from '@/helpers/ImageOperation';
 import { mutate } from 'swr';
+import { useExpenseCtx } from '@/context/context';
 
 interface DocumentForm {
     filename: string;
@@ -25,6 +26,7 @@ type Props = {
 };
 
 const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
+    const { drivers } = useExpenseCtx()
     const [formData, setFormData] = useState<DocumentForm>({
         filename: '',
         validityDate: new Date().toISOString().split('T')[0],
@@ -36,34 +38,26 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-    const [drivers, setDrivers] = useState<IDriver[]>([]);
-    const [filteredDrivers, setFilteredDrivers] = useState<IDriver[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const router = useRouter()
 
-    useEffect(() => {
-        const fetchDrivers = async () => {
-            try {
-                const res = await fetch(`/api/drivers`);
-                const data = await res.json();
-                setDrivers(data.drivers);
-                setFilteredDrivers(data.drivers);
-            } catch (error) {
-                setError('Failed to fetch drivers');
-            }
-        };
-        fetchDrivers();
-    }, []);
+
 
     // Filter drivers based on search term
-    useEffect(() => {
+
+    const filteredDrivers = useMemo(() => {
+        if (!drivers || drivers.length === 0) return []
+        let filtered = [...drivers]
         if (searchTerm) {
-            setFilteredDrivers(drivers.filter((driver) =>
-                driver.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                driver.contactNumber.toLowerCase().includes(searchTerm.toLowerCase())
-            ));
+            const lowercaseQuery = searchTerm.toLowerCase()
+            filtered = drivers.filter((driver) =>
+                driver.name.toLowerCase().includes(lowercaseQuery) ||
+                driver.contactNumber.toLowerCase().includes(lowercaseQuery)
+            )
         }
-    }, [searchTerm, drivers]);
+        return filtered
+    }, [drivers, searchTerm])
+
 
     // Handle option selection for lorry (driver)
     const handleOptionSelect = (value: string) => {
@@ -236,13 +230,18 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
                             </div>
                             {filteredDrivers.length > 0 ? (
                                 filteredDrivers.map((driver) => (
-                                    <SelectItem key={driver.driver_id} value={driver.driver_id}>
-                                        <span>{driver.name}</span>
-                                        <span
-                                            className={`ml-2 p-1 rounded ${driver.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
-                                        >
-                                            {driver.status}
-                                        </span>
+                                    <SelectItem key={driver.driver_id} value={driver.driver_id} >
+                                        <div className='grid grid-cols-3 text-left w-full gap-4'>
+                                            <p className='col-span-1'>{driver.name}</p>
+                                            <p className='col-span-1'>{driver.contactNumber}</p>
+                                            <p
+                                                className={`col-span-1 p-1 rounded ${driver.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+                                            >
+                                                {driver.status}
+                                            </p>
+                                        </div>
+
+
                                     </SelectItem>
                                 ))
                             ) : (

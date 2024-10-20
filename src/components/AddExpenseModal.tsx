@@ -10,8 +10,10 @@ import { statuses } from '@/utils/schema';
 import DriverSelect from './trip/DriverSelect';
 import ShopSelect from './shopkhata/ShopSelect';
 import { useExpenseCtx } from '@/context/context';
-import { renderDocument } from './RenderDocument';
+import RenderDocument  from './RenderDocument';
 import Image from 'next/image';
+import Link from 'next/link';
+import PreviewDocument from './documents/PreviewDocument';
 
 interface ChargeModalProps {
     isOpen: boolean;
@@ -71,6 +73,7 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
     const [trip, setTrip] = useState<ITrip | undefined>()
     const [file, setFile] = useState<File | null>()
     const [fileUrl, setFileUrl] = useState<string | null>(selected?.url || null);
+    const [modalOpen, setModalOpen] = useState(false)
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files ? e.target.files[0] : null;
@@ -228,7 +231,7 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
                         duration: 0.5,
                         ease: [0, 0.71, 0.2, 1.01]
                     }}
-                    className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl"
+                    className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl max-h-[700px] overflow-y-auto thin-scrollbar"
                 >
                     <h2 className="text-xl font-semibold mb-4">Add Expense</h2>
                     <div className={`mb-4 grid ${file && fileUrl ? 'grid-cols-3 gap-6' : 'grid-cols-2'} items-start`}>
@@ -250,28 +253,31 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
                         {/* Preview section */}
                         {file && fileUrl && (
                             <div className='col-span-1 flex justify-center items-start'>
-                                <div className='border border-gray-300 shadow-lg rounded-lg p-1 bg-white -top-6'>
+                                <div className='border border-gray-300 shadow-lg rounded-lg p-1 bg-white -top-6 overflow-hidden' >
                                     {file.type?.startsWith('image/') || fileUrl.endsWith('.jpg') || fileUrl.endsWith('.png') ? (
                                         <Image
                                             src={fileUrl}
                                             width={120}
                                             height={120}
                                             alt='Preview'
-                                            className='rounded-md shadow-md'
+                                            className='rounded-md shadow-md '
+                                            
                                         />
                                     ) : (
                                         <iframe
                                             src={fileUrl.split('.pdf')[0]}
                                             width='120'
                                             height='120'
-                                            className='border border-gray-300 rounded-md shadow-md'
+                                            className='border border-gray-300 rounded-md shadow-md '
                                             title='PDF Preview'
+                                            
                                         />
                                     )}
-                                    <p className='text-xs text-gray-500 text-center mt-2'>
-                                        {file.name?.length > 20 ? file.name.slice(0, 20) + '...' : file.name || 'Document'}
-                                    </p>
+                                    <Button variant={'link'} onClick={()=>setModalOpen(true)}>
+                                        Open Document
+                                    </Button>
                                 </div>
+                                <PreviewDocument isOpen={modalOpen} onClose={()=>setModalOpen(false) } documentUrl={fileUrl} />
                             </div>
                         )}
 

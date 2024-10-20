@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { pdfjs } from 'react-pdf';
-import { renderDocument } from '../RenderDocument';
+import RenderDocument from '../RenderDocument';
 import { Button } from '../ui/button';
 import dynamic from 'next/dynamic';
 import RecentDocuments from '../documents/RecentDocuments';

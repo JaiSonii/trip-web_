@@ -12,6 +12,7 @@ import { useExpenseCtx } from '@/context/context';
 import { FaShieldAlt, FaThLarge } from 'react-icons/fa';
 import folderIcon from '@/assets/folder-icon.png'
 import Image from 'next/image';
+import { TbReceiptTax } from 'react-icons/tb';
 
 const TruckDocArray = [
   {
@@ -37,6 +38,12 @@ const TruckDocArray = [
     title: 'Fitness Certificate',
 
     icon: <FaFolderOpen className='text-bottomNavBarColor' size={70} /> // Folder icon for "Other" category
+  },
+  
+  {
+    title: 'Tax',
+
+    icon: <TbReceiptTax className='text-bottomNavBarColor' size={70} /> // Folder icon for "Other" category
   },
   {
     title: 'Other',
@@ -147,7 +154,7 @@ const TruckDocuments = () => {
 
       <div className="my-4">
         <h1 className="text-lg font-semibold text-black my-4">Select Document Type</h1>
-        <div className="grid grid-cols-6 gap-3">
+        <div className="grid grid-cols-7 gap-2">
           {TruckDocArray.map((item: any, index: number) => (
             <div
               key={index}
