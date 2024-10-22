@@ -104,9 +104,6 @@ export default function Home() {
       </section>
 
 
-
-
-
       {/* Hero Section */}
       <section className="p-4 lg:p-16 bg-white">
         <div className="flex flex-col-reverse lg:flex-row items-center justify-between gap-6 ">
@@ -244,69 +241,70 @@ export default function Home() {
         </div>
       </section>
 
-
-      <footer className="bg-[#FE8631] text-black p-16 mt-20">
+      <footer className="bg-[#FE8631] text-black p-16 mt-0 sm:mt-10 relative">
         <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 text-lg">
           {/* Products Section */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Products</h3>
-            <ul>
-              <li className="mb-2"><Link href="#">Trip management</Link></li>
-              <li className="mb-2"><Link href="#">Expense management</Link></li>
-              <li><Link href="#">Route optimization</Link></li>
+            <ul className="space-y-2">
+              <li><Link href="#" className="hover:text-white transition">Trip management</Link></li>
+              <li><Link href="#" className="hover:text-white transition">Expense management</Link></li>
+              <li><Link href="#" className="hover:text-white transition">Route optimization</Link></li>
             </ul>
           </div>
 
           {/* Company Section */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Company</h3>
-            <ul>
-              <li className="mb-2"><Link href="#">About us</Link></li>
-              <li><Link href="#">Contact us</Link></li>
+            <ul className="space-y-2">
+              <li><Link href="#" className="hover:text-white transition">About us</Link></li>
+              <li><Link href="#" className="hover:text-white transition">Contact us</Link></li>
             </ul>
           </div>
 
           {/* Terms Section */}
           <div>
-            <ul>
-              <li className="mb-2"><Link href="#">Terms of service</Link></li>
-              <li><Link href="#">Privacy & Policy</Link></li>
+            <h3 className="text-lg font-semibold mb-4">Legal</h3>
+            <ul className="space-y-2">
+              <li><Link href="/terms" className="hover:text-white transition" target="_black" rel="noopener noreferrer">Terms of service</Link></li>
+              <li><Link href="/privacy-policy" className="hover:text-white transition" target="_black" rel="noopener noreferrer">Privacy & Policy</Link></li>
             </ul>
           </div>
 
           {/* Get in Touch Section */}
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-6">
             <div>
               <h3 className="text-lg font-bold mb-4">Get in Touch</h3>
-              <div className="flex space-x-4 items-center ">
+              <div className="flex space-x-4 items-center">
                 <Link href="#">
-                  <Image src={instaIcon} alt="Instagram" width={27} height={27} />
+                  <Image src={instaIcon} alt="Instagram" width={27} height={27} className="hover:opacity-80 transition" />
                 </Link>
                 <Link href="#">
-                  <Image src={linkedinIcon} alt="LinkedIn" width={30} height={30} />
+                  <Image src={linkedinIcon} alt="LinkedIn" width={30} height={30} className="hover:opacity-80 transition" />
                 </Link>
                 <Link href="#">
-                  <Image src={fbIcon} alt="Facebook" width={30} height={30} />
+                  <Image src={fbIcon} alt="Facebook" width={30} height={30} className="hover:opacity-80 transition" />
                 </Link>
                 <Link href="#">
-                  <Image src={ytIcon} alt="YouTube" width={30} height={30} />
+                  <Image src={ytIcon} alt="YouTube" width={30} height={30} className="hover:opacity-80 transition" />
                 </Link>
               </div>
             </div>
             <div>
               <h3 className="text-lg font-bold mb-4">Download our app</h3>
               <Link href="#">
-                <Image src={playstore} alt="Google Play" width={173} height={51} />
+                <Image src={playstore} alt="Google Play" width={173} height={51} className="hover:opacity-90 transition" />
               </Link>
             </div>
           </div>
         </div>
 
         {/* Bottom Line and Copyright */}
-        <div className="mt-8 border-t border-white pt-4">
-          <p className="text-center text-lg font-semibold">&copy; 2024 Awajahi. All Rights Reserved.</p>
+        <div className="mt-12 border-t border-white pt-6 text-center">
+          <p className="text-lg font-semibold">&copy; 2024 Awajahi. All Rights Reserved.</p>
         </div>
       </footer>
+
     </div>
   );
 }

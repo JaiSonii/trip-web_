@@ -10,7 +10,6 @@ import { statuses } from '@/utils/schema';
 import DriverSelect from './trip/DriverSelect';
 import ShopSelect from './shopkhata/ShopSelect';
 import { useExpenseCtx } from '@/context/context';
-import RenderDocument  from './RenderDocument';
 import Image from 'next/image';
 import Link from 'next/link';
 import PreviewDocument from './documents/PreviewDocument';
@@ -287,7 +286,7 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
                     <div className='flex justify-between gap-2'>
                         {categories &&
                             <div className="mb-4 w-full">
-                                <label className="block text-sm font-medium text-gray-700">Select Category</label>
+                                <label className="block text-sm font-medium text-gray-700">Select Category*</label>
                                 <Select value={selectedCategory} onValueChange={(value) => setSelectedCategory(value)}>
                                     <SelectTrigger className="w-full">
                                         <SelectValue>{selectedCategory || 'Select Category'}</SelectValue>
@@ -301,7 +300,7 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
                             </div>
                         }
                         <div className="mb-4 w-full">
-                            <label className="block text-sm font-medium text-gray-700">Expense Type</label>
+                            <label className="block text-sm font-medium text-gray-700">Expense Type*</label>
                             <Select value={formData.expenseType} onValueChange={(value) => handleSelectChange('expenseType', value)}>
                                 <SelectTrigger className="w-full">
                                     <SelectValue>{formData.expenseType || 'Select Expense Type'}</SelectValue>
@@ -317,7 +316,7 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
 
                     <div className='flex items-center space-x-2 '>
                         <div className="mb-4 w-1/2">
-                            <label className="block text-sm font-medium text-gray-700">Amount</label>
+                            <label className="block text-sm font-medium text-gray-700">Amount*</label>
                             <input
                                 type="number"
                                 name="amount"
@@ -329,7 +328,7 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
                         </div>
 
                         <div className="mb-4 w-1/2">
-                            <label className="block text-sm font-medium text-gray-700">Date</label>
+                            <label className="block text-sm font-medium text-gray-700">Date*</label>
                             <input
                                 type="date"
                                 name="date"
@@ -342,7 +341,7 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
 
                     {selectedCategory !== 'Office Expense' && <div className='flex items-center space-x-2 '>
                         {selectedCategory === 'Trip Expense' && <div className="mb-4 w-1/2">
-                            <label className="block text-sm font-medium text-gray-700">Select Trip</label>
+                            <label className="block text-sm font-medium text-gray-700">Select Trip*</label>
                             <Select value={formData.trip_id} defaultValue={formData.trip_id} onValueChange={(value) => handleSelectChange('trip_id', value)}>
                                 <SelectTrigger className="w-full">
                                     <SelectValue placeholder='Select Trip' />
@@ -369,7 +368,7 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
                         </div>}
 
                         <div className="mb-4 w-1/2">
-                            <label className="block text-sm font-medium text-gray-700">Select Truck</label>
+                            <label className="block text-sm font-medium text-gray-700">Select Truck*</label>
                             <Select value={formData.truck} onValueChange={(value) => handleSelectChange('truck', value)}>
                                 <SelectTrigger className="w-full text-black" value={formData.truck}>
                                     <SelectValue placeholder='Select Truck' />
@@ -392,7 +391,7 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
 
                     </div>}
 
-                    <label className="block text-sm font-medium text-gray-700">Payment Mode</label>
+                    <label className="block text-sm font-medium text-gray-700">Payment Mode*</label>
                     <div className="flex flex-row w-full justify-start gap-3 mb-3">
                         {paymentModes.map((type) => (
                             <button

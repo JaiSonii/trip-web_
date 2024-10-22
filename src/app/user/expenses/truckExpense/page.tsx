@@ -133,7 +133,10 @@ const TruckExpense: React.FC = () => {
       selected ?
         setTruckExpenseBook((prev) => (
           prev.map((exp) => exp._id === data._id ? ({ ...exp, ...data }) : exp)
-        )) : getBook(null, null)
+        )) : setTruckExpenseBook((prev)=>[
+          {...data},
+          ...prev
+        ])
 
     } catch (error) {
       console.error(error);

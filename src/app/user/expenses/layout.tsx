@@ -8,9 +8,9 @@ interface PartyLayoutProps {
 const Layout: React.FC<PartyLayoutProps> = ({ children }) => {
 
   return (
-    <ExpenseLayout >
-      {children}
-    </ExpenseLayout>
+      <ExpenseLayout >
+        {children}
+      </ExpenseLayout>
   );
 };
 

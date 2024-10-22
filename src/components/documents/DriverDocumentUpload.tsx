@@ -81,29 +81,34 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
     };
 
     // Handle file change
+    // Handle file change
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        e.preventDefault(); // prevent any accidental form submission due to file input change
+
         const types = new Set(['License', 'Aadhar', 'PAN', 'Police Verification'])
+
         const fileData = new FormData();
         if (e.target.files) {
+            const file = e.target.files[0];
             setFormData({
                 ...formData,
-                file: e.target.files[0],
+                file: file,
             });
 
-            fileData.append('file', e.target.files[0] as File);
+            fileData.append('file', file as File);
             setLoading(true);
             try {
-                if (e.target.files[0].type.includes('image/')) {
-                    const text = await extractTextFromImage(e.target.files[0]);
-                    const type = getDocType(text)
-                    const validity: string = extractLatestDate(text) as any
+                if (file.type.includes('image/')) {
+                    const text = await extractTextFromImage(file);
+                    const type = getDocType(text);
+                    const validity: string = extractLatestDate(text) as any;
                     setFormData((prev) => ({
                         ...prev,
                         docType: types.has(type) ? type : 'Other',
                         validityDate: new Date(validity || Date.now()).toISOString().split('T')[0]
-                    }))
-                    setLoading(false)
-                    return
+                    }));
+                    setLoading(false);
+                    return;
                 } else {
                     const res = await fetch(`/api/documents/validate`, {
                         method: 'POST',
@@ -119,8 +124,8 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
 
                     const data = await res.json();
                     if (data.status === 402) {
-                        setError(data.error)
-                        return
+                        setError(data.error);
+                        return;
                     }
                     setFormData({
                         ...formData,
@@ -131,10 +136,11 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
                 }
             } catch (error) {
                 setLoading(false);
-                setError('Error occurred while validating document. Please enter manually');
+                setError('Error occurred while validating document. Please enter manually.');
             }
         }
     };
+
 
     // Handle form submission
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {

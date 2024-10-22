@@ -83,7 +83,10 @@ const OfficeExpense: React.FC = () => {
             selected ?
                 setMaintainenceBook((prev) => (
                     prev.map((exp) => exp._id === data._id ? ({ ...exp, ...data }) : exp)
-                )) : getBook()
+                )) : setMaintainenceBook((prev)=>[
+                    {...data},
+                    ...prev
+                  ])
 
         } catch (error) {
             console.error(error);
