@@ -7,6 +7,7 @@ import { Button } from '../ui/button';
 import dynamic from 'next/dynamic';
 import RecentDocuments from '../documents/RecentDocuments';
 import Link from 'next/link';
+import TruckDocumentUpload from '../documents/TruckDocumentUpload';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -15,8 +16,6 @@ interface TruckDocumentProps {
 }
 
 const TruckDocuments: React.FC<TruckDocumentProps> = ({ truckNo }) => {
-
-    const TruckDocumentUpload = dynamic(() => import('@/components/documents/TruckDocumentUpload'), { ssr: false })
 
     const [documents, setDocuments] = useState<any>([]);
     const [modalOpen, setModalOpen] = useState(false)

@@ -16,6 +16,7 @@ import Image from 'next/image';
 import biltyIcon from '@/assets/bilty-icon.png';
 import folderIcon from '@/assets/folder-icon.png'
 import { FaThLarge } from 'react-icons/fa';
+import TripDocumentUpload from '@/components/documents/TripDocumentUpload';
 
 const TripDocumentsLanding = () => {
   const TripDocArray = [
@@ -37,7 +38,6 @@ const TripDocumentsLanding = () => {
     },
   ];
 
-  const TripDocumentUpload = dynamic(() => import('@/components/documents/TripDocumentUpload'), { ssr: false });
   const { trips, isLoading } = useExpenseCtx();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState<string>('');

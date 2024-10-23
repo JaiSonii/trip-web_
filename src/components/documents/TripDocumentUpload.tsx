@@ -26,7 +26,7 @@ type Props = {
     setOpen: (open: boolean) => void;
 };
 
-const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId }) => {
+const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId }) => {
     const { trips } = useExpenseCtx()
     console.log(trips)
     const [formData, setFormData] = useState<DocumentForm>({
@@ -363,4 +363,4 @@ const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId }) => {
     );
 };
 
-export default TruckDocumentUpload;
+export default TripDocumentUpload;

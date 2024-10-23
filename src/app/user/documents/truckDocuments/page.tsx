@@ -13,6 +13,7 @@ import { FaShieldAlt, FaThLarge } from 'react-icons/fa';
 import folderIcon from '@/assets/folder-icon.png'
 import Image from 'next/image';
 import { TbReceiptTax } from 'react-icons/tb';
+import TruckDocumentUpload from '@/components/documents/TruckDocumentUpload';
 
 const TruckDocArray = [
   {
@@ -64,7 +65,6 @@ const TruckDocuments = () => {
   const [type, setType] = useState('')
 
   const RecentDocuments = dynamic(() => import('@/components/documents/RecentDocuments'))
-  const TruckDocumentUpload = dynamic(() => import('@/components/documents/TruckDocumentUpload'))
 
 
 

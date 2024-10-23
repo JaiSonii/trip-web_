@@ -13,6 +13,7 @@ import { UndoIcon } from 'lucide-react';
 import { formatNumber } from '@/utils/utilArray';
 import Link from 'next/link';
 import { mutate } from 'swr';
+import BiltyForm from '../BiltyForm';
 
 interface TripDetailsProps {
   trip: ITrip | any;
@@ -23,6 +24,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
   const [accounts, setAccounts] = useState<PaymentBook[]>([]);
   const [tripBalance, setBalance] = useState(trip.balance);
   const [charges, setCharges] = useState<TripExpense[]>([])
+  const [biltyModalOpen, setBiltyModalOpen] = useState(false)
 
   // useEffect(() => {
   //   const balance = () => {
@@ -221,13 +223,15 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
           <div className="col-span-3 flex justify-center space-x-4">
             <div className="flex items-center space-x-4">
               <StatusButton status={trip.status as number} statusUpdate={handleStatusUpdate} dates={trip.dates} amount={tripBalance} />
-              <ViewBillButton />
               <Button variant={'destructive'} onClick={handleUndoStatus}>
                 <div className='flex items-center space-x-2'>
                   <UndoIcon />
                   <span>Undo Status</span>
                 </div>
               </Button>
+              <ViewBillButton />
+              
+              <Button onClick={()=>setBiltyModalOpen(true)}>Generate Bilty</Button>
               {/* Add more buttons as needed */}
             </div>
           </div>
@@ -249,6 +253,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
 
 
       </div>
+      <BiltyForm isOpen={biltyModalOpen} onClose={()=>setBiltyModalOpen(false)}/>
     </div>
   );
 };

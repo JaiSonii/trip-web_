@@ -38,6 +38,7 @@ const StatusButton: React.FC<StatusButtonProps> = ({ status, statusUpdate, dates
 
   return (
     <div className="w-full">
+      
       <Button
         onClick={openModal}
         className={`
@@ -63,6 +64,7 @@ const StatusButton: React.FC<StatusButtonProps> = ({ status, statusUpdate, dates
           <span>{label} - {fillPercentage}%</span>
         </div>
       </Button>
+
 
       <StatusModal
         status={status}

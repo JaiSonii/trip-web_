@@ -7,6 +7,7 @@ import { useParams } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
+import TripDocumentUpload from '@/components/documents/TripDocumentUpload'
 
 const TripDocumentsPage = () => {
     const { tripId } = useParams() as { tripId: string };
@@ -15,7 +16,6 @@ const TripDocumentsPage = () => {
     const [modalOpen, setModalOpen] = useState(false)
 
     const TripDocuments = dynamic(() => import('@/components/trip/TripDocuments'), { ssr: false })
-    const TripDocumentUpload = dynamic(() => import('@/components/documents/TripDocumentUpload'), { ssr: false })
 
     const fetchTrip = async () => {
         try {
