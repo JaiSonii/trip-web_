@@ -253,7 +253,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
 
 
       </div>
-      <BiltyForm isOpen={biltyModalOpen} onClose={()=>setBiltyModalOpen(false)}/>
+      <BiltyForm isOpen={biltyModalOpen} onClose={()=>setBiltyModalOpen(false)} trip={trip}/>
     </div>
   );
 };

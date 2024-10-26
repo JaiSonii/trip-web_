@@ -24,7 +24,7 @@ export const metadata = {
 
 const TermsPage = () => {
     return (
-        <div className="container mx-auto p-4 bg-[#FBFBFB] font-roboto">
+        <div className="container mx-auto p-4 bg-[#FBFBFB] font-roboto text-black">
             <div className="mb-6">
                 <h1 className="text-3xl font-bold">Terms and Conditions</h1>
                 <span className="text-gray-600">Last Updated: {new Date('2024-10-21').toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}</span>

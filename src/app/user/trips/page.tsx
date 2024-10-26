@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { ITrip } from '@/utils/interface';
 import { statuses } from '@/utils/schema';
 import { useRouter } from 'next/navigation';
@@ -21,6 +21,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import debounce from 'lodash.debounce';
 import { useExpenseCtx } from '@/context/context';
 import { mutate } from 'swr';
+import { motion } from 'framer-motion';
+import { MdDelete, MdEdit } from 'react-icons/md';
+import { IoAddCircle, IoCloseCircleOutline } from 'react-icons/io5';
 
 
 const columnOptions = [
@@ -47,6 +50,27 @@ const TripsPage = () => {
   const [visibleColumns, setVisibleColumns] = useState<string[]>(columnOptions.map(col => col.label));
   const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
   const [searchQuery, setSearchQuery] = useState('')
+  const [openOptions, setOpenOptions] = useState(false);
+  const dropdownRef = useRef<any>(null);
+  const [openOptionsId, setOpenOptionsId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: any) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setOpenOptions(false);
+      }
+    };
+
+    if (openOptions) {
+      document.addEventListener('mousedown', handleClickOutside);
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [openOptions]);
 
   const sortedTrips = useMemo(() => {
     if (!trips || trips.length === 0) return [];  // This line ensures that trips is not null or empty
@@ -375,11 +399,61 @@ const TripsPage = () => {
                       </TableCell>
                     )}
                     <TableCell className="">
-                      <div className='flex items-center justify-between'>
-                        <p className='text-green-600 font-semibold'>₹{formatNumber(trip.balance)}</p>
-                        <SlOptionsVertical />
+                      <div className="flex items-center justify-between">
+                        <p className="text-green-600 font-semibold">₹{formatNumber(trip.balance)}</p>
+                        <div className="relative" ref={dropdownRef}>
+                          <Button
+                            className="rounded-full"
+                            variant={'ghost'}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              // Toggle options for the current row
+                              setOpenOptionsId(openOptionsId === trip.trip_id ? null : trip.trip_id);
+                            }}
+                          >
+                            <SlOptionsVertical size={20} />
+                          </Button>
+                          {openOptionsId === trip.trip_id && ( // Only display for the active row
+                            <motion.div
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.2 }}
+                              className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md flex flex-col gap-2 p-2 z-20"
+                            >
+                              <Button
+                                onClick={() => setOpenOptionsId(null)}
+                                className="justify-start"
+                              >
+                                Update Status
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                onClick={() => setOpenOptionsId(null)}
+                                className="justify-start"
+                              >
+                                Undo Status
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                onClick={() => setOpenOptionsId(null)}
+                                className="justify-start"
+                              >
+                                <MdDelete className="mr-2" /> Delete Trip
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  setOpenOptionsId(null)
+                                }}
+                                className="justify-start"
+                              >
+                                <IoCloseCircleOutline className="mr-2" /> Close
+                              </Button>
+                            </motion.div>
+                          )}
+                        </div>
                       </div>
-
                     </TableCell>
                   </TableRow>
                 ))}

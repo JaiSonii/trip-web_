@@ -14,7 +14,7 @@ const fontSans = FontSans({
 export const metadata: Metadata = {
   title: "Awajahi - Moving India One Mile at a Time",
   description: "Awajahi is transforming transportation in India, one mile at a time. Discover our services and how we are moving India efficiently and reliably.",
-  keywords: ["Awajahi", "Transport", "Logistics", "India", "Moving Services", "Web Application", "Fleet Management","awajahi"],
+  keywords: ["Awajahi", "Transport", "Logistics", "India", "Moving Services", "Web Application", "Fleet Management", "awajahi"],
   authors: [{ name: "Awajahi Team" }],
   robots: {
     index: true,
@@ -26,8 +26,20 @@ export const metadata: Metadata = {
     url: "https://www.awajahi.com",
     type: "website",
     locale: "en_US",
+    images: [
+      {
+        url: "https://www.awajahi.com/src/assets/awajahi logo.png", // Update this URL to the path of your logo
+        width: 1200,
+        height: 630,
+        alt: "Awajahi Logo",
+      },
+    ],
+  },
+  icons: {
+    icon: "/favicon.ico", // Add your favicon here
   },
 };
+
 
 export default function RootLayout({
   children,
