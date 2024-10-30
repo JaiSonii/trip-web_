@@ -67,6 +67,7 @@ type FormDataType = {
   paidBy: 'consigner' | 'consignee' | 'agent'
   ewayBillNo: string
   invoiceNo: string
+  truckNo : string
 }
 
 const steps = [
@@ -127,7 +128,8 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
     unit: '',
     paidBy: 'consigner',
     ewayBillNo: '',
-    invoiceNo: ''
+    invoiceNo: '',
+    truckNo : trip.truck || ''
   })
   const billRef = useRef<HTMLDivElement>(null)
 
@@ -135,13 +137,13 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
     const copy = selectedCopy
     switch (copy) {
       case 'Consigner':
-        return 'bg-red-200'
+        return 'bg-red-100'
       case 'Consignee':
-        return 'bg-blue-200'
+        return 'bg-blue-100'
       case 'Driver':
-        return 'bg-yellow-200'
+        return 'bg-yellow-100'
       case 'Office':
-        return 'bg-green-200'
+        return 'bg-green-100'
 
 
       default:
@@ -149,11 +151,19 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
     }
   }, [selectedCopy])
 
-  const handlePrint = useReactToPrint({
-    contentRef: billRef,
-    documentTitle: 'Bilty',
-    onAfterPrint: () => console.log('PDF generated successfully'),
-  })
+
+
+
+  const downloadAllPDFs = async () => {
+    for (const tab of tabs) {
+      setSelectedCopy(tab); // Set the color for each PDF
+      await new Promise((resolve) => setTimeout(resolve, 200)); // Small delay to ensure color is applied
+      generatePDF(billRef, { filename: `Bilty-${tab}-${selectedCopy + " Copy"}-${trip.LR}-${formData.truckNo}-${trip.trip_id}` });
+    }
+  };
+
+
+
 
   if (!isOpen) return null
 
@@ -269,8 +279,8 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
                 </div>
                 <div className="col-span-3 text-xs text-black p-1 border-2 border-black flex flex-col gap-1">
                   <span className="text-xs">CONSIGNMENT NOTE</span>
-                  <span>No. : </span>
-                  <span>Date : </span>
+                  <span>No. : <span className='text-red-500'>{formData.LR}</span></span>
+                  <span>Date : <span className='text-red-500'>{new Date(formData.date).toLocaleDateString('en-IN')}</span></span>
                 </div>
 
 
@@ -380,7 +390,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
                 Date :
               </span>
               <span>
-                Lorry No. :
+                Lorry No. : <span className='text-red-500'>{formData.truckNo}</span>
               </span>
             </div>
 
@@ -649,7 +659,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
 
             <div className="mt-4 flex justify-between">
               <Button variant='outline' onClick={() => setShowBill(false)}>Edit Form</Button>
-              <Button onClick={() => generatePDF(billRef, { filename: `Bilty-${selectedCopy + " Copy"}-${trip.LR}-${trip.trip_id}` })}>Download PDF</Button>
+              <Button onClick={() => downloadAllPDFs()}>Download PDF</Button>
             </div>
           </div>
         }

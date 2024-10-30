@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import TripForm from '@/components/trip/TripForm';
 import { IDriver, TruckModel, IParty, ITrip } from '@/utils/interface';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Loading from '../loading'; // Ensure the Loading component shows a GIF
 import { useExpenseCtx } from '@/context/context';
 import { mutate } from 'swr';
@@ -16,6 +16,8 @@ const CreateTripPage: React.FC = () => {
   const [saving, setSaving] = useState(false); // New state for saving overlay
   const [error, setError] = useState<string | null>(null);
   const [latestLR, setLatestLR] = useState<string>(''); // State to hold the latest LR
+  const data  = useSearchParams()
+  const duplicate = data.get('trip')
 
   useEffect(() => {
     const fetchData = async () => {
@@ -143,7 +145,7 @@ const CreateTripPage: React.FC = () => {
       )}
       <div className="w-full h-full relative">
 
-        <TripForm parties={parties} trucks={trucks} drivers={drivers} onSubmit={handleTripSubmit} lr={latestLR} />
+        <TripForm parties={parties} trucks={trucks} drivers={drivers} onSubmit={handleTripSubmit} lr={latestLR} duplicate={duplicate ? JSON.parse(duplicate) : {}}/>
       </div>
     </>
 

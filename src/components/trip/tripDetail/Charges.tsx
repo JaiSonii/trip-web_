@@ -11,7 +11,7 @@ interface ChargesProps {
   charges: TripExpense[];
   setCharges: React.Dispatch<React.SetStateAction<TripExpense[]>>;
   tripId: string;
-  onAddCharge: (charge: TripExpense) => void;
+  onAddCharge?: (charge: TripExpense) => void;
   trip: ITrip;
 }
 

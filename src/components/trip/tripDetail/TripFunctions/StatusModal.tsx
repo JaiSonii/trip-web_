@@ -17,7 +17,7 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
   const [podReceivedDate, setPodReceivedDate] = useState<string>(new Date().toLocaleDateString());
   const [podImage, setPodImage] = useState<File | null>(null);
   const [paymentType, setPaymentType] = useState<string>('');
-  const [settlementDate, setSettlementDate] = useState<string>('');
+  const [settlementDate, setSettlementDate] = useState<Date>(new Date(Date.now()));
   const [receivedByDriver, setReceivedByDriver] = useState<boolean>(false);
   const [notes, setNotes] = useState<string>('');
 
@@ -81,6 +81,7 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
           paymentType,
           receivedByDriver,
           notes,
+          date : dates[4],
           dates: dates,
           status: status + 1,
         };
@@ -181,8 +182,8 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
                 <label className="block text-sm font-medium text-bottomNavBarColor mb-1">Settlement Date</label>
                 <input
                   type="date"
-                  value={settlementDate}
-                  onChange={(e) => setSettlementDate(e.target.value)}
+                  value={new Date(settlementDate).toISOString().split('T')[0]}
+                  onChange={(e) => setSettlementDate(new Date(e.target.value))}
                 />
               </div>
               <div className="mb-4">

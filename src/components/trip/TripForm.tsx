@@ -10,33 +10,38 @@ import { Button } from '../ui/button';
 import { formatNumber } from '@/utils/utilArray';
 import { loadingIndicator } from '../ui/LoadingIndicator';
 import { createWorker } from 'tesseract.js'
+import { useSearchParams } from 'next/navigation';
 type Props = {
     parties: IParty[];
     trucks: TruckModel[];
     drivers: IDriver[];
     lr: string;
+    duplicate : any;
     onSubmit: (trip: any) => void;
 };
 
-const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr }) => {
+const TripForm: React.FC<Props> = ({ parties, trucks, drivers, onSubmit, lr, duplicate }) => {
+
+
+
     const [formData, setFormData] = useState({
-        party: JSON.parse(localStorage.getItem('tripData') as any)?.party || '',
-        truck: JSON.parse(localStorage.getItem('tripData') as any)?.truck || '',
-        driver: JSON.parse(localStorage.getItem('tripData') as any)?.driver || '',
-        supplierId: JSON.parse(localStorage.getItem('tripData') as any)?.supplierId || '',
+        party: duplicate?.party || JSON.parse(localStorage.getItem('tripData') as any)?.party || '',
+        truck: duplicate?.truck || JSON.parse(localStorage.getItem('tripData') as any)?.truck || '',
+        driver: duplicate?.driver || JSON.parse(localStorage.getItem('tripData') as any)?.driver || '',
+        supplierId: duplicate?.supplier || JSON.parse(localStorage.getItem('tripData') as any)?.supplierId || '',
         route: {
-            origin: '',
-            destination: ''
+            origin: duplicate?.route?.origin || '',
+            destination: duplicate?.route?.destination || ''
         },
-        billingType: 'Fixed',
+        billingType: duplicate?.billingTpe || 'Fixed',
         perUnit: 0,
         totalUnits: 0,
-        amount: 0,
-        startDate: new Date(),
-        truckHireCost: 0,
-        LR: lr,
-        material: '',
-        notes: '',
+        amount: duplicate?.amount || 0,
+        startDate: duplicate?.startDate || new Date(),
+        truckHireCost: duplicate?.truckHireCost || 0,
+        LR:  lr,
+        material: duplicate?.material || '',
+        notes: duplicate?.notes || '',
         file: null,
         ewbValidity: null
     });

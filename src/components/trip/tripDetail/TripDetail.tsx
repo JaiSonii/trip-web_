@@ -139,45 +139,39 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
     }
 
     if (data.status === 4) {
+      const itemtosend = {
+        ...data,
+        accountType : 'Payments',
+        trip_id: trip.trip_id,
+        driver_id: data.receivedByDriver ? trip.driver : null
+      }
       try {
-        const res = await fetch(`/api/trips/${trip.trip_id}`, {
-          method: 'PATCH',
+        const res = await fetch(`/api/parties/${trip.party}/payments`, {
+          method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
-          body: JSON.stringify({
-            data: {
-              account: {
-                accountType: 'Payments',
-                receivedByDriver: data.receivedByDriver,
-                amount: data.amount,
-                paymentType: data.paymentType,
-                paymentDate: data.dates[4],
-                notes: data.notes,
-              },
-            },
-          }),
+          body: JSON.stringify(itemtosend),
         });
         if (!res.ok) {
           throw new Error('Failed to add new item');
         }
         const resData = await res.json();
-        setAccounts(resData.trip.accounts);
-        setTrip((prev : ITrip | any)=>({
-          ...prev,
-          ...resData.trip
-        }));
+        if (resData.status == 400) {
+          alert(resData.message);
+        }
+        setAccounts((prev: any) => [
+          resData.payment,
+          ...prev
+        ]);
+        setBalance((prev: number) => prev - data.amount)
+
       } catch (error: any) {
-        alert(error.message);
-        console.log(error);
+        alert('Failed to Add Payment')
       }
     }
+  }
 
-  };
-
-  const handleAddCharge = (newCharge: any) => {
-    // Add logic to handle adding the new charge
-  };
 
 
 
@@ -230,8 +224,8 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
                 </div>
               </Button>
               <ViewBillButton />
-              
-              <Button onClick={()=>setBiltyModalOpen(true)}>Generate Bilty</Button>
+
+              <Button onClick={() => setBiltyModalOpen(true)}>Generate Bilty</Button>
               {/* Add more buttons as needed */}
             </div>
           </div>
@@ -249,13 +243,14 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
       <div className='grid grid-cols-3 gap-2 mt-4'>
         <div className='col-span-1 bg-[#FAFDFF] p-2 rounded-xl shadow-xl'><DataList data={accounts} label="Advances" modalTitle="Add Advance" trip={trip} setData={setAccounts} setBalance={setBalance} setTrip={setTrip} /></div>
         <div className='col-span-1 bg-[#FAFDFF] p-2 rounded-xl shadow-xl'><DataList data={accounts} label="Payments" modalTitle="Add Payment" trip={trip} setData={setAccounts} setBalance={setBalance} setTrip={setTrip} /></div>
-        <div className='col-span-1 bg-[#FAFDFF] p-2 rounded-xl shadow-xl'><Charges charges={charges} onAddCharge={handleAddCharge} setCharges={setCharges} tripId={trip.trip_id} trip={trip} /></div>
+        <div className='col-span-1 bg-[#FAFDFF] p-2 rounded-xl shadow-xl'><Charges charges={charges} setCharges={setCharges} tripId={trip.trip_id} trip={trip} /></div>
 
 
       </div>
-      <BiltyForm isOpen={biltyModalOpen} onClose={()=>setBiltyModalOpen(false)} trip={trip}/>
+      <BiltyForm isOpen={biltyModalOpen} onClose={() => setBiltyModalOpen(false)} trip={trip} />
     </div>
   );
 };
 
-export default TripDetails;
+
+export default TripDetails
