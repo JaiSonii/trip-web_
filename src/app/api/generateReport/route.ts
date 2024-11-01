@@ -112,6 +112,8 @@ export async function GET(req: Request) {
         .container {
             max-width: 800px;
             margin: 0 auto;
+            background-color : #F3FAFF;
+            padding : 2rem
         }
         h1 {
             font-size: 18px;
@@ -127,6 +129,7 @@ export async function GET(req: Request) {
         .card {
             background-color: white;
             border-radius: 8px;
+            border : 1px solid #E5E7EB;
             padding: 15px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
@@ -154,6 +157,7 @@ export async function GET(req: Request) {
         .small-card {
             background-color: white;
             border-radius: 8px;
+            border : 1px solid #E5E7EB;
             padding: 10px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
@@ -190,6 +194,7 @@ export async function GET(req: Request) {
             .footer {
             display : inline-flex;
             align-items: center;
+            gap : 2px;
   text-align: center;
   padding: 10px;
   font-size: 14px;
