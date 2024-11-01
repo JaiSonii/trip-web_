@@ -94,7 +94,7 @@ const AccessPage: React.FC = () => {
 
   return (
     <Suspense fallback={<Loading />}>
-      <div className="p-8 bg-white max-w-lg rounded-lg">
+      <div className="max-w-4xl container border border-gray-300 shadow-md rounded-lg p-8">
         <h2 className="text-2xl font-bold text-bottomNavBarColor mb-6 ">
           Grant Access 
         </h2>

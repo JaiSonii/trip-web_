@@ -1,26 +1,20 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import React, { useState, ChangeEvent, FormEvent, useEffect, Suspense } from "react";
+import React, { useState, Suspense, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
 import Loading from "@/app/user/loading";
+import generatePDF from "react-to-pdf";
 
 const ReportPage: React.FC = () => {
-  const router = useRouter();
   const params = useSearchParams();
   const userId = params.get("user_id");
-  const [userPhone, setUserPhone] = useState<string>("");
-  const [phone, setPhone] = useState<string>("");
-  const [role, setRole] = useState<"driver" | "accountant">("driver"); // default role
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [month, setMonth] = useState<string>("");
   const [year, setYear] = useState<string>("");
-  const [report, setReport] = useState<string | null>(null);
-
-
-
+  const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setModalOpen] = useState<boolean>(false);
+  const [reportContent, setReportContent] = useState<string | null>(null);
+  const contentRef = useRef<any>(null)
 
   const handleGenerateReport = async () => {
     if (!month || !year) {
@@ -34,27 +28,24 @@ const ReportPage: React.FC = () => {
 
     if (response.ok) {
       const reportHtml = await response.text();
-
-      // Open report in a new window
-      const newWindow = window.open("", "_blank");
-      if (newWindow) {
-        newWindow.document.write(reportHtml);
-        newWindow.document.close();
-      } else {
-        setError("Failed to open report in a new window");
-      }
+      setReportContent(reportHtml);
+      setModalOpen(true); // Open modal-like div to display the report
     } else {
       setError("Failed to generate report");
     }
   };
 
-
+  const handleDownloadPDF = async() => {
+    try {
+      await generatePDF(contentRef, {filename : `Report-${month}-${year}.pdf`});
+    } catch (error) {
+      alert('Failed to download pdf')
+    }
+  };
 
   return (
     <Suspense fallback={<Loading />}>
-      <div className=" p-8 bg-white max-w-lg rounded-lg">
-        
-
+      <div className="max-w-4xl container border border-gray-300 shadow-md rounded-lg p-8">
         <h2 className="text-2xl font-bold text-bottomNavBarColor mb-4">
           Generate Report
         </h2>
@@ -105,8 +96,28 @@ const ReportPage: React.FC = () => {
 
         <div className="p-10 text-center text-sm">
           {error && <p className="text-red-500">{error}</p>}
-          {success && <p className="text-green-500">{success}</p>}
         </div>
+
+        {isModalOpen && reportContent && (
+          <div  className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
+            <div className="bg-white max-w-4xl max-h-[700px] w-full p-6 rounded-lg shadow-lg overflow-auto">
+              <h3 className="text-lg font-semibold mb-4">Generated Report</h3>
+              <div ref={contentRef}
+                className="overflow-auto border border-gray-300 rounded-md p-4"
+                dangerouslySetInnerHTML={{ __html: reportContent }}
+              />
+              <Button className="mt-4 w-full" onClick={handleDownloadPDF}>
+                Download as PDF
+              </Button>
+              <Button
+                className="mt-2 w-full bg-gray-300 text-gray-800 hover:bg-gray-400"
+                onClick={() => setModalOpen(false)}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
     </Suspense>
   );

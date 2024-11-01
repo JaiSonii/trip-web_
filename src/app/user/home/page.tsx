@@ -18,7 +18,7 @@ const Page = () => {
         <div className='flex items-center gap-4'>
           <IoNotificationsOutline size={30} />
 
-          <Link href={'/user/profile'}><FaRegCircleUser size={30} className='font-normal' /></Link>
+          <Link href={'/user/profile/details'}><FaRegCircleUser size={30} className='font-normal' /></Link>
         </div>
 
       </div>

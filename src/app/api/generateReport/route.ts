@@ -100,86 +100,183 @@ export async function GET(req: Request) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balance Report</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>Balance Report for ${month} ${year}</title>
     <style>
-        .bg-bottomNavBarColor {
-            background-color: #CC5500;
-        }
-        .text-primaryOrange {
-            color: #ff6a00;
-        }
-        .text-lightOrange {
-            color: #ffa666;
-        }
-        .bg-lightOrangeButtonColor {
-            background-color: #ffcaA4;
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
         }
         .container {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            max-width: 100vw; /* Ensure content fits within viewport width */
-            max-height: 100vh; /* Ensure content fits within viewport height */
-            overflow: hidden;
-            padding: 0 1rem; /* Padding for small screen adjustments */
+            max-width: 800px;
+            margin: 0 auto;
         }
-        .content {
+        h1 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .card-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .card-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        .section-title {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .small-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .small-card-title {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .small-card-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+        .profit {
+            color: #22c55e;
+        }
+        .expense {
+            color: #ef4444;
+        }
+        .button {
+            background-color: #f97316;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: block;
             width: 100%;
-            max-width: 1000px; /* Adjust max width as needed */
-            height: 100%;
-            overflow-y: auto;
+            max-width: 200px;
+            margin: 20px auto;
+            text-align: center;
         }
-        .box {
-            max-height: calc(100vh / 5); /* Adjust based on the number of boxes */
-            padding: 1rem; /* Reduced padding for better fit */
-            margin-bottom: 0.5rem; /* Reduced margin for better fit */
-        }
-        .text-box {
-            font-size: 0.875rem; /* Smaller font size for fitting content */
-        }
+            .footer {
+            display : inline-flex;
+            align-items: center;
+  text-align: center;
+  padding: 10px;
+  font-size: 14px;
+  color: #333;
+}
+
+.footer-logo {
+  width: 20px;
+  height: auto;
+  vertical-align: middle;
+  margin: 0 5px;
+}
+
     </style>
 </head>
-<body class="bg-gray-100">
+<body>
     <div class="container">
-        <div class="content">
-            <h1 class="text-lg md:text-xl font-bold text-buttonTextColor text-center mb-4">Balance Report for ${month} ${year}</h1>
-
-            <div class="box bg-lightOrangeButtonColor text-buttonTextColor font-bold rounded-lg shadow-lg text-sm md:text-base text-box">
-                <span>Overall Profit : <span class="text-green-600">${ownTruckProfit + marketTruckProfit}</span></span>
+        <h1>Balance Report for ${month} ${year}</h1>
+        
+        <div class="grid">
+            <div class="card">
+                <div class="card-title">Overall Profit</div>
+                <div class="card-value profit">₹${ownTruckProfit + marketTruckProfit}</div>
             </div>
-
-            <div class="box bg-lightOrangeButtonColor text-gray-900 font-semibold rounded-lg shadow-lg text-sm md:text-base text-box">
-                <h2>Total Trips for ${month} ${year}: ${totalTrips}</h2> <!-- Display total trips -->
-            </div>
-
-            <div class="box bg-lightOrangeButtonColor text-gray-900 font-semibold rounded-lg shadow-lg text-sm md:text-base text-box">
-                <h2>Overall Revenue for ${month} ${year}: ${marketTruckProfit + ownTruckProfit}</h2>
-            </div>
-
-            <div class="box bg-lightOrangeButtonColor shadow-lg rounded-lg text-sm md:text-base text-box">
-                <h2>Revenue from Market Trucks</h2>
-                <p>Total Freight: <span class="font-bold">${marketTruckTrips.totalFreight}</span></p>
-                <p>Total Charges: <span class="font-bold text-green-600">${marketTruckTrips.totalCharges}</span></p>
-                <p>Total Deductions: <span class="font-bold text-red-600">${marketTruckTrips.totalDeductions}</span></p>
-                <p>Profit: <span class="font-bold text-green-600">${marketTruckProfit}</span></p>
-            </div>
-
-            <div class="box bg-lightOrangeButtonColor shadow-lg rounded-lg text-sm md:text-base text-box">
-                <h2>Own Trucks</h2>
-                <p>Total Freight: <span class="font-bold">${ownTruckTrips.totalFreight}</span></p>
-                <p>Total Charges: <span class="font-bold text-green-600">${ownTruckTrips.totalCharges}</span></p>
-                <p>Total Deductions: <span class="font-bold text-red-600">${ownTruckTrips.totalDeductions}</span></p>
-                <p>Profit: <span class="font-bold text-green-600">${ownTruckProfit}</span></p>
-            </div>
-
-            <div class="box bg-lightOrangeButtonColor shadow-lg rounded-lg text-sm md:text-base text-box">
-                <h2>Expenses</h2>
-                <p>Total Expense: <span class="font-bold text-red-600">${totalExpense}</span></p>
-                <p>Total Office Expense: <span class="font-bold text-red-600">${totalOfficeExpense}</span></p>
+            <div class="card">
+                <div class="card-title">Total Trips</div>
+                <div class="card-value">${totalTrips}</div>
             </div>
         </div>
+
+        <div class="section-title">Revenue from Market Trucks</div>
+        <div class="grid-4">
+            <div class="small-card">
+                <div class="small-card-title">Total Freight</div>
+                <div class="small-card-value">${marketTruckTrips.totalFreight}</div>
+            </div>
+            <div class="small-card">
+                <div class="small-card-title">Total Charges</div>
+                <div class="small-card-value">${marketTruckTrips.totalCharges}</div>
+            </div>
+            <div class="small-card">
+                <div class="small-card-title">Total Deductions</div>
+                <div class="small-card-value">${marketTruckTrips.totalDeductions}</div>
+            </div>
+            <div class="small-card">
+                <div class="small-card-title">Profit</div>
+                <div class="small-card-value profit">${marketTruckProfit}</div>
+            </div>
+        </div>
+
+        <div class="section-title">Own Trucks</div>
+        <div class="grid-4">
+            <div class="small-card">
+                <div class="small-card-title">Total Freight</div>
+                <div class="small-card-value">${ownTruckTrips.totalFreight}</div>
+            </div>
+            <div class="small-card">
+                <div class="small-card-title">Total Charges</div>
+                <div class="small-card-value">${ownTruckTrips.totalCharges}</div>
+            </div>
+            <div class="small-card">
+                <div class="small-card-title">Total Deductions</div>
+                <div class="small-card-value">${ownTruckTrips.totalDeductions}</div>
+            </div>
+            <div class="small-card">
+                <div class="small-card-title">Profit</div>
+                <div class="small-card-value profit">${ownTruckProfit}</div>
+            </div>
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <div class="card-title">Total Expense</div>
+                <div class="card-value expense">₹${totalExpense}</div>
+            </div>
+            <div class="card">
+                <div class="card-title">Office Expense</div>
+                <div class="card-value">${totalOfficeExpense}</div>
+            </div>
+        </div>
+
+        <div class="footer">
+  Generated with 
+  <img src="https://www.awajahi.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fawajahi%20logo.e4977a4d.png&w=64&q=75" alt="Awajahi logo" class="footer-logo" /> 
+  Awajahi.com
+</div>
+
     </div>
 </body>
 </html>

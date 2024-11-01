@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: "https://www.awajahi.com/src/assets/awajahi logo.png", // Update this URL to the path of your logo
+        url: "https://www.awajahi.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fawajahi%20logo.e4977a4d.png&w=64&q=75", // Update this URL to the path of your logo
         width: 1200,
         height: 630,
         alt: "Awajahi Logo",

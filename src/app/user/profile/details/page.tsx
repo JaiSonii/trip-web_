@@ -63,9 +63,9 @@ const DetailsPage = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg mt-6">
+    <div className="max-w-4xl container border border-gray-300 shadow-md rounded-lg p-8">
       {user && (
-        <form className="grid grid-cols-1 md:grid-cols-2 gap-6" onSubmit={handleSave}>
+        <form className="flex flex-col gap-4" onSubmit={handleSave}>
           <div>
             <label className="block font-medium text-gray-700">Name:</label>
             <input
