@@ -112,7 +112,7 @@ export async function GET(req: Request) {
         }
       }, // Sort by startDate in descending order
       // Exclude unnecessary fields including accountBalance, chargeToBill, and chargeNotToBill
-      { $project: { partyDetails: 0, tripExpenses: 0, accounts: 0, chargeToBill: 0, chargeNotToBill: 0, accountBalance: 0 } }
+      { $project: { partyDetails: 0, tripExpenses: 0, accounts: 0, chargeToBill: 0, chargeNotToBill: 0, accountBalance: 0 , user_id : 0} }
     ]);
 
     return NextResponse.json({ trips });

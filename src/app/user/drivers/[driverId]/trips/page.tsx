@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import Loading from '../loading';
 import PartyName from '@/components/party/PartyName';
 import { useDriver } from '@/context/driverContext';
+import { renderCellContent } from '@/utils/renderTripCell';
 
 const DriverTrips: React.FC = () => {
   const { driver, loading } = useDriver();
@@ -17,6 +18,14 @@ const DriverTrips: React.FC = () => {
     key: null,
     direction: 'asc',
   });
+
+  const columnOptions = [
+    { label: 'Start Date', value: 'startDate' },
+    { label: 'Truck Number', value: 'truck' },
+    { label: 'Party Name', value: 'party' },
+    { label: 'Route', value: 'route' },
+    { label: 'Status', value: 'status' },
+  ];
 
   const trips = driver?.driverTrips || [];
 
@@ -82,50 +91,12 @@ const DriverTrips: React.FC = () => {
               className="border-t hover:bg-orange-100 cursor-pointer transition-colors"
               onClick={() => router.push(`/user/trips/${trip.trip_id}`)}
             >
-              <TableCell className="border p-4">
-                <div className="flex items-center space-x-2">
-                  <FaCalendarAlt className="text-bottomNavBarColor" />
-                  <span>{new Date(trip.startDate).toLocaleDateString()}</span>
-                </div>
-              </TableCell>
-              <TableCell className="border p-4">
-                <div className="flex items-center space-x-2">
-                  <FaTruck className="text-bottomNavBarColor" />
-                  <span>{trip.truck}</span>
-                </div>
-              </TableCell>
-              <TableCell className="border p-4">
-                <div className="flex items-center space-x-2">
-                  <FaRoute className="text-bottomNavBarColor" />
-                  <span>{trip.route.origin.split(',')[0]} -&gt; {trip.route.destination.split(',')[0]}</span>
-                </div>
-              </TableCell>
-              <TableCell className="border p-4">
-                <div className="flex flex-col items-center space-x-2">
-                  <span>{statuses[trip.status as number]}</span>
-                  <div className="relative w-full bg-gray-200 h-1 rounded">
-                    <div
-                      className={`absolute top-0 left-0 h-1 rounded transition-width duration-500 ${trip.status === 0
-                          ? 'bg-red-500'
-                          : trip.status === 1
-                            ? 'bg-yellow-500'
-                            : trip.status === 2
-                              ? 'bg-blue-500'
-                              : trip.status === 3
-                                ? 'bg-green-500'
-                                : 'bg-green-800'
-                        }`}
-                      style={{ width: `${(trip.status / 4) * 100}%` }}
-                    ></div>
-                  </div>
-                </div>
-              </TableCell>
-              <TableCell className="border p-4">
-                <div className="flex items-center space-x-2">
-                  <GoOrganization className="text-bottomNavBarColor" />
-                  <span>{trip.partyName}</span>
-                </div>
-              </TableCell>
+              {columnOptions.map(col => 
+                      <TableCell key={col.value}>
+                        {renderCellContent(col.value, trip)}
+                      </TableCell>
+                    
+                  )}
             </TableRow>
           ))}
         </TableBody>

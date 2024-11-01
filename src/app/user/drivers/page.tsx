@@ -1,40 +1,53 @@
-// DriversPage.tsx
 'use client'
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+
+import React, { useCallback, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { mutate } from 'swr';
+import debounce from 'lodash.debounce';
+import { FaUser, FaPhone, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
+
 import { IDriver } from '@/utils/interface';
-import Loading from './loading';
-import DriverBalance from '@/components/driver/DriverBalance';
-import { FaUser, FaPhone, FaCircle, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { formatNumber } from '@/utils/utilArray';
 import { useExpenseCtx } from '@/context/context';
-import debounce from 'lodash.debounce';
-import { mutate } from 'swr';
+import Loading from './loading';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Input } from '@/components/ui/input';
 
-const DriversPage = () => {
-  mutate('/api/drivers')
+type SortConfig = {
+  key: keyof IDriver | null;
+  direction: 'asc' | 'desc';
+};
+
+export default function DriversPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
-  const { drivers, isLoading } = useExpenseCtx()
-  const [searchQuery, setSearchQuery] = useState('')
+  const { drivers, isLoading } = useExpenseCtx();
+  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: 'asc' });
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const debouncedSearch = useMemo(
+    () => debounce((query: string) => setSearchQuery(query), 300),
+    []
+  );
+
+  const handleSearch = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    debouncedSearch(e.target.value.toLowerCase());
+  }, [debouncedSearch]);
 
   const sortedDrivers = useMemo(() => {
-    if (!drivers || drivers.length === 0) return []; // This line ensures that trips is not null or empty
-    let sortableDrivers = [...drivers as any];
+    if (!drivers || drivers.length === 0) return [];
+    
+    let sortableDrivers = [...drivers];
 
     if (searchQuery) {
-      const lowercaseQuery = searchQuery.toLowerCase()
-      sortableDrivers = drivers.filter((driver) =>
-        driver.name.toLowerCase().includes(lowercaseQuery) ||
-        driver.contactNumber?.toLowerCase().includes(lowercaseQuery) ||
-        driver.balance?.toString().toLowerCase().includes(lowercaseQuery) ||
-        driver.status.toLowerCase().includes(lowercaseQuery)
-      )
+      const lowercaseQuery = searchQuery.toLowerCase();
+      sortableDrivers = sortableDrivers.filter((driver) =>
+        Object.values(driver).some(value => 
+          typeof value === 'string' && value.toLowerCase().includes(lowercaseQuery)
+        )
+      );
     }
-    if (sortConfig.key !== null) {
+
+    if (sortConfig.key) {
       sortableDrivers.sort((a, b) => {
         if (a[sortConfig.key!] < b[sortConfig.key!]) {
           return sortConfig.direction === 'asc' ? -1 : 1;
@@ -45,49 +58,25 @@ const DriversPage = () => {
         return 0;
       });
     }
+
     return sortableDrivers;
   }, [drivers, sortConfig, searchQuery]);
 
+  const requestSort = useCallback((key: keyof IDriver) => {
+    setSortConfig((prevConfig) => ({
+      key,
+      direction: prevConfig.key === key && prevConfig.direction === 'asc' ? 'desc' : 'asc',
+    }));
+  }, []);
 
-  const requestSort = (key: any) => {
-    let direction: 'asc' | 'desc' = 'asc'
-    if (sortConfig.key === key && sortConfig.direction === 'asc') {
-      direction = 'desc'
-    }
-    setSortConfig({ key, direction })
-  }
-
-  const getSortIcon = (columnName: any) => {
+  const getSortIcon = useCallback((columnName: keyof IDriver) => {
     if (sortConfig.key === columnName) {
-      return sortConfig.direction === 'asc' ? <FaSortUp /> : <FaSortDown />
+      return sortConfig.direction === 'asc' ? <FaSortUp /> : <FaSortDown />;
     }
-    return <FaSort />
-  }
+    return <FaSort />;
+  }, [sortConfig]);
 
-  // Debounce the search input to reduce re-renders on each keystroke
-  const debouncedSearch = useCallback(
-    debounce((query) => setSearchQuery(query), 300),
-    []
-  );
-
-  // Handle search input
-  const handleSearch: any = (e: React.ChangeEvent<HTMLInputElement>) => {
-    debouncedSearch(e.target.value.toLowerCase());
-  };
-
-
-  // Handling different states
-  if (isLoading) {
-    return <Loading />;
-  }
-
-  if (error) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <div className="text-red-500">{error}</div>
-      </div>
-    );
-  }
+  if (isLoading) return <Loading />;
 
   if (!drivers || drivers.length === 0) {
     return (
@@ -97,79 +86,74 @@ const DriversPage = () => {
     );
   }
 
-
   return (
     <div className="w-full h-full p-4">
       <div className='flex w-full px-60 mb-4'>
-        <input
+        <Input
           type="text"
           placeholder="Search..."
           onChange={handleSearch}
+          className="w-full"
         />
       </div>
-      <div className="">
-        <Table className="">
-          <TableHeader>
-            <TableRow >
-              <TableHead onClick={() => requestSort('name')}>
-                <div className='flex justify-between'>
-                  Name {getSortIcon('name')}
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead onClick={() => requestSort('name')} className="cursor-pointer">
+              <div className='flex justify-between items-center'>
+                Name {getSortIcon('name')}
+              </div>
+            </TableHead>
+            <TableHead>Contact Number</TableHead>
+            <TableHead onClick={() => requestSort('status')} className="cursor-pointer">
+              <div className='flex justify-between items-center'>
+                Status {getSortIcon('status')}
+              </div>
+            </TableHead>
+            <TableHead onClick={() => requestSort('balance')} className="cursor-pointer">
+              <div className='flex justify-between items-center'>
+                Balance {getSortIcon('balance')}
+              </div>
+            </TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sortedDrivers.map((driver) => (
+            <TableRow
+              key={driver.driver_id}
+              className="border-t hover:bg-blue-100 cursor-pointer transition-colors"
+              onClick={() => router.push(`/user/drivers/${driver.driver_id}`)}
+            >
+              <TableCell className="border p-4">
+                <div className='flex items-center gap-3'>
+                  <FaUser className="text-bottomNavBarColor" />
+                  <span>{driver.name}</span>
                 </div>
-
-              </TableHead>
-              <TableHead >Contact Number</TableHead>
-              <TableHead onClick={() => requestSort('status')}>
-                <div className='flex justify-between'>
-                  Status {getSortIcon('status')}
+              </TableCell>
+              <TableCell className="border p-4">
+                <div className='flex items-center gap-3'>
+                  <FaPhone className="text-green-500" />
+                  <span>{driver.contactNumber || ''}</span>
                 </div>
-              </TableHead>
-              <TableHead onClick={() => requestSort('balance')}>
-                <div className='flex justify-between'>
-                  Balance {getSortIcon('balance')}
-                </div>
-              </TableHead>
+              </TableCell>
+              <TableCell className="border p-4">
+                <span
+                  className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
+                    driver.status === 'Available' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                  }`}
+                >
+                  {driver.status}
+                </span>
+              </TableCell>
+              <TableCell className="border p-4 font-semibold text-xl">
+                <span className={`${Number(driver.balance) < 0 ? 'text-red-500' : 'text-green-500'} font-semibold`}>
+                  ₹{formatNumber(Number(driver.balance))}
+                </span>
+              </TableCell>
             </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedDrivers.map((driver, index) => (
-              <TableRow
-                key={index}
-                className="border-t hover:bg-blue-100 cursor-pointer transition-colors"
-                onClick={() => router.push(`/user/drivers/${driver.driver_id}`)}
-              >
-                <TableCell className="border p-4 space-x-2">
-                  <div className='flex items-center gap-3'>
-                    <FaUser className="text-bottomNavBarColor" />
-                    <span>{driver.name}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="border p-4 space-x-2 gap-3">
-                  <div className='flex items-center space-x-2'>
-                    <FaPhone className="text-green-500" />
-                    <span>{driver.contactNumber || ''}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="border p-4 flex items-center space-x-2">
-                  <div className='flex items-center gap-3'>
-                    <span
-                      className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${driver.status === 'Available' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                        }`}
-                    >
-                      {driver.status}
-                    </span>
-                  </div>
-
-                </TableCell>
-                <TableCell className="border p-4 space-x-2 font-semibold text-xl">
-                  <span className={`${driver.balance as number < 0 ? 'text-red-500' : 'text-green-500'} font-semibold`}>₹{formatNumber(driver.balance as number)}</span>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
-};
-
-export default DriversPage;
+}
