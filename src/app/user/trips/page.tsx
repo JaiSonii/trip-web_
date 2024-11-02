@@ -28,6 +28,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { IoMdUndo } from 'react-icons/io';
 
+
 const columnOptions = [
   { label: 'Start Date', value: 'startDate' },
   { label: 'LR Number', value: 'LR' },
@@ -35,8 +36,8 @@ const columnOptions = [
   { label: 'Party Name', value: 'party' },
   { label: 'Route', value: 'route' },
   { label: 'Status', value: 'status' },
-  { label: 'Invoice Amt', value: 'invoice' },
-  { label: 'Truck Hire Cost', value: 'truckCost' }
+  { label: 'Invoice Amt', value: 'amount' },
+  { label: 'Truck Hire Cost', value: 'truckHireCost' }
 ];
 
 export default function TripsPage() {
@@ -102,6 +103,7 @@ export default function TripsPage() {
       dates: trip.dates.map((date, index, array) => index === array.length - 1 ? null : date)
     };
     try {
+      
       const res = await fetch(`/api/trips/${trip.trip_id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -111,7 +113,6 @@ export default function TripsPage() {
       mutate('/api/trips');
     } catch (error) {
       console.error('Error updating status:', error);
-      alert(error);
     }
   };
 

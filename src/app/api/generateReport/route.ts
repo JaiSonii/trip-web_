@@ -82,9 +82,22 @@ export async function GET(req: Request) {
         console.log(tripsData);
 
         const [expenses, officeExpenses] = await Promise.all([
+            // Fetch all expenses within the date range
             Expense.find({ user_id: user, date: { $gte: startDate, $lt: endDate } }).select('amount').lean(),
-            OfficeExpense.find({ user_id: user, date: { $gte: startDate, $lt: endDate } }).select('amount').lean()
+
+            // Fetch office expenses where trip_id and truck are either empty strings or null
+            Expense.find({
+                user_id: user,
+                date: { $gte: startDate, $lt: endDate },
+                $or: [
+                    { trip_id: "" },
+                    { trip_id: null },
+                    { truck: "" },
+                    { truck: null }
+                ]
+            }).select('amount').lean()
         ]);
+
 
         const totalExpense = expenses.reduce((total, expense) => total + expense.amount, 0);
         const totalOfficeExpense = officeExpenses.reduce((total, expense) => total + expense.amount, 0);

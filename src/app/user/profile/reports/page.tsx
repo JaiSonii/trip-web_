@@ -5,6 +5,7 @@ import React, { useState, Suspense, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import Loading from "@/app/user/loading";
 import generatePDF from "react-to-pdf";
+import { X } from "lucide-react";
 
 const ReportPage: React.FC = () => {
   const params = useSearchParams();
@@ -35,9 +36,9 @@ const ReportPage: React.FC = () => {
     }
   };
 
-  const handleDownloadPDF = async() => {
+  const handleDownloadPDF = async () => {
     try {
-      await generatePDF(contentRef, {filename : `Report-${month}-${year}.pdf`});
+      await generatePDF(contentRef, { filename: `Report-${month}-${year}.pdf` });
     } catch (error) {
       alert('Failed to download pdf')
     }
@@ -99,9 +100,13 @@ const ReportPage: React.FC = () => {
         </div>
 
         {isModalOpen && reportContent && (
-          <div  className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white max-w-4xl max-h-[700px] w-full p-6 rounded-lg shadow-lg overflow-auto">
-              <h3 className="text-lg font-semibold mb-4">Generated Report</h3>
+              <div className="flex justify-between">
+                <h3 className="text-lg font-semibold mb-4">Generated Report</h3>
+                <Button variant='ghost' size='icon' onClick={() => setModalOpen(false)}><X /></Button>
+              </div>
+
               <div ref={contentRef}
                 className="overflow-auto border border-gray-300 rounded-md p-4"
                 dangerouslySetInnerHTML={{ __html: reportContent }}
@@ -109,12 +114,7 @@ const ReportPage: React.FC = () => {
               <Button className="mt-4 w-full" onClick={handleDownloadPDF}>
                 Download as PDF
               </Button>
-              <Button
-                className="mt-2 w-full bg-gray-300 text-gray-800 hover:bg-gray-400"
-                onClick={() => setModalOpen(false)}
-              >
-                Close
-              </Button>
+
             </div>
           </div>
         )}
