@@ -348,9 +348,9 @@ function renderCellContent(columnValue: string, trip: ITrip) {
           </div>
         </div>
       );
-    case 'invoice':
+    case 'amount':
       return <p className='text-green-600 font-semibold'>₹{formatNumber(trip.amount)}</p>;
-    case  'truckCost':
+    case  'truckHireCost':
       return (
         <p className='text-red-500 font-semibold'>
           {trip.truckHireCost ? '₹' + formatNumber(trip.truckHireCost) : 'NA'}
