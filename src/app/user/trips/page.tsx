@@ -242,7 +242,7 @@ export default function TripsPage() {
                   visibleColumns.includes(col.label) && (
                     <TableHead key={col.value} onClick={() => requestSort(col.value as keyof ITrip)}>
                       <div className="flex justify-center">
-                        {col.label} {getSortIcon(col.value as keyof ITrip)}
+                        {col.label} {col.value !== 'route' && getSortIcon(col.value as keyof ITrip)}
                       </div>
                     </TableHead>
                   )
