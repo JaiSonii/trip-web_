@@ -113,15 +113,15 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
         else if (selectedCategory === 'Trip Expense') return Array.from(fuelAndDriverChargeTypes)
         else if (selectedCategory === 'Office Expense') return Array.from(officeExpenseTypes)
         if (selected) {
-            if (maintenanceChargeTypes.has(selected.expenseType)) {
+            if ((!selected.trip_id || selected.trip_id === '')  && selected.truck) {
                 setSelectedCategory('Truck Expense')
                 return Array.from(maintenanceChargeTypes)
             }
-            if (fuelAndDriverChargeTypes.has(selected.expenseType)) {
+            if (selected.trip_id && selected.trip_id !== ''){
                 setSelectedCategory('Trip Expense')
                 return Array.from(fuelAndDriverChargeTypes)
             }
-            if (officeExpenseTypes.includes(selected.expenseType)) {
+            if ((!selected.trip_id || selected.trip_id === '') && (!selected.truck || selected.truck === '')) {
                 setSelectedCategory('Office Expense')
                 return officeExpenseTypes
             }
