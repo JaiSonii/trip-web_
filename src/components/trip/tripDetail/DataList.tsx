@@ -5,36 +5,33 @@ import { MdDelete, MdEdit } from 'react-icons/md';
 import { Button } from '@/components/ui/button';
 import { formatNumber } from '@/utils/utilArray';
 import { PiPlusBold } from 'react-icons/pi';
+import { useTrip } from '@/context/tripContext';
 
 interface DataListProps {
-  data: PaymentBook[];
   label: string;
-  trip: ITrip;
-  setData: React.Dispatch<React.SetStateAction<PaymentBook[]>>;
-  setTrip: any;
-  setBalance: any;
   modalTitle: string;
 }
 
-const DataList: React.FC<DataListProps> = ({ data, label, modalTitle, trip, setData, setBalance, setTrip }) => {
+const DataList: React.FC<DataListProps> = ({ label, modalTitle }) => {
+  const { trip, setTrip } = useTrip()
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editData, setEditData] = useState<PaymentBook | null>(null);
-  const [listData, setListData] = useState<PaymentBook[] >([]);
+  const [listData, setListData] = useState<PaymentBook[]>([]);
   const [expandedItem, setExpandedItem] = useState<number | null>(null);
 
   useEffect(() => {
-    const temp = data.filter((account) => account.accountType === label);
+    const temp = trip.tripAccounts.filter((account : PaymentBook | any) => account.accountType === label);
     const sortedData = temp.sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      (a : PaymentBook, b : PaymentBook) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
     setListData(sortedData);
-  }, [data, label]);
+  }, [trip, label]);
 
   const handleAddItem = async (newItem: any) => {
     const itemtosend = {
       ...newItem,
-      trip_id : trip.trip_id,
-      driver_id : newItem.receivedByDriver ? trip.driver : null
+      trip_id: trip.trip_id,
+      driver_id: newItem.receivedByDriver ? trip.driver : null
     }
     try {
       const res = await fetch(`/api/parties/${trip.party}/payments`, {
@@ -52,11 +49,12 @@ const DataList: React.FC<DataListProps> = ({ data, label, modalTitle, trip, setD
         alert(resData.message);
         return;
       }
-      setData((prev) : any=>[
-        resData.payment,
-        ...prev
-      ]);
-      setBalance((prev: number) => prev - newItem.amount)
+
+      setTrip((prev: ITrip | any) => ({
+        ...prev,
+        balance: prev.balance - newItem.amount,
+        tripAccounts : [resData.payment, ...prev.tripAccounts]
+      }))
       setIsModalOpen(false);
       // setTrip();
       // router.refresh();
@@ -74,8 +72,8 @@ const DataList: React.FC<DataListProps> = ({ data, label, modalTitle, trip, setD
         },
         body: JSON.stringify({
           ...editedItem,
-          driver_id : editedItem.receivedByDriver === true ? trip.driver : null
-        } ),
+          driver_id: editedItem.receivedByDriver === true ? trip.driver : null
+        }),
       });
       if (!res.ok) {
         throw new Error('Failed to edit item');
@@ -88,18 +86,11 @@ const DataList: React.FC<DataListProps> = ({ data, label, modalTitle, trip, setD
         return;
       }
 
-      setData((prev : any)=>prev.map((item : any)=>item._id === resData.payment._id ? resData.payment : item));
-      // setTrip((prev: ITrip) => ({
-      //   ...prev,
-      //   ...resData.trip,
-      // }));
-      setBalance((prev: number) => {
-        if (editData) {
-          return prev + editData?.amount as number - editedItem.amount
-        } else {
-          return prev
-        }
-      })
+      setTrip((prev: ITrip | any) => ({
+        ...prev,
+        balance: editData ? prev.balance + editData?.amount as number - editedItem.amount : prev.balance,
+        tripAccounts : prev.tripAccounts.map((acc: any) => acc._id === resData.payment._id? resData.payment : acc),
+      }))
       setEditData(null);
       setIsModalOpen(false);
     } catch (error) {
@@ -119,16 +110,11 @@ const DataList: React.FC<DataListProps> = ({ data, label, modalTitle, trip, setD
         throw new Error('Failed to delete item');
       }
       const resData = await res.json();
-      setData((prev: PaymentBook[] | any) => {
-        const updatedData = prev.filter((acc : any) => acc._id !== item._id);
-        console.log('Updated data:', updatedData);
-        return updatedData;
-      });
-      setTrip((prev: ITrip) => ({
+      setTrip((prev: ITrip | any) => ({
         ...prev,
-        ...resData.trip
-      }));
-      setBalance((prev: number) => prev + item.amount)
+        balance: prev.balance + item.amount,
+        tripAccounts : prev.tripAccounts.filter((acc: any) => acc._id!== item._id),
+      }))
       // router.refresh();
     } catch (error) {
       console.log(error);
@@ -230,7 +216,7 @@ const DataList: React.FC<DataListProps> = ({ data, label, modalTitle, trip, setD
           isOpen={!!editData}
           onClose={closeModal}
           onSave={handleEditItem}
-          modalTitle="Edit Item"
+          modalTitle={`Edit ${label.slice(0,label.length - 1)}`}
           accountType={label}
           editData={editData}
         />

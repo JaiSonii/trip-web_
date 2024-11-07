@@ -1,4 +1,5 @@
 'use client'
+import { TripProvider } from '@/context/tripContext';
 import Link from 'next/link';
 import { useParams, usePathname } from 'next/navigation';
 import React from 'react'
@@ -16,24 +17,26 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     ]
     return (
         <div>
-            <div className="flex items-center justify-around "style={{scrollbarWidth : 'thin'}}>
-                {tabs.map((tab) => (
-                    <Link
-                        key={tab.name}
-                        href={tab.path}
-                        className={`px-4 py-2 transition duration-300 ease-in-out font-semibold rounded-t-md hover:bg-hoverColor ${pathname === tab.path
-                            ? 'border-b-2 border-[#3190F5] text-buttonTextColor '
-                            : 'border-transparent text-buttonTextColor hover:border-bottomNavBarColor'
-                            }`}
-                        prefetch={true}
-                    >
-                        <div className="flex items-center space-x-2">
-                            <span>{tab.name}</span>
-                        </div>
-                    </Link>
-                ))}
-            </div>
-            {children}
+            <TripProvider tripId={tripId as string} >
+                <div className="flex items-center justify-around " style={{ scrollbarWidth: 'thin' }}>
+                    {tabs.map((tab) => (
+                        <Link
+                            key={tab.name}
+                            href={tab.path}
+                            className={`px-4 py-2 transition duration-300 ease-in-out font-semibold rounded-t-md hover:bg-hoverColor ${pathname === tab.path
+                                ? 'border-b-2 border-[#3190F5] text-buttonTextColor '
+                                : 'border-transparent text-buttonTextColor hover:border-bottomNavBarColor'
+                                }`}
+                            prefetch={true}
+                        >
+                            <div className="flex items-center space-x-2">
+                                <span>{tab.name}</span>
+                            </div>
+                        </Link>
+                    ))}
+                </div>
+                {children}
+            </TripProvider>
         </div>
     )
 }

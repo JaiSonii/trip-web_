@@ -6,16 +6,14 @@ import EditChargeModal from './EditChargeModal';
 import { Button } from '@/components/ui/button';
 import { formatNumber } from '@/utils/utilArray';
 import { PiPlusBold } from 'react-icons/pi';
+import { useTrip } from '@/context/tripContext';
 
-interface ChargesProps {
-  charges: TripExpense[];
-  setCharges: React.Dispatch<React.SetStateAction<TripExpense[]>>;
-  tripId: string;
-  onAddCharge?: (charge: TripExpense) => void;
-  trip: ITrip;
+type props = {
+  tripId : string
 }
 
-const Charges: React.FC<ChargesProps> = ({ charges, setCharges, tripId, trip }) => {
+const Charges : React.FC<props> = ({tripId}) => {
+  const {trip, setTrip} = useTrip()
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [expandedItem, setExpandedItem] = useState<number | null>(null);
@@ -23,11 +21,11 @@ const Charges: React.FC<ChargesProps> = ({ charges, setCharges, tripId, trip }) 
   const [selectedCharge, setSelectedCharge] = useState<TripExpense | null>(null);
 
   useEffect(() => {
-    if (charges) {
-      const sorted = [...charges].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    if (trip.tripCharges) {
+      const sorted = [...trip.tripCharges].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
       setSortedCharges(sorted);
     }
-  }, [charges]);
+  }, [trip.tripCharges]);
 
   const handleAddCharge = async (newCharge: TripExpense) => {
     try {
@@ -42,7 +40,14 @@ const Charges: React.FC<ChargesProps> = ({ charges, setCharges, tripId, trip }) 
         throw new Error('Failed to add Charge')
       }
       const data =  await res.json();
-      setCharges((prev: TripExpense[]) => [...prev, data.newCharge]);
+      setTrip((prev : ITrip | any) =>({
+        ...prev,
+        tripCharges : [
+          data.newCharge,
+          ...prev.tripCharges
+        ],
+        balance : newCharge.partyBill ? prev.balance + newCharge.amount : prev.balance - newCharge.amount,
+      }))
     } catch (error) {
       alert(error)
       console.error('Error adding charge:', error);
@@ -69,7 +74,13 @@ const Charges: React.FC<ChargesProps> = ({ charges, setCharges, tripId, trip }) 
       body: JSON.stringify({ id: chargeToDelete._id }),
     });
     if (res.ok) {
-      setCharges((prevCharges: TripExpense[]) => prevCharges.filter((charge, i) => i !== index));
+      
+      setTrip((prev : ITrip | any) =>({
+        ...prev,
+        tripCharges : prev.tripCharges.filter((charge : any) => charge._id !== chargeToDelete._id),
+        balance : chargeToDelete.partyBill ? prev.balance - chargeToDelete.amount : prev.balance + chargeToDelete 
+      }))
+      
     } else {
       console.error('Failed to delete charge:', chargeToDelete._id);
     }
@@ -92,7 +103,7 @@ const Charges: React.FC<ChargesProps> = ({ charges, setCharges, tripId, trip }) 
         <p className="text-sm text-gray-500">No charges available.</p>
       ) : (
         <div className="bg-white shadow-lg rounded-lg divide-y divide-gray-200">
-          {sortedCharges.map((charge, index) => (
+          {sortedCharges.map((charge : any, index : number) => (
             <div
               key={index}
               className="flex flex-col px-4 py-4 hover:bg-gray-50 transition duration-300 ease-in-out transform hover:scale-105 rounded-lg cursor-pointer"
@@ -162,13 +173,12 @@ const Charges: React.FC<ChargesProps> = ({ charges, setCharges, tripId, trip }) 
               return;
             }
 
-            // Update charges in state
-            const updatedCharges = sortedCharges.map(charge =>
-              charge._id === selectedCharge._id ? editedCharge : charge
-            );
-            setCharges(updatedCharges);
-
-            // Close edit modal
+            setTrip((prev : ITrip | any) =>({
+              ...prev,
+              tripCharges : prev.tripCharges.map((charge : any) =>
+                charge._id === selectedCharge._id? editedCharge : charge
+              ),
+            }))
             setEditModalOpen(false);
           }}
           charge={selectedCharge}

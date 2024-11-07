@@ -12,17 +12,13 @@ import { Button } from '@/components/ui/button';
 import { UndoIcon } from 'lucide-react';
 import { formatNumber } from '@/utils/utilArray';
 import Link from 'next/link';
-import { mutate } from 'swr';
 import BiltyForm from '../BiltyForm';
+import { useTrip } from '@/context/tripContext';
 
-interface TripDetailsProps {
-  trip: ITrip | any;
-  setTrip: any;
-}
 
-const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
-  const [accounts, setAccounts] = useState<PaymentBook[]>([]);
-  const [tripBalance, setBalance] = useState(trip.balance);
+
+const TripDetails = () => {
+  const {trip, setTrip} = useTrip()
   const [charges, setCharges] = useState<TripExpense[]>([])
   const [biltyModalOpen, setBiltyModalOpen] = useState(false)
 
@@ -40,7 +36,6 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
   useEffect(() => {
     const sorted = trip.tripCharges?.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());
     setCharges(sorted);
-    setAccounts(trip?.tripAccounts)
   }, [trip]);
 
   const handleUndoStatus = async () => {
@@ -160,11 +155,11 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
         if (resData.status == 400) {
           alert(resData.message);
         }
-        setAccounts((prev: any) => [
-          resData.payment,
-          ...prev
-        ]);
-        setBalance((prev: number) => prev - data.amount)
+        setTrip((prev: ITrip | any) => ({
+          ...prev,
+          balance: prev.balance - resData.payment.amount,
+          tripAccounts : [resData.payment, ...prev.tripAccounts]
+        }))
 
       } catch (error: any) {
         alert('Failed to Add Payment')
@@ -189,7 +184,7 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
             <Link href={`/user/drivers/${trip.driver}`}>
               <TripInfo label="Driver" value={trip.driverName || '----'} />
             </Link>
-            <TripInfo label="Pending" value={`₹${formatNumber(tripBalance)}`} />
+            <TripInfo label="Pending" value={`₹${formatNumber(trip.balance)}`} />
           </div>
 
           <div className='grid grid-cols-4 gap-2'>
@@ -200,23 +195,13 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
             <TripInfo label="Material" value={trip.material || '----'} />
             <TripInfo label="Billing Type" value={trip.billingType || '----'} />
           </div>
-
-          {/* <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
-            <TripInfo label="Party Name" value={partyName || '----'} />
-            <div className="flex flex-col md:flex-row md:gap-6">
-              <TripInfo label="LR Number" value={trip.LR || '----'} />
-              <TripInfo label="Material" value={trip.material || '----'} />
-              <TripInfo label="Billing Type" value={trip.billingType || '----'} />
-            </div>
-
-          </div> */}
           <TripInfo label="Route" value={`${trip.route.origin} → ${trip.route.destination}`} startDate={trip.startDate} />
           <div className=" w-full">
             <TripStatus status={trip.status as number} dates={trip.dates} />
           </div>
           <div className="col-span-3 flex justify-center space-x-4">
             <div className="flex items-center space-x-4">
-              <StatusButton status={trip.status as number} statusUpdate={handleStatusUpdate} dates={trip.dates} amount={tripBalance} />
+              <StatusButton status={trip.status as number} statusUpdate={handleStatusUpdate} dates={trip.dates} amount={trip.balance} />
               <Button variant={'destructive'} onClick={handleUndoStatus}>
                 <div className='flex items-center space-x-2'>
                   <UndoIcon />
@@ -241,9 +226,9 @@ const TripDetails: React.FC<TripDetailsProps> = ({ trip, setTrip }) => {
         </div>
       </div>
       <div className='grid grid-cols-3 gap-2 mt-4'>
-        <div className='col-span-1 bg-[#FAFDFF] p-2 rounded-xl shadow-xl'><DataList data={accounts} label="Advances" modalTitle="Add Advance" trip={trip} setData={setAccounts} setBalance={setBalance} setTrip={setTrip} /></div>
-        <div className='col-span-1 bg-[#FAFDFF] p-2 rounded-xl shadow-xl'><DataList data={accounts} label="Payments" modalTitle="Add Payment" trip={trip} setData={setAccounts} setBalance={setBalance} setTrip={setTrip} /></div>
-        <div className='col-span-1 bg-[#FAFDFF] p-2 rounded-xl shadow-xl'><Charges charges={charges} setCharges={setCharges} tripId={trip.trip_id} trip={trip} /></div>
+        <div className='col-span-1 bg-[#FAFDFF] p-2 rounded-xl shadow-xl'><DataList  label="Advances" modalTitle="Add Advance" /></div>
+        <div className='col-span-1 bg-[#FAFDFF] p-2 rounded-xl shadow-xl'><DataList  label="Payments" modalTitle="Add Payment" /></div>
+        <div className='col-span-1 bg-[#FAFDFF] p-2 rounded-xl shadow-xl'><Charges tripId={trip.trip_id} /></div>
 
 
       </div>

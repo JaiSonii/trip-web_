@@ -8,7 +8,7 @@ import { MdEdit, MdDelete, MdClose } from 'react-icons/md';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import Loading from '../loading';
-import { mutate } from 'swr';
+import { useTrip } from '@/context/tripContext';
 
 // Dynamically import components
 const TripDetails = dynamic(() => import('@/components/trip/tripDetail/TripDetail'), {
@@ -22,43 +22,41 @@ const EditTripForm = dynamic(() => import('@/components/trip/EditTripForm'), {
 
 
 const useFetchData = (tripId: string) => {
-  const [trip, setTrip] = useState<ITrip | null>(null);
+  const {trip, setTrip, loading} = useTrip()
   const [parties, setParties] = useState<IParty[]>([]);
   const [trucks, setTrucks] = useState<TruckModel[]>([]);
   const [drivers, setDrivers] = useState<IDriver[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
  
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const tripRes = await fetch(`/api/trips/${tripId}`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const tripRes = await fetch(`/api/trips/${tripId}`, {
+  //         method: 'GET',
+  //         headers: { 'Content-Type': 'application/json' },
+  //       });
 
-        if (!tripRes.ok) throw new Error('Failed to fetch trip details');
+  //       if (!tripRes.ok) throw new Error('Failed to fetch trip details');
 
-        const tripData = await tripRes.json();
-        console.log(tripData)
-        setTrip(tripData.trip);
-      } catch (error: any) {
-        console.error('Error fetching data:', error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  //       const tripData = await tripRes.json();
+  //       console.log(tripData)
+  //       setTrip(tripData.trip);
+  //     } catch (error: any) {
+  //       console.error('Error fetching data:', error);
+  //       setError(error.message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    if (tripId) {
-      fetchData();
-    }
-  }, [tripId]);
+  //   if (tripId) {
+  //     fetchData();
+  //   }
+  // }, [tripId]);
 
   const handleEditClicked = useCallback(async () => {
-    setLoading(true);
     try {
       const [partiesRes, trucksRes, driversRes] = await Promise.all([
         fetch('/api/parties', { method: 'GET', headers: { 'Content-Type': 'application/json' } }),
@@ -82,9 +80,7 @@ const useFetchData = (tripId: string) => {
     } catch (error: any) {
       console.error('Error fetching data:', error);
       setError(error.message);
-    } finally {
-      setLoading(false);
-    }
+    } 
   }, []);
 
   return { trip, parties, trucks, drivers, loading, error, setTrip, handleEditClicked };
@@ -230,7 +226,7 @@ const TripPage: React.FC = () => {
           </motion.div>
         </div>
       )}
-      <TripDetails trip={trip as ITrip} setTrip={setTrip} />
+      <TripDetails />
       {docModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
           <TripDocumentUpload open={docModalOpen} setOpen={setDocModalOpen} tripId={tripId as string} />
