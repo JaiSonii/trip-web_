@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 import useSWR from "swr";
-import { ITrip, IDriver, TruckModel } from "@/utils/interface";
+import { ITrip, IDriver, TruckModel, IParty, ISupplier } from "@/utils/interface";
 
 const ExpenseCtx = createContext<{
     trips: ITrip[];

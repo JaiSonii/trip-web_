@@ -3,6 +3,7 @@ import './globals.css';
 import { cn } from "@/lib/utils";
 import { Roboto as FontSans } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
+import Script from "next/script";
 
 // Load Roboto font with multiple weights
 const fontSans = FontSans({
@@ -48,6 +49,22 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Add Google Analytics Script */}
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=G-BMXWP592W0`} // Replace with your Measurement ID
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-BMXWP592W0'); // Replace with your Measurement ID
+          `}
+        </Script>
+      </head>
       <body
         className={cn(
           "min-h-screen bg-background font-roboto antialiased",
