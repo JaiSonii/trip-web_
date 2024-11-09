@@ -9,40 +9,48 @@ import { FaUserTie, FaPhone, FaTruck, FaWallet, FaSort, FaSortDown, FaSortUp } f
 import { formatNumber } from '@/utils/utilArray';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import debounce from 'lodash.debounce';
+import { useExpenseCtx } from '@/context/context';
+import { mutate, useSWRConfig } from 'swr';
 
 const SuppliersPage = () => {
-  const router = useRouter();
 
-  const [suppliers, setSuppliers] = useState<ISupplier[] | any>([]);
-  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const {suppliers, isLoading} = useExpenseCtx()
+  // const [suppliers, setSuppliers] = useState<ISupplier[] | any>([]);
+  // const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' });
   const [searchQuery, setSearchQuery] = useState(''); // Track the search query
+  const {mutate} = useSWRConfig()
+
+  useEffect(()=>{
+    mutate('/api/suppliers')
+  },[mutate])
 
   // Fetch suppliers data
-  useEffect(() => {
-    const fetchSuppliers = async () => {
-      try {
-        const res = await fetch('/api/suppliers', {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
+  // useEffect(() => {
+  //   const fetchSuppliers = async () => {
+  //     try {
+  //       const res = await fetch('/api/suppliers', {
+  //         method: 'GET',
+  //         headers: { 'Content-Type': 'application/json' },
+  //       });
 
-        if (!res.ok) {
-          throw new Error('Failed to fetch suppliers');
-        }
+  //       if (!res.ok) {
+  //         throw new Error('Failed to fetch suppliers');
+  //       }
 
-        const data = await res.json();
-        setSuppliers(data.suppliers);
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  //       const data = await res.json();
+  //       setSuppliers(data.suppliers);
+  //     } catch (err) {
+  //       setError((err as Error).message);
+  //     } finally {
+  //       setLoading(false);
+  //     }
+  //   };
 
-    fetchSuppliers();
-  }, []);
+  //   fetchSuppliers();
+  // }, []);
 
   // Function to request sorting
   const requestSort = (key: any) => {
@@ -103,35 +111,35 @@ const SuppliersPage = () => {
   }, [suppliers, searchQuery, sortConfig]);
 
 
-  useEffect(() => {
-    const fetchSuppliers = async () => {
-      try {
-        const res = await fetch('/api/suppliers', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+  // useEffect(() => {
+  //   const fetchSuppliers = async () => {
+  //     try {
+  //       const res = await fetch('/api/suppliers', {
+  //         method: 'GET',
+  //         headers: {
+  //           'Content-Type': 'application/json',
+  //         },
+  //       });
 
-        if (!res.ok) {
-          throw new Error('Failed to fetch suppliers');
-        }
+  //       if (!res.ok) {
+  //         throw new Error('Failed to fetch suppliers');
+  //       }
 
-        const data = await res.json();
-        setSuppliers(data.suppliers);
-      } catch (err) {
-        setError((err as Error).message);
-      } finally {
-        setTimeout(() => {
-          setLoading(false);
-        }, 1000);
-      }
-    };
+  //       const data = await res.json();
+  //       setSuppliers(data.suppliers);
+  //     } catch (err) {
+  //       setError((err as Error).message);
+  //     } finally {
+  //       setTimeout(() => {
+  //         setLoading(false);
+  //       }, 1000);
+  //     }
+  //   };
 
-    fetchSuppliers();
-  }, []);
+  //   fetchSuppliers();
+  // }, []);
 
-  if (loading) {
+  if (isLoading) {
     return <Loading />;
   }
 

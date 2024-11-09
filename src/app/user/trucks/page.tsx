@@ -1,10 +1,9 @@
 'use client'
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { FaRoute, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa6';
-import { GoOrganization } from 'react-icons/go';
+import { FaSort, FaSortDown, FaSortUp } from 'react-icons/fa6';
 import debounce from 'lodash.debounce';
 
 import Loading from './loading';
@@ -17,6 +16,7 @@ import TripCard from '@/components/TripCard';
 import { Input } from '@/components/ui/input';
 
 import type { TruckModel as ITruck } from '@/utils/interface';
+import { useSWRConfig } from 'swr';
 
 type SortConfig = {
   key: keyof ITruck | any;
@@ -24,10 +24,17 @@ type SortConfig = {
 };
 
 export default function TrucksPage() {
+ 
   const router = useRouter();
   const { trucks, isLoading } = useExpenseCtx();
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: 'asc' });
   const [searchQuery, setSearchQuery] = useState('');
+
+  const {mutate} = useSWRConfig()
+
+  useEffect(()=>{
+    mutate('/api/trucks')
+  },[mutate])
 
   const debouncedSearch = useMemo(
     () => debounce((query: string) => setSearchQuery(query), 300),

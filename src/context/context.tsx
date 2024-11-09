@@ -7,6 +7,8 @@ const ExpenseCtx = createContext<{
     drivers: IDriver[];
     shops: any[];
     trucks: TruckModel[] | any[];
+    suppliers : ISupplier[] | any[];
+    parties : IParty [] | any[]
     isLoading: boolean;
     error: any;
 }>({
@@ -14,6 +16,8 @@ const ExpenseCtx = createContext<{
     drivers: [],
     shops: [],
     trucks: [],
+    suppliers : [],
+    parties : [],
     isLoading: false,
     error: null,
 });
@@ -31,6 +35,8 @@ export const ExpenseProvider = ({ children }: Props) => {
     const { data: driversData, error: driversError, isLoading: driversLoading } = useSWR("/api/drivers", fetcher);
     const { data: trucksData, error: trucksError, isLoading: trucksLoading } = useSWR("/api/trucks", fetcher);
     const { data: shopsData, error: shopsError, isLoading: shopsLoading } = useSWR("/api/shopkhata", fetcher);
+    const { data: partiesData, error: partiesError, isLoading: partiesLoading } = useSWR("/api/parties", fetcher);
+    const { data: suppliersData, error: suppliersError, isLoading: suppliersLoading } = useSWR("/api/suppliers", fetcher);
 
     const isLoading = tripsLoading || driversLoading || trucksLoading || shopsLoading;
     const error = tripsError || driversError || trucksError || shopsError;
@@ -39,6 +45,8 @@ export const ExpenseProvider = ({ children }: Props) => {
     const drivers = driversData?.drivers || [];
     const trucks = trucksData?.trucks || [];
     const shops = shopsData?.shops || [];
+    const parties = partiesData?.parties || [];
+    const suppliers = suppliersData?.suppliers || [];
 
     return (
         <ExpenseCtx.Provider
@@ -47,6 +55,8 @@ export const ExpenseProvider = ({ children }: Props) => {
                 drivers,
                 shops,
                 trucks,
+                parties,
+                suppliers,
                 isLoading,
                 error,
             }}

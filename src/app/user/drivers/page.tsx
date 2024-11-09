@@ -1,8 +1,7 @@
 'use client'
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { mutate } from 'swr';
 import debounce from 'lodash.debounce';
 import { FaUser, FaPhone, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
 
@@ -12,6 +11,7 @@ import { useExpenseCtx } from '@/context/context';
 import Loading from './loading';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
+import { useSWRConfig } from 'swr';
 
 type SortConfig = {
   key: keyof IDriver | null;
@@ -19,10 +19,17 @@ type SortConfig = {
 };
 
 export default function DriversPage() {
+  
   const router = useRouter();
   const { drivers, isLoading } = useExpenseCtx();
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: 'asc' });
   const [searchQuery, setSearchQuery] = useState('');
+
+  const {mutate} = useSWRConfig()
+
+  useEffect(()=>{
+    mutate('/api/trips')
+  },[mutate])
 
   const debouncedSearch = useMemo(
     () => debounce((query: string) => setSearchQuery(query), 300),

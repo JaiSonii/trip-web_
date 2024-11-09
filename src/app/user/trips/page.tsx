@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { mutate } from 'swr';
 import debounce from 'lodash.debounce';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
@@ -26,6 +25,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useSWRConfig } from 'swr';
 import { IoMdUndo } from 'react-icons/io';
 
 
@@ -51,6 +51,11 @@ export default function TripsPage() {
   const [sortConfig, setSortConfig] = useState<{ key: keyof ITrip | null; direction: 'asc' | 'desc' }>({ key: null, direction: 'asc' });
   const [searchQuery, setSearchQuery] = useState('');
   const [openOptionsId, setOpenOptionsId] = useState<string | null>(null);
+  const {mutate} = useSWRConfig()
+
+  useEffect(()=>{
+    mutate('/api/trips')
+  },[mutate])
 
   const fetchTrips = useCallback(async (status?: number) => {
     setLoading(true);

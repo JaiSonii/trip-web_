@@ -5,7 +5,7 @@ import { IParty } from '@/utils/interface';
 
 import { v4 as uuidv4 } from 'uuid'
 
-import {  verifyToken } from '@/utils/auth';
+import { verifyToken } from '@/utils/auth';
 
 const Party = models.Party || model('Party', partySchema);
 
@@ -23,86 +23,93 @@ export async function GET(req: Request) {
       { $match: { user_id: user } }, // Match based on user ID
       {
         $lookup: {
-          from: 'trips', // Join with the trips collection
+          from: 'trips', // Join with trips collection
           localField: 'party_id',
           foreignField: 'party',
           as: 'trips'
         }
       },
-      { $unwind: { path: '$trips', preserveNullAndEmptyArrays: true } }, // Unwind trips array
+      // Group the trips to sum up the amounts before unwinding
+      {
+        $addFields: {
+          totalTripAmount: {
+            $sum: { $ifNull: ['$trips.amount', 0] } // Sum of amounts for all trips
+          }
+        }
+      },
       {
         $lookup: {
-          from: 'tripcharges', // Join with the tripcharges collection
+          from: 'tripcharges', // Join with tripcharges collection
           localField: 'trips.trip_id',
           foreignField: 'trip_id',
           as: 'tripExpenses'
         }
       },
       {
+        $lookup: {
+          from: 'partypayments', // Join with partypayments collection for account balance
+          localField: 'party_id',
+          foreignField: 'party_id',
+          as: 'tripAccounts'
+        }
+      },
+      {
         $addFields: {
-          tripBalance: {
-            $let: {
-              vars: {
-                accountBalance: {
-                  $sum: {
-                    $map: {
-                      input: '$trips.accounts', // Sum account amounts from each trip
-                      as: 'account',
-                      in: '$$account.amount'
-                    }
+          chargeToBill: {
+            $sum: {
+              $map: {
+                input: {
+                  $filter: {
+                    input: { $ifNull: ['$tripExpenses', []] }, // Handle null tripExpenses
+                    as: 'expense',
+                    cond: { $eq: ['$$expense.partyBill', true] }
                   }
                 },
-                chargeToBill: {
-                  $sum: {
-                    $map: {
-                      input: {
-                        $filter: {
-                          input: '$tripExpenses', // Use tripExpenses from joined tripcharges
-                          as: 'expense',
-                          cond: { $eq: ['$$expense.partyBill', true] }
-                        }
-                      },
-                      as: 'filteredExpense',
-                      in: '$$filteredExpense.amount'
-                    }
+                as: 'filteredExpense',
+                in: { $ifNull: ['$$filteredExpense.amount', 0] }
+              }
+            }
+          },
+          chargeNotToBill: {
+            $sum: {
+              $map: {
+                input: {
+                  $filter: {
+                    input: { $ifNull: ['$tripExpenses', []] }, // Handle null tripExpenses
+                    as: 'expense',
+                    cond: { $eq: ['$$expense.partyBill', false] }
                   }
                 },
-                chargeNotToBill: {
-                  $sum: {
-                    $map: {
-                      input: {
-                        $filter: {
-                          input: '$tripExpenses', // Use tripExpenses from joined tripcharges
-                          as: 'expense',
-                          cond: { $eq: ['$$expense.partyBill', false] }
-                        }
-                      },
-                      as: 'filteredExpense',
-                      in: '$$filteredExpense.amount'
-                    }
-                  }
-                }
-              },
-              in: {
-                $cond: {
-                  if: { $ne: ['$trips', null] }, // Check if trips exist
-                  then: {
-                    $subtract: [
-                      { $add: ['$trips.amount', '$$chargeToBill'] }, // Calculate balance
-                      { $add: ['$$accountBalance', '$$chargeNotToBill'] }
-                    ]
-                  },
-                  else: 0 // If no trips, balance is 0
-                }
+                as: 'filteredExpense',
+                in: { $ifNull: ['$$filteredExpense.amount', 0] }
+              }
+            }
+          },
+          accountBalance: {
+            $sum: {
+              $map: {
+                input: { $ifNull: ['$tripAccounts', []] }, // Handle null tripAccounts
+                as: 'account',
+                in: { $ifNull: ['$$account.amount', 0] }
               }
             }
           }
         }
       },
       {
+        $addFields: {
+          partyBalance: {
+            $subtract: [
+              { $add: ['$totalTripAmount', '$chargeToBill'] }, // sum of totalTripAmount and chargeToBill
+              { $add: ['$accountBalance', '$chargeNotToBill'] } // sum of accountBalance and chargeNotToBill
+            ]
+          }
+        }
+      },
+      {
         $group: {
           _id: '$_id', // Group by party_id
-          partyBalance: { $sum: '$tripBalance' }, // Sum of balances for all trips
+          partyBalance: { $sum: '$partyBalance' }, // Sum of balances for all trips
           party: { $first: '$$ROOT' } // Preserve the full party document
         }
       },
@@ -112,7 +119,7 @@ export async function GET(req: Request) {
         }
       },
       { $replaceRoot: { newRoot: '$party' } }, // Replace the root with the full party document
-      { $project: { trips: 0, tripExpenses: 0 } } // Optionally remove trips and tripExpenses if not needed in the final output
+      { $project: { trips: 0, tripExpenses: 0, tripAccounts: 0 } } // Optionally remove trips and tripExpenses if not needed in the final output
     ]);
 
 

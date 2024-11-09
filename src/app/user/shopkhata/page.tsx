@@ -11,15 +11,20 @@ import { formatNumber } from '@/utils/utilArray';
 import debounce from 'lodash.debounce';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useExpenseCtx } from '@/context/context';
-import { mutate } from 'swr';
+import { useSWRConfig } from 'swr';
 
 const ShopKhataPage = () => {
-  mutate('/api/shopkhata')
   const {shops, isLoading} = useExpenseCtx()
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' });
   const [searchQuery, setSearchQuery] = useState(''); // Track the search query
+
+  const {mutate} = useSWRConfig()
+
+  useEffect(()=>{
+    mutate('/api/shopkhata')
+  },[mutate])
 
   const requestSort = (key: any) => {
     let direction: 'asc' | 'desc' = 'asc';
