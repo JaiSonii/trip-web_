@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import './globals.css';
 import { cn } from "@/lib/utils";
 import { Roboto as FontSans } from "next/font/google";
-import { Analytics } from "@vercel/analytics/react";
 import Script from "next/script";
+import Analytics from "@/lib/analytics";
 
 // Load Roboto font with multiple weights
 const fontSans = FontSans({
   subsets: ["latin"],
-  weight: ["100", "300", "400", "500", "700"],  // Add multiple weights as needed
+  weight: ["100", "300", "400", "500", "700"],
   variable: "--font-sans",
 });
 
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
     locale: "en_US",
     images: [
       {
-        url: "https://www.awajahi.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fawajahi%20logo.e4977a4d.png&w=64&q=75", // Update this URL to the path of your logo
+        url: "https://www.awajahi.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fawajahi%20logo.e4977a4d.png&w=64&q=75",
         width: 1200,
         height: 630,
         alt: "Awajahi Logo",
@@ -37,10 +37,9 @@ export const metadata: Metadata = {
     ],
   },
   icons: {
-    icon: "/favicon.ico", // Add your favicon here
+    icon: "/favicon.ico",
   },
 };
-
 
 export default function RootLayout({
   children,
@@ -59,9 +58,28 @@ export default function RootLayout({
           {`
             window.dataLayer = window.dataLayer || [];
             function gtag(){dataLayer.push(arguments);}
+
+            // Function to capture UTM parameters
+            function getUTMParams() {
+              const urlParams = new URLSearchParams(window.location.search);
+              return {
+                utm_source: urlParams.get('utm_source') || '(direct)',
+                utm_medium: urlParams.get('utm_medium') || '(none)',
+                utm_campaign: urlParams.get('utm_campaign') || '',
+                utm_content: urlParams.get('utm_content') || '',
+                utm_term: urlParams.get('utm_term') || '',
+              };
+            }
+
+            // Set up Google Analytics with UTM parameters
             gtag('js', new Date());
 
-            gtag('config', 'G-BMXWP592W0'); // Replace with your Measurement ID
+            // Get the UTM parameters and include them in the gtag config
+            const utmParams = getUTMParams();
+            gtag('config', 'G-BMXWP592W0', {
+              page_path: window.location.pathname,
+              ...utmParams
+            });
           `}
         </Script>
       </head>
@@ -72,7 +90,7 @@ export default function RootLayout({
         )}
       >
         {children}
-        <Analytics />
+        {/* <Analytics /> */}
       </body>
     </html>
   );
