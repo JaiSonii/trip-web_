@@ -182,7 +182,7 @@ export default function TrucksPage() {
                   {truck.supplierName ? (
                     <Button variant="link" asChild>
                       <Link 
-                        href={`/user/suppliers/${truck.supplier}`} 
+                        href={`/user/suppliers/${truck.supplier}/trips`} 
                         onClick={(e) => e.stopPropagation()}
                       >
                         {truck.supplierName}
