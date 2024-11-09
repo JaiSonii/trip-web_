@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -8,7 +8,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ITrip } from '@/utils/interface'
-import { useReactToPrint } from 'react-to-print'
 import generatePDF from 'react-to-pdf';
 
 type ConsignerConsigneeType = {
@@ -96,6 +95,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
   const [currentStep, setCurrentStep] = useState(0)
   const [showBill, setShowBill] = useState(false)
   const [selectedCopy, setSelectedCopy] = useState('Consigner')
+  const [user, setUser] = useState<any>()
   const [formData, setFormData] = useState<FormDataType>({
     gstNumber: '',
     pan: '',
@@ -133,6 +133,32 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
   })
   const billRef = useRef<HTMLDivElement>(null)
 
+  const fetchUser = async()=>{
+    try{
+      const res = await fetch('/api/users')
+      if(!res.ok){
+        alert('Failed to fetch details')
+        return
+      }
+      const data = await res.json()
+      const user = data.user
+      setUser(user)
+      setFormData((prev)=>({
+        ...prev,
+        companyName : user.companyName,
+        address : user.address,
+        contactNumber : user.phone,
+        gstNumber : user.gstNumber
+      }))
+    }catch(error){
+      alert('Failed to fetch User Details')
+    }
+  }
+
+  useEffect(()=>{
+    if(isOpen) fetchUser();
+  },[isOpen])
+
   const biltyColor = useMemo(() => {
     const copy = selectedCopy
     switch (copy) {
@@ -159,6 +185,23 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
       setSelectedCopy(tab); // Set the color for each PDF
       await new Promise((resolve) => setTimeout(resolve, 200)); // Small delay to ensure color is applied
       generatePDF(billRef, { filename: `Bilty-${tab}-${selectedCopy + " Copy"}-${trip.LR}-${formData.truckNo}-${trip.trip_id}` });
+    }
+    if(!user.companyName || !user.address || !user.gstNumber){
+      try {
+        const res = await fetch('/api/users',{
+          method : 'PUT',
+          body : JSON.stringify({
+            companyName: user.companyName || formData.companyName,
+            address: user.address || formData.address,
+            gstNumber: user.gstNumber || formData.gstNumber
+          })
+        })
+        if(!res.ok){
+          alert('Failed to update user details')
+        }
+      } catch (error) {
+        alert('Failed to update user details')
+      }
     }
   };
 
