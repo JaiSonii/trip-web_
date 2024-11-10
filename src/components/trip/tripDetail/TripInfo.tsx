@@ -8,7 +8,7 @@ interface TripInfoProps {
   value: string;
   tripId?: string;
   startDate?: Date;
-  validityDate?: Date;
+  validityDate?: Date | null;
 }
 
 const TripInfo: React.FC<TripInfoProps> = ({ label, value, tripId, startDate, validityDate }) => {

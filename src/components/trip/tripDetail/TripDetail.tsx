@@ -195,7 +195,7 @@ const TripDetails = () => {
             <TripInfo label="Material" value={trip.material || '----'} />
             <TripInfo label="Billing Type" value={trip.billingType || '----'} />
           </div>
-          <TripInfo label="Route" value={`${trip.route.origin} → ${trip.route.destination}`} startDate={trip.startDate} validityDate={trip.documents.find((doc : any)=>doc.type === 'E-Way Bill').validityDate || null}/>
+          <TripInfo label="Route" value={`${trip.route.origin} → ${trip.route.destination}`} startDate={trip.startDate} validityDate={trip?.documents?.find((doc : any)=>doc.type === 'E-Way Bill')?.validityDate || null}/>
           <div className=" w-full">
             <TripStatus status={trip.status as number} dates={trip.dates} />
           </div>
