@@ -54,7 +54,6 @@ const CreateDriverPage: React.FC = () => {
                 current.driver = data.data.driver_id
                 localStorage.setItem('tripData', JSON.stringify(current))
             }
-            mutate('/api/drivers/create')
             router.push(nextpath ? nextpath : '/user/drivers');
         } catch (error) {
             console.error('Error saving party:', error);

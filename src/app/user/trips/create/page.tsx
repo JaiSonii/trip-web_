@@ -5,13 +5,14 @@ import { IDriver, TruckModel, IParty, ITrip } from '@/utils/interface';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Loading from '../loading'; // Ensure the Loading component shows a GIF
 import { useExpenseCtx } from '@/context/context';
-import { mutate } from 'swr';
+import { useSWRConfig } from 'swr';
 
 const CreateTripPage: React.FC = () => {
-  const { trips, drivers, trucks } = useExpenseCtx();
+  
+
+  const { trips } = useExpenseCtx();
   const router = useRouter();
 
-  const [parties, setParties] = useState<IParty[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false); // New state for saving overlay
   const [error, setError] = useState<string | null>(null);
@@ -19,23 +20,18 @@ const CreateTripPage: React.FC = () => {
   const data  = useSearchParams()
   const duplicate = data.get('trip')
 
+  const {mutate} = useSWRConfig()
+  useEffect(()=>{
+    mutate(`/api/trips`)
+    mutate(`/api/trucks`)
+    mutate(`/api/drivers`)
+    mutate(`/api/parties`)
+  },[mutate])
+
   useEffect(() => {
     const fetchData = async () => {
       try {
         // Fetch parties, trucks, drivers
-        const [partiesRes] = await Promise.all([
-          fetch('/api/parties/create'),
-        ]);
-
-        if (!partiesRes.ok) {
-          throw new Error('Failed to fetch data');
-        }
-
-        const [partiesData] = await Promise.all([
-          partiesRes.json()
-        ]);
-
-        setParties(partiesData.parties);
 
         // Find the latest trip's LR
         if (trips && trips.length > 0) {
@@ -121,7 +117,6 @@ const CreateTripPage: React.FC = () => {
       }
 
       const data = await tripRes.json();
-      await mutate('/api/trips')
       router.push('/user/trips');
     } catch (error) {
       console.error('Error saving trip:', error);
@@ -145,7 +140,7 @@ const CreateTripPage: React.FC = () => {
       )}
       <div className="w-full h-full relative">
 
-        <TripForm parties={parties} trucks={trucks} drivers={drivers} onSubmit={handleTripSubmit} lr={latestLR} duplicate={duplicate ? JSON.parse(duplicate) : {}}/>
+        <TripForm onSubmit={handleTripSubmit} lr={latestLR} duplicate={duplicate ? JSON.parse(duplicate) : {}}/>
       </div>
     </>
 

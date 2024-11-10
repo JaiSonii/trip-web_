@@ -89,7 +89,7 @@ export async function PUT(req: Request, { params }: { params: { tripId: string }
         await trip.save();
 
         // Return success response
-        return NextResponse.json({ message: 'Document uploaded successfully', status: 200 });
+        return NextResponse.json({ documents : trip.documents, message: 'Document uploaded successfully', status: 200 });
 
     } catch (error) {
         // Log the error and return server error response

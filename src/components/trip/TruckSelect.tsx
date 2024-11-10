@@ -58,7 +58,7 @@ const TruckSelect: React.FC<Props> = ({ trucks, formData, handleChange, setFormD
   return (
     <div>
       <label className="block w-full">
-      <label className="block text-sm text-gray-700">Lorry</label>
+      <label className="block text-xs font-medium text-gray-700 mb-1">Lorry*</label>
         <Select name="truck" value={formData.truck} onValueChange={handleOptionSelect}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select Lorry" />

@@ -93,7 +93,7 @@ const RouteInputs: React.FC<RouteInputsProps> = ({ formData, handleChange }) => 
     return (
         <div className="flex flex-wrap justify-between">
             <div className="w-full md:w-1/2 mb-4 pr-1">
-                <label className="block text-sm font-medium text-gray-700">From</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">From*</label>
                 <Autosuggest
                     suggestions={suggestionsOrigin}
                     onSuggestionsFetchRequested={(params: SuggestionsFetchRequestedParams) => fetchSuggestions(params.value, setSuggestionsOrigin)}
@@ -112,7 +112,7 @@ const RouteInputs: React.FC<RouteInputsProps> = ({ formData, handleChange }) => 
                 />
             </div>
             <div className="w-full md:w-1/2 mb-4 pl-1">
-                <label className="block text-sm font-medium text-gray-700">To</label>
+                <label className="block text-xs font-medium text-gray-700 mb-1">To*</label>
                 <Autosuggest
                     suggestions={suggestionsDestination}
                     onSuggestionsFetchRequested={(params: SuggestionsFetchRequestedParams) => fetchSuggestions(params.value, setSuggestionsDestination)}

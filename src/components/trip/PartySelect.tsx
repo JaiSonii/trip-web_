@@ -37,7 +37,7 @@ const PartySelect: React.FC<PartySelectProps> = ({ parties, formData, handleChan
   return (
     <div>
       <label className="block w-full">
-        <label className="block text-sm text-gray-700">Customer</label>
+        <label className="block text-xs font-medium text-gray-700 mb-1">Customer*</label>
         <Select name="party" defaultValue={formData.party} onValueChange={handleSelectChange}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Select Customer" />

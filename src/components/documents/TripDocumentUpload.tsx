@@ -18,15 +18,17 @@ interface DocumentForm {
     docType: string;
     file: File | null;
     tripId: string;
+    
 }
 
 type Props = {
     open: boolean;
     tripId?: string;
     setOpen: (open: boolean) => void;
+    setTrip? : any
 };
 
-const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId }) => {
+const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip }) => {
     const { trips } = useExpenseCtx()
     console.log(trips)
     const [formData, setFormData] = useState<DocumentForm>({
@@ -183,6 +185,13 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId }) => {
                 });
                 setOpen(false)
                 mutate('/api/documents/recent')
+                const data = await response.json();
+                if(setTrip) {
+                    setTrip((prev : any) =>({
+                        ...prev,
+                        documents : data.documents
+                    }))
+                }
                 router.refresh()
             } else {
                 const errorData = await response.json();

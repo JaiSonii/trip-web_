@@ -192,7 +192,7 @@ export async function POST(this: any, req: Request) {
         type: "E-Way Bill",
         validityDate: new Date(validity as any),
         uploadedDate: new Date(),
-        url: fileUrl,
+        url: fileUrl || '',
       })
     }
 

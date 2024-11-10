@@ -16,7 +16,8 @@ const TripsLayout = ({ children }: { children: React.ReactNode }) => {
   const headings: any = {
     '/user/trips': 'Trips',
     '/user/trips/create': 'Create New Trip',
-    [`/user/trips/${tripId}`] : 'Trip Details'
+    [`/user/trips/${tripId}`] : 'Trip Details',
+    [`/user/trips/${tripId}/documents`] : 'Trip Documents'
   }
 
   return (

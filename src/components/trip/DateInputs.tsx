@@ -1,6 +1,6 @@
 export const DateInputs: React.FC<{ formData: any; handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void; }> = ({ formData, handleChange }) => (
     <div >
-      <label className="block text-sm text-gray-700">Start Date</label>
+      <label className="block text-xs font-medium text-gray-700 mb-1">Start Date*</label>
       <input
         type="date"
         

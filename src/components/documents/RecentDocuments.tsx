@@ -37,6 +37,7 @@ const RecentDocuments: React.FC<props> = ({ docs }) => {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-100">
                     {docs?.map((doc: any, index: number) => (
+                        doc.url && 
                         <tr key={index} className="hover:bg-gray-50">
                             <td className="py-2 px-3 border-b border-gray-200 text-sm">
                                 <div className="flex items-center space-x-3">
