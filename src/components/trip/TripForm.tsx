@@ -250,7 +250,7 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
           <input
             type="date"
             name="ewbValidity"
-            value={new Date(formData.ewbValidity).toISOString().split('T')[0] || ''}
+            value={formData.ewbValidity ? new Date(formData.ewbValidity).toISOString().split('T')[0] : ''}
             onChange={handleChange}
             className="w-full"
           />
