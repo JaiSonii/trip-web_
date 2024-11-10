@@ -145,7 +145,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
       setUser(user)
       setFormData((prev)=>({
         ...prev,
-        companyName : user.companyName,
+        companyName : user.company,
         address : user.address,
         contactNumber : user.phone,
         gstNumber : user.gstNumber
@@ -191,7 +191,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
         const res = await fetch('/api/users',{
           method : 'PUT',
           body : JSON.stringify({
-            companyName: user.companyName || formData.companyName,
+            companyName: user.company || formData.companyName,
             address: user.address || formData.address,
             gstNumber: user.gstNumber || formData.gstNumber
           })
