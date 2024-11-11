@@ -229,55 +229,75 @@ export async function PATCH(req: Request, { params }: { params: { tripId: string
 export async function PUT(req: Request, { params }: { params: { tripId: string } }) {
   const { user, error } = await verifyToken(req);
   if (error) {
-    return NextResponse.json({ error });
+    return NextResponse.json({ error }, { status: 401 });
   }
+  
   const { tripId } = params;
 
   try {
     await connectToDatabase();
 
-    // Assuming data is correctly parsed from req.json()
+    // Parse and validate incoming data
     const { data } = await req.json();
+    if (!data) {
+      return NextResponse.json({ message: 'No data provided' }, { status: 400 });
+    }
 
-    // Assuming models.Truck and models.Driver are defined elsewhere
     const Truck = models.Truck || model('Truck', truckSchema);
     const Driver = models.Driver || model('Driver', driverSchema);
+    const Trip = models.Trip || model('Trip', tripSchema);
+    const TripExpense = models.TripCharges || model('TripCharges', tripChargesSchema);
 
-    const oldTrip = await Trip.findOne({ user_id: user, trip_id: tripId })
-    const TripExpense = models.TripExpense || model('TripExpense', tripChargesSchema)
-    const charges = await TripExpense.find({ user_id: user, trip_id: oldTrip.trip_id })
-    const pending = await fetchBalanceBack(oldTrip, charges)
-    if (pending < 0) {
-      return NextResponse.json({ message: "Balance going negative", status: 400 })
-    }
-
-    const trip = await Trip.findOneAndUpdate({ user_id: user, trip_id: tripId }, data, { new: true });
-    if (data.startDate) {
-      trip.dates[0] = data.startDate
-      await trip.save()
-    }
-
-    if (!trip) {
+    // Fetch old trip and associated charges
+    const oldTrip = await Trip.findOne({ user_id: user, trip_id: tripId });
+    if (!oldTrip) {
       return NextResponse.json({ message: 'Trip not found' }, { status: 404 });
     }
 
+    const charges = await TripExpense.find({ user_id: user, trip_id: oldTrip.trip_id });
+    const pending = await fetchBalanceBack(oldTrip, charges);
+    if (pending < 0) {
+      return NextResponse.json({ message: "Balance going negative" }, { status: 400 });
+    }
 
+    // Update trip data
+    const updatedTrip : ITrip | null = await Trip.findOneAndUpdate({ user_id: user, trip_id: tripId }, data, { new: true });
+    if (!updatedTrip) {
+      return NextResponse.json({ message: 'Trip update failed' }, { status: 404 });
+    }
 
-    // Update driver status to 'On Trip'
+    // Handle E-Way Bill document validity date
+    if (data.ewbValidity) {
+      const eWayBillDoc = updatedTrip.documents.find(doc => doc.type === 'E-Way Bill');
+      if (eWayBillDoc) {
+        eWayBillDoc.validityDate = new Date(data.ewbValidity);
+      } else {
+        updatedTrip.documents.push({ type: 'E-Way Bill', validityDate: new Date(data.ewbValidity), filename : '', uploadedDate : new Date(), url : '' });
+      }
+    }
 
-    await Driver.findOneAndUpdate({ driver_id: trip.driver }, { status: 'On Trip' });
+    // Update trip start date if provided
+    if (data.startDate) {
+      updatedTrip.dates[0] = data.startDate;
+    }
 
-    // Update truck status to 'On Trip'
+    await updatedTrip.save();
 
-    await Truck.findOneAndUpdate({ truckNo: trip.truck }, { status: 'On Trip' });
+    // Update driver and truck status if they are part of this trip
+    if (updatedTrip.driver) {
+      await Driver.findOneAndUpdate({ driver_id: updatedTrip.driver }, { status: 'On Trip' });
+    }
+    if (updatedTrip.truck) {
+      await Truck.findOneAndUpdate({ truckNo: updatedTrip.truck }, { status: 'On Trip' });
+    }
 
-    // Return updated trip with status 200
-    return NextResponse.json({ trip }, { status: 200 });
+    return NextResponse.json({ trip: updatedTrip, status: 200 });
   } catch (err: any) {
     console.error(err);
-    return NextResponse.json({ message: 'Internal Server Error', error: err.message }, { status: 500 });
+    return NextResponse.json({ message: 'Internal Server Error', error: err.message , status: 500 });
   }
 }
+
 
 export async function DELETE(req: Request, { params }: { params: { tripId: string } }) {
   const { user, error } = await verifyToken(req);

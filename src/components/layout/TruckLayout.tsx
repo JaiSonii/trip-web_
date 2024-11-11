@@ -18,6 +18,7 @@ import { motion } from 'framer-motion';
 import AddExpenseModal from '../AddExpenseModal';
 import { handleAddExpense } from '@/helpers/ExpenseOperation';
 import { useTruck } from '@/context/truckContext';
+import { Frown } from 'lucide-react';
 
 interface TruckLayoutProps {
     children: React.ReactNode;
@@ -115,7 +116,11 @@ const TruckLayout = ({ children}: TruckLayoutProps) => {
 
 
     if (loading) return <Loading />;
+    if(!truck){
+        return <div className='flex items-center justify-center space-x-2'><Frown className='text-bottomNavBarColor' /> Truck Not Found</div>
+      }
     if (error) return <div className="text-red-500 text-center my-4">Error: {error}</div>;
+    
 
     return (
         <div className="w-full h-full p-4 bg-gray-50 rounded-lg shadow-sm min-h-screen">

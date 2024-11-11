@@ -13,6 +13,7 @@ import { IoDocuments } from 'react-icons/io5';
 import { loadingIndicator } from '../ui/LoadingIndicator';
 import { useDriver } from '@/context/driverContext';
 import Loading from '@/app/user/loading';
+import { Frown } from 'lucide-react';
 
 
 interface DriverLayoutProps {
@@ -26,7 +27,6 @@ interface DriverLayoutProps {
 const DriverLayout: React.FC<DriverLayoutProps> = ({ driverId, onDriverUpdate, children }) => {
 
   const { driver, loading, setDriver } = useDriver()
-  console.log(driver)
   
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -183,6 +183,10 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ driverId, onDriverUpdate, c
   };
 
   if (loading) return <Loading />
+
+  if(!driver){
+    return <div className='flex items-center justify-center space-x-2'><Frown className='text-bottomNavBarColor' /> Driver Not Found</div>
+  }
 
   return (
     <div className='flex flex-col gap-2 justify-start text-black'>

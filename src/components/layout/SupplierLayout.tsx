@@ -10,6 +10,7 @@ import SupplierBalance from '../supplier/SupplierBalance';
 import { useSupplier } from '@/context/supplierContext';
 import Loading from '@/app/user/suppliers/loading';
 import { formatNumber } from '@/utils/utilArray';
+import { Frown } from 'lucide-react';
 
 interface TruckLayoutProps {
     children: React.ReactNode;
@@ -162,6 +163,10 @@ const SupplierLayout = ({ children }: TruckLayoutProps) => {
 
 
     if (loading) return <Loading />
+
+    if(!supplier){
+        return <div className='flex items-center justify-center space-x-2'><Frown className='text-bottomNavBarColor' /> Supplier Not Found</div>
+      }
 
     return (
         <div className="w-full h-full p-4 bg-gray-50 rounded-lg shadow-sm">

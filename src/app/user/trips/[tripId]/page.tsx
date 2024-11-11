@@ -9,90 +9,27 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import Loading from '../loading';
 import { useTrip } from '@/context/tripContext';
+import { Frown, Loader2 } from 'lucide-react';
 
 // Dynamically import components
 const TripDetails = dynamic(() => import('@/components/trip/tripDetail/TripDetail'), {
-  loading: () => <Loading />,
+  loading: () => <div className='flex items-center justify-center'> <Loader2 className='animate-spin text-bottomNavBarColor' /></div>,
   ssr: false,
 });
 const EditTripForm = dynamic(() => import('@/components/trip/EditTripForm'), {
-  loading: () => <Loading />,
+  loading: () => <div className='flex items-center justify-center'> <Loader2 className='animate-spin text-bottomNavBarColor' /></div>,
   ssr: false,
 });
 
 
-const useFetchData = (tripId: string) => {
-  const {trip, setTrip, loading} = useTrip()
-  const [parties, setParties] = useState<IParty[]>([]);
-  const [trucks, setTrucks] = useState<TruckModel[]>([]);
-  const [drivers, setDrivers] = useState<IDriver[]>([]);
-  const [error, setError] = useState<string | null>(null);
-
- 
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const tripRes = await fetch(`/api/trips/${tripId}`, {
-  //         method: 'GET',
-  //         headers: { 'Content-Type': 'application/json' },
-  //       });
-
-  //       if (!tripRes.ok) throw new Error('Failed to fetch trip details');
-
-  //       const tripData = await tripRes.json();
-  //       console.log(tripData)
-  //       setTrip(tripData.trip);
-  //     } catch (error: any) {
-  //       console.error('Error fetching data:', error);
-  //       setError(error.message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   if (tripId) {
-  //     fetchData();
-  //   }
-  // }, [tripId]);
-
-  const handleEditClicked = useCallback(async () => {
-    try {
-      const [partiesRes, trucksRes, driversRes] = await Promise.all([
-        fetch('/api/parties', { method: 'GET', headers: { 'Content-Type': 'application/json' } }),
-        fetch('/api/trucks', { method: 'GET', headers: { 'Content-Type': 'application/json' } }),
-        fetch('/api/drivers', { method: 'GET', headers: { 'Content-Type': 'application/json' } }),
-      ]);
-
-      if (!partiesRes.ok) throw new Error('Failed to fetch parties');
-      if (!trucksRes.ok) throw new Error('Failed to fetch trucks');
-      if (!driversRes.ok) throw new Error('Failed to fetch drivers');
-
-      const [partiesData, trucksData, driversData] = await Promise.all([
-        partiesRes.json(),
-        trucksRes.json(),
-        driversRes.json(),
-      ]);
-
-      setParties(partiesData.parties);
-      setTrucks(trucksData.trucks);
-      setDrivers(driversData.drivers);
-    } catch (error: any) {
-      console.error('Error fetching data:', error);
-      setError(error.message);
-    } 
-  }, []);
-
-  return { trip, parties, trucks, drivers, loading, error, setTrip, handleEditClicked };
-};
-
 const TripPage: React.FC = () => {
+  const { trip, setTrip, loading } = useTrip();
   const router = useRouter();
   const { tripId } = useParams();
-  const { trip, parties, trucks, drivers, loading, error, setTrip, handleEditClicked } = useFetchData(tripId as string);
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [docModalOpen, setDocModalOpen] = useState(false)
+  const [error, setError] = useState('')
 
   const TripDocumentUpload = dynamic(()=> import('@/components/documents/TripDocumentUpload'), {ssr : false})
 
@@ -134,9 +71,12 @@ const TripPage: React.FC = () => {
         setIsSubmitting(false);
         return;
       }
-      setTrip(newData.trip);
+      setTrip((prev : ITrip | any)=>({
+        ...prev,
+        ...newData.trip
+      }));
       setIsEditing(false); // Close editing mode after successful edit
-      router.refresh();
+
     } catch (error) {
       console.error('Error editing trip:', error);
     } finally {
@@ -168,6 +108,10 @@ const TripPage: React.FC = () => {
     return <Loading />;
   }
 
+  if(!trip){
+    return <div className='flex items-center justify-center space-x-2'><Frown className='text-bottomNavBarColor' /> Trip Not Found</div>
+  }
+
   if (error) {
     return <div>Error: {error}</div>;
   }
@@ -182,7 +126,6 @@ const TripPage: React.FC = () => {
           <Button
             variant="outline"
             onClick={() => {
-              handleEditClicked();
               setIsEditing(true);
             }}
             className="transition-all duration-300 ease-in-out transform hover:scale-105"
@@ -217,10 +160,7 @@ const TripPage: React.FC = () => {
               <MdClose size={24} />
             </Button>
             <EditTripForm
-              parties={parties}
-              trucks={trucks}
               trip={trip as ITrip}
-              drivers={drivers}
               onSubmit={handleEdit}
             />
           </motion.div>

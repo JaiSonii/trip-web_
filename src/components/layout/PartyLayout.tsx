@@ -9,6 +9,7 @@ import Loading from '@/app/user/parties/loading';
 import { Button } from '../ui/button';
 import dynamic from 'next/dynamic';
 import { PaymentBook } from '@/utils/interface';
+import { Frown } from 'lucide-react';
 
 interface PartyLayoutProps {
   children: React.ReactNode;
@@ -18,7 +19,6 @@ interface PartyLayoutProps {
 const PartyLayout = ({ children, partyId }: PartyLayoutProps) => {
   const pathname = usePathname();
   const {party, setParty, loading} = useParty()
-  console.log(party)
   const [isOpen , setIsOpen] = useState(false)
 
   const PaymentModal = dynamic(()=>import('@/components/party/PaymentModal'))
@@ -59,6 +59,10 @@ const PartyLayout = ({ children, partyId }: PartyLayoutProps) => {
 
   if(loading){
     return <Loading />
+  }
+
+  if(!party){
+    return <div className='flex items-center justify-center space-x-2'><Frown className='text-bottomNavBarColor' /> Party Not Found</div>
   }
 
   return (

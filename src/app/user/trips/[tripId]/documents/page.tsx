@@ -7,11 +7,16 @@ import RecentDocuments from '@/components/documents/RecentDocuments';
 import { useTrip } from '@/context/tripContext';
 import { Button } from '@/components/ui/button';
 import TripDocumentUpload from '@/components/documents/TripDocumentUpload';
+import { Frown } from 'lucide-react';
 
 const Page = () => {
   const {tripId} = useParams()
   const [isOpen, setIsOpen] = useState(false)
   const {trip, setTrip, loading} = useTrip()
+
+  if(!trip){
+    return <div className='flex items-center justify-center space-x-2'><Frown className='text-bottomNavBarColor' /> Trip Not Found</div>
+  }
 
   return (
     <div className='mx-auto p-4'>

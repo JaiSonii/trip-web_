@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { DeleteExpense, handleAddExpense, handleEditExpense } from '@/helpers/ExpenseOperation';
 import { useTruck } from '@/context/truckContext';
 import TripCard from '@/components/TripCard';
+import { Frown } from 'lucide-react';
 
 const Loading = dynamic(() => import('./loading'), {
   ssr: false,
@@ -93,6 +94,7 @@ const TruckPage = () => {
 
 
   if (loading) return <Loading />;
+  
 
   return (
     <div className="w-full h-full p-4">
