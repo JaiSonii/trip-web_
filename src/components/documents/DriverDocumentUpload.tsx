@@ -10,6 +10,7 @@ import { createWorker } from 'tesseract.js';
 import { extractLatestDate } from '@/helpers/ImageOperation';
 import { mutate } from 'swr';
 import { useExpenseCtx } from '@/context/context';
+import { Loader2 } from 'lucide-react';
 
 interface DocumentForm {
     filename: string;
@@ -209,7 +210,7 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
             {/* Loading indicator */}
             {loading && (
                 <div className="flex justify-center mb-4">
-                    {loadingIndicator}
+                    <Loader2 className='animate-spin text-bottomNavBarColor' /> 
                 </div>
             )}
 

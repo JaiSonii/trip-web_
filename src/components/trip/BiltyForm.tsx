@@ -707,7 +707,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
           </div>
         }
 
-        <footer className='text-red-500 text-xs mt-4'>*currently under development</footer>
+        {/* <footer className='text-red-500 text-xs mt-4'>*currently under development</footer> */}
       </motion.div>
 
 

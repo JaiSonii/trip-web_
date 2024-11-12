@@ -11,6 +11,7 @@ import { extractLatestDate } from '@/helpers/ImageOperation';
 import { mutate } from 'swr';
 import { statuses } from '@/utils/schema';
 import { useExpenseCtx } from '@/context/context';
+import { Loader2 } from 'lucide-react';
 
 interface DocumentForm {
     filename: string;
@@ -220,7 +221,7 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip })
             {/* Loading indicator */}
             {loading && (
                 <div className="flex justify-center mb-4">
-                    {loadingIndicator}
+                    <Loader2 className='animate-spin text-bottomNavBarColor' /> 
                 </div>
             )}
 

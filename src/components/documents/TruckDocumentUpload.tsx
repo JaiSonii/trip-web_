@@ -10,6 +10,7 @@ import { getDocType } from '@/helpers/ImageOperation';
 import { extractLatestDate } from '@/helpers/ImageOperation';
 import { mutate } from 'swr';
 import { useExpenseCtx } from '@/context/context';
+import { Loader2 } from 'lucide-react';
 
 interface DocumentForm {
     filename: string;
@@ -209,7 +210,7 @@ const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo }) => {
             {/* Loading indicator */}
             {loading && (
                 <div className="flex justify-center mb-4">
-                    {loadingIndicator}
+                    <Loader2 className='animate-spin text-bottomNavBarColor' /> 
                 </div>
             )}
 

@@ -303,7 +303,7 @@ export default function TripsPage() {
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.5 }}
                   transition={{ duration: 0.3 }}
-                  className="bg-white p-6 rounded-lg shadow-lg relative w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+                  className="bg-white p-6 rounded-lg shadow-lg relative w-full max-w-3xl max-h-[90vh] overflow-y-auto thin-scrollbar"
                 >
                   <Button
                     variant="ghost"

@@ -151,7 +151,7 @@ const TripPage: React.FC = () => {
             transition={{
               duration: 0.5,
               ease: [0, 0.71, 0.2, 1.01]
-            }} className="bg-white p-6 rounded-lg shadow-lg relative w-full max-w-2xl">
+            }} className="bg-white p-6 rounded-lg shadow-lg relative w-full max-w-3xl max-h-[90vh] overflow-y-auto thin-scrollbar">
             <Button
               variant="ghost"
               onClick={handleCancelEdit}

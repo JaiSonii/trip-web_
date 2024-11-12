@@ -86,8 +86,8 @@ export default function Home() {
           {/* Hero Image */}
           <div className="relative w-full lg:w-auto flex justify-center lg:justify-end items-end h-full mt-6 sm:mt-10 lg:mt-0">
             <Image
-              width={300}
-              height={400}
+              width={530}
+              height={600}
               alt="hero img"
               src={heroImg}
               className="rounded-lg"
@@ -266,8 +266,8 @@ export default function Home() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Legal</h3>
             <ul className="space-y-2">
-              <li><Link href="/terms" className="hover:text-white transition" target="_black" rel="noopener noreferrer">Terms of service</Link></li>
-              <li><Link href="/privacy-policy" className="hover:text-white transition" target="_black" rel="noopener noreferrer">Privacy & Policy</Link></li>
+              <li><Link href="/terms" className="hover:text-white transition" >Terms of service</Link></li>
+              <li><Link href="/privacy-policy" className="hover:text-white transition" >Privacy & Policy</Link></li>
             </ul>
           </div>
 
