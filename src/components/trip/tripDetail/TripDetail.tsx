@@ -133,7 +133,7 @@ const TripDetails = () => {
       }
     }
 
-    if (data.status === 4) {
+    if (data.status === 4 && trip.balance > 0) {
       const itemtosend = {
         ...data,
         accountType : 'Payments',

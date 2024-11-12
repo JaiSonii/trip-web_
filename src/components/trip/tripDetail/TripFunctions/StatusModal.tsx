@@ -76,6 +76,7 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
         data = { dates: dates, status: status + 1 };
       } else if (statuses[status] === 'POD Submitted') {
         dates[4] = new Date(settlementDate);
+        amount === 0 ? data = { dates: dates, status: status + 1} :
         data = {
           amount: amount,
           paymentType,
@@ -111,10 +112,10 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
             ease: [0, 0.71, 0.2, 1.01]
           }} className="bg-white rounded-lg shadow-md overflow-hidden" style={{ maxWidth: '600px', width: '90%' }}>
         <div className="p-6">
-          <h2 className="text-lg font-bold mb-4 text-bottomNavBarColor">Trip {statuses[status + 1]}</h2>
+          <h2 className="text-lg font-bold mb-4 text-black">Trip {statuses[status + 1]}</h2>
           {statuses[status] === 'Started' && (
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+              <label className="">End Date</label>
               <input
                 type="date"
                 value={startDate}
@@ -125,7 +126,7 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
           {statuses[status] === 'Completed' && (
             <>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">POD Received Date</label>
+                <label className="">POD Received Date*</label>
                 <input
                   type="date"
                   value={podReceivedDate}
@@ -133,7 +134,7 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">POD Image</label>
+                <label className="">POD Image</label>
                 <input
                   type="file"
                   accept="image/*, application/pdf"
@@ -144,7 +145,7 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
           )}
           {statuses[status] === 'POD Recieved' && (
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">POD Submitted Date</label>
+              <label className="">POD Submitted Date*</label>
               <input
                 type="date"
                 value={startDate}
@@ -155,7 +156,7 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
           {statuses[status] === 'POD Submitted' && (
             <>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                <label className="">Amount</label>
                 <input
                   type="number"
                   value={amount}
@@ -163,13 +164,12 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Payment Type</label>
+                <label className="">Payment Type</label>
                 <select
                   className="w-full px-3 py-2 border border-lightOrange rounded-lg focus:outline-none focus:ring focus:ring-lightOrange focus:border-lightOrange"
                   value={paymentType}
                   onChange={(e) => setPaymentType(e.target.value)}
                 >
-                  <option value="">Select Payment Type</option>
                   <option value="Cash">Cash</option>
                   <option value="Cheque">Cheque</option>
                   <option value="UPI">UPI</option>
@@ -179,7 +179,7 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
                 </select>
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium text-bottomNavBarColor mb-1">Settlement Date</label>
+                <label className="">Settlement Date*</label>
                 <input
                   type="date"
                   value={new Date(settlementDate).toISOString().split('T')[0]}

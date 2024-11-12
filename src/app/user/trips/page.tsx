@@ -449,7 +449,7 @@ function renderCellContent(columnValue: string, trip: ITrip) {
                     trip.status === 3 ? 'bg-green-500' :
                       'bg-green-800'
                 }`}
-              style={{ width: `${(trip.status as number + 1) * 25}%` }}
+              style={{ width: `${(trip.status as number + 1) * 20}%` }}
             />
           </div>
         </div>

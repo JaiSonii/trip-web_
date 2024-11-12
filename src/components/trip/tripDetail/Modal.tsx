@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { PaymentBook } from '@/utils/interface';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import { useTrip } from '@/context/tripContext';
 
 interface ModalProps {
   isOpen: boolean;
@@ -36,6 +37,8 @@ const Modal: React.FC<ModalProps> = ({
     notes: editData?.notes || ''
   });
 
+  const {trip, setTrip} = useTrip()
+
   useEffect(() => {
     if (editData) {
       const formattedDate = (editData.date instanceof Date)
@@ -63,6 +66,14 @@ const Modal: React.FC<ModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formState.amount) {
+      alert('Amount is required');
+      return;
+    }
+    if(formState.amount > trip.balance){
+      alert('Payment amount exceeds the balance')
+      return;
+    }
     onSave({
       id: editData?._id.toString(),
       accountType,
@@ -91,7 +102,7 @@ const Modal: React.FC<ModalProps> = ({
           <h3 className="text-lg font-semibold mb-4">{modalTitle}</h3>
           <form onSubmit={handleSubmit}>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Amount</label>
+              <label className="">Amount</label>
               <input
                 type="number"
                 name="amount"
@@ -107,7 +118,7 @@ const Modal: React.FC<ModalProps> = ({
               />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Payment Type</label>
+              <label className="">Payment Type*</label>
               <select
                 name="paymentType"
                 value={formState.paymentType}
@@ -131,7 +142,7 @@ const Modal: React.FC<ModalProps> = ({
               <label className="block text-sm font-medium text-gray-700">Received By Driver</label>
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Payment Date</label>
+              <label className="">Payment Date*</label>
               <input
                 type="date"
                 name="date"
@@ -142,7 +153,7 @@ const Modal: React.FC<ModalProps> = ({
               />
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700">Notes</label>
+              <label className="">Notes</label>
               <textarea
                 name="notes"
                 value={formState.notes}

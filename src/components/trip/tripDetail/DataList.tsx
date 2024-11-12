@@ -126,6 +126,10 @@ const DataList: React.FC<DataListProps> = ({ label, modalTitle }) => {
   };
 
   const openAddModal = () => {
+    if(trip.balance <= 0){
+      alert('Trip Balance is zero');
+      return
+    }
     setEditData(null);
     setIsModalOpen(true);
   };

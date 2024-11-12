@@ -259,6 +259,10 @@ textarea {
   @apply w-full px-3 py-2 border border-lightOrange rounded-lg focus:outline-none focus:ring focus:ring-lightOrange;
 }
 
+label {
+  @apply block text-xs font-medium text-gray-700 mb-1
+}
+
 select {
   @apply cursor-pointer
   w-full
