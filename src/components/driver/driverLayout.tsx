@@ -14,6 +14,7 @@ import { loadingIndicator } from '../ui/LoadingIndicator';
 import { useDriver } from '@/context/driverContext';
 import Loading from '@/app/user/loading';
 import { Frown } from 'lucide-react';
+import { formatNumber } from '@/utils/utilArray';
 
 
 interface DriverLayoutProps {
@@ -27,7 +28,7 @@ interface DriverLayoutProps {
 const DriverLayout: React.FC<DriverLayoutProps> = ({ driverId, onDriverUpdate, children }) => {
 
   const { driver, loading, setDriver } = useDriver()
-  
+
 
   const [modalOpen, setModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'gave' | 'got' | null>(null);
@@ -97,26 +98,26 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ driverId, onDriverUpdate, c
           date,
         }),
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to update driver');
       }
-  
+
       const data = await response.json();
-  
+
       // Update the driver state
       setDriver((prev: any) => {
         const latestAccount = data.accounts[data.accounts.length - 1]; // Get the last account entry from the updated response
         const newBalance =
           prev.balance - (latestAccount.got || 0) + (latestAccount.gave || 0); // Update balance correctly
-  
+
         return {
           ...prev,
           driverExpAccounts: [latestAccount, ...prev.driverExpAccounts], // Add the latest entry to the accounts
           balance: newBalance, // Set the updated balance
         };
       });
-  
+
       console.log(`Confirm ${modalType} clicked with amount: ${amount}, reason: ${reason}, date: ${date}`);
       closeModal(); // Close the modal after confirming
     } catch (error: any) {
@@ -126,7 +127,7 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ driverId, onDriverUpdate, c
       router.refresh(); // Refresh the page after updating
     }
   };
-  
+
   const handleEditDriver = async (driverName: string, mobileNumber: string) => {
     const updatedDriver: Partial<IDriver> = {
       name: driverName,
@@ -177,32 +178,41 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ driverId, onDriverUpdate, c
       router.push('/user/drivers');
     } catch (error: any) {
       console.error('Failed to delete driver:', error);
-      alert(error.message); // Display an alert with the error message
+      alert(error.message); // Display an alert with the error message-
       setError(error.message);
     }
   };
 
   if (loading) return <Loading />
 
-  if(!driver){
+  if (!driver) {
     return <div className='flex items-center justify-center space-x-2'><Frown className='text-bottomNavBarColor' /> Driver Not Found</div>
   }
 
   return (
     <div className='flex flex-col gap-2 justify-start text-black'>
       <div className="flex items-center justify-between p-4 bg-gray-200 rounded-sm">
-        <div className="flex items-center gap-2">
-          <h1 className="text-3xl font-bold mr-5 cursor-pointer" >
-            {driver?.name}
-          </h1>
-          <span className="ml-2 text-lg text-gray-700">{driver?.contactNumber}</span>
-          {driver?.status === 'Available' && (
-            <svg style={{ width: '20px', height: '20px' }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
-              <path fill="#4caf50" d="M44,24c0,11-9,20-20,20S4,35,4,24S13,4,24,4S44,13,44,24z"></path>
-            </svg>
-          )}
-          {driver?.status}
+        <div className='flex flex-col gap-2'>
+          <div className="flex items-center gap-2">
+            <h1 className="text-3xl font-bold mr-5 cursor-pointer" >
+              {driver?.name}
+            </h1>
+            <span className="ml-2 text-lg text-gray-700">{driver?.contactNumber}</span>
+            {driver && (
+              <svg style={{ width: '20px', height: '20px' }} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+                <path
+                  fill={driver.status === 'On Trip' ? '#f44336' : '#4caf50'} // Red if onTrip, green if available
+                  d="M44,24c0,11-9,20-20,20S4,35,4,24S13,4,24,4S44,13,44,24z"
+                ></path>
+              </svg>
+            )}
+            {driver?.status}
+          </div>
+          <div className="flex items-center justify-between ">
+            <span className={`text-xl font-semibold `}>Driver Balance : <span className={`${driver.balance >= 0 ? 'text-green-500' : 'text-red-500'}`}>₹{formatNumber(Math.abs(driver?.balance))}</span></span> {/* Display balance */}
+          </div>
         </div>
+
         <div className="flex items-center">
           <DriverActions onGaveClick={() => openModal('gave')} onGotClick={() => openModal('got')} />
           <DropdownMenu onEditClick={() => setEdit(true)} onDeleteClick={handleDeleteDriver} />
@@ -215,9 +225,7 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ driverId, onDriverUpdate, c
         )}
       </div>
       <div>
-        <div className="flex items-center justify-between p-3 bg-gray-200 rounded-sm w-fit">
-          <span className="text-2xl">Driver Balance: {driver?.balance}</span> {/* Display balance */}
-        </div>
+
         <div className="flex border-b-2 border-lightOrange mb-4 mt-2">
           {tabs.map((tab) => (
             <Link

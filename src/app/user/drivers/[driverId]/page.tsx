@@ -106,7 +106,7 @@ const Driver: React.FC = () => {
     return <FaSort />
   }
 
-  const Modal = dynamic(() => import('@/components/trip/tripDetail/Modal'), { ssr: false })
+  // const Modal = dynamic(() => import('@/components/trip/tripDetail/Modal'), { ssr: false })
 
   const handleDelete = async (account: any) => {
     let balance = driver.balance
@@ -341,8 +341,8 @@ const Driver: React.FC = () => {
                   <TableCell><span className='text-red-600 font-semibold'>₹{formatNumber(account.gave) || (account.expenseType && formatNumber(account.amount)) || 0}</span></TableCell>
                   <TableCell ><span className='text-green-600 font-semibold'>₹{formatNumber(account.got) || (account.paymentType && formatNumber(account.amount)) || 0}</span></TableCell>
                   <TableCell>
-                    <div className='flex flex-row gap-2 items-center w-full'>
-                      <Button
+                    <div className='flex gap-2 items-center w-full'>
+                      {!account.accountType && <Button
                         variant={'outline'}
                         onClick={() => {
                           setSelected(account);
@@ -356,7 +356,7 @@ const Driver: React.FC = () => {
                         }}
                       >
                         <MdEdit />
-                      </Button>
+                      </Button>}
                       <Button
                         variant={'destructive'}
                         onClick={() => {
@@ -387,14 +387,14 @@ const Driver: React.FC = () => {
         driverId={driverId as string}
         selected={selected} categories={['Truck Expense', 'Trip Expense']} />
 
-      {selected != null && <Modal
+      {/* {selected != null && <Modal
         isOpen={paymentEdit}
         onClose={() => setPaymentEdit(false)}
         onSave={handleEditAccounts}
         modalTitle="Edit Item"
         accountType={selected.accountType}
         editData={selected}
-      />}
+      />} */}
       <DriverModal
         open={accountEdit}
         onClose={() => setAccountEdit(false)}
