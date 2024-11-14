@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, {  useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import debounce from 'lodash.debounce';
 import { FaTruck, FaCalendarAlt, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
@@ -26,7 +26,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useSWRConfig } from 'swr';
+import useSWR, { useSWRConfig } from 'swr';
 import dynamic from 'next/dynamic';
 
 const EditTripForm = dynamic(() => import('@/components/trip/EditTripForm'), {
@@ -45,83 +45,94 @@ const columnOptions = [
   { label: 'Truck Hire Cost', value: 'truckHireCost' }
 ];
 
+const fetcher = (url: string) => fetch(url).then((res) => res.json())
+
 export default function TripsPage() {
-  const { trips: ctxTrips } = useExpenseCtx();
+  // const { trips: ctxTrips } = useExpenseCtx();
   const router = useRouter();
-  const [trips, setTrips] = useState<ITrip[] | null>([]);
+  // const [trips, setTrips] = useState<ITrip[] | null>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // const [error, setError] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<number | undefined>();
   const [visibleColumns, setVisibleColumns] = useState<string[]>(columnOptions.map(col => col.label));
   const [sortConfig, setSortConfig] = useState<{ key: keyof ITrip | null; direction: 'asc' | 'desc' }>({ key: null, direction: 'asc' });
   const [searchQuery, setSearchQuery] = useState('');
   const [openOptionsId, setOpenOptionsId] = useState<string | null>(null);
-  const { mutate } = useSWRConfig();
+  // const { mutate } = useSWRConfig();
   const [edit, setEdit] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<ITrip | null>(null);
 
-  const fetchTrips = useCallback(async (status?: number) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const queryParam = status !== undefined ? `?status=${status}` : '';
-      const res = await fetch(`/api/trips${queryParam}`);
-      if (!res.ok) throw new Error('Failed to fetch trips');
-      const data = await res.json();
-      setTrips(data.trips);
-    } catch (err) {
-      setError((err as Error).message);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
-  useEffect(() => {
-    if (ctxTrips.length > 0) {
-      setTrips(ctxTrips);
-    } else {
-      fetchTrips();
-    }
-  }, [ctxTrips, fetchTrips]);
+
+  // const fetchTrips = useCallback(async (status?: number) => {
+  //   setLoading(true);
+  //   setError(null);
+  //   try {
+  //     const queryParam = status !== undefined ? `?status=${status}` : '';
+  //     const res = await fetch(`/api/trips${queryParam}`);
+  //     if (!res.ok) throw new Error('Failed to fetch trips');
+  //     const data = await res.json();
+  //     setTrips(data.trips);
+  //   } catch (err) {
+  //     setError((err as Error).message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }, []);
+
+  // useEffect(() => {
+  //   if (ctxTrips.length > 0) {
+  //     setTrips(ctxTrips);
+  //   } else {
+  //     fetchTrips();
+  //   }
+  // }, [ctxTrips, fetchTrips]);
+
+  const { trips: ctxTrips, isLoading } = useExpenseCtx()
+
+  const { data, error, mutate } = useSWR<{ trips: ITrip[] }>(
+    `/api/trips${selectedStatus !== undefined ? `?status=${selectedStatus}` : ''}`,
+    fetcher
+  )
+
+  const trips = data?.trips || ctxTrips
 
   const handleStatusChange = useCallback((value: string) => {
-    const status = value ? parseInt(value) : undefined;
-    setSelectedStatus(prevStatus => prevStatus === status ? undefined : status);
-    fetchTrips(status);
-  }, [fetchTrips]);
+    const status = value === 'all' ? undefined : parseInt(value)
+    setSelectedStatus(status)
+  }, [])
 
   const handleDelete = useCallback(async (tripId: string) => {
     try {
-      const res = await fetch(`/api/trips/${tripId}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed to delete trip');
-      mutate('/api/trips');
-      router.push('/user/trips');
+      const res = await fetch(`/api/trips/${tripId}`, { method: 'DELETE' })
+      if (!res.ok) throw new Error('Failed to delete trip')
+      mutate() // Revalidate the data after deletion
     } catch (error) {
-      console.error('Error deleting trip:', error);
+      console.error('Error deleting trip:', error)
     }
-  }, [mutate, router]);
+  }, [mutate])
 
   const handleUndoStatus = useCallback(async (trip: ITrip) => {
     if (trip.status === 0) {
-      alert('Cannot Undo the Status');
-      return;
+      alert('Cannot Undo the Status')
+      return
     }
     const data = {
       status: trip.status as number - 1,
       dates: trip.dates.map((date, index, array) => index === array.length - 1 ? null : date)
-    };
+    }
     try {
       const res = await fetch(`/api/trips/${trip.trip_id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data }),
-      });
-      if (!res.ok) throw new Error('Failed to update status');
-      mutate('/api/trips');
+      })
+      if (!res.ok) throw new Error('Failed to update status')
+      mutate() // Revalidate the data after status update
     } catch (error) {
-      console.error('Error updating status:', error);
+      console.error('Error updating status:', error)
     }
-  }, [mutate]);
+  }, [mutate])
 
   const handleDuplicate = useCallback((e: React.MouseEvent, trip: ITrip) => {
     e.stopPropagation();
@@ -183,21 +194,21 @@ export default function TripsPage() {
   }, []);
 
   const handleEdit = useCallback(async (data: Partial<ITrip>) => {
-    if (!selectedTrip) return;
+    if (!selectedTrip) return
     setLoading(true)
     try {
       const res = await fetch(`/api/trips/${selectedTrip.trip_id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ data })
-      });
+      })
 
-      if (!res.ok) throw new Error('Failed to edit trip');
+      if (!res.ok) throw new Error('Failed to edit trip')
 
-      const newData = await res.json();
+      const newData = await res.json()
       if (newData.status === 400) {
-        alert(newData.message);
-        return;
+        alert(newData.message)
+        return
       }
 
       await Promise.all([
@@ -211,19 +222,20 @@ export default function TripsPage() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ status: 'Available' }),
         })
-      ]);
+      ])
+      setLoading(false)
+      mutate() // Revalidate the data after editing
 
-      mutate('/api/trips');
     } catch (error) {
-      console.error('Error editing trip:', error);
+      console.error('Error editing trip:', error)
     } finally {
-      setSelectedTrip(null);
-      setEdit(false);
-      setLoading(false);
+      setSelectedTrip(null)
+      setEdit(false)
+      setLoading(false)
     }
-  }, [selectedTrip, mutate]);
+  }, [selectedTrip, mutate])
 
-  if (loading) return <Loading />;
+  if (loading || isLoading) return <Loading />;
   if (error) return <div className="flex justify-center items-center h-full text-red-500">{error}</div>;
 
   return (
@@ -245,21 +257,18 @@ export default function TripsPage() {
           </span>
         </div>
         <div className='flex items-end space-x-2 p-2'>
-          <Select onValueChange={handleStatusChange}>
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Select Status" />
+          <Select
+            value={selectedStatus?.toString() ?? 'all'}
+            onValueChange={handleStatusChange}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
               {statuses.map((status, index) => (
                 <SelectItem key={index} value={index.toString()}>
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={selectedStatus === index}
-                      onChange={() => handleStatusChange(index.toString())}
-                    />
-                    <span>{status}</span>
-                  </label>
+                  {status}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -407,15 +416,11 @@ function renderCellContent(columnValue: string, trip: ITrip) {
           </div>
           <div>
             <span className='font-medium text-xs text-gray-500 whitespace-nowrap'>
-              Validity :
+              EWB Validity :
               {(() => {
                 const eWayBillDoc = trip.documents?.find(doc => doc.type === 'E-Way Bill');
                 return eWayBillDoc?.validityDate
-                  ? new Date(eWayBillDoc.validityDate as any).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric'
-                  })
+                  ? new Date(eWayBillDoc.validityDate as any).toLocaleDateString('en-IN')
                   : 'N/A';
               })()}
             </span>

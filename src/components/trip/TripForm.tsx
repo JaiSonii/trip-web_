@@ -246,7 +246,7 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
           {fileLoading && <Loader2 className="animate-spin mt-2 justify-center text-bottomNavBarColor" />}
         </div>
         <div className="flex-shrink-0 w-1/3">
-          <label className="block text-xs font-medium text-gray-700 mb-1">Validity Date</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">EWB Validity</label>
           <input
             type="date"
             name="ewbValidity"

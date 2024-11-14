@@ -134,7 +134,7 @@ const EditTripForm: React.FC<Props> = ({ onSubmit, trip }) => {
                             </label>
                         </div>
                         <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Validity Date</label>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">EWB Validity</label>
                             <input
                                 type="date"
                                 name="ewbValidity"
