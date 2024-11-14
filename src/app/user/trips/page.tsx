@@ -26,7 +26,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import useSWR, { useSWRConfig } from 'swr';
+import useSWR from 'swr';
 import dynamic from 'next/dynamic';
 
 const EditTripForm = dynamic(() => import('@/components/trip/EditTripForm'), {

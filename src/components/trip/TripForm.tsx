@@ -84,6 +84,7 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
     setFormData((prev) => ({
       ...prev,
       driver: updatedTruck?.driver_id ? updatedTruck?.driver_id : '',
+      supplierId : updatedTruck?.supplier ? updatedTruck?.supplier : ''
     }))
     setHasSupplier(!!updatedTruck?.supplier)
   }, [formData.truck, trucks])
