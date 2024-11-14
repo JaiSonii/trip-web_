@@ -2,9 +2,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { minitruck, openBody, closedContainer, trailer, truckTypes } from '@/utils/utilArray';
+import { minitruck, openBody, closedContainer, trailer, truckTypes, truckTypesIcons } from '@/utils/utilArray';
 import { validateTruckNo } from '@/utils/validate';
-import { useRouter } from 'next/navigation';
 import { IDriver, ISupplier, TruckModel } from '@/utils/interface';
 import SupplierSelect from '@/components/truck/SupplierSelect';
 import AdditionalDetails from '@/components/truck/AdditionalDetails';
@@ -34,7 +33,6 @@ interface EditTruckModalProps {
 
 const EditTruckModal: React.FC<EditTruckModalProps> = ({ truck, isOpen, onClose, onSave }) => {
     const drivers = useExpenseCtx().drivers
-    const router = useRouter();
     const [saving, setSaving] = useState(false);
     const [formdata, setFormdata] = useState<FormData>({
         truckNo: truck?.truckNo || '',
@@ -134,76 +132,86 @@ const EditTruckModal: React.FC<EditTruckModalProps> = ({ truck, isOpen, onClose,
         <>
             <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
             <div className="fixed inset-0 flex items-center justify-center z-50">
-                <div className="bg-white text-black p-4 max-w-md mx-auto shadow-md rounded-md relative">
+                <div className="bg-white text-black p-4 max-w-md w-full mx-auto shadow-md rounded-md relative">
                     {saving && (
                         <div className='absolute inset-0 bg-black bg-opacity-10 flex justify-center items-center z-50'>
                             <Loading />
                         </div>
                     )}
-                    <form className="space-y-4" onSubmit={handleSubmit}>
-                        <input
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                            type='text'
-                            name='truckNo'
-                            value={formdata.truckNo}
-                            placeholder='Enter the Truck Number'
-                            onChange={handleInputChange}
-                        />
-                        <select
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                            name='truckType'
-                            value={formdata.truckType}
-                            onChange={handleInputChange}
-                        >
-                            <option value='' disabled>Select Truck Type</option>
-                            {truckTypes.map((truckType, index) => (
-                                <option key={index} value={truckType}>{truckType}</option>
-                            ))}
-                        </select>
-                        <select
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                            name='ownership'
-                            value={formdata.ownership}
-                            onChange={handleInputChange}
-                        >
-                            <option value='' disabled>Select Ownership</option>
-                            <option value='Self'>Self</option>
-                            <option value='Market'>Market</option>
-                        </select>
-                        <label className="block text-sm text-gray-700">Driver</label>
-                        <Select name="driver_id" value={formdata.driver_id} onValueChange={(value) => setFormdata({ ...formdata, driver_id: value })}>
-                            <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Select Driver" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {drivers.map((driver) => (
-                                    <SelectItem key={driver.driver_id} value={driver.driver_id}>
-                                        <span>{driver.name}</span>
-                                        <span
-                                            className={`ml-2 p-1 rounded ${driver.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
-                                        >
-                                            {driver.status}
-                                        </span>
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                    <form className="space-y-2" onSubmit={handleSubmit}>
+                        <div>
+                            <label>Lorry No</label>
+                            <input
+                                className="w-full p-2 border border-gray-300 rounded-md"
+                                type='text'
+                                name='truckNo'
+                                value={formdata.truckNo}
+                                placeholder='Enter the Truck Number'
+                                onChange={handleInputChange}
+                            />
+                        </div>
+
+                        <div>
+                            <label>Lorry Type</label>
+                            <Select defaultValue={formdata.truckType} onValueChange={(value) => setFormdata({ ...formdata, truckType: value })}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select Truck Type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {truckTypesIcons.map(({ type, Icon }) => (
+                                        <SelectItem key={type} value={type}>
+                                            <Icon className="inline-block mr-2" /> {type}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div>
+                            <label>Ownership</label>
+                            <Select defaultValue={formdata.ownership} onValueChange={(value) => setFormdata({ ...formdata, ownership: value })}>
+                                <SelectTrigger >
+                                    <SelectValue placeholder="Select Ownership*" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value='Self'>Self</SelectItem>
+                                    <SelectItem value='Market'>Market</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div>
+                            <label>Driver</label>
+                            <Select name="driver_id" value={formdata.driver_id} onValueChange={(value) => setFormdata({ ...formdata, driver_id: value })}>
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Select Driver" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {drivers.map((driver) => (
+                                        <SelectItem key={driver.driver_id} value={driver.driver_id}>
+                                            <span>{driver.name}</span>
+                                            <span
+                                                className={`ml-2 p-1 rounded ${driver.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+                                            >
+                                                {driver.status}
+                                            </span>
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
 
                         {formdata.ownership === 'Market' && (
-                            <SupplierSelect
-                                suppliers={suppliers}
-                                value={formdata.supplier}
-                                onChange={(value) => setFormdata({ ...formdata, supplier: value })}
-                            />
-                        )}
-                        {formdata.truckType !== 'Other' && (
-                            <button
-                                className="w-full p-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50"
-                                type="button"
-                                onClick={() => setShowDetails(true)}
-                            >
-                                Add More Details
-                            </button>
+                            <div>
+                                <label>Supplier</label>
+                                <SupplierSelect
+                                    suppliers={suppliers}
+                                    value={formdata.supplier}
+                                    onChange={(value) => setFormdata({ ...formdata, supplier: value })}
+                                />
+                            </div>
+
                         )}
                         {showDetails && formdata.truckType !== 'Other' && (
                             <AdditionalDetails
@@ -212,6 +220,16 @@ const EditTruckModal: React.FC<EditTruckModalProps> = ({ truck, isOpen, onClose,
                                 handleInputChange={handleInputChange}
                             />
                         )}
+                        {formdata.truckType !== 'Other' && (
+                            <Button
+                                className='hover:scale-100 w-full'
+                                type="button"
+                                onClick={() => setShowDetails((prev) => !prev)}
+                            >
+                                {showDetails ? 'Hide Details' : 'Add More Details'}
+                            </Button>
+                        )}
+
                         {error && <div className="text-red-500">{error}</div>}
                         <div className='flex flex-row w-full justify-end gap-2'>
                             <Button

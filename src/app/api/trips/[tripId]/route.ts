@@ -26,64 +26,98 @@ export async function GET(req: Request, { params }: { params: { tripId: string }
     await connectToDatabase();
 
     const trips = await Trip.aggregate([
-      { $match: { user_id: user, trip_id: tripId } },  // Filter trips based on user_id and optional statuses
+      {
+        $match: {
+          user_id: user,
+          trip_id: tripId
+        }
+      },
       {
         $lookup: {
-          from: 'parties',  // Join with the Party collection
-          localField: 'party',
-          foreignField: 'party_id',
+          from: 'parties',
+          let: { party_id: '$party' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$party_id', '$$party_id'] } } },
+            { $project: { name: 1 } }  // Project only the fields needed
+          ],
           as: 'partyDetails'
         }
       },
-      { $unwind: '$partyDetails' },
+      { $unwind: '$partyDetails' },  // Unwind after filtered `$lookup`
       {
         $lookup: {
-          from: 'drivers',  // Join with the Party collection
-          localField: 'driver',
-          foreignField: 'driver_id',
+          from: 'suppliers',
+          let: { supplier_id: '$supplier' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$supplier_id', '$$supplier_id'] },
+                    { $ne: ['$supplier_id', null] },  // Exclude null supplier IDs
+                    { $ne: ['$supplier_id', ''] }     // Exclude empty string supplier IDs
+                  ]
+                }
+              }
+            },
+            { $project: { name: 1 } }
+          ],
+          as: 'supplierDetails'
+        }
+      },
+      {
+        $addFields: {
+          supplierName: { $arrayElemAt: ['$supplierDetails.name', 0] }  // Extract supplier name
+        }
+      },
+      {
+        $lookup: {
+          from: 'drivers',
+          let: { driver_id: '$driver' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$driver_id', '$$driver_id'] } } },
+            { $project: { name: 1 } }
+          ],
           as: 'driverDetails'
         }
       },
-      { $unwind: '$driverDetails' },  // Unwind partyDetails array
+      { $unwind: '$driverDetails' },  // Unwind after filtered `$lookup`
       {
         $lookup: {
-          from: 'expenses',  // Join with the Party collection
-          localField: 'trip_id',
-          foreignField: 'trip_id',
+          from: 'expenses',
+          let: { trip_id: '$trip_id' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$trip_id', '$$trip_id'] } } },
+          ],
           as: 'tripExpenses'
         }
       },
       {
         $lookup: {
-          from: 'tripcharges',  // Join with the TripExpense collection
-          localField: 'trip_id',
-          foreignField: 'trip_id',
+          from: 'tripcharges',
+          let: { trip_id: '$trip_id' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$trip_id', '$$trip_id'] } } },
+          ],
           as: 'tripCharges'
         }
       },
       {
-        $lookup : {
-          from : 'partypayments',
-          localField: 'trip_id',
-          foreignField : 'trip_id',
-          as : 'tripAccounts'
+        $lookup: {
+          from: 'partypayments',
+          let: { trip_id: '$trip_id' },
+          pipeline: [
+            { $match: { $expr: { $eq: ['$trip_id', '$$trip_id'] } } },
+          ],
+          as: 'tripAccounts'
         }
       },
       {
         $addFields: {
-          // Calculate the final balance based on the fetchBalance logic
           balance: {
             $let: {
               vars: {
-                accountBalance: {
-                  $sum: {
-                    $map: {
-                      input: '$tripAccounts',
-                      as: 'account',
-                      in: '$$account.amount'
-                    }
-                  }
-                },
+                accountBalance: { $sum: '$tripAccounts.amount' },
                 chargeToBill: {
                   $sum: {
                     $map: {
@@ -117,22 +151,28 @@ export async function GET(req: Request, { params }: { params: { tripId: string }
               },
               in: {
                 $subtract: [
-                  { $add: ['$amount', '$$chargeToBill'] },  // Add trip amount and chargeToBill
-                  { $add: ['$$accountBalance', '$$chargeNotToBill'] }  // Subtract accountBalance and chargeNotToBill
+                  { $add: ['$amount', '$$chargeToBill'] },
+                  { $add: ['$$accountBalance', '$$chargeNotToBill'] }
                 ]
               }
             }
           },
-          // Include the party name from the joined partyDetails
           partyName: '$partyDetails.name',
           driverName: '$driverDetails.name'
-
         }
       },
-      { $sort: { startDate: -1 } },  // Sort by startDate in descending order
-      // Exclude unnecessary fields including accountBalance, chargeToBill, and chargeNotToBill
-      { $project: { partyDetails: 0, chargeToBill: 0, chargeNotToBill: 0, accountBalance: 0 } }
+      {
+        $sort: { startDate: -1 }
+      },
+      {
+        $project: {
+          partyDetails: 0,
+          supplierDetails: 0,
+          driverDetails: 0,
+        }
+      }
     ]);
+
 
 
     if (!trips) {
@@ -231,7 +271,7 @@ export async function PUT(req: Request, { params }: { params: { tripId: string }
   if (error) {
     return NextResponse.json({ error }, { status: 401 });
   }
-  
+
   const { tripId } = params;
 
   try {
@@ -261,7 +301,7 @@ export async function PUT(req: Request, { params }: { params: { tripId: string }
     }
 
     // Update trip data
-    const updatedTrip : ITrip | null = await Trip.findOneAndUpdate({ user_id: user, trip_id: tripId }, data, { new: true });
+    const updatedTrip: ITrip | null = await Trip.findOneAndUpdate({ user_id: user, trip_id: tripId }, data, { new: true });
     if (!updatedTrip) {
       return NextResponse.json({ message: 'Trip update failed' }, { status: 404 });
     }
@@ -272,7 +312,7 @@ export async function PUT(req: Request, { params }: { params: { tripId: string }
       if (eWayBillDoc) {
         eWayBillDoc.validityDate = new Date(data.ewbValidity);
       } else {
-        updatedTrip.documents.push({ type: 'E-Way Bill', validityDate: new Date(data.ewbValidity), filename : '', uploadedDate : new Date(), url : '' });
+        updatedTrip.documents.push({ type: 'E-Way Bill', validityDate: new Date(data.ewbValidity), filename: '', uploadedDate: new Date(), url: '' });
       }
     }
 
@@ -294,7 +334,7 @@ export async function PUT(req: Request, { params }: { params: { tripId: string }
     return NextResponse.json({ trip: updatedTrip, status: 200 });
   } catch (err: any) {
     console.error(err);
-    return NextResponse.json({ message: 'Internal Server Error', error: err.message , status: 500 });
+    return NextResponse.json({ message: 'Internal Server Error', error: err.message, status: 500 });
   }
 }
 

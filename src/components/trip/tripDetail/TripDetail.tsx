@@ -18,7 +18,7 @@ import { useTrip } from '@/context/tripContext';
 
 
 const TripDetails = () => {
-  const {trip, setTrip} = useTrip()
+  const { trip, setTrip } = useTrip()
   const [charges, setCharges] = useState<TripExpense[]>([])
   const [biltyModalOpen, setBiltyModalOpen] = useState(false)
 
@@ -136,7 +136,7 @@ const TripDetails = () => {
     if (data.status === 4 && trip.balance > 0) {
       const itemtosend = {
         ...data,
-        accountType : 'Payments',
+        accountType: 'Payments',
         trip_id: trip.trip_id,
         driver_id: data.receivedByDriver ? trip.driver : null
       }
@@ -158,7 +158,7 @@ const TripDetails = () => {
         setTrip((prev: ITrip | any) => ({
           ...prev,
           balance: prev.balance - resData.payment.amount,
-          tripAccounts : [resData.payment, ...prev.tripAccounts]
+          tripAccounts: [resData.payment, ...prev.tripAccounts]
         }))
 
       } catch (error: any) {
@@ -179,10 +179,11 @@ const TripDetails = () => {
 
           <div className='grid grid-cols-3 gap-2'>
             <Link href={`/user/trucks/${trip.truck}`}>
-              <TripInfo label="Lorry" value={trip.truck || '----'} />
+              <TripInfo label="Lorry" value={trip.truck || '----'} supplierId={trip.supplier || ''} supplierName={trip.supplierName || ''} />
             </Link>
+
             <Link href={`/user/drivers/${trip.driver}`}>
-              <TripInfo label="Driver" value={trip.driverName || '----'} />
+                <TripInfo label="Driver" value={trip.driverName || '----'} />
             </Link>
             <TripInfo label="Pending" value={`₹${formatNumber(trip.balance)}`} />
           </div>
@@ -195,7 +196,7 @@ const TripDetails = () => {
             <TripInfo label="Material" value={trip.material || '----'} />
             <TripInfo label="Billing Type" value={trip.billingType || '----'} />
           </div>
-          <TripInfo label="Route" value={`${trip.route.origin} → ${trip.route.destination}`} startDate={trip.startDate} validityDate={trip?.documents?.find((doc : any)=>doc.type === 'E-Way Bill')?.validityDate || null}/>
+          <TripInfo label="Route" value={`${trip.route.origin} → ${trip.route.destination}`} startDate={trip.startDate} validityDate={trip?.documents?.find((doc: any) => doc.type === 'E-Way Bill')?.validityDate || null} />
           <div className=" w-full">
             <TripStatus status={trip.status as number} dates={trip.dates} />
           </div>
@@ -226,8 +227,8 @@ const TripDetails = () => {
         </div>
       </div>
       <div className='grid grid-cols-3 gap-2 mt-4'>
-        <div className='col-span-1 bg-[#FAFDFF] p-2 rounded-xl shadow-xl'><DataList  label="Advances" modalTitle="Add Advance" /></div>
-        <div className='col-span-1 bg-[#FAFDFF] p-2 rounded-xl shadow-xl'><DataList  label="Payments" modalTitle="Add Payment" /></div>
+        <div className='col-span-1 bg-[#FAFDFF] p-2 rounded-xl shadow-xl'><DataList label="Advances" modalTitle="Add Advance" /></div>
+        <div className='col-span-1 bg-[#FAFDFF] p-2 rounded-xl shadow-xl'><DataList label="Payments" modalTitle="Add Payment" /></div>
         <div className='col-span-1 bg-[#FAFDFF] p-2 rounded-xl shadow-xl'><Charges tripId={trip.trip_id} /></div>
 
 

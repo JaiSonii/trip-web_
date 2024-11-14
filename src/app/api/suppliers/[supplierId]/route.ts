@@ -27,6 +27,93 @@ export async function GET(req: Request, { params }: { params: { supplierId: stri
         $match: { user_id: user, supplier_id: supplierId }
       },
       {
+        // Lookup trucks related to the supplier and fetch necessary fields
+        $lookup: {
+          from: 'trucks',
+          localField: 'supplier_id',
+          foreignField: 'supplier',
+          pipeline: [
+            { $match: { user_id: user } }, // Filter trucks by user_id
+            {
+              $lookup: {
+                from: 'drivers',
+                localField: 'driver_id',
+                foreignField: 'driver_id',
+                pipeline: [
+                  { $project: { name: 1 } } // Only get the driver name
+                ],
+                as: 'drivers'
+              }
+            },
+            {
+              $lookup: {
+                from: 'trips',
+                localField: 'truckNo',
+                foreignField: 'truck',
+                pipeline: [
+                  { $project: { trip_id: 1, party: 1, route: 1, startDate: 1, status: 1 } }
+                ],
+                as: 'trips'
+              }
+            },
+            {
+              $unwind: { path: '$trips', preserveNullAndEmptyArrays: true } // Allow trucks with no trips
+            },
+            {
+              $lookup: {
+                from: 'parties',
+                localField: 'trips.party',
+                foreignField: 'party_id',
+                pipeline: [
+                  { $project: { name: 1 } } // Only get the party name
+                ],
+                as: 'partyDetails'
+              }
+            },
+            {
+              $unwind: { path: '$partyDetails', preserveNullAndEmptyArrays: true } // Handle trips without party data
+            },
+            {
+              $group: {
+                _id: '$_id', // Group by truck
+                truckNo: { $first: '$truckNo' },
+                truckType: { $first: '$truckType' },
+                model: { $first: '$model' },
+                capacity: { $first: '$capacity' },
+                bodyLength: { $first: '$bodyLength' },
+                ownership: { $first: '$ownership' },
+                status: { $first: '$status' },
+                driver_id: { $first: '$driver_id' },
+                driverName: { $first: { $arrayElemAt: ['$drivers.name', 0] } }, // Extract driver name
+                trips: {
+                  $push: {
+                    trip_id: '$trips.trip_id',
+                    partyName: '$partyDetails.name',
+                    route: '$trips.route',
+                    startDate: '$trips.startDate',
+                    status: '$trips.status'
+                  }
+                }
+              }
+            },
+            {
+              $addFields: {
+                trips: { $sortArray: { input: '$trips', sortBy: { startDate: -1 } } } // Sort trips by startDate descending
+              }
+            },
+            {
+              $addFields: {
+                latestTrip: { $arrayElemAt: ['$trips', 0] } // Extract the latest trip after sorting
+              }
+            },
+            {
+              $project: { trips: 0 } // Exclude trips field if only latestTrip is needed
+            }
+          ],
+          as: 'supplierTrucks'
+        }
+      },
+      {
         $lookup: {
           from: 'trips',
           localField: 'supplier_id',
@@ -48,7 +135,7 @@ export async function GET(req: Request, { params }: { params: { supplierId: stri
             $concatArrays: [
               {
                 $map: {
-                  input: { $ifNull: ['$supplierTrips', []] }, // Ensures input is always an array
+                  input: { $ifNull: ['$supplierTrips', []] },
                   as: 'trip',
                   in: {
                     trip_id: '$$trip.trip_id',
@@ -60,14 +147,14 @@ export async function GET(req: Request, { params }: { params: { supplierId: stri
                     type: 'trip',
                     status: '$$trip.status',
                     truck: '$$trip.truck',
-                    amount: { $ifNull: ['$$trip.truckHireCost', 0] }, // Use trip.truckHireCost as amount
-                    balance: { $subtract: [0, '$$trip.truckHireCost'] } // Subtract truckHireCost from balance
+                    amount: { $ifNull: ['$$trip.truckHireCost', 0] },
+                    balance: { $subtract: [0, '$$trip.truckHireCost'] }
                   }
                 }
               },
               {
                 $map: {
-                  input: { $ifNull: ['$supplierAccounts', []] }, // Ensures input is always an array
+                  input: { $ifNull: ['$supplierAccounts', []] },
                   as: 'payment',
                   in: {
                     _id: '$$payment._id',
@@ -75,8 +162,7 @@ export async function GET(req: Request, { params }: { params: { supplierId: stri
                     date: '$$payment.date',
                     type: 'payment',
                     amount: { $ifNull: ['$$payment.amount', 0] },
-                    balance: { $add: [0, '$$payment.amount'] }, // Add payment amount to balance
-                    // Check if trip_id exists in supplier account and add trip route if found
+                    balance: { $add: [0, '$$payment.amount'] },
                     route: {
                       $let: {
                         vars: {
@@ -84,7 +170,7 @@ export async function GET(req: Request, { params }: { params: { supplierId: stri
                             $arrayElemAt: [
                               {
                                 $filter: {
-                                  input: { $ifNull: ['$supplierTrips', []] }, // Ensure input is an array
+                                  input: { $ifNull: ['$supplierTrips', []] },
                                   as: 'trip',
                                   cond: { $eq: ['$$trip.trip_id', '$$payment.trip_id'] }
                                 }
@@ -93,7 +179,7 @@ export async function GET(req: Request, { params }: { params: { supplierId: stri
                             ]
                           }
                         },
-                        in: { $ifNull: ['$$matchedTrip.route', null] } // Add route only if trip_id matches
+                        in: { $ifNull: ['$$matchedTrip.route', null] }
                       }
                     }
                   }
@@ -104,7 +190,6 @@ export async function GET(req: Request, { params }: { params: { supplierId: stri
         }
       },
       {
-        // Sort the concatenated array by date
         $addFields: {
           supplierTripAccounts: {
             $sortArray: {
@@ -115,14 +200,13 @@ export async function GET(req: Request, { params }: { params: { supplierId: stri
         }
       },
       {
-        // Calculate cumulative balance across trips and payments
         $addFields: {
           supplierTripAccounts: {
             $reduce: {
               input: '$supplierTripAccounts',
               initialValue: { balance: 0, items: [] },
               in: {
-                balance: { $add: ['$$value.balance', '$$this.balance'] }, // Adjust cumulative balance
+                balance: { $add: ['$$value.balance', '$$this.balance'] },
                 items: {
                   $concatArrays: [
                     '$$value.items',
@@ -142,13 +226,13 @@ export async function GET(req: Request, { params }: { params: { supplierId: stri
         }
       },
       {
-        // Specify inclusion only
         $project: {
           supplierTripAccounts: '$supplierTripAccounts.items',
           balance: '$supplierTripAccounts.balance',
           name: 1,
           contactNumber: 1,
-          supplier_id: 1
+          supplier_id: 1,
+          supplierTrucks: 1 // Include supplierTrucks in the output
         }
       }
     ]);

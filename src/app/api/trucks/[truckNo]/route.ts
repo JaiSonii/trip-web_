@@ -54,12 +54,8 @@ export async function PUT(req: Request, { params }: { params: { truckNo: string 
       return NextResponse.json({ message: 'No Truck Found' }, { status: 404 });
     }
 
-    const trips = await Trip.find({ user_id: user, truck: truckNo });
+    const trips = await Trip.updateMany({ user_id: user, truck: truckNo }, { $set : {truck : data.truckNo}});
 
-    await Promise.all(trips.map(async (trip) => {
-      trip.truck = data.truckNo; // Update the truck number in each trip
-      await trip.save();
-    }));
 
     // Update the truck number in the Expense collection
     const updatedExpenses = await Expense.updateMany(
@@ -67,7 +63,7 @@ export async function PUT(req: Request, { params }: { params: { truckNo: string 
       { $set: { truck: data.truckNo } }  // Update operation to set the new truck number
     );
 
-    return NextResponse.json({ truck }, { status: 200 });
+    return NextResponse.json({ truck , status: 200 });
   } catch (err: any) {
     return NextResponse.json({ message: err.message }, { status: 500 });
   }
@@ -88,6 +84,32 @@ export async function GET(req: Request, { params }: { params: { truckNo: string 
         $match: {
           user_id: user,
           truckNo: truckNo
+        }
+      },
+      {
+        $lookup: {
+          from: 'suppliers',
+          let: { supplier_id: '$supplier' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$supplier_id', '$$supplier_id'] },
+                    { $ne: ['$supplier_id', null] },  // Exclude null supplier IDs
+                    { $ne: ['$supplier_id', ''] }     // Exclude empty string supplier IDs
+                  ]
+                }
+              }
+            },
+            { $project: { name: 1 } }
+          ],
+          as: 'supplierDetails'
+        }
+      },
+      {
+        $addFields: {
+          supplierName: { $arrayElemAt: ['$supplierDetails.name', 0] }  // Extract supplier name
         }
       },
       {
@@ -149,7 +171,7 @@ export async function GET(req: Request, { params }: { params: { truckNo: string 
                     },
                     date: '$$trip.startDate',  // Rename startDate to date
                     partyName: '$partyDetails.name',  // Add partyName from lookup
-                    type : 'trip'
+                    type: 'trip'
                   }
                 ]
               }

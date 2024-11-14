@@ -24,11 +24,11 @@ interface TruckLayoutProps {
     children: React.ReactNode;
 }
 
-const TruckLayout = ({ children}: TruckLayoutProps) => {
-    const {truck, setTruck, loading} = useTruck()
+const TruckLayout = ({ children }: TruckLayoutProps) => {
+    const { truck, setTruck, loading } = useTruck()
     const router = useRouter();
     const pathname = usePathname();
-    const {truckNo} = useParams()
+    const { truckNo } = useParams()
     const tabs = [
         { logo: <FaTruckMoving />, name: 'Trip Book', path: `/user/trucks/${truckNo}/trips` },
         { logo: <BsFillFuelPumpFill />, name: 'Fuel Book', path: `/user/trucks/${truckNo}/fuel` },
@@ -86,12 +86,16 @@ const TruckLayout = ({ children}: TruckLayoutProps) => {
             if (!response.ok) {
                 throw new Error('Failed to update truck');
             }
-            router.refresh();
+            const data = await response.json();
+            setTruck((prev : TruckModel | any)=>({
+                ...prev,
+                ...data.truck
+            }))
         } catch (error) {
             console.error('Error updating truck:', error);
             setError('Failed to update truck. Please try again later.');
         }
-        router.push(`/user/trucks`);
+        
     };
 
     const handleDelete = async () => {
@@ -116,11 +120,11 @@ const TruckLayout = ({ children}: TruckLayoutProps) => {
 
 
     if (loading) return <Loading />;
-    if(!truck){
+    if (!truck) {
         return <div className='flex items-center justify-center space-x-2'><Frown className='text-bottomNavBarColor' /> Truck Not Found</div>
-      }
+    }
     if (error) return <div className="text-red-500 text-center my-4">Error: {error}</div>;
-    
+
 
     return (
         <div className="w-full h-full p-4 bg-gray-50 rounded-lg shadow-sm min-h-screen">
@@ -143,19 +147,51 @@ const TruckLayout = ({ children}: TruckLayoutProps) => {
                             {showDetails ? <MdExpandLess className="ml-2" /> : <MdExpandMore className="ml-2" />}
                         </Button>
                         <div className={`transition-all duration-500 ease-in-out transform ${showDetails ? 'max-h-screen opacity-100 scale-100' : 'max-h-0 opacity-0 scale-95 overflow-hidden'}`}>
-                            <div className="bg-gray-100 p-4 rounded-lg shadow-md">
-                                <div className="flex flex-row items-center space-x-4">
-                                    <span className="flex items-center space-x-2">
+                            <div className="bg-white p-1 rounded-lg shadow-lg border border-gray-200">
+                                {/* Table Header */}
+                                <div className="grid grid-cols-4 gap-6 border-b border-gray-300 pb-1 mb-1 text-gray-700 font-medium">
+                                    <span className="text-center">Status</span>
+                                    <span className="text-center">Type & Model</span>
+                                    <span className="text-center">Ownership</span>
+                                    <span className="text-center">Supplier</span>
+                                </div>
+
+                                {/* Table Content */}
+                                <div className="grid grid-cols-4 gap-6 text-gray-900">
+                                    {/* Status */}
+                                    <div className="flex justify-center items-center space-x-2">
                                         <span className={`h-3 w-3 rounded-full ${truck?.status === 'On Trip' ? 'bg-red-500' : 'bg-green-500'}`}></span>
-                                        <span className="text-xl font-semibold text-gray-800">{truck?.status}</span>
-                                    </span>
-                                    <span className="text-xl font-semibold text-gray-800">
-                                        {truck?.truckType} {truck?.model}
-                                    </span>
-                                    <span className="text-xl font-semibold text-gray-800">{truck?.ownership}</span>
+                                        <span className="font-semibold">{truck?.status}</span>
+                                    </div>
+
+                                    {/* Truck Type & Model */}
+                                    <div className="flex flex-col items-center text-center">
+                                        <span className="text-lg font-semibold">{truck?.truckType}</span>
+                                        <span className="text-sm text-gray-500">{truck?.model}</span>
+                                    </div>
+
+                                    {/* Ownership */}
+                                    <div className="flex justify-center items-center font-semibold text-center">
+                                        {truck?.ownership}
+                                    </div>
+
+                                    {/* Supplier */}
+                                    <div className="flex justify-center items-center">
+                                        {truck?.supplier ? (
+                                            <Button variant={'link'}>
+                                                <Link href={`/user/suppliers/${truck?.supplier}/trips`} className="text-blue-600 hover:underline font-semibold">
+                                                    {truck?.supplierName}
+                                                </Link>
+                                            </Button>
+                                        ) : (
+                                            <span className="text-gray-500">N/A</span>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         </div>
+
+
                     </div>
 
                     <div className="relative" ref={dropdownRef}>
@@ -186,7 +222,7 @@ const TruckLayout = ({ children}: TruckLayoutProps) => {
                                 >
                                     <MdEdit className="mr-2" /> Edit Truck
                                 </Button>
-                                <Button
+                                {/* <Button
                                     variant="destructive"
                                     onClick={() => {
                                         handleDelete();
@@ -195,7 +231,7 @@ const TruckLayout = ({ children}: TruckLayoutProps) => {
                                     className="justify-start"
                                 >
                                     <MdDelete className="mr-2" /> Delete Truck
-                                </Button>
+                                </Button> */}
                                 <Button
                                     variant="ghost"
                                     onClick={() => {

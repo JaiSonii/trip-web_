@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname, useParams } from 'next/navigation';
 import Link from 'next/link';
-import { FaBook, FaTruckMoving, FaEdit, FaTrashAlt, FaPlusCircle } from 'react-icons/fa';
+import { FaBook, FaTruckMoving, FaEdit, FaTrashAlt, FaPlusCircle, FaTruck } from 'react-icons/fa';
 import { Button } from '../ui/button';
 import EditSupplierModal from '../supplier/EditSupplierModal';
 import AddPaymentModal from '../supplier/AddPaymentModal';
@@ -46,6 +46,7 @@ const SupplierLayout = ({ children }: TruckLayoutProps) => {
     const tabs = [
         { logo: <FaTruckMoving />, name: 'Trip Book', path: `/user/suppliers/${supplierId}/trips` },
         { logo: <FaBook />, name: 'Passbook', path: `/user/suppliers/${supplierId}/passbook` },
+        { logo: <FaTruck />, name: 'Trucks', path: `/user/suppliers/${supplierId}/trucks` },
     ];
 
     // useEffect(() => {
@@ -169,21 +170,21 @@ const SupplierLayout = ({ children }: TruckLayoutProps) => {
       }
 
     return (
-        <div className="w-full h-full p-4 bg-gray-50 rounded-lg shadow-sm">
+        <div className="w-full h-full p-4 bg-white ">
             <div className="flex flex-col space-y-4">
                 <div className="flex items-center justify-between border-b-2 border-gray-200 pb-4">
                     <div>
                         <h1 className="text-3xl font-bold">{supplier?.name}</h1>
                         <p className="text-gray-600">{supplier?.contactNumber}</p>
-                        <p className="text-lg font-semibold p-2 flex items-center space-x-2">Balance: <p className={`font-semibold ml-2 ${supplier.balance >= 0 ? 'text-green-500' : "text-red-500"}`}>{formatNumber(supplier.balance)}</p></p>
+                        <p className="text-lg font-semibold p-2 flex items-center space-x-2">Balance: <p className={`font-semibold ml-2 ${supplier.balance >= 0 ? 'text-green-500' : "text-red-500"}`}>₹{formatNumber(Math.abs(supplier.balance))}</p></p>
                     </div>
                     <div className="flex space-x-2">
                         <Button variant="outline" onClick={handleEditSupplier}>
                             <FaEdit className="mr-2" /> Edit Supplier
                         </Button>
-                        <Button variant="destructive" onClick={handleDeleteSupplier}>
+                        {/* <Button variant="destructive" onClick={handleDeleteSupplier}>
                             <FaTrashAlt className="mr-2" /> Delete Supplier
-                        </Button>
+                        </Button> */}
                         <Button onClick={handleAddPayment}>
                             <FaPlusCircle className="mr-2" /> Add Payment
                         </Button>

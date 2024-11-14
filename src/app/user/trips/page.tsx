@@ -243,7 +243,7 @@ export default function TripsPage() {
       <div className='flex w-full px-4 md:px-60'>
         <input
           type="text"
-          placeholder="Search..."
+          placeholder={`Search from ${trips.length} trips...`}
           onChange={handleSearch}
           className="w-full p-2 border rounded"
         />

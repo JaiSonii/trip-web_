@@ -18,7 +18,7 @@ const SupplierSelect: React.FC<Props> = ({ suppliers, value, onChange }) => {
     );
 
     return (
-        <Select onValueChange={(value) => onChange('supplier', value)}>
+        <Select defaultValue={value} onValueChange={(value) => onChange('supplier', value)}>
             <SelectTrigger>
                 <SelectValue placeholder="Select Supplier*" />
             </SelectTrigger>
