@@ -16,7 +16,7 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
   const [startDate, setStartDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [podReceivedDate, setPodReceivedDate] = useState<string>(new Date().toLocaleDateString());
   const [podImage, setPodImage] = useState<File | null>(null);
-  const [paymentType, setPaymentType] = useState<string>('');
+  const [paymentType, setPaymentType] = useState<string>('Cash');
   const [settlementDate, setSettlementDate] = useState<Date>(new Date(Date.now()));
   const [receivedByDriver, setReceivedByDriver] = useState<boolean>(false);
   const [notes, setNotes] = useState<string>('');
@@ -76,16 +76,16 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
         data = { dates: dates, status: status + 1 };
       } else if (statuses[status] === 'POD Submitted') {
         dates[4] = new Date(settlementDate);
-        amount === 0 ? data = { dates: dates, status: status + 1} :
-        data = {
-          amount: amount,
-          paymentType,
-          receivedByDriver,
-          notes,
-          date : dates[4],
-          dates: dates,
-          status: status + 1,
-        };
+        amount === 0 ? data = { dates: dates, status: status + 1 } :
+          data = {
+            amount: amount,
+            paymentType,
+            receivedByDriver,
+            notes,
+            date: dates[4],
+            dates: dates,
+            status: status + 1,
+          };
       }
 
       onSave(data)
@@ -105,12 +105,12 @@ const StatusModal: React.FC<StatusModalProps> = ({ status, isOpen, onClose, onSa
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-gray-500 bg-opacity-75">
       <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{
-            duration: 0.5,
-            ease: [0, 0.71, 0.2, 1.01]
-          }} className="bg-white rounded-lg shadow-md overflow-hidden" style={{ maxWidth: '600px', width: '90%' }}>
+        initial={{ opacity: 0, scale: 0.5 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{
+          duration: 0.5,
+          ease: [0, 0.71, 0.2, 1.01]
+        }} className="bg-white rounded-lg shadow-md overflow-hidden" style={{ maxWidth: '600px', width: '90%' }}>
         <div className="p-6">
           <h2 className="text-lg font-bold mb-4 text-black">Trip {statuses[status + 1]}</h2>
           {statuses[status] === 'Started' && (
