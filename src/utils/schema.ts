@@ -283,6 +283,17 @@ export const userSchema = new Schema({
   gstNumber : String,
   address : String,
   company : String,
+  bankDetails: {
+    msmeNo: String,
+    accountNo: String,
+    ifscCode: String,
+    bankName: String,
+    bankBranch: String,
+  },
+  logoUrl: String,
+  stampUrl: String,
+  signatureUrl: String,
+
   createdAt: { type: Date, default: Date.now }
 });
 

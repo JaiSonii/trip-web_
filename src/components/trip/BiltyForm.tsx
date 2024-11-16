@@ -9,6 +9,7 @@ import { X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ITrip } from '@/utils/interface'
 import generatePDF from 'react-to-pdf';
+import Image from 'next/image'
 
 type ConsignerConsigneeType = {
   gstNumber: string;
@@ -66,7 +67,8 @@ type FormDataType = {
   paidBy: 'consigner' | 'consignee' | 'agent'
   ewayBillNo: string
   invoiceNo: string
-  truckNo : string
+  truckNo: string
+  logo : string
 }
 
 const steps = [
@@ -129,35 +131,37 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
     paidBy: 'consigner',
     ewayBillNo: '',
     invoiceNo: '',
-    truckNo : trip.truck || ''
+    truckNo: trip.truck || '',
+    logo : ''
   })
   const billRef = useRef<HTMLDivElement>(null)
 
-  const fetchUser = async()=>{
-    try{
+  const fetchUser = async () => {
+    try {
       const res = await fetch('/api/users')
-      if(!res.ok){
+      if (!res.ok) {
         alert('Failed to fetch details')
         return
       }
       const data = await res.json()
       const user = data.user
       setUser(user)
-      setFormData((prev)=>({
+      setFormData((prev) => ({
         ...prev,
-        companyName : user.company,
-        address : user.address,
-        contactNumber : user.phone,
-        gstNumber : user.gstNumber
+        companyName: user.company,
+        address: user.address,
+        contactNumber: user.phone,
+        gstNumber: user.gstNumber,
+        logo : user.logoUrl
       }))
-    }catch(error){
+    } catch (error) {
       alert('Failed to fetch User Details')
     }
   }
 
-  useEffect(()=>{
-    if(isOpen) fetchUser();
-  },[isOpen])
+  useEffect(() => {
+    if (isOpen) fetchUser();
+  }, [isOpen])
 
   const biltyColor = useMemo(() => {
     const copy = selectedCopy
@@ -186,17 +190,17 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
       await new Promise((resolve) => setTimeout(resolve, 200)); // Small delay to ensure color is applied
       generatePDF(billRef, { filename: `Bilty-${tab}-${selectedCopy + " Copy"}-${trip.LR}-${formData.truckNo}-${trip.trip_id}` });
     }
-    if(!user.companyName || !user.address || !user.gstNumber){
+    if (!user.companyName || !user.address || !user.gstNumber) {
       try {
-        const res = await fetch('/api/users',{
-          method : 'PUT',
-          body : JSON.stringify({
+        const res = await fetch('/api/users', {
+          method: 'PUT',
+          body: JSON.stringify({
             companyName: user.company || formData.companyName,
             address: user.address || formData.address,
             gstNumber: user.gstNumber || formData.gstNumber
           })
         })
-        if(!res.ok){
+        if (!res.ok) {
           alert('Failed to update user details')
         }
       } catch (error) {
@@ -235,8 +239,15 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
         <section className="px-6 py-2 w-full">
           <div className="flex items-center gap-8 justify-center">
             <div className="flex justify-center">
-              <div className="rounded-full bg-black text-white text-center flex items-center justify-center"
-                style={{ width: "70px", height: "70px" }}>Logo</div>
+              {formData.logo ?
+              <div>
+                <Image src={formData.logo} alt='logo' width={60} height={60} className='' />
+              </div>
+                 :
+                <div className=" bg-gray-300 text-white text-center flex items-center justify-center rounded-full"
+                  style={{ width: "70px", height: "70px" }}></div>
+              }
+
             </div>
 
             <div className="text-center py-2 border-b border-black">
