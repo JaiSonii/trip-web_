@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Upload } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
+import Image from 'next/image'
 
 
 const DetailsPage = () => {
@@ -47,9 +48,22 @@ const DetailsPage = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (user) {
+      if(e.target.name.startsWith('bankDetails')){
+        setUser({...user, bankDetails: {...user.bankDetails, [e.target.name.replace('bankDetails.', '')]: e.target.value } })
+        return
+      }
       setUser({ ...user, [e.target.name]: e.target.value });
     }
   };
+
+  const handleCancel = ()=>{
+    setIsEditing(false)
+    setPreviews({
+      logo : user.logoUrl || '',
+      stamp : user.stampUrl || '',
+      signature : user.signatureUrl || ''
+    })
+  }
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,11 +114,11 @@ const DetailsPage = () => {
     return (
       <div className="w-full h-40 border rounded-md overflow-hidden flex items-center justify-center bg-gray-100">
         {preview ? (
-          <iframe
+          <Image
             src={preview}
-            className="w-full h-full no-scrollbar"
-            style={{ border: 'none', overflow: 'hidden' }}
-            title={`${type} preview`}
+            alt={`${type} preview`}
+            width={130}
+            height={130}
           />
         ) : (
           <div className="flex flex-col items-center justify-center text-gray-400">
@@ -174,7 +188,7 @@ const DetailsPage = () => {
               <label htmlFor="bankMsmeNo">MSME Number</label>
               <input
                 id="bankMsmeNo"
-                name="bankMsmeNo"
+                name="bankDetails.msmeNo"
                 value={user.bankDetails?.msmeNo || ''}
                 onChange={handleInputChange}
                 disabled={!isEditing}
@@ -184,7 +198,7 @@ const DetailsPage = () => {
               <label htmlFor="bankAccountNo">Account Number</label>
               <input
                 id="bankAccountNo"
-                name="bankAccountNo"
+                name="bankDetails.accountNo"
                 value={user.bankDetails?.accountNo || ''}
                 onChange={handleInputChange}
                 disabled={!isEditing}
@@ -194,7 +208,7 @@ const DetailsPage = () => {
               <label htmlFor="bankIfscCode">IFSC Code</label>
               <input
                 id="bankIfscCode"
-                name="bankIfscCode"
+                name="bankDetails.ifscCode"
                 value={user.bankDetails?.ifscCode || ''}
                 onChange={handleInputChange}
                 disabled={!isEditing}
@@ -204,7 +218,7 @@ const DetailsPage = () => {
               <label htmlFor="bankName">Bank Name</label>
               <input
                 id="bankName"
-                name="bankName"
+                name="bankDetails.bankName"
                 value={user.bankDetails?.bankName || ''}
                 onChange={handleInputChange}
                 disabled={!isEditing}
@@ -214,7 +228,7 @@ const DetailsPage = () => {
               <label htmlFor="bankBranch">Bank Branch</label>
               <input
                 id="bankBranch"
-                name="bankBranch"
+                name="bankDetails.bankBranch"
                 value={user.bankDetails?.bankBranch || ''}
                 onChange={handleInputChange}
                 disabled={!isEditing}
@@ -243,6 +257,7 @@ const DetailsPage = () => {
                 id="stamp"
                 name="stamp"
                 type="file"
+                accept='image/*'
                 onChange={(e) => handleFileChange(e, setStamp, 'stamp')}
                 disabled={!isEditing}
                 hidden={!isEditing}
@@ -272,7 +287,7 @@ const DetailsPage = () => {
               {isEditing ? (
                 <>
                   <Button type="submit" variant="ghost">Save</Button>
-                  <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+                  <Button type="button" variant="outline" onClick={handleCancel}>Cancel</Button>
                 </>
               ) : (
                 <Button type="button" variant="outline" onClick={() => setIsEditing(true)}>Edit</Button>

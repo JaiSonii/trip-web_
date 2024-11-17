@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ITrip } from '@/utils/interface'
 import generatePDF from 'react-to-pdf';
 import Image from 'next/image'
+import { getDominantColor } from '@/utils/imgColor'
 
 type ConsignerConsigneeType = {
   gstNumber: string;
@@ -68,7 +69,7 @@ type FormDataType = {
   ewayBillNo: string
   invoiceNo: string
   truckNo: string
-  logo : string
+  logo: string
 }
 
 const steps = [
@@ -132,7 +133,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
     ewayBillNo: '',
     invoiceNo: '',
     truckNo: trip.truck || '',
-    logo : ''
+    logo: ''
   })
   const billRef = useRef<HTMLDivElement>(null)
 
@@ -152,7 +153,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
         address: user.address,
         contactNumber: user.phone,
         gstNumber: user.gstNumber,
-        logo : user.logoUrl
+        logo: user.logoUrl
       }))
     } catch (error) {
       alert('Failed to fetch User Details')
@@ -230,6 +231,35 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
 
   const progressPercentage = ((currentStep + 1) / steps.length) * 100
 
+  function CompanyHeader({ formData }: { formData: { logo: string; companyName: string } }) {
+    const [dominantColor, setDominantColor] = useState("black");
+
+    useEffect(() => {
+      async function fetchDominantColor() {
+        try {
+          const color = await getDominantColor(formData.logo);
+          setDominantColor(color);
+        } catch (error) {
+          console.error("Failed to fetch dominant color:", error);
+          setDominantColor("black"); // Fallback color
+        }
+      }
+
+      if (formData.logo) {
+        fetchDominantColor();
+      }
+    }, [formData.logo]);
+
+    return (
+      <h1
+        className={`text-3xl font-bold`}
+        style={{ color: dominantColor }}
+      >
+        {formData.companyName}
+      </h1>
+    );
+  }
+
   function Bilty({ formData, color }: { formData: FormDataType, color: string }) {
     return (
 
@@ -240,10 +270,10 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
           <div className="flex items-center gap-8 justify-center">
             <div className="flex justify-center">
               {formData.logo ?
-              <div>
-                <Image src={formData.logo} alt='logo' width={60} height={60} className='' />
-              </div>
-                 :
+                <div>
+                  <Image src={formData.logo} alt='logo' width={60} height={60} className='' />
+                </div>
+                :
                 <div className=" bg-gray-300 text-white text-center flex items-center justify-center rounded-full"
                   style={{ width: "70px", height: "70px" }}></div>
               }
@@ -251,7 +281,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
             </div>
 
             <div className="text-center py-2 border-b border-black">
-              <h1 className="text-3xl font-bold text-black">{formData.companyName}</h1>
+            <CompanyHeader formData={formData} />
               <h2 className="text-lg font-normal text-gray-700">FLEET OWNERS & TRANSPORT CONTRACTOR</h2>
               <span className="text-sm text-gray-600 whitespace-nowrap">
                 {formData.address}
