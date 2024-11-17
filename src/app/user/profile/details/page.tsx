@@ -74,7 +74,8 @@ const DetailsPage = () => {
           name: user.name,
           company: user.company,
           gstNumber: user.gstNumber,
-          address: user.address
+          address: user.address,
+          bankDetails: user.bankDetails,
         }))
         if (logo) formdata.append('logo', logo)
         if (stamp) formdata.append('stamp', stamp)
