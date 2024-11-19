@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { formatNumber } from '@/utils/utilArray';
 import { PiPlusBold } from 'react-icons/pi';
 import { useTrip } from '@/context/tripContext';
+import { useToast } from '@/components/hooks/use-toast';
 
 interface DataListProps {
   label: string;
@@ -18,6 +19,7 @@ const DataList: React.FC<DataListProps> = ({ label, modalTitle }) => {
   const [editData, setEditData] = useState<PaymentBook | null>(null);
   const [listData, setListData] = useState<PaymentBook[]>([]);
   const [expandedItem, setExpandedItem] = useState<number | null>(null);
+  const {toast} = useToast()
 
   useEffect(() => {
     const temp = trip.tripAccounts.filter((account : PaymentBook | any) => account.accountType === label);
@@ -46,7 +48,7 @@ const DataList: React.FC<DataListProps> = ({ label, modalTitle }) => {
       }
       const resData = await res.json();
       if (resData.status == 400) {
-        alert(resData.message);
+        toast({description : resData.message, variant : 'destructive'});
         return;
       }
 
@@ -59,6 +61,11 @@ const DataList: React.FC<DataListProps> = ({ label, modalTitle }) => {
       // setTrip();
       // router.refresh();
     } catch (error) {
+      toast({
+        title : 'Internal Server Error',
+        description : 'Failed to add payment',
+        variant : 'destructive'
+      })
       console.log(error);
     }
   };
@@ -82,7 +89,7 @@ const DataList: React.FC<DataListProps> = ({ label, modalTitle }) => {
       const resData = await res.json();
 
       if (resData.status == 400) {
-        alert(resData.message);
+        toast({description : resData.message, variant : 'destructive'});
         return;
       }
 
@@ -94,6 +101,11 @@ const DataList: React.FC<DataListProps> = ({ label, modalTitle }) => {
       setEditData(null);
       setIsModalOpen(false);
     } catch (error) {
+      toast({
+        title : 'Internal Server Error',
+        description : 'Failed to edit payment',
+        variant : 'destructive'
+      })
       console.log(error);
     }
   };
@@ -117,6 +129,11 @@ const DataList: React.FC<DataListProps> = ({ label, modalTitle }) => {
       }))
       // router.refresh();
     } catch (error) {
+      toast({
+        title : 'Internal Server Error',
+        description : 'Failed to delete payment',
+        variant : 'destructive'
+      })
       console.log(error);
     }
   };
@@ -127,7 +144,7 @@ const DataList: React.FC<DataListProps> = ({ label, modalTitle }) => {
 
   const openAddModal = () => {
     if(trip.balance <= 0){
-      alert('Trip Balance is zero');
+      toast({description : 'Trip Balance is zero', variant : 'warning'});
       return
     }
     setEditData(null);

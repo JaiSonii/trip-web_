@@ -13,6 +13,7 @@ import { PiSteeringWheelLight, PiTruck, PiBank } from "react-icons/pi";
 import { TbUsersGroup } from "react-icons/tb";
 import { HiOutlineUser } from "react-icons/hi";
 import { ExpenseProvider } from '@/context/context';
+import { useToast } from '../hooks/use-toast';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -25,6 +26,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const [selected, setSelected] = useState<string | null>(null);
   const [phone, setPhone] = useState<string | null>('');
   const [user, setUser] = useState<any>(null);
+  const {toast } = useToast()
 
   // useEffect(() => {
   //   const fetchPhone = async () => {
@@ -35,6 +37,17 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   //   };
   //   fetchPhone();
   // }, []);
+
+  useEffect(()=>{
+    const updateVisit = Cookies.get('updateVisit') as string;
+    if(updateVisit == '1'){
+      toast({
+        title : 'Welcome Back!',
+        description : 'New Feature to generate Frieght Memo has been added',
+        variant : 'featureUpdate'
+      })
+    }
+  },[])
 
   useEffect(() => {
     const initialSelected = primaryMenuItems.find(item => pathname.startsWith(item.href));

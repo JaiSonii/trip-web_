@@ -218,7 +218,7 @@ export async function PUT(req: Request, { params }: { params: { driverId: string
     })
 
     driver.save()
-    return NextResponse.json({ driver: driver }, { status: 200 })
+    return NextResponse.json({ accounts: driver.accounts , status: 200 })
   } catch (err) {
     console.log(err)
   }

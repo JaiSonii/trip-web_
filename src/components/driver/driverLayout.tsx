@@ -15,6 +15,7 @@ import { useDriver } from '@/context/driverContext';
 import Loading from '@/app/user/loading';
 import { Frown } from 'lucide-react';
 import { formatNumber } from '@/utils/utilArray';
+import { useToast } from '../hooks/use-toast';
 
 
 interface DriverLayoutProps {
@@ -35,6 +36,7 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ driverId, onDriverUpdate, c
   const [error, setError] = useState<string | null>(null);
   const [edit, setEdit] = useState<boolean>(false);
   const router = useRouter();
+  const {toast} = useToast()
 
   // const fetchDriverDetails = async () => {
   //   try {
@@ -123,8 +125,10 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ driverId, onDriverUpdate, c
     } catch (error: any) {
       console.error('Failed to update driver:', error);
       setError(error.message); // Set error message if something goes wrong
-    } finally {
-      router.refresh(); // Refresh the page after updating
+      toast({
+        description : 'Internal Server Error',
+        variant : 'destructive'
+      })
     }
   };
 
@@ -152,6 +156,10 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ driverId, onDriverUpdate, c
       alert('Driver Info Edited Successfully');
       router.push('/user/drivers');
     } catch (error: any) {
+      toast({
+        description : 'Internal Server Error',
+        variant : 'destructive'
+      })
       console.log(error);
     }
   };
@@ -178,7 +186,10 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ driverId, onDriverUpdate, c
       router.push('/user/drivers');
     } catch (error: any) {
       console.error('Failed to delete driver:', error);
-      alert(error.message); // Display an alert with the error message-
+      toast({
+        description : 'Internal Server Error',
+        variant : 'destructive'
+      })
       setError(error.message);
     }
   };

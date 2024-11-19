@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "@/app/globals.css";
 import dynamic from 'next/dynamic';
 import { Roboto } from 'next/font/google';
+import { Toaster } from "@/components/ui/toaster";
 
 // Import Roboto font from Google Fonts
 const roboto = Roboto({
@@ -30,6 +31,7 @@ export default function RootLayout({
           {/* Sidebar: 3/12 width */}
           <div className="w-screen">
             <MainLayout>{children}</MainLayout>
+            <Toaster />
           </div>
         </div>
       </body>

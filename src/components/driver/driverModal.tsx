@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { driverGave, driverGot } from '@/utils/utilArray';
 import { Button } from '../ui/button';
+import { useToast } from '@/components/hooks/use-toast';
 
 interface DriverModalProps {
   open: boolean;
@@ -15,6 +16,7 @@ const DriverModal: React.FC<DriverModalProps> = ({ open, onClose, type, onConfir
   const [reason, setReason] = useState<string>('');
   const [date, setDate] = useState<string>(new Date().toISOString().split('T')[0]); // Store date in ISO format
   const [otherReason, setOtherReason] = useState<string>('');
+  const {toast} = useToast();
 
   useEffect(() => {
     if (selected) {
@@ -28,8 +30,19 @@ const DriverModal: React.FC<DriverModalProps> = ({ open, onClose, type, onConfir
   const handleConfirm = () => {
     const finalReason = reason === 'Other' ? otherReason : reason;
 
-    if (!amount || !finalReason || !date) {
-      alert('Please fill in all the details');
+    if (!amount || !finalReason || !date ) {
+      toast({
+        'description' : 'Please fill all the detials',
+        variant : 'warning'
+      })
+
+      if(amount <= 0){
+        toast({
+          description : 'Amount not acceptable',
+          variant : 'warning'
+        })
+      }
+
       return;
     }
 
@@ -61,7 +74,7 @@ const DriverModal: React.FC<DriverModalProps> = ({ open, onClose, type, onConfir
     <>
       {open && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="absolute inset-0 bg-gray-900 opacity-50 backdrop-blur-lg"></div>
+          <div className="absolute inset-0 bg-gray-800 opacity-50 backdrop-blur-lg"></div>
           <div className="relative bg-white p-8 rounded-lg shadow-lg w-96">
             <h2 className="text-xl font-bold mb-4">{type === 'gave' ? 'Driver Gave' : 'Driver Got'}</h2>
             <form>

@@ -19,6 +19,14 @@ const config: Config = {
     extend: {
       colors: {
         white: '#ffffff',
+        warning: {
+          DEFAULT: '#ffcc00', // Darker orange for warning
+          foreground: '#FFFFFF', // White text for contrast
+        },
+        featureUpdate: {
+          DEFAULT: '#4caf50', // Replace with desired base color
+          foreground: '#ffffff', // Replace with contrasting foreground
+        },
         gray: {
           100: '#f5f5f5',
         },

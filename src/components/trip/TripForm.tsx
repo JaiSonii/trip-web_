@@ -16,6 +16,7 @@ import { createWorker } from 'tesseract.js'
 import { useExpenseCtx } from '@/context/context'
 import { Loader2 } from 'lucide-react'
 import Loading from '@/app/user/loading'
+import { useToast } from '../hooks/use-toast'
 
 type Props = {
   lr: string
@@ -54,6 +55,7 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
   const [hasSupplier, setHasSupplier] = useState(false)
   const [fileLoading, setFileLoading] = useState(false)
   const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB in bytes
+  const {toast} = useToast()
 
   const worker = useRef<null | any>(null)
 
@@ -104,7 +106,10 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
     if (!uploadedFile) return
 
     if (uploadedFile.size > MAX_FILE_SIZE) {
-      alert(`File size exceeds the maximum limit of ${MAX_FILE_SIZE / (1024 * 1024)} MB.`)
+      toast({
+        description : `File size exceeds the maximum limit of ${MAX_FILE_SIZE / (1024 * 1024)} MB.`,
+        variant :'warning'
+      })
       return
     }
 
@@ -124,7 +129,10 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
       const resData = await processFile(file, isPdf)
       processTripData(resData.ewbValidityDate)
     } catch (error: any) {
-      alert(error.message)
+      toast({
+        description : `Failed to extract details from E-Way Bill`,
+        variant :'warning'
+      })
       console.error("Error processing e-way bill:", error)
     } finally {
       setFileLoading(false)
@@ -212,12 +220,26 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
     const sanitizedTruckHireCost = sanitizeInput(formData.truckHireCost.toString())
 
     if (sanitizedAmount === null || sanitizedTruckHireCost === null) {
-      alert('Please enter valid numeric values for Amount and Truck Hire Cost.')
+      toast({
+        description : 'Please enter valid numeric values for Amount and Truck Hire Cost.',
+        variant :'warning'
+      })
       return
     }
 
     if (!formData.supplierId && !formData.driver) {
-      alert('Driver Needs to be assigned!')
+      toast({
+        description : 'Driver Needs to be assigned!',
+        variant :'warning'
+      })
+      return
+    }
+
+    if(!formData.party || !formData.truck || !formData.amount || !formData.route.origin || !formData.route.destination || !formData.LR){
+      toast({
+        description : 'Please fill in the required fields',
+        variant :'warning'
+      })
       return
     }
 
@@ -230,7 +252,7 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
     localStorage.removeItem('tripData')
   }
 
-  if (isLoading) return <div className="flex justify-center items-center h-screen"><Loading /></div>
+  if (isLoading) return <div className="flex justify-center items-center h-screen"><Loader2 className='text-bottomNavBarColor animate-spin' /></div>
 
   return (
     <div className="bg-white text-black p-4 max-w-3xl mx-auto shadow-md rounded-md">

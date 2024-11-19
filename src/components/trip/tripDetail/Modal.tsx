@@ -3,6 +3,7 @@ import { PaymentBook } from '@/utils/interface';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { useTrip } from '@/context/tripContext';
+import { useToast } from '@/components/hooks/use-toast';
 
 interface ModalProps {
   isOpen: boolean;
@@ -38,6 +39,7 @@ const Modal: React.FC<ModalProps> = ({
   });
 
   const {trip, setTrip} = useTrip()
+  const {toast} = useToast()
 
   useEffect(() => {
     if (editData) {
@@ -66,12 +68,18 @@ const Modal: React.FC<ModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formState.amount) {
-      alert('Amount is required');
+    if (!formState.amount || formState.amount <=0) {
+      toast({
+        description : 'Enter Valid Amount',
+        variant : 'warning'
+      })
       return;
     }
     if(formState.amount > trip.balance){
-      alert('Payment amount exceeds the balance')
+      toast({
+        description : 'Payment amount exceeds pending balance',
+        variant : 'warning'
+      })
       return;
     }
     onSave({

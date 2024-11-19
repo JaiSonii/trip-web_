@@ -24,22 +24,18 @@ const Driver: React.FC = () => {
 
   const { driver, loading, setDriver } = useDriver()
   const [error, setError] = useState<string | null>(null);
-  const [accounts, setAccounts] = useState<IExpense[] | PaymentBook[] | any[]>(driver?.driverExpAccounts);
   const [expenseEdit, setExpenseEdit] = useState(false);
   const [paymentEdit, setPaymentEdit] = useState(false);
   const [accountEdit, setAccountEdit] = useState(false);
   const [selected, setSelected] = useState<any>([]);
   const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
 
-  useEffect(() => {
-    setAccounts(driver?.driverExpAccounts)
-  }, [driver])
 
   const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), { ssr: false })
 
 
   const sortedAccounts = useMemo(() => {
-    if (!accounts || accounts.length === 0) return []; // Ensure accounts is not null or empty
+    if (!driver?.driverExpAccounts || driver?.driverExpAccounts.length === 0) return []; // Ensure accounts is not null or empty
 
     // Utility functions to get sortable values for specific fields
     const getSortableDate = (account: any) => {
@@ -54,7 +50,7 @@ const Driver: React.FC = () => {
       return account.got || (account.type !== 'truck' ? account.amount : 0); // Use 'got' or fallback to 'amount' for non-truck types
     };
 
-    let sortableAccounts = [...accounts as any];
+    let sortableAccounts = [...driver?.driverExpAccounts as any];
 
     if (sortConfig.key !== null) {
       sortableAccounts.sort((a, b) => {
@@ -88,7 +84,7 @@ const Driver: React.FC = () => {
     }
 
     return sortableAccounts;
-  }, [accounts, sortConfig]);
+  }, [driver, sortConfig]);
 
 
   const requestSort = (key: any) => {
@@ -115,25 +111,34 @@ const Driver: React.FC = () => {
 
       if (account.expenseType) {
         deletedAccount = await DeleteExpense(account._id);
-        setAccounts(prev => prev.filter(acc => acc._id !== deletedAccount._id));
-        balance += deletedAccount.amount
+        setDriver((prev : IDriver | any)=>({
+          ...prev,
+          driverExpAccounts : prev.driverExpAccounts.filter((acc : any) => acc._id !== deletedAccount._id),
+          balance : prev.balance + deletedAccount.amount
+        }))
       } else if (account.accountType) {
         deletedAccount = await DeleteAccount(account._id, account.trip_id, account.party_id);
-        setAccounts(prev => prev.filter(acc => acc.paymentBook_id !== deletedAccount.paymentBook_id));
-        balance += deletedAccount.amount
+        setDriver((prev : IDriver | any)=>({
+          ...prev,
+          driverExpAccounts : prev.driverExpAccounts.filter((acc : any) => acc.paymentBook_id !== deletedAccount.paymentBook_id),
+          balance : prev.balance + deletedAccount.amount
+        }))
       } else {
         const data = await deleteDriverAccount(driverId as string, account.account_id);
         deletedAccount = data.driver;
-        setAccounts(prev => prev.filter(acc => acc.account_id !== account.account_id));
-        balance = balance - account.got + account.gave
+        setDriver((prev : IDriver | any)=>({
+          ...prev,
+          driverExpAccounts : prev.driverExpAccounts.filter((acc : any) => acc.account_id !== account.account_id),
+          balance : prev.balance - account.got + account.gave
+        }))
       }
 
       // Update driverExpAccounts in driver state with the updated accounts
-      setDriver((prev: any) => ({
-        ...prev,
-        driverExpAccounts: accounts.filter(acc => acc.account_id !== account.account_id),
-        balance : balance
-      }));
+      // setDriver((prev: any) => ({
+      //   ...prev,
+      //   driverExpAccounts: accounts.filter(acc => acc.account_id !== account.account_id),
+      //   balance : balance
+      // }));
     } catch (error) {
       console.error(error);
       alert(error);
@@ -218,7 +223,7 @@ const Driver: React.FC = () => {
   const handleEditAccounts = async (account: any) => {
     try {
       // Create a variable to store the updated accounts
-      let updatedAccounts: any[] = [...accounts];
+      let updatedAccounts: any[] = [...driver?.driverExpAccounts];
       let updatedAccount: any;
       let balance : number = driver.balance
 
@@ -260,7 +265,6 @@ const Driver: React.FC = () => {
       }
 
       // Now update the accounts and driverExpAccounts using updatedAccounts
-      setAccounts(updatedAccounts);
       setDriver((prev: any) => ({
         ...prev,
         balance : balance,

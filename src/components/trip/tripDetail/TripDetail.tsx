@@ -14,13 +14,14 @@ import { formatNumber } from '@/utils/utilArray';
 import Link from 'next/link';
 import BiltyForm from '../BiltyForm';
 import { useTrip } from '@/context/tripContext';
-
+import FrieghtMemo from '../FrieghtMemo';
 
 
 const TripDetails = () => {
   const { trip, setTrip } = useTrip()
   const [charges, setCharges] = useState<TripExpense[]>([])
   const [biltyModalOpen, setBiltyModalOpen] = useState(false)
+  const [fmModalOpen, setFmModalOpen] = useState(false)
 
   // useEffect(() => {
   //   const balance = () => {
@@ -210,8 +211,9 @@ const TripDetails = () => {
                 </div>
               </Button>
               <ViewBillButton />
-
+              {trip.truckHireCost ? <Button variant={'outline'} onClick={()=>setFmModalOpen(true)}>Generate FM/Challan</Button> : null}
               <Button onClick={() => setBiltyModalOpen(true)}>Generate Bilty</Button>
+              
               {/* Add more buttons as needed */}
             </div>
           </div>
@@ -234,6 +236,7 @@ const TripDetails = () => {
 
       </div>
       <BiltyForm isOpen={biltyModalOpen} onClose={() => setBiltyModalOpen(false)} trip={trip} />
+      <FrieghtMemo isOpen={fmModalOpen} onClose={()=>setFmModalOpen(false)} trip={trip} />
     </div>
   );
 };

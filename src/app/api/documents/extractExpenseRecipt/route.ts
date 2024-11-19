@@ -49,7 +49,7 @@ export async function POST(req:Request) {
         }
         const text = await req.text()
         const reciptDetails = await extractReciptDetails(text)
-        return NextResponse.json({success : true,reciptDetails, status : 200})
+        return NextResponse.json({success : true, reciptDetails, status : 200})
     } catch (error) {
         console.log(error)
         return NextResponse.json({error : 'Internal Server Error', status : 500})
