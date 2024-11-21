@@ -57,7 +57,6 @@ const TripDocumentsLanding = () => {
         const res = await fetch(`/api/trips/documents?type=${encodeURIComponent(type as string)}`);
         const data = res.ok ? await res.json() : setMessage('Failed to fetch documents');
         setDocuments(data.documents);
-        console.log(data)
         setMessage('');
         if (data.documents.length === 0) {
           setMessage('No documents found');

@@ -4,7 +4,7 @@ export const isValidGSTNumber = (gstNumber: string): boolean => {
 };
 
 export const isValidPhone = (phone: string): boolean => {
-    return /^[789]\d{9}$/.test(phone); // Phone number validation logic for India
+    return /^[6789]\d{9}$/.test(phone); // Phone number validation logic for India
 };
 
 export const validateTruckNo = (truckNo: string): boolean => {

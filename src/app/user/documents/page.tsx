@@ -12,7 +12,6 @@ const RecentDocuments = dynamic(() => import('@/components/documents/RecentDocum
 
 const DocumentsPage = () => {
   const { documents, counts, docsLoading } = useRecentDocsCtx()
-  console.log(documents, counts, docsLoading)
   const [error, setError] = useState('');
 
   // const fetchRecentDocuments = async () => {

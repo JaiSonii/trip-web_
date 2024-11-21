@@ -38,6 +38,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   //   fetchPhone();
   // }, []);
 
+
+
   useEffect(()=>{
     const updateVisit = Cookies.get('updateVisit') as string;
     if(updateVisit == '1'){

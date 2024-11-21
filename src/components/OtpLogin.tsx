@@ -21,6 +21,7 @@ import logo from '@/assets/awajahi logo.png'
 import otpPic from '@/assets/otp-pic.png';
 import Link from "next/link";
 import { loadingIndicator } from "./ui/LoadingIndicator";
+import { isValidPhone } from "@/utils/validate";
 
 function OtpLogin() {
   const router = useRouter();
@@ -65,7 +66,7 @@ function OtpLogin() {
 
         if (result.status === 200) {
           Cookies.set("selectedRole", "carrier");
-          router.replace(`/user/parties`);
+          router.replace(`/user/home`);
         } else {
           setError("Failed to verify OTP. Please check the OTP.");
         }
@@ -84,6 +85,10 @@ function OtpLogin() {
   const requestOtp = async (e?: FormEvent<HTMLFormElement>) => {
     e?.preventDefault();
     setResendCountdown(60);
+    if(!isValidPhone(phoneNumber)){
+      setError("Please enter a valid phone number.");
+      return;
+    }
 
     startTransition(async () => {
       setError("");

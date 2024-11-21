@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+'use client'
 import "@/app/globals.css";
 import dynamic from 'next/dynamic';
 import { Roboto } from 'next/font/google';
 import { Toaster } from "@/components/ui/toaster";
+import { useEffect } from "react";
 
 // Import Roboto font from Google Fonts
 const roboto = Roboto({
@@ -14,16 +15,34 @@ const roboto = Roboto({
 // Dynamically import MainLayout without SSR
 const MainLayout = dynamic(() => import('@/components/layout/MainLayout'), { ssr: false });
 
-export const metadata: Metadata = {
-  title: "Awajahi",
-  description: "Moving India One Mile at a time",
-};
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/service-worker.js')
+        .then((registration) => {
+          console.log('Service Worker registered:', registration.scope);
+        })
+        .catch((err) => console.error('Service Worker registration failed:', err));
+
+      // Request notification permissions for /user/* pages
+      if (Notification.permission === 'default') {
+        Notification.requestPermission().then((permission) => {
+          if (permission === 'granted') {
+            console.log('Notifications are enabled');
+          } else {
+            console.warn('Notifications are disabled');
+          }
+        });
+      }
+    }
+  }, []);
   return (
     <html lang="en">
       <body className={`${roboto.variable}`}>

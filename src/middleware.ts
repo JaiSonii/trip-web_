@@ -27,7 +27,7 @@ export async function middleware(request: NextRequest) {
 
   if (loggedInUserNotAccessPaths) {
     if (token) {
-      return NextResponse.redirect(new URL('/user/parties', request.url))
+      return NextResponse.redirect(new URL('/user/home', request.url))
     }
   } else {
     if (!token) {

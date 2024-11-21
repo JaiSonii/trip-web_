@@ -14,14 +14,7 @@ import { getDominantColor } from '@/utils/imgColor'
 import { formatNumber } from '@/utils/utilArray'
 import logo from '@/assets/awajahi logo.png'
 
-type ConsignerConsigneeType = {
-  gstNumber: string;
-  name: string;
-  address: string;
-  city: string;
-  pincode: string;
-  contactNumber: string;
-};
+
 
 type Props = {
   isOpen: boolean
@@ -116,7 +109,7 @@ const steps = [
   }
 ]
 
-const tabs = ['Consigner', 'Consignee', 'Office', 'Driver']
+
 
 export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
 

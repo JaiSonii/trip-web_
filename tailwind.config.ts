@@ -20,23 +20,23 @@ const config: Config = {
       colors: {
         white: '#ffffff',
         warning: {
-          DEFAULT: '#ffcc00', // Darker orange for warning
-          foreground: '#FFFFFF', // White text for contrast
+          DEFAULT: '#ffcc00',
+          foreground: '#FFFFFF',
         },
         featureUpdate: {
-          DEFAULT: '#4caf50', // Replace with desired base color
-          foreground: '#ffffff', // Replace with contrasting foreground
+          DEFAULT: '#4caf50',
+          foreground: '#ffffff',
         },
         gray: {
           100: '#f5f5f5',
         },
         // Custom Colors
         whiteColor: '#ffffff',
-        primaryColor: '0xffFF6A00',
-        backgroundColor: '0xFFFFFFFa',
-        primaryTextColor: '0xff000000',
+        primaryColor: '#FF6A00',
+        backgroundColor: '#FFFFFFFa',
+        primaryTextColor: '#000000',
         secondaryTextColor: '#5a5a5a',
-        splashColor: 'rgba(255, 255, 255, 0.3)', // 0x4DFFFFFF in rgba
+        splashColor: 'rgba(255, 255, 255, 0.3)',
         cardColor: '#ffffff',
         cardSecondaryColor: '#cecece',
         buttonColor: '#000000',
@@ -45,45 +45,45 @@ const config: Config = {
         primaryOrange: '#ff6a00',
         lightOrange: '#ffa666',
         lightOrangeButtonColor: '#ffcaA4',
-        destructive : '#D95C2B',
-        buttonTextColor : '#6F2718 ',
-        hoverColor : '#FFC49980',
+        destructive: '#D95C2B',
+        buttonTextColor: '#6F2718',
+        hoverColor: '#FFC49980',
 
-        // Existing HSL-based Colors
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        // Replaced HSL-based Colors with example color codes
+        border: "#e2e8f0",
+        input: "#e2e8f0",
+        ring: "#93c5fd",
+        background: "#ffffff",
+        foreground: "#020617",
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))",
+          DEFAULT: "#3b82f6",
+          foreground: "#ffffff",
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))",
+          DEFAULT: "#64748b",
+          foreground: "#ffffff",
         },
         muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))",
+          DEFAULT: "#f1f5f9",
+          foreground: "#64748b",
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))",
+          DEFAULT: "#f59e0b",
+          foreground: "#ffffff",
         },
         popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))",
+          DEFAULT: "#ffffff",
+          foreground: "#020617",
         },
         card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))",
+          DEFAULT: "#ffffff",
+          foreground: "#020617",
         },
       },
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        lg: "0.5rem",
+        md: "0.375rem",
+        sm: "0.25rem",
       },
       keyframes: {
         "accordion-down": {
@@ -99,14 +99,12 @@ const config: Config = {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
       },
-
-      // Add Roboto font to the font family
       fontFamily: {
-        roboto: ['Roboto', 'sans-serif'], // Define the Roboto font family
+        roboto: ['Roboto', 'sans-serif'],
       },
     },
   },
   plugins: [require("tailwindcss-animate")],
-};
+}
 
-export default config;
+export default config

@@ -281,7 +281,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
             </div>
 
             <div className="text-center py-2 border-b border-black">
-            <CompanyHeader formData={formData} />
+              <CompanyHeader formData={formData} />
               <h2 className="text-lg font-normal text-gray-700">FLEET OWNERS & TRANSPORT CONTRACTOR</h2>
               <span className="text-sm text-gray-600 whitespace-nowrap">
                 {formData.address}
@@ -555,18 +555,21 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
 
                 {currentStep === 0 && (
                   <>
-                    {(steps[currentStep].fields as (keyof FormDataType)[]).map((field) => (
-                      <div key={field} className="mb-1">
-                        <label htmlFor={field} className='text-xs text-gray-500'>{placeholders[field]}</label>
-                        <Input
-                          id={field}
-                          name={field}
-                          value={formData[field] as string}
-                          onChange={handleInputChange}
-                          className="mt-[1px]"
-                        />
-                      </div>
-                    ))}
+                    <div className='grid grid-cols-2 gap-2'>
+                      {(steps[currentStep].fields as (keyof FormDataType)[]).map((field) => (
+                        <div key={field} className="mb-1">
+                          <label htmlFor={field} className='text-xs text-gray-500'>{placeholders[field]}</label>
+                          <Input
+                            id={field}
+                            name={field}
+                            value={formData[field] as string}
+                            onChange={handleInputChange}
+                            className="mt-[1px]"
+                          />
+                        </div>
+                      ))}
+                    </div>
+
                   </>
                 )}
 
@@ -584,7 +587,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
                       />
                     </div>
                     <div className="mb-4">
-                      {/* <Label htmlFor="LR">LR</Label> */}
+                      <Label htmlFor="LR">LR</Label>
                       <Input
                         id="LR"
                         name="LR"
@@ -632,7 +635,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
                 {currentStep === 2 && (
                   <>
                     <div className="mb-4">
-                      {/* <Label htmlFor="material">Material</Label> */}
+                      <Label htmlFor="material">Material</Label>
                       <Input
                         id="material"
                         name="material"
@@ -644,7 +647,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
                     </div>
                     <div className="grid grid-cols-2 gap-4 mb-4">
                       <div>
-                        {/* <Label htmlFor="weight">Weight</Label> */}
+                        <Label htmlFor="weight">Weight</Label>
                         <Input
                           id="weight"
                           name="weight"
@@ -656,7 +659,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
                         />
                       </div>
                       <div>
-                        {/* <Label htmlFor="unit">Unit</Label> */}
+                        <Label htmlFor="unit">Unit</Label>
                         <Input
                           id="unit"
                           name="unit"
