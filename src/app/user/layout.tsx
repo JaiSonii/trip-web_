@@ -48,7 +48,7 @@ export default function RootLayout({
       <body className={`${roboto.variable}`}>
         <div className="flex flex-row">
           {/* Sidebar: 3/12 width */}
-          <div className="w-screen">
+          <div className="w-screen text-black">
             <MainLayout>{children}</MainLayout>
             <Toaster />
           </div>

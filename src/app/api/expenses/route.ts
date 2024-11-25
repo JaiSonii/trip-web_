@@ -1,11 +1,12 @@
 import { uploadFileToS3 } from "@/helpers/fileOperation";
 import { verifyToken } from "@/utils/auth";
 import { IExpense } from "@/utils/interface";
-import { connectToDatabase, ExpenseSchema } from "@/utils/schema";
+import { connectToDatabase, ExpenseSchema, RecentActivitiesSchema } from "@/utils/schema";
 import { model, models } from "mongoose";
 import { NextResponse } from "next/server";
 
 const Expense = models.Expense || model('Expense', ExpenseSchema);
+const RecentActivities = models.RecentActivities || model('RecentActivities', RecentActivitiesSchema);
 const monthMap: { [key: string]: number } = {
     January: 0,
     February: 1,
@@ -183,8 +184,26 @@ export async function POST(req: Request) {
             newExpense.url = fileUrl;
         }
 
+        let recentActivity = await RecentActivities.findOne({user_id : user})
+        if (!recentActivity){
+            recentActivity = new RecentActivities({
+                user_id : user,
+                activities : [{
+                    type : 'Add expense',
+                    data : newExpense
+                }]
+            })
+        }else{
+            if(recentActivity.activities.length == 4){
+                recentActivity.activities.pop()
+            }
+            recentActivity.activities.unshift({
+                type : 'Add expense',
+                data : newExpense
+            })
+        }
+        await recentActivity.save()
         await newExpense.save()
-        console.log(newExpense)
         return NextResponse.json({ expense: newExpense, status: 200 })
 
     } catch (error: any) {

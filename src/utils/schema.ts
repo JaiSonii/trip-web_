@@ -450,6 +450,10 @@ export const ShopKhataAccountsSchema = new Schema({
   date : {type : Date, required : true}
 })
 
+export const RecentActivitiesSchema = new Schema({
+  user_id : {type : String, required : true},
+  activities : []
+})
 
 
 const connectString: any = process.env.NEXT_PUBLIC_MONGO_URL

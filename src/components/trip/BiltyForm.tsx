@@ -70,6 +70,7 @@ type FormDataType = {
   invoiceNo: string
   truckNo: string
   logo: string
+  signature: string
 }
 
 const steps = [
@@ -133,7 +134,8 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
     ewayBillNo: '',
     invoiceNo: '',
     truckNo: trip.truck || '',
-    logo: ''
+    logo: '',
+    signature: ''
   })
   const billRef = useRef<HTMLDivElement>(null)
 
@@ -153,7 +155,8 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
         address: user.address,
         contactNumber: user.phone,
         gstNumber: user.gstNumber,
-        logo: user.logoUrl
+        logo: user.logoUrl,
+        signature: user.signatureUrl
       }))
     } catch (error) {
       alert('Failed to fetch User Details')
@@ -418,8 +421,29 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
                       <td className="border p-2 border-black">{item}</td>
                       <td className="border p-2 border-black">Fixed</td>
                       <td className="border p-2 border-black">Fixed</td>
-                      <td className="border p-2 border-black">Fixed</td>
-                      <td className="border p-2 border-black">Fixed</td>
+                      <td className="border p-2 border-black">
+                        <div className='flex flex-col gap-3 text-black text-left text-[10px]'>
+                          <p>Mazdoor</p>
+                          <p>Hire Charges</p>
+                          <p>Sur. Ch.</p>
+                          <p>St. Ch.</p>
+                          <p>Risk Ch.</p>
+                          <p className='mt-2 text-xs'>TOTAL</p>
+                        </div>
+                      </td>
+                      <td className="border border-black">
+                        <div className='flex flex-col justify-between'>
+                        <div className='flex font-semibold gap-4 flex-col items-center py-3 justify-between'>
+                          <p>TO</p>
+                          <p>BE</p>
+                          <p>BILLED</p>
+                        </div>
+                        <div className='border-t border-black h-1'>
+
+                        </div>
+                        </div>
+                        
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -468,10 +492,10 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
                 DO No. :
               </span>
               <span>
-                INV No. :
+                INV No. : <span className='text-red-500'>{formData.invoiceNo}</span>
               </span>
               <span>
-                Date :
+                Date : <span className='text-red-500'>{new Date(formData.date).toLocaleDateString('en-IN')}</span>
               </span>
               <span>
                 Lorry No. : <span className='text-red-500'>{formData.truckNo}</span>
@@ -483,8 +507,8 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
             <span className="text-black whitespace-nowrap">
               Value : <span className="text-red-500">As Per Invoice</span>
             </span>
-            <span className="text-black text-xs whitespace-nowrap">
-              Signature of Transport Operator :
+            <span className="text-black text-xs whitespace-nowrap flex gap-4">
+              Signature of Transport Operator : {formData.signature ? <Image src={formData.signature} width={30} height={30} alt='user signature' /> : null}
             </span>
 
           </div>
@@ -698,7 +722,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
                 {currentStep === 3 && (
                   <>
                     <div className="mb-4">
-                      {/* <Label htmlFor="ewayBillNo">E-Way Bill No.</Label> */}
+                      <label htmlFor="ewayBillNo">E-Way Bill No.</label>
                       <Input
                         id="ewayBillNo"
                         name="ewayBillNo"
@@ -709,7 +733,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
                       />
                     </div>
                     <div className="mb-4">
-                      {/* <Label htmlFor="invoiceNo">Goods Invoice No.</Label> */}
+                      <label htmlFor="invoiceNo">Goods Invoice No.</label>
                       <Input
                         id="invoiceNo"
                         name="invoiceNo"

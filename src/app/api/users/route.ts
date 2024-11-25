@@ -6,22 +6,22 @@ import { NextResponse } from "next/server";
 
 const User = models.User || model('User', userSchema)
 
-export async function GET(req : Request){
-    try {
-        const {user, error} = await verifyToken(req)
-        if(!user || error){
-            return NextResponse.json({error})
-        }
-        await connectToDatabase()
-        const userData = await User.findOne({user_id : user})
-        if(!userData){
-            return NextResponse.json({error : 'User Not Found', status : 400})
-        }
-        return NextResponse.json({status : 200, user : userData})
-    } catch (error) {
-        console.log(error)
-        return NextResponse.json({status : 500, error : error})
+export async function GET(req: Request) {
+  try {
+    const { user, error } = await verifyToken(req)
+    if (!user || error) {
+      return NextResponse.json({ error })
     }
+    await connectToDatabase()
+    const userData = await User.findOne({ user_id: user })
+    if (!userData) {
+      return NextResponse.json({ error: 'User Not Found', status: 400 })
+    }
+    return NextResponse.json({ status: 200, user: userData })
+  } catch (error) {
+    console.log(error)
+    return NextResponse.json({ status: 500, error: error })
+  }
 }
 
 export async function PUT(req: Request) {
@@ -71,7 +71,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: 'User not found', status: 400 });
     }
 
-    return NextResponse.json({ status: 200, user : updatedUser });
+    return NextResponse.json({ status: 200, user: updatedUser });
   } catch (error) {
     console.error('Error in PUT:', error);
     return NextResponse.json({ error: 'Internal Server Error', status: 500 });
