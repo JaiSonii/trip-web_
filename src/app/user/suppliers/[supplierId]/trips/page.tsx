@@ -15,7 +15,6 @@ import { useSupplier } from '@/context/supplierContext'
 const SupplierDetailPage = () => {
 
     const {supplier, setSupplier, loading} = useSupplier()
-    console.log(supplier)
     const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
 
     const sortedTrips = useMemo(() => {

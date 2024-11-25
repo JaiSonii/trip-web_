@@ -1,4 +1,5 @@
 import { uploadFileToS3 } from "@/helpers/fileOperation";
+import { recentActivity } from "@/helpers/recentActivity";
 import { verifyToken } from "@/utils/auth";
 import { connectToDatabase, tripSchema } from "@/utils/schema";
 import { model, models } from "mongoose";
@@ -6,19 +7,19 @@ import { NextResponse } from "next/server";
 
 const Trip = models.Trip || model('Trip', tripSchema);
 
-export async function GET(req : Request,  {params} : {params : {tripId : string}}){
+export async function GET(req: Request, { params }: { params: { tripId: string } }) {
     try {
-        const {user, error} = await verifyToken(req)
-        if(!user || error){
-            return NextResponse.json({error})
+        const { user, error } = await verifyToken(req)
+        if (!user || error) {
+            return NextResponse.json({ error })
         }
-        const {tripId} = params
+        const { tripId } = params
         await connectToDatabase()
-        const trip = await Trip.findOne({user_id : user, trip_id : tripId}).select(['trip_id','documents','route','startDate']).exec();
-        return NextResponse.json({status : 200, documents : trip.documents})
+        const trip = await Trip.findOne({ user_id: user, trip_id: tripId }).select(['trip_id', 'documents', 'route', 'startDate']).exec();
+        return NextResponse.json({ status: 200, documents: trip.documents })
     } catch (error) {
         console.log(error)
-        return NextResponse.json({status : 500, error})
+        return NextResponse.json({ status: 500, error })
     }
 }
 
@@ -63,7 +64,7 @@ export async function PUT(req: Request, { params }: { params: { tripId: string }
         const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3FileName}${contentType === 'application/pdf' ? '.pdf' : ''}`;
 
         // Check if the document type already exists in the documents array
-        const existingDocIndex = trip.documents.findIndex((doc : any) => doc.type === docType);
+        const existingDocIndex = trip.documents.findIndex((doc: any) => doc.type === docType);
 
         if (existingDocIndex !== -1) {
             // Replace the existing document with the new one
@@ -86,10 +87,15 @@ export async function PUT(req: Request, { params }: { params: { tripId: string }
         }
 
         // Save the updated trip document
-        await trip.save();
+        await Promise.all([trip.save(), recentActivity('Added Trip Document', {
+            trip_id: tripId,
+            filename: filename || '',
+            type: docType,
+            url: fileUrl,
+        }, user)]);
 
         // Return success response
-        return NextResponse.json({ documents : trip.documents, message: 'Document uploaded successfully', status: 200 });
+        return NextResponse.json({ documents: trip.documents, message: 'Document uploaded successfully', status: 200 });
 
     } catch (error) {
         // Log the error and return server error response

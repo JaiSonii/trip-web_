@@ -13,6 +13,7 @@ import Image from 'next/image'
 import { getDominantColor } from '@/utils/imgColor'
 import { formatNumber } from '@/utils/utilArray'
 import logo from '@/assets/awajahi logo.png'
+import { useToast } from '../hooks/use-toast'
 
 
 
@@ -74,10 +75,7 @@ interface FormDataType {
   material: string;
   unit: string;
   noOfBags: string;
-  amount: string;
   advance: string;
-  balance: string;
-  commission: string;
   hamali: string;
   extraWeight: string;
   cashAC: string;
@@ -101,7 +99,7 @@ const steps = [
   },
   {
     title: 'Trip Details',
-    fields: ['from', 'to', 'truckNo', 'truckHireCost', 'material', 'weight', 'unit', 'noOfBags', 'amount', 'advance', 'balance', 'commission', 'hamali']
+    fields: ['from', 'to', 'truckNo', 'truckHireCost', 'material', 'weight', 'unit', 'noOfBags','advance', 'hamali']
   },
   {
     title: 'Extra Details',
@@ -134,13 +132,7 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
     material: trip.material || '',
     unit: '',
     noOfBags: '',
-    amount: trip.amount || '',
-    advance: trip.tripAccounts.reduce(
-      (total: number, account: PaymentBook) => account.accountType === 'Advances' ? total + account.amount : total,
-      0 // Initial value for the accumulator
-    ) || '',
-    balance: trip.balance || '',
-    commission: '',
+    advance: '',
     hamali: '',
     extraWeight: '',
     cashAC: '',
@@ -153,15 +145,20 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
     logo: ''
   })
   const billRef = useRef<HTMLDivElement>(null)
+  const {toast} = useToast()
 
   const fetchUser = async () => {
     try {
-      const res = await fetch('/api/users')
-      if (!res.ok) {
-        alert('Failed to fetch details')
+      const [res, paymentsRes] = await Promise.all([fetch('/api/users'),fetch(`/api/suppliers/${trip.supplier}/payments/trips/${trip.trip_id}`)])
+      if (!res.ok || !paymentsRes.ok) {
+        toast({
+          description : 'Failed to fetch Details',
+          variant : 'destructive'
+        })
         return
       }
       const data = await res.json()
+      const paymentsData = await paymentsRes.json()
       const user = data.user
       setUser(user)
       setFormData((prev) => ({
@@ -170,7 +167,12 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
         address: user.address,
         contactNumber: user.phone,
         gstNumber: user.gstNumber,
-        logo: user.logoUrl
+        logo: user.logoUrl,
+        pincode: user.pincode,
+        email: user.email,
+        city: user.city,
+        pan: user.panNumber,
+        advance : paymentsData.totalAmount
       }))
     } catch (error) {
       alert('Failed to fetch User Details')
@@ -203,9 +205,9 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
 
 
   const downloadAllPDFs = async () => {
-      await new Promise((resolve) => setTimeout(resolve, 200)); // Small delay to ensure color is applied
-      generatePDF(billRef, { filename: `FM-${trip.LR}-${formData.truckNo}-${trip.trip_id}` });
-    
+    await new Promise((resolve) => setTimeout(resolve, 200)); // Small delay to ensure color is applied
+    generatePDF(billRef, { filename: `FM-${trip.LR}-${formData.truckNo}-${trip.trip_id}` });
+
     if (!user.companyName || !user.address || !user.gstNumber) {
       try {
         const res = await fetch('/api/users', {
@@ -213,7 +215,11 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
           body: JSON.stringify({
             companyName: user.company || formData.companyName,
             address: user.address || formData.address,
-            gstNumber: user.gstNumber || formData.gstNumber
+            gstNumber: user.gstNumber || formData.gstNumber,
+            pincode: user.pincode || formData.pincode,
+            email: user.email || formData.email,
+            city: user.city || formData.city,
+            pan: user.panNumber || formData.pan
           })
         })
         if (!res.ok) {
@@ -277,7 +283,10 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
 
   function Bilty({ formData, color }: { formData: FormDataType, color: string }) {
     return (
-      <div className=" max-w-2xl container border border-black p-6 font-roboto text-sm">
+      <div className="relative max-w-2xl container border border-black p-6 font-roboto text-sm">
+         <div className=" top-2 right-2 text-right text-xs mt-2">
+          <p>📞 {formData.contactNumber}{formData.email && `, ✉️ ${formData.email}`}</p>
+        </div>
         <div className="text-center">
           <h1 className="text-orange-500 text-base font-bold">CHALLAN/FREIGHT MEMO</h1>
           <h2 className="text-2xl font-bold text-black">{formData.companyName}</h2>
@@ -289,9 +298,7 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
           </p>
         </div>
 
-        <div className="text-right text-xs mt-2">
-          <p>📞 {formData.contactNumber}{formData.email && `, ✉️ ${formData.email}`}</p>
-        </div>
+       
 
         <table className="w-full border-collapse mt-6">
           <tbody>
@@ -328,20 +335,12 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
               <td className="border border-black p-2">{formData.weight}</td>
             </tr>
             <tr>
-              <td className="border border-black p-2">Total Freight</td>
-              <td className="border border-black p-2">{formatNumber(formData.amount)}</td>
-            </tr>
-            <tr>
               <td className="border border-black p-2">Advance</td>
               <td className="border border-black p-2">{formatNumber(formData.advance)}</td>
             </tr>
             <tr>
               <td className="border border-black p-2">Balance</td>
-              <td className="border border-black p-2">{formatNumber(formData.advance)}</td>
-            </tr>
-            <tr>
-              <td className="border border-black p-2">Commission</td>
-              <td className="border border-black p-2">{formatNumber(formData.commission)}</td>
+              <td className="border border-black p-2">{formatNumber(Number(formData.truckHireCost) - Number(formData.advance))}</td>
             </tr>
             <tr>
               <td className="border border-black p-2">Hamali</td>
@@ -368,10 +367,6 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
               <td className="border border-black p-2">{formData.spareParts}</td>
             </tr>
             <tr>
-              <td className="border border-black p-2 font-bold">Net Balance</td>
-              <td className="border border-black p-2 font-bold">{formatNumber(formData.balance)}</td>
-            </tr>
-            <tr>
               <td className="border border-black p-2" colSpan={3}>
                 <strong>LR Rec. date: {new Date(formData.date).toLocaleDateString('en-IN')}</strong>
                 <p className="mt-2"></p>
@@ -386,7 +381,7 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
         </div>
 
         <div className="text-center text-xs mt-4 flex items-center justify-center">
-          <span className='flex space-x-2'>Powered with <Image src={logo} alt='awajahi logo' width={15} height={15} className='mx-1'/> Awajahi</span>
+          <span className='flex space-x-2'>Powered with <Image src={logo} alt='awajahi logo' width={15} height={15} className='mx-1' /> Awajahi</span>
         </div>
       </div>
     )
@@ -490,7 +485,7 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
                           <Input
                             id={field}
                             name={field}
-                            value={formData[field as keyof FormDataType] as string|| ""}
+                            value={formData[field as keyof FormDataType] as string || ""}
                             onChange={handleInputChange}
                             className="mt-1"
                           />

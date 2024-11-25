@@ -1,3 +1,4 @@
+import { recentActivity } from "@/helpers/recentActivity"
 import { verifyToken } from "@/utils/auth"
 import { connectToDatabase, PartyPaymentSchema } from "@/utils/schema"
 import { model, models } from "mongoose"
@@ -15,6 +16,7 @@ export async function PUT(req : Request, {params} : {params : {paymentId : strin
         const {paymentId} = params
         await connectToDatabase()
         const payment = await PartyPayment.findByIdAndUpdate(paymentId, data, {new : true})
+        await recentActivity('Updated Party Payment', payment, user)
         return NextResponse.json({payment, status : 200})
     } catch (error) {
         console.log(error)
@@ -31,6 +33,7 @@ export async function DELETE(req : Request, {params} : {params : {paymentId : st
         const {paymentId} = params
         await connectToDatabase()
         const payment = await PartyPayment.findByIdAndDelete(paymentId)
+        await recentActivity('Deleted Party Payment', payment, user)
         return NextResponse.json({payment, status : 200})
     } catch (error) {
         console.log(error)

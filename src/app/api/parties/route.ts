@@ -6,6 +6,7 @@ import { IParty } from '@/utils/interface';
 import { v4 as uuidv4 } from 'uuid'
 
 import { verifyToken } from '@/utils/auth';
+import { recentActivity } from '@/helpers/recentActivity';
 
 const Party = models.Party || model('Party', partySchema);
 
@@ -173,7 +174,7 @@ export async function POST(req: Request) {
       updatedAt: data.updatedAt || new Date(),
     });
 
-    const savedParty = await newParty.save();
+    const [savedParty,un] = await Promise.all([newParty.save(), recentActivity('Added New Customer', newParty, user)]);
     return NextResponse.json({ message: 'Saved Successfully', data: savedParty }, { status: 200 });
 
   } catch (error: any) {

@@ -1,4 +1,5 @@
 import { uploadFileToS3 } from "@/helpers/fileOperation";
+import { recentActivity } from "@/helpers/recentActivity";
 import { verifyToken } from "@/utils/auth";
 import { connectToDatabase, ExpenseSchema } from "@/utils/schema";
 import { model, models } from "mongoose";
@@ -35,7 +36,7 @@ export async function PUT(req: Request, { params }: { params: { expenseId: strin
       const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3FileName}${contentType === 'application/pdf' ? '.pdf' : ''}`;
       charge.url = fileUrl;
     }
-    await charge.save()
+    await Promise.all([charge.save(), recentActivity('Edited Expense', charge, user)])
     // Return a success response with the new charge
     return NextResponse.json({ status: 200, expense: charge });
 
@@ -60,6 +61,8 @@ export async function DELETE(req: Request, { params }: { params: { expenseId: st
     if (!charge) {
       return NextResponse.json({ status: 404, message: "Charge Not Found" })
     }
+
+    await recentActivity('Deleted Expense', charge, user)
     return NextResponse.json({ message: 'Deletion Success', status: 200, expense: charge })
   } catch (error) {
     console.log(error)

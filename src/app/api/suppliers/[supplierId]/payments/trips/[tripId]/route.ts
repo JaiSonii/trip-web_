@@ -14,7 +14,7 @@ export async function GET(req: Request, { params }: { params: { supplierId: stri
 
         const { supplierId, tripId } = params;
         await connectToDatabase();
-        const supplierAccounts = await SupplierAccount.find({ user_id: user, supplier_id: supplierId, trip_id: tripId }).select('amount').lean();
+        const supplierAccounts = await SupplierAccount.find({ user_id: user, supplier_id: supplierId, trip_id: tripId }).select(['amount']).lean();
 
         const totalAmount = supplierAccounts.reduce((sum, account) => sum + account.amount, 0);
 

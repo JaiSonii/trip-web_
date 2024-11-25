@@ -1,3 +1,4 @@
+import { recentActivity } from "@/helpers/recentActivity";
 import { verifyToken } from "@/utils/auth";
 import { connectToDatabase, supplierAccountSchema } from "@/utils/schema";
 import { model, models } from "mongoose";
@@ -21,6 +22,7 @@ export async function DELETE(req: Request, { params }: { params: { paymentId: st
 
         // Find and delete the SupplierAccount by paymentId
         const account = await SupplierAccount.findByIdAndDelete(paymentId);
+        await recentActivity('Deleted Supplier Payment', account, user)
 
         // Check if the account was found and deleted
         if (!account) {

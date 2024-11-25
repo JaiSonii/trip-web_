@@ -1,3 +1,4 @@
+import { recentActivity } from "@/helpers/recentActivity";
 import { verifyToken } from "@/utils/auth";
 import { connectToDatabase, supplierAccountSchema } from "@/utils/schema";
 import { model, models } from "mongoose";
@@ -26,7 +27,9 @@ export async function POST(req: Request, { params }: { params: { supplierId: str
             const savedPayment = await supplierAccount.save();
             savedPayments.push(savedPayment);
         }
-
+        await recentActivity('Added Supplier Payment', {
+            supplier_id : supplierId
+        }, user);
         return NextResponse.json({ success: true, payments: savedPayments });
     } catch (error: any) {
         console.error('Error saving supplier account:', error);

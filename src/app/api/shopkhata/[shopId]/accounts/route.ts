@@ -1,3 +1,4 @@
+import { recentActivity } from "@/helpers/recentActivity";
 import { verifyToken } from "@/utils/auth";
 import { connectToDatabase, ExpenseSchema, OfficeExpenseSchema, ShopKhataAccountsSchema } from "@/utils/schema";
 import { model, models } from "mongoose";
@@ -21,7 +22,7 @@ export async function POST(req : Request, {params } : {params : {shopId : string
             shop_id : shopId,
            ...data
         })
-        await newkhata.save()
+        await Promise.all([newkhata.save(), recentActivity('Added Shop Payment', newkhata, user)])
         return NextResponse.json({newkhata,status : 200})
     } catch (error) {
         console.log(error)

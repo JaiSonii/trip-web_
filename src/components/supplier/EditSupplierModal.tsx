@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '../ui/button';
 import { ISupplier } from '@/utils/interface';
+import { Loader2 } from 'lucide-react';
 
 interface EditSupplierModalProps {
     supplier: ISupplier;
@@ -12,10 +13,13 @@ interface EditSupplierModalProps {
 const EditSupplierModal = ({ supplier, isOpen, onClose, onSave }: EditSupplierModalProps) => {
     const [name, setName] = useState(supplier.name);
     const [contactNumber, setContactNumber] = useState(supplier.contactNumber);
+    const [saving, setSaving] = useState(false);
 
     const handleSave = () => {
+        setSaving(true);
         const updatedSupplier = { ...supplier, name, contactNumber };
         onSave(updatedSupplier as any);
+        setSaving(false);
     };
 
     if (!isOpen) return null;
@@ -44,7 +48,7 @@ const EditSupplierModal = ({ supplier, isOpen, onClose, onSave }: EditSupplierMo
                 </div>
                 <div className="flex justify-end space-x-2">
                     <Button variant={'outline'} onClick={onClose}>Cancel</Button>
-                    <Button  onClick={handleSave}>Save</Button>
+                    <Button  onClick={handleSave} disabled={saving}>{saving ? <Loader2 className='text-bottomNavBarColor animate-spin' /> : 'Save'}</Button>
                 </div>
             </div>
         </div>

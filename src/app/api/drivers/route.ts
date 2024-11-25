@@ -4,6 +4,7 @@ import { connectToDatabase, driverSchema } from '@/utils/schema';
 import { IDriver } from '@/utils/interface';
 import { verifyToken } from '@/utils/auth';
 import { v4 as uuidv4 } from 'uuid'
+import { recentActivity } from '@/helpers/recentActivity';
 
 
 const Driver = models.Driver || model('Driver', driverSchema);
@@ -128,7 +129,7 @@ export async function POST(req: Request) {
       status: data.status
     });
 
-    const savedDriver = await newDriver.save();
+    const [savedDriver,recent] = await Promise.all([ newDriver.save(),recentActivity('Added New Driver', newDriver, user)]);
     return NextResponse.json({ message: 'Saved Successfully', data: savedDriver, status: 200 });
 
   } catch (error: any) {

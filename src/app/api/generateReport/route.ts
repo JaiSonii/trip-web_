@@ -1,3 +1,4 @@
+import { recentActivity } from "@/helpers/recentActivity";
 import { verifyToken } from "@/utils/auth";
 import { connectToDatabase, ExpenseSchema, OfficeExpenseSchema, tripChargesSchema, tripSchema, truckSchema } from "@/utils/schema";
 import { monthMap } from "@/utils/utilArray";
@@ -79,7 +80,7 @@ export async function GET(req: Request) {
         const marketTruckTrips = tripsData.find(d => d._id === 'Market') || { trips: [], tripCount: 0, totalFreight: 0, totalCharges: 0, totalDeductions: 0 };
         const ownTruckTrips = tripsData.find(d => d._id === 'Self') || { trips: [], tripCount: 0, totalFreight: 0, totalCharges: 0, totalDeductions: 0 };
 
-        console.log(tripsData);
+
 
         const [expenses, officeExpenses] = await Promise.all([
             // Fetch all expenses within the date range
@@ -299,7 +300,10 @@ export async function GET(req: Request) {
 </body>
 </html>
 `;
-
+        await recentActivity('Generated Report', {
+            month: month,
+            year: year
+        }, user)
         return new Response(htmlReport, {
             headers: { 'Content-Type': 'text/html' },
         });

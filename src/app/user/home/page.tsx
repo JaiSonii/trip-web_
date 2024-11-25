@@ -12,6 +12,7 @@ import Loading from '../loading';
 import { useExpenseCtx } from '@/context/context';
 import { useCallback } from 'react';
 import { useAnimatedNumber } from '@/components/hooks/useAnimatedNumber';
+import { RxActivityLog } from "react-icons/rx";
 
 
 interface ExpenseData {
@@ -243,18 +244,18 @@ const Page = () => {
               Recent Activities
             </h3>
             <div className='border-t-2 border-t-gray-300 pt-4'>
-              {data?.recentActivities?.length > 0 ? (
-                data.recentActivities.map((activity: any, index: number) => (
+              {data?.recentActivities.activities?.length > 0 ? (
+                data.recentActivities.activities.map((activity: any, index: number) => (
                   <div key={index} className='flex items-center justify-between mb-4 last:mb-0'>
                     <div className='flex items-center gap-2'>
                       {/* You can add an icon here if needed */}
-                      <p className="font-medium">{activity.title}</p>
+                      <div className="font-medium flex items-center gap-2"><RxActivityLog size={40} className='text-white bg-blue-500 rounded-lg p-2 border font-semibold'/> <div className='flex flex-col gap-1'>{activity.type} <p className='text-xs text-gray-400'>{activity.date && new Date(activity.date).toLocaleDateString('en-IN')}</p></div></div>
                     </div>
-                    <p className='text-sm text-gray-500'>{activity.date}</p>
+                    {/* <p className='text-sm text-gray-500'>{activity.date}</p> */}
                   </div>
                 ))
               ) : (
-                <p className='text-center text-sm text-gray-500'>No Recent Activities</p>
+                <p className='text-center text-sm text-gray-500'> No Recent Activities</p>
               )}
             </div>
           </div>

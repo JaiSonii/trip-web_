@@ -4,6 +4,7 @@ import { connectToDatabase, truckSchema } from '@/utils/schema';
 import { verifyToken } from '@/utils/auth';
 import { v4 as uuidv4 } from 'uuid'
 import { validateTruckNo } from '@/utils/validate';
+import { recentActivity } from '@/helpers/recentActivity';
 
 
 const Truck = models.Truck || model('Truck', truckSchema);
@@ -193,7 +194,8 @@ export async function POST(req: Request) {
     });
 
     // Save to the database
-    const truck = await newTruck.save();
+    const [truck, un] = await Promise.all([newTruck.save(), recentActivity('Added New Lorry',newTruck,user)]);
+    
 
     return NextResponse.json({ truck, status: 200 });
   } catch (error: any) {

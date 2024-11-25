@@ -1,10 +1,11 @@
 import { model, models } from 'mongoose'
-import { tripSchema, ExpenseSchema, connectToDatabase } from '@/utils/schema';
+import { tripSchema, ExpenseSchema, connectToDatabase, RecentActivitiesSchema } from '@/utils/schema';
 import { verifyToken } from '@/utils/auth';
 import { NextResponse } from 'next/server';
 
 const Trip = models.Trip || model('Trip', tripSchema)
 const Expense = models.Expense || model('Expense', ExpenseSchema)
+const RecentActivities = models.RecentActivities || model('RecentActivities',RecentActivitiesSchema)
 
 async function getTripsByMonth(userId: string) {
     // Determine the current financial year
@@ -334,8 +335,8 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: 'unauthorized', status: 401 })
         }
         await connectToDatabase()
-        const [expenses, trips, accountsReceivable, profit] = await Promise.all([categorizeExpenses(user), getTripsByMonth(user),getAccounts(user), calculateMonthlyProfit(user)])
-        return NextResponse.json({ expenses, trips, accountsReceivable, profit,status: 200 })
+        const [expenses, trips, accountsReceivable, profit, recentActivities] = await Promise.all([categorizeExpenses(user), getTripsByMonth(user),getAccounts(user), calculateMonthlyProfit(user), RecentActivities.findOne({user_id : user}).select('activities').lean() ])
+        return NextResponse.json({ expenses, trips, accountsReceivable, profit,recentActivities, status: 200 })
     } catch (error) {
         console.log(error)
         return NextResponse.json({ error, status: 500 })

@@ -3,6 +3,7 @@ import { connectToDatabase, ShopKhataSchema } from '@/utils/schema';
 import { verifyToken } from '@/utils/auth';
 import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid'
+import { recentActivity } from '@/helpers/recentActivity';
 
 const ShopKhata = models.ShopKhata || model('ShopKhata', ShopKhataSchema)
 
@@ -93,7 +94,7 @@ export async function POST(req: Request) {
             user_id: user,
             ...data
         })
-        await newShop.save()
+        await Promise.all([newShop.save(), recentActivity('Added New Shop', newShop, user)])
         return NextResponse.json({ newShop, status: 200 })
     } catch (error) {
         console.log(error)

@@ -1,3 +1,4 @@
+import { recentActivity } from "@/helpers/recentActivity";
 import { verifyToken } from "@/utils/auth";
 import { connectToDatabase } from "@/utils/schema";
 import { partySchema } from "@/utils/schema";
@@ -186,6 +187,7 @@ export async function PUT(req: Request, { params }: { params: { partyId: string 
     }
 
     const party = await Party.findOneAndUpdate({ party_id: partyId, user_id: user }, data, { new: true }).lean().exec();
+    await recentActivity('Updated Customer Details', party, user)
 
     if (!party) {
       return NextResponse.json({ message: 'Party not found' }, { status: 404 });

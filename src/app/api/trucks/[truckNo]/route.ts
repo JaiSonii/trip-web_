@@ -3,6 +3,7 @@ import { connectToDatabase, ExpenseSchema, tripSchema, truckSchema } from '@/uti
 import { TruckModel } from '@/utils/interface';
 import mongoose, { model, Model, models } from 'mongoose';
 import { verifyToken } from '@/utils/auth';
+import { recentActivity } from '@/helpers/recentActivity';
 
 const Truck = mongoose.models.Truck || mongoose.model<TruckModel>('Truck', truckSchema);
 const Trip = models.Trip || model('Trip', tripSchema)
@@ -54,16 +55,16 @@ export async function PUT(req: Request, { params }: { params: { truckNo: string 
       return NextResponse.json({ message: 'No Truck Found' }, { status: 404 });
     }
 
-    const trips = await Trip.updateMany({ user_id: user, truck: truckNo }, { $set : {truck : data.truckNo}});
+    const trips = await Trip.updateMany({ user_id: user, truck: truckNo }, { $set: { truck: data.truckNo } });
 
 
     // Update the truck number in the Expense collection
-    const updatedExpenses = await Expense.updateMany(
+    const [updatedExpenses, un] = await Promise.all([Expense.updateMany(
       { user_id: user, truck: truckNo }, // Query to find matching documents with the old truck number
       { $set: { truck: data.truckNo } }  // Update operation to set the new truck number
-    );
+    ), recentActivity('Updated Lorry Details', truck, user)]);
 
-    return NextResponse.json({ truck , status: 200 });
+    return NextResponse.json({ truck, status: 200 });
   } catch (err: any) {
     return NextResponse.json({ message: err.message }, { status: 500 });
   }

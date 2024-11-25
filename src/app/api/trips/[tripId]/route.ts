@@ -1,6 +1,7 @@
 
 import { fetchBalanceBack } from "@/helpers/fetchTripBalance";
 import { uploadFileToS3 } from "@/helpers/fileOperation";
+import { recentActivity } from "@/helpers/recentActivity";
 import { verifyToken } from "@/utils/auth";
 import { ITrip, PaymentBook } from "@/utils/interface";
 import { connectToDatabase, driverSchema, ExpenseSchema, partySchema, supplierAccountSchema, tripChargesSchema, truckSchema } from "@/utils/schema";
@@ -331,6 +332,7 @@ export async function PUT(req: Request, { params }: { params: { tripId: string }
       await Truck.findOneAndUpdate({ truckNo: updatedTrip.truck }, { status: 'On Trip' });
     }
 
+    await recentActivity('Updated Trip Details', updatedTrip,user)
     return NextResponse.json({ trip: updatedTrip, status: 200 });
   } catch (err: any) {
     console.error(err);

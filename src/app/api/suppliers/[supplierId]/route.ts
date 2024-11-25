@@ -4,6 +4,7 @@ import { models, model } from 'mongoose';
 import { supplierSchema } from "@/utils/schema";
 import { NextResponse } from "next/server";
 import { verifyToken } from "@/utils/auth";
+import { recentActivity } from "@/helpers/recentActivity";
 
 // Retrieve or define Mongoose model for Supplier
 const Supplier = models.Supplier || model('Supplier', supplierSchema);
@@ -320,6 +321,7 @@ export async function PUT(req: Request, { params }: { params: { supplierId: stri
       return NextResponse.json({ message: 'Invalid phone number' }, { status: 400 });
     }
     const supplier = await Supplier.findOneAndUpdate({ user_id: user, supplier_id: supplierId }, data).lean();
+    await recentActivity('Updated Supplier Details', supplier, user)
 
     // Handle case where supplier is not found
     if (!supplier) {

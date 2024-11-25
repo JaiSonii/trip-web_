@@ -7,6 +7,7 @@ const Driver = models.Driver || model('Driver', driverSchema)
 import { NextResponse } from 'next/server';
 import { IDriver } from '@/utils/interface';
 import { verifyToken } from "@/utils/auth";
+import { recentActivity } from "@/helpers/recentActivity";
 
 
 export async function GET(req: Request, { params }: { params: { driverId: string } }) {
@@ -217,7 +218,7 @@ export async function PUT(req: Request, { params }: { params: { driverId: string
       got: data.got
     })
 
-    driver.save()
+    await Promise.all([driver.save(),recentActivity('Added Driver Payments', driver, user)])
     return NextResponse.json({ accounts: driver.accounts , status: 200 })
   } catch (err) {
     console.log(err)

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '../ui/button';
 import TripAllocationModal from './TripAllocationModal';
 import { ISupplierAccount, ITrip } from '@/utils/interface';
+import { Loader2 } from 'lucide-react';
 
 interface AddPaymentModalProps {
     isOpen: boolean;
@@ -21,6 +22,7 @@ const AddPaymentModal = ({ isOpen, onClose, onSave, supplierId }: AddPaymentModa
     const [totalTruckHireCost, setTotalTruckHireCost] = useState<number>(0);
     const [truckHireCosts, setTruckHireCosts] = useState<Record<string, number>>({});
     const [isTripAllocationModalOpen, setIsTripAllocationModalOpen] = useState(false);
+    const [saving, setSaving] = useState(false);
 
     useEffect(() => {
         const fetchTrips = async () => {
@@ -54,6 +56,7 @@ const AddPaymentModal = ({ isOpen, onClose, onSave, supplierId }: AddPaymentModa
 
     const handleSave = () => {
         // If tripAllocations is empty, create a single payment entry without trip_id
+        setSaving(true)
         const payments = Object.entries(tripAllocations).length > 0
             ? Object.entries(tripAllocations).map(([tripId, allocatedAmount]) => ({
                 supplier_id: supplierId, // Assign the appropriate supplier_id
@@ -75,6 +78,7 @@ const AddPaymentModal = ({ isOpen, onClose, onSave, supplierId }: AddPaymentModa
 
         // Call onSave with the constructed payments array
         onSave(payments as any);
+        setSaving(false)
     };
 
 
@@ -166,7 +170,7 @@ const AddPaymentModal = ({ isOpen, onClose, onSave, supplierId }: AddPaymentModa
                     </div>
                     <div className="flex justify-end space-x-2 mt-4">
                         <Button variant="outline" onClick={onClose}>Cancel</Button>
-                        <Button onClick={handleSave}>Save</Button>
+                        <Button onClick={handleSave} disabled={saving}>{saving ? <Loader2 className='text-bottomNavBarColor animate-spin' /> : 'Save'}</Button>
                     </div>
                 </div>
             </div>

@@ -156,7 +156,12 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
         contactNumber: user.phone,
         gstNumber: user.gstNumber,
         logo: user.logoUrl,
-        signature: user.signatureUrl
+        signature: user.signatureUrl,
+        pincode : user.pincode,
+        pan : user.panNumber,
+        city : user.city,
+        email : user.email
+
       }))
     } catch (error) {
       alert('Failed to fetch User Details')
@@ -201,7 +206,11 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
           body: JSON.stringify({
             companyName: user.company || formData.companyName,
             address: user.address || formData.address,
-            gstNumber: user.gstNumber || formData.gstNumber
+            gstNumber: user.gstNumber || formData.gstNumber,
+            pincode : user.pincode || formData.pincode,
+            panNumber : user.panNumber || formData.pan,
+            city : user.city || formData.city,
+            email : user.email || formData.email,
           })
         })
         if (!res.ok) {
@@ -508,7 +517,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
               Value : <span className="text-red-500">As Per Invoice</span>
             </span>
             <span className="text-black text-xs whitespace-nowrap flex gap-4">
-              Signature of Transport Operator : {formData.signature ? <Image src={formData.signature} width={30} height={30} alt='user signature' /> : null}
+              Signature of Transport Operator : {formData.signature ? <Image src={formData.signature} width={40} height={40} alt='user signature' /> : null}
             </span>
 
           </div>

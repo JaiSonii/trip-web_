@@ -1,3 +1,4 @@
+import { recentActivity } from "@/helpers/recentActivity";
 import { verifyToken } from "@/utils/auth";
 import { connectToDatabase, PartyPaymentSchema } from "@/utils/schema";
 import { model, models } from "mongoose";
@@ -19,7 +20,7 @@ export async function POST(req : Request, {params} : {params : {partyId : string
             party_id : partyId,
             ...data
         })
-        await payment.save()
+        await Promise.all([payment.save(), recentActivity('Added Party Payment', payment, user)])
         return NextResponse.json({payment, status : 200})
     } catch (error) {
         console.log(error)

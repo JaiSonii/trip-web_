@@ -4,6 +4,7 @@ import { connectToDatabase, supplierSchema } from '@/utils/schema';
 import { ISupplier } from '@/utils/interface';
 import { v4 as uuidv4 } from 'uuid';
 import { verifyToken } from '@/utils/auth';
+import { recentActivity } from '@/helpers/recentActivity';
 
 const Supplier = models.Supplier || model('Supplier', supplierSchema);
 
@@ -127,7 +128,7 @@ export async function POST(req: Request) {
       balance: 0,
     });
 
-    const savedSupplier = await newSupplier.save();
+    await Promise.all([newSupplier.save(), recentActivity('Added New Supplier', newSupplier, user)]);
     return NextResponse.json({ message: 'Saved Successfully', data: newSupplier }, { status: 200 });
 
   } catch (error: any) {

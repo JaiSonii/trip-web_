@@ -1,3 +1,4 @@
+import { recentActivity } from "@/helpers/recentActivity";
 import { verifyToken } from "@/utils/auth";
 import { connectToDatabase, tripChargesSchema } from "@/utils/schema";
 import { model, models } from "mongoose";
@@ -15,6 +16,7 @@ export async function DELETE(req: Request, { params }: { params: { chargeId: str
         return NextResponse.json({ error });
       }
       const expense = await TripCharges.findByIdAndDelete(chargeId);
+      await recentActivity('Deleted Trip Charge', expense, user)
       if (!expense) {
         return NextResponse.json({ message: 'Expense not found' }, { status: 404 });
       }

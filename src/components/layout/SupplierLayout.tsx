@@ -11,6 +11,7 @@ import { useSupplier } from '@/context/supplierContext';
 import Loading from '@/app/user/suppliers/loading';
 import { formatNumber } from '@/utils/utilArray';
 import { Frown } from 'lucide-react';
+import { useToast } from '../hooks/use-toast';
 
 interface TruckLayoutProps {
     children: React.ReactNode;
@@ -42,6 +43,8 @@ const SupplierLayout = ({ children }: TruckLayoutProps) => {
     const { supplierId } = useParams()
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isAddPaymentModalOpen, setIsAddPaymentModalOpen] = useState(false);
+    
+    const {toast} = useToast()
 
     const tabs = [
         { logo: <FaTruckMoving />, name: 'Trip Book', path: `/user/suppliers/${supplierId}/trips` },
@@ -115,7 +118,8 @@ const SupplierLayout = ({ children }: TruckLayoutProps) => {
                 ...updatedSupplier
             }));
             setIsEditModalOpen(false);
-            alert('Supplier updated successfully');
+            toast({
+                description : 'Supplier updated successfully'});
         } catch (error) {
             console.error('Failed to update supplier:', error);
         }
@@ -153,7 +157,10 @@ const SupplierLayout = ({ children }: TruckLayoutProps) => {
                 supplierTripAccounts: [...saved, ...prev.supplierTripAccounts], // Concatenate the new payments with existing data
                 balance: prev.balance + savedBal
             }));
-            alert('Payment added successfully');
+            toast({
+                description : 'Payment Added Successfully',
+                variant : 'default'
+            })
 
             // You might want to fetch the updated supplier details here if needed
         } catch (error: any) {

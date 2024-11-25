@@ -283,6 +283,10 @@ export const userSchema = new Schema({
   gstNumber : String,
   address : String,
   company : String,
+  city : String,
+  pincode : String,
+  panNumber : String,
+  email : String,
   bankDetails: {
     msmeNo: String,
     accountNo: String,

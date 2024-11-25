@@ -420,7 +420,11 @@ function renderCellContent(columnValue: string, trip: ITrip) {
               {(() => {
                 const eWayBillDoc = trip.documents?.find(doc => doc.type === 'E-Way Bill');
                 return eWayBillDoc?.validityDate
-                  ? new Date(eWayBillDoc.validityDate as any).toLocaleDateString('en-IN')
+                  ? new Date(eWayBillDoc.validityDate as any).toLocaleDateString('en-IN',{
+                    day : '2-digit',
+                    month : '2-digit',
+                    year : '2-digit'
+                  })
                   : 'N/A';
               })()}
             </span>

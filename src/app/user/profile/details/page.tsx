@@ -1,15 +1,16 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Upload } from 'lucide-react'
+import { Loader2, Upload, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef, useCallback } from 'react'
 import Image from 'next/image'
-
+import { removeBackgroundFromImage } from '@/helpers/removebg'
+import Loading from '@/app/user/loading'
+import logoImg from '@/assets/awajahi logo.png'
 
 const DetailsPage = () => {
   const [user, setUser] = useState<any>()
-
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -17,14 +18,24 @@ const DetailsPage = () => {
   const [logo, setLogo] = useState<File | null>(null)
   const [stamp, setStamp] = useState<File | null>(null)
   const [signature, setSignature] = useState<File | null>(null)
+  const [innerLoading, setInnerLoading] = useState(false)
   const [previews, setPreviews] = useState({
     logo: '',
     stamp: '',
     signature: ''
   })
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [showBgRemovalPrompt, setShowBgRemovalPrompt] = useState(false)
+  const [currentFile, setCurrentFile] = useState<{
+    file: File,
+    setter: React.Dispatch<React.SetStateAction<File | null>>,
+    previewKey: 'logo' | 'stamp' | 'signature'
+  } | null>(null)
+
 
 
   const fetchUser = async () => {
+    setLoading(true)
     try {
       const response = await fetch('/api/users')
       if (!response.ok) {
@@ -33,13 +44,14 @@ const DetailsPage = () => {
       const data = await response.json()
       setUser(data.user)
       setPreviews({
-        logo : data.user.logoUrl,
-        stamp : data.user.stampUrl,
-        signature : data.user.signatureUrl
+        logo: data.user.logoUrl,
+        stamp: data.user.stampUrl,
+        signature: data.user.signatureUrl
       })
     } catch (error) {
       console.error('Error:', error)
     }
+    setLoading(false);
   }
 
   useEffect(() => {
@@ -48,25 +60,26 @@ const DetailsPage = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (user) {
-      if(e.target.name.startsWith('bankDetails')){
-        setUser({...user, bankDetails: {...user.bankDetails, [e.target.name.replace('bankDetails.', '')]: e.target.value } })
+      if (e.target.name.startsWith('bankDetails')) {
+        setUser({ ...user, bankDetails: { ...user.bankDetails, [e.target.name.replace('bankDetails.', '')]: e.target.value } })
         return
       }
       setUser({ ...user, [e.target.name]: e.target.value });
     }
   };
 
-  const handleCancel = ()=>{
+  const handleCancel = () => {
     setIsEditing(false)
     setPreviews({
-      logo : user.logoUrl || '',
-      stamp : user.stampUrl || '',
-      signature : user.signatureUrl || ''
+      logo: user.logoUrl || '',
+      stamp: user.stampUrl || '',
+      signature: user.signatureUrl || ''
     })
   }
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    setInnerLoading(true)
     if (user) {
       try {
         const formdata = new FormData();
@@ -75,7 +88,11 @@ const DetailsPage = () => {
           company: user.company,
           gstNumber: user.gstNumber,
           address: user.address,
+          pincode: user.pincode,
+          city: user.city,
+          panNumber: user.panNumber,
           bankDetails: user.bankDetails,
+          email : user.email
         }))
         if (logo) formdata.append('logo', logo)
         if (stamp) formdata.append('stamp', stamp)
@@ -95,20 +112,66 @@ const DetailsPage = () => {
         alert(err.message)
       }
     }
+    setInnerLoading(false)
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<File | null>>, previewKey: 'logo' | 'stamp' | 'signature') => {
-    e.preventDefault()
+  const handleFileChange = useCallback((
+    e: React.ChangeEvent<HTMLInputElement>,
+    setter: React.Dispatch<React.SetStateAction<File | null>>,
+    previewKey: 'logo' | 'stamp' | 'signature'
+  ) => {
+    e.preventDefault();
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]
-      setter(file)
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        setPreviews(prev => ({ ...prev, [previewKey]: reader.result as string }))
-      }
-      reader.readAsDataURL(file)
+      const file = e.target.files[0];
+      setCurrentFile({ file, setter, previewKey });
+      setShowBgRemovalPrompt(true);
     }
-  }
+  }, []);
+
+  const handleBgRemovalChoice = useCallback((removeBackground: boolean) => {
+    setShowBgRemovalPrompt(false);
+    if (currentFile && canvasRef.current) {
+      const { file, setter, previewKey } = currentFile;
+      const reader = new FileReader();
+      setInnerLoading(true);
+
+      reader.onloadend = () => {
+        const img = document.createElement('img');
+        img.onload = () => {
+          let processedImageDataUrl: string;
+          if (removeBackground) {
+            processedImageDataUrl = removeBackgroundFromImage(img, canvasRef.current!) as string;
+          } else {
+            const canvas = canvasRef.current!;
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d')!;
+            ctx.drawImage(img, 0, 0);
+            processedImageDataUrl = canvas.toDataURL('image/png');
+          }
+
+          setPreviews((prev) => ({ ...prev, [previewKey]: processedImageDataUrl }));
+
+          fetch(processedImageDataUrl)
+            .then((res) => res.blob())
+            .then((blob) => {
+              const processedFile = new File(
+                [blob],
+                `${previewKey}${removeBackground ? '-removed-bg' : ''}.png`,
+                { type: 'image/png' }
+              );
+              setter(processedFile);
+            })
+            .catch((error) => console.error('Error converting processed image to file:', error));
+        };
+        img.src = reader.result as string;
+        setInnerLoading(false);
+      };
+      reader.readAsDataURL(file);
+    }
+    setCurrentFile(null);
+  }, [currentFile]);
+
 
   const renderPreview = (type: 'logo' | 'stamp' | 'signature') => {
     const preview = previews[type]
@@ -120,6 +183,7 @@ const DetailsPage = () => {
             alt={`${type} preview`}
             width={130}
             height={130}
+            layout="fixed"
           />
         ) : (
           <div className="flex flex-col items-center justify-center text-gray-400">
@@ -129,6 +193,10 @@ const DetailsPage = () => {
         )}
       </div>
     )
+  }
+
+  if (loading) {
+    return <Loading />
   }
 
   return (
@@ -171,11 +239,55 @@ const DetailsPage = () => {
               />
             </div>
             <div>
+              <label className="block font-medium text-gray-700">PAN Number:</label>
+              <input
+                type="text"
+                name="panNumber"
+                value={user.panNumber || ''}
+                onChange={handleInputChange}
+                className="border border-gray-300 rounded-md p-2"
+                disabled={!isEditing}
+              />
+            </div>
+            <div>
+              <label className="block font-medium text-gray-700">Email:</label>
+              <input
+                type="email"
+                name="email"
+                value={user.email || ''}
+                onChange={handleInputChange}
+                className="border border-gray-300 rounded-md p-2"
+                disabled={!isEditing}
+              />
+            </div>
+            <div>
               <label className="block font-medium text-gray-700">Address:</label>
               <input
                 type="text"
                 name="address"
                 value={user.address || ''}
+                onChange={handleInputChange}
+                className="border border-gray-300 rounded-md p-2"
+                disabled={!isEditing}
+              />
+            </div>
+            <div>
+              <label className="block font-medium text-gray-700">City:</label>
+              <input
+                type="text"
+                name="city"
+                value={user.city || ''}
+                onChange={handleInputChange}
+                className="border border-gray-300 rounded-md p-2"
+                disabled={!isEditing}
+              />
+            </div>
+            <div>
+              <label className="block font-medium text-gray-700">Pincode:</label>
+              <input
+                type="text"
+                name="pincode"
+                value={user.pincode || ''}
                 onChange={handleInputChange}
                 className="border border-gray-300 rounded-md p-2"
                 disabled={!isEditing}
@@ -280,14 +392,14 @@ const DetailsPage = () => {
               />
               {renderPreview('signature')}
             </div>
-
           </div>
 
+          {isEditing && <footer className='text-red-500 text-xs mt-2'>If the Background is not removed properly please upload brighter image*</footer>}
           <div className="flex justify-between col-span-2">
             <div className="mt-6 flex space-x-4">
               {isEditing ? (
                 <>
-                  <Button type="submit" variant="ghost">Save</Button>
+                  <Button type="submit" variant="ghost" disabled={innerLoading}>{innerLoading ? <Loader2 className='text-bottomNavBarColor animate-spin' /> : 'Save'}</Button>
                   <Button type="button" variant="outline" onClick={handleCancel}>Cancel</Button>
                 </>
               ) : (
@@ -298,8 +410,43 @@ const DetailsPage = () => {
           </div>
         </form>
       )}
+      <canvas ref={canvasRef} style={{ display: 'none' }} />
+      {showBgRemovalPrompt && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4">
+            <div className="flex justify-between items-center mb-6">
+              <div className='flex items-center gap-2'>
+                <Image src={logoImg} alt='logo' width={30} height={30} priority />
+                <h3 className="text-2xl font-semibold text-gray-800">Background Removal</h3>
+              </div>
+
+              <button
+                onClick={() => setShowBgRemovalPrompt(false)}
+                className="text-gray-500 hover:text-gray-700 transition-colors"
+              >
+                <X size={24} />
+              </button>
+            </div>
+            <p className="text-gray-600 mb-6">Would you like Awajahi to remove the background from this image?</p>
+            <div className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4">
+              <Button
+                onClick={() => handleBgRemovalChoice(true)}
+              >
+                Yes, Remove Background
+              </Button>
+              <Button
+                onClick={() => handleBgRemovalChoice(false)}
+                className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-6 rounded-lg "
+              >
+                No, Keep Original
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
 
 export default DetailsPage
+

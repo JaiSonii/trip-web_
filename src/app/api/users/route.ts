@@ -41,7 +41,7 @@ export async function PUT(req: Request) {
       if (!file) return '';
 
       const fileBuffer = Buffer.from(await file.arrayBuffer());
-      const fileName = `${folder}/${user}}`;
+      const fileName = `${folder}/${user}`;
       const contentType = file.type;
 
       // Upload file to S3
@@ -57,11 +57,10 @@ export async function PUT(req: Request) {
     const logoUrl = await uploadIfPresent(logoFile, 'logos');
     const stampUrl = await uploadIfPresent(stampFile, 'stamps');
     const signatureUrl = await uploadIfPresent(signatureFile, 'signatures');
+    
 
     // Update data with S3 URLs
-    if (logoUrl) data.logoUrl = logoUrl;
-    if (stampUrl) data.stampUrl = stampUrl;
-    if (signatureUrl) data.signatureUrl = signatureUrl;
+    
 
     // Connect to database and update user
     await connectToDatabase();
@@ -70,6 +69,13 @@ export async function PUT(req: Request) {
     if (!updatedUser) {
       return NextResponse.json({ error: 'User not found', status: 400 });
     }
+
+    if (logoUrl) updatedUser.logoUrl = logoUrl;
+    if (stampUrl) updatedUser.stampUrl = stampUrl;
+    if (signatureUrl) updatedUser.signatureUrl = signatureUrl;
+
+    await updatedUser.save()
+    console.log(updatedUser)
 
     return NextResponse.json({ status: 200, user: updatedUser });
   } catch (error) {

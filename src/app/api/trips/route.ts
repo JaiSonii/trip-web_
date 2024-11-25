@@ -7,6 +7,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { partySchema } from '@/utils/schema';
 import { verifyToken } from '@/utils/auth';
 import { uploadFileToS3 } from '@/helpers/fileOperation';
+import { recentActivity } from '@/helpers/recentActivity';
 
 const Trip = models.Trip || model('Trip', tripSchema);
 const Party = models.Party || model('Party', partySchema)
@@ -197,7 +198,7 @@ export async function POST(this: any, req: Request) {
     }
 
     // Save the new trip document
-    const savedTrip = await newTrip.save();
+    const [savedTrip,un] = await Promise.all([newTrip.save(),recentActivity('Created New Trip',newTrip, user)]);
 
     // Update related records
     await Driver.findOneAndUpdate({ user_id: user, driver_id: formData.get('driver') }, { status: 'On Trip' });
