@@ -463,6 +463,14 @@ export const RecentActivitiesSchema = new Schema({
   activities : []
 })
 
+export const otherDocumentsSchema = new Schema({
+  user_id : {type : String, required : true},
+  filename : String,
+  url : String,
+  uploadedDate : String,
+  validityDate : String
+})
+
 
 const connectString: any = process.env.NEXT_PUBLIC_MONGO_URL
 

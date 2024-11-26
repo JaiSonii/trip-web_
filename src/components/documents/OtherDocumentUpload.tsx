@@ -9,6 +9,7 @@ import { useToast } from '../hooks/use-toast';
 interface DocumentForm {
     filename: string;
     file: File | null;
+    validityDate: string ;  // ISO string for the date input
 }
 
 type Props = {
@@ -17,10 +18,11 @@ type Props = {
     setUser : any
 };
 
-const CompanyDocumentUpload: React.FC<Props> = ({ open, setOpen, setUser }) => {
+const OtherDocumentUpload: React.FC<Props> = ({ open, setOpen, setUser }) => {
     const [formData, setFormData] = useState<DocumentForm>({
         filename: '',
         file: null,
+        validityDate : ''
     });
 
     const [loading, setLoading] = useState(false);
@@ -92,11 +94,14 @@ const CompanyDocumentUpload: React.FC<Props> = ({ open, setOpen, setUser }) => {
 
         const data = new FormData();
         data.append('file', formData.file);
-        data.append('filename', formData.filename);
+        data.append('data', JSON.stringify({
+            filename: formData.filename,
+            validityDate: formData.validityDate,
+        }));
 
         try {
-            const response = await fetch(`/api/users`, {
-                method: 'PATCH',
+            const response = await fetch(`/api/documents`, {
+                method: 'POST',
                 body: data,
             });
 
@@ -108,10 +113,16 @@ const CompanyDocumentUpload: React.FC<Props> = ({ open, setOpen, setUser }) => {
                 setFormData({
                     filename: '',
                     file: null,
+                    validityDate : ''
                 });
                 setOpen(false);
                 const data = await response.json()
-                setUser(data.user)
+                setUser((prev : any[])=>[
+                    {
+                        ...data.document,
+                    },
+                    ...prev
+                ])
             } else {
                 const errorData = await response.json();
                 setError(errorData.message || 'Something went wrong.');
@@ -183,6 +194,18 @@ const CompanyDocumentUpload: React.FC<Props> = ({ open, setOpen, setUser }) => {
                     />
                 </div>
 
+                <div className="mb-4">
+                    <label className="block text-gray-700">Validity(optional)</label>
+                    <input
+                        type="date"
+                        name="validityDate"
+                        value={formData.validityDate ? new Date(formData.validityDate).toISOString() : ''}
+                        onChange={handleChange}
+                        className="w-full mt-1 p-2 border rounded"
+                        placeholder=""
+                    />
+                </div>
+
 
 
                 {/* Submit button */}
@@ -199,4 +222,4 @@ const CompanyDocumentUpload: React.FC<Props> = ({ open, setOpen, setUser }) => {
     );
 };
 
-export default CompanyDocumentUpload;
+export default OtherDocumentUpload;

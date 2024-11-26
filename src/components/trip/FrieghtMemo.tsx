@@ -14,6 +14,9 @@ import { getDominantColor } from '@/utils/imgColor'
 import { formatNumber } from '@/utils/utilArray'
 import logo from '@/assets/awajahi logo.png'
 import { useToast } from '../hooks/use-toast'
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
+import { Separator } from '@radix-ui/react-select'
+import { Table, TableBody, TableRow, TableCell } from '../ui/table'
 
 
 
@@ -99,7 +102,7 @@ const steps = [
   },
   {
     title: 'Trip Details',
-    fields: ['from', 'to', 'truckNo', 'truckHireCost', 'material', 'weight', 'unit', 'noOfBags','advance', 'hamali']
+    fields: ['from', 'to', 'truckNo', 'truckHireCost', 'material', 'weight', 'unit', 'noOfBags', 'advance', 'hamali']
   },
   {
     title: 'Extra Details',
@@ -145,15 +148,15 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
     logo: ''
   })
   const billRef = useRef<HTMLDivElement>(null)
-  const {toast} = useToast()
+  const { toast } = useToast()
 
   const fetchUser = async () => {
     try {
-      const [res, paymentsRes] = await Promise.all([fetch('/api/users'),fetch(`/api/suppliers/${trip.supplier}/payments/trips/${trip.trip_id}`)])
+      const [res, paymentsRes] = await Promise.all([fetch('/api/users'), fetch(`/api/suppliers/${trip.supplier}/payments/trips/${trip.trip_id}`)])
       if (!res.ok || !paymentsRes.ok) {
         toast({
-          description : 'Failed to fetch Details',
-          variant : 'destructive'
+          description: 'Failed to fetch Details',
+          variant: 'destructive'
         })
         return
       }
@@ -172,7 +175,7 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
         email: user.email,
         city: user.city,
         pan: user.panNumber,
-        advance : paymentsData.totalAmount
+        advance: paymentsData.totalAmount
       }))
     } catch (error) {
       alert('Failed to fetch User Details')
@@ -208,19 +211,21 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
     await new Promise((resolve) => setTimeout(resolve, 200)); // Small delay to ensure color is applied
     generatePDF(billRef, { filename: `FM-${trip.LR}-${formData.truckNo}-${trip.trip_id}` });
 
-    if (!user.companyName || !user.address || !user.gstNumber) {
+    if (!user.companyName || !user.address || !user.gstNumber || !user.pincode || !user.email || !user.city || !user.panNumber) {
+      const data = new FormData()
+      data.append('data', JSON.stringify({
+        companyName: user.company || formData.companyName,
+        address: user.address || formData.address,
+        gstNumber: user.gstNumber || formData.gstNumber,
+        pincode: user.pincode || formData.pincode,
+        email: user.email || formData.email,
+        city: user.city || formData.city,
+        panNumber: user.panNumber || formData.pan
+      }))
       try {
         const res = await fetch('/api/users', {
           method: 'PUT',
-          body: JSON.stringify({
-            companyName: user.company || formData.companyName,
-            address: user.address || formData.address,
-            gstNumber: user.gstNumber || formData.gstNumber,
-            pincode: user.pincode || formData.pincode,
-            email: user.email || formData.email,
-            city: user.city || formData.city,
-            pan: user.panNumber || formData.pan
-          })
+          body: data
         })
         if (!res.ok) {
           alert('Failed to update user details')
@@ -283,91 +288,89 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
 
   function Bilty({ formData, color }: { formData: FormDataType, color: string }) {
     return (
-      <div className="relative max-w-2xl container border border-black p-6 font-roboto text-sm">
-         <div className=" top-2 right-2 text-right text-xs mt-2">
+      <Card className="relative max-w-2xl mx-auto p-6 font-sans text-sm shadow-md border-2 border-gray-200">
+        <div className="absolute top-2 right-2 text-right text-xs mt-2">
           <p>📞 {formData.contactNumber}{formData.email && `, ✉️ ${formData.email}`}</p>
         </div>
-        <div className="text-center">
-          <h1 className="text-orange-500 text-base font-bold">CHALLAN/FREIGHT MEMO</h1>
-          <h2 className="text-2xl font-bold text-black">{formData.companyName}</h2>
+        <div className="text-center mt-8">
+          <h1 className="text-orange-600 text-lg font-bold">CHALLAN/FREIGHT MEMO</h1>
+          <h2 className="text-2xl font-bold text-gray-800 mt-2">{formData.companyName}</h2>
         </div>
 
         <div className="text-center mt-2">
-          <p className="text-sm">
+          <p className="text-sm text-gray-600">
             {formData.address},<br /> {formData.city}, {formData.pincode}
           </p>
         </div>
 
-       
-
         <table className="w-full border-collapse mt-6">
           <tbody>
             <tr>
-              <td className="border border-black p-2">Trailer No.: {formData.truckNo}</td>
-              <td className="border border-black p-2">Challan No.: {formData.challanNo}</td>
-              <td className="border border-black p-2">Date: {new Date(formData.date).toLocaleDateString('en-IN')}</td>
+              <td className="border border-gray-300 p-2 bg-gray-50">Trailer No.: {formData.truckNo}</td>
+              <td className="border border-gray-300 p-2 bg-gray-50">Challan No.: {formData.challanNo}</td>
+              <td className="border border-gray-300 p-2 bg-gray-50">Date: {new Date(formData.date).toLocaleDateString('en-IN')}</td>
             </tr>
             <tr>
-              <td className="border border-black p-2">Material: {formData.material}</td>
-              <td className="border border-black p-2">From: {formData.from}</td>
-              <td className="border border-black p-2">To: {formData.to}</td>
+              <td className="border border-gray-300 p-2">Material: {formData.material}</td>
+              <td className="border border-gray-300 p-2">From: {formData.from}</td>
+              <td className="border border-gray-300 p-2">To: {formData.to}</td>
             </tr>
             <tr>
-              <td className="border border-black p-2">Vehicle Owner: </td>
-              <td className="border border-black p-2" colSpan={2}>PAN No.: {formData.pan}</td>
+              <td className="border border-gray-300 p-2">Vehicle Owner: </td>
+              <td className="border border-gray-300 p-2" colSpan={2}>PAN No.: {formData.pan}</td>
             </tr>
             <tr>
-              <td className="border border-black p-2 align-top" rowSpan={14} style={{ width: '50%' }}>
-                <strong>DASTI TO DRIVER:</strong>
+              <td className="border border-gray-300 p-2 align-top" rowSpan={14} style={{ width: '50%' }}>
+                <strong className="text-gray-700">DASTI TO DRIVER:</strong>
                 <div className="whitespace-pre-line mt-2 text-sm">
                   {formData.cashAC}
                 </div>
               </td>
-              <td className="border border-black p-2">Rate</td>
-              <td className="border border-black p-2">{trip.billingType}</td>
+              <td className="border border-gray-300 p-2 bg-gray-50">Rate</td>
+              <td className="border border-gray-300 p-2 bg-gray-50">{trip.billingType}</td>
             </tr>
             <tr>
-              <td className="border border-black p-2">Truck Hire Cost</td>
-              <td className="border border-black p-2">{formatNumber(formData.truckHireCost)}</td>
+              <td className="border border-gray-300 p-2">Truck Hire Cost</td>
+              <td className="border border-gray-300 p-2">{formatNumber(formData.truckHireCost)}</td>
             </tr>
             <tr>
-              <td className="border border-black p-2">Weight</td>
-              <td className="border border-black p-2">{formData.weight}</td>
+              <td className="border border-gray-300 p-2 bg-gray-50">Weight</td>
+              <td className="border border-gray-300 p-2 bg-gray-50">{formData.weight}</td>
             </tr>
             <tr>
-              <td className="border border-black p-2">Advance</td>
-              <td className="border border-black p-2">{formatNumber(formData.advance)}</td>
+              <td className="border border-gray-300 p-2">Advance</td>
+              <td className="border border-gray-300 p-2">{formatNumber(formData.advance)}</td>
             </tr>
             <tr>
-              <td className="border border-black p-2">Balance</td>
-              <td className="border border-black p-2">{formatNumber(Number(formData.truckHireCost) - Number(formData.advance))}</td>
+              <td className="border border-gray-300 p-2 bg-gray-50">Balance</td>
+              <td className="border border-gray-300 p-2 bg-gray-50">{formatNumber(Number(formData.truckHireCost) - Number(formData.advance))}</td>
             </tr>
             <tr>
-              <td className="border border-black p-2">Hamali</td>
-              <td className="border border-black p-2">{formatNumber(formData.hamali)}</td>
+              <td className="border border-gray-300 p-2">Hamali</td>
+              <td className="border border-gray-300 p-2">{formatNumber(formData.hamali)}</td>
             </tr>
             <tr>
-              <td className="border border-black p-2">Extra Weight</td>
-              <td className="border border-black p-2">{formData.extraWeight}</td>
+              <td className="border border-gray-300 p-2 bg-gray-50">Extra Weight</td>
+              <td className="border border-gray-300 p-2 bg-gray-50">{formData.extraWeight}</td>
             </tr>
             <tr>
-              <td className="border border-black p-2">Extra</td>
-              <td className="border border-black p-2">{formData.extra}</td>
+              <td className="border border-gray-300 p-2">Extra</td>
+              <td className="border border-gray-300 p-2">{formData.extra}</td>
             </tr>
             <tr>
-              <td className="border border-black p-2">TDS</td>
-              <td className="border border-black p-2">{formData.TDS}</td>
+              <td className="border border-gray-300 p-2 bg-gray-50">TDS</td>
+              <td className="border border-gray-300 p-2 bg-gray-50">{formData.TDS}</td>
             </tr>
             <tr>
-              <td className="border border-black p-2">Tyre</td>
-              <td className="border border-black p-2">{formData.tire}</td>
+              <td className="border border-gray-300 p-2">Tyre</td>
+              <td className="border border-gray-300 p-2">{formData.tire}</td>
             </tr>
             <tr>
-              <td className="border border-black p-2">Spare Parts</td>
-              <td className="border border-black p-2">{formData.spareParts}</td>
+              <td className="border border-gray-300 p-2 bg-gray-50">Spare Parts</td>
+              <td className="border border-gray-300 p-2 bg-gray-50">{formData.spareParts}</td>
             </tr>
             <tr>
-              <td className="border border-black p-2" colSpan={3}>
+              <td className="border border-gray-300 p-2" colSpan={3}>
                 <strong>LR Rec. date: {new Date(formData.date).toLocaleDateString('en-IN')}</strong>
                 <p className="mt-2"></p>
                 <strong>Payment date:</strong>
@@ -381,10 +384,14 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
         </div>
 
         <div className="text-center text-xs mt-4 flex items-center justify-center">
-          <span className='flex space-x-2'>Powered with <Image src={logo} alt='awajahi logo' width={15} height={15} className='mx-1' /> Awajahi</span>
+          <span className='flex items-center space-x-1'>
+            Powered by
+            <Image src={logo} alt='Awajahi logo' width={15} height={15} className='mx-1' />
+            Awajahi
+          </span>
         </div>
-      </div>
-    )
+      </Card>
+    );
 
   }
 

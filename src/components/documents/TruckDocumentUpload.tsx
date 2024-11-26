@@ -106,6 +106,7 @@ const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo }) => {
                     const validity: string = extractLatestDate(text) as any;
                     setFormData((prev) => ({
                         ...prev,
+                        filename : file.name,
                         docType: types.has(type) ? type : 'Other',
                         validityDate: new Date(validity || Date.now()).toISOString().split('T')[0]
                     }));

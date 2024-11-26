@@ -7,6 +7,7 @@ import { GoOrganization } from 'react-icons/go';
 import dynamic from 'next/dynamic';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 import { useRecentDocsCtx } from '@/context/recentDocs';
+import { IoDocument } from 'react-icons/io5';
 
 const RecentDocuments = dynamic(() => import('@/components/documents/RecentDocuments'), { ssr: false });
 
@@ -57,6 +58,11 @@ const DocumentsPage = () => {
       title: 'Company Documents',
       link: '/user/documents/companyDocuments',
       icon: <GoOrganization className='text-bottomNavBarColor' size={40} />
+    },
+    {
+      title: 'Other Documents',
+      link: '/user/documents/otherDocuments',
+      icon: <IoDocument className='text-bottomNavBarColor' size={40} />
     }
   ];
 
@@ -70,7 +76,7 @@ const DocumentsPage = () => {
         <h1 className="text-2xl font-semibold text-black">Documents</h1>
       </div>
 
-      <div className="grid grid-cols-4 gap-4 border-b-2 border-gray-300 py-4">
+      <div className="grid grid-cols-5 gap-4 border-b-2 border-gray-300 py-4">
         {documentTypes.map((type) => (
           <Link href={type.link} key={type.title}>
             <div className="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out hover:shadow-lightOrangeButtonColor hover:bg-lightOrange cursor-pointer">
@@ -84,7 +90,8 @@ const DocumentsPage = () => {
                   {type.title === 'Trip Documents' && counts.tripDocuments + ' files'}
                   {type.title === 'Driver Documents' && counts.driverDocuments + ' files'}
                   {type.title === 'Lorry Documents' && counts.truckDocuments + ' files'}
-                  {type.title === 'Company Documents' && '0 files'}
+                  {type.title === 'Company Documents' && 'X files'}
+                  {type.title === 'Other Documents' && 'X files'}
                 </p>
               </div>
             </div>

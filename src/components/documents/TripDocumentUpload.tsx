@@ -136,6 +136,7 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip })
                     setFormData({
                         ...formData,
                         file: e.target.files[0],
+                        filename : e.target.files[0].name,
                         validityDate: new Date(data.validity).toISOString().split('T')[0],
                         docType: types.has(data.docType) ? data.docType : 'Other',
                     });

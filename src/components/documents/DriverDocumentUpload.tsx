@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from '../ui/button';
-import { loadingIndicator } from '@/components/ui/LoadingIndicator'; // Ensure this component is available
-import { IDriver } from '@/utils/interface';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { motion } from 'framer-motion'
 import { useRouter } from 'next/navigation';
@@ -131,6 +129,7 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
                     setFormData({
                         ...formData,
                         file: e.target.files[0],
+                        filename : e.target.files[0].name,
                         validityDate: new Date(data.validity).toISOString().split('T')[0],
                         docType: types.has(data.docType) ? data.docType : 'Other',
                     });
