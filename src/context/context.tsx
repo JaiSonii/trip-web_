@@ -1,14 +1,36 @@
 import { createContext, useContext } from "react";
 import useSWR from "swr";
-import { ITrip, IDriver, TruckModel, IParty, ISupplier } from "@/utils/interface";
+import { ITrip, IDriver, TruckModel, IParty, ISupplier, IExpense } from "@/utils/interface";
+
+interface DashboardData {
+    expenses: ExpenseData[] | [];
+    trips: TripData[] | [];
+    recentActivities: ITrip | IExpense | TruckModel | IDriver | ISupplier | any | {}
+    profit : number
+  }
+
+
+  interface ExpenseData {
+    _id: string;
+    totalExpenses: number;
+    totalAmount: number;
+   
+  }
+  
+  interface TripData {
+    _id: number;
+    count: number;
+    month: string;
+  }
 
 const ExpenseCtx = createContext<{
     trips: ITrip[];
     drivers: IDriver[];
     shops: any[];
     trucks: TruckModel[] | any[];
-    suppliers : ISupplier[] | any[];
-    parties : IParty [] | any[]
+    suppliers: ISupplier[] | any[];
+    parties: IParty[] | any[];
+    dashboardData: DashboardData;
     isLoading: boolean;
     error: any;
 }>({
@@ -16,8 +38,14 @@ const ExpenseCtx = createContext<{
     drivers: [],
     shops: [],
     trucks: [],
-    suppliers : [],
-    parties : [],
+    suppliers: [],
+    parties: [],
+    dashboardData: {
+        expenses: [],
+        trips: [],
+        recentActivities: {},
+        profit: 0, // Add your dashboard data here
+    },  // Add your dashboard data here
     isLoading: false,
     error: null,
 });
@@ -37,6 +65,7 @@ export const ExpenseProvider = ({ children }: Props) => {
     const { data: shopsData, error: shopsError, isLoading: shopsLoading } = useSWR("/api/shopkhata", fetcher);
     const { data: partiesData, error: partiesError, isLoading: partiesLoading } = useSWR("/api/parties", fetcher);
     const { data: suppliersData, error: suppliersError, isLoading: suppliersLoading } = useSWR("/api/suppliers", fetcher);
+    const { data: dashData, error: dashError, isLoading: dashLoading } = useSWR('/api/dashboard', fetcher);
 
     const isLoading = tripsLoading || driversLoading || trucksLoading || shopsLoading;
     const error = tripsError || driversError || trucksError || shopsError;
@@ -47,6 +76,7 @@ export const ExpenseProvider = ({ children }: Props) => {
     const shops = shopsData?.shops || [];
     const parties = partiesData?.parties || [];
     const suppliers = suppliersData?.suppliers || [];
+    const dashboardData = dashData || {};
 
     return (
         <ExpenseCtx.Provider
@@ -57,6 +87,7 @@ export const ExpenseProvider = ({ children }: Props) => {
                 trucks,
                 parties,
                 suppliers,
+                dashboardData,
                 isLoading,
                 error,
             }}

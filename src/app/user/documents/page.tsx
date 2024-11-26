@@ -55,7 +55,7 @@ const DocumentsPage = () => {
     },
     {
       title: 'Company Documents',
-      link: '#',
+      link: '/user/documents/companyDocuments',
       icon: <GoOrganization className='text-bottomNavBarColor' size={40} />
     }
   ];

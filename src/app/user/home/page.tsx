@@ -1,39 +1,20 @@
 'use client'
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { FaRegCircleUser } from 'react-icons/fa6';
 import { IoNotificationsOutline } from "react-icons/io5";
 import Link from 'next/link';
 import { ChartConfig, ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
 import { Bar, BarChart, CartesianGrid, Cell, Label, Legend, Pie, PieChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
 import { useToast } from '@/components/hooks/use-toast';
-import { IDriver, IExpense, ISupplier, ITrip, TruckModel } from '@/utils/interface';
 import Loading from '../loading';
 import { useExpenseCtx } from '@/context/context';
-import { useCallback } from 'react';
 import { useAnimatedNumber } from '@/components/hooks/useAnimatedNumber';
 import { RxActivityLog } from "react-icons/rx";
+import { useSWRConfig } from 'swr';
+import { recentIcons } from '@/utils/icons';
+import RecentActivities from '@/components/RecentActivites';
 
-
-interface ExpenseData {
-  _id: string;
-  totalExpenses: number;
-  totalAmount: number;
- 
-}
-
-interface TripData {
-  _id: number;
-  count: number;
-  month: string;
-}
-
-interface DashboardData {
-  expenses: ExpenseData[];
-  trips: TripData[];
-  recentActivities: ITrip | IExpense | TruckModel | IDriver | ISupplier | any
-  profit : number
-}
 
 const piechartConfig: ChartConfig = {
   totalAmount: {
@@ -62,17 +43,17 @@ const chartConfig: ChartConfig = {
 }
 
 const Page = () => {
-  const [loading, setLoading] = useState(true)
-  const [data, setData] = useState<DashboardData | null>(null)
   const { toast } = useToast()
-  const {trips, isLoading} = useExpenseCtx()
+  const {dashboardData : data, trips, isLoading} = useExpenseCtx()
+  const {mutate} = useSWRConfig()
+
 
   const totalCost = useMemo(() => {
-    return data?.expenses.reduce((acc, curr) => acc + curr.totalAmount, 0) || 0
+    return data?.expenses?.reduce((acc, curr) => acc + curr.totalAmount, 0) || 0
   }, [data])
 
   const totalTrip = useMemo(() => {
-    return data?.trips.reduce((acc, curr) => acc + curr.count, 0) || 0
+    return data?.trips?.reduce((acc, curr) => acc + curr.count, 0) || 0
   }, [data])
 
   const totalRecievable = useMemo(()=>{
@@ -84,29 +65,11 @@ const Page = () => {
   const animatedTotalReceivable = useAnimatedNumber(totalRecievable);
   const animatedProfit = useAnimatedNumber(data?.profit || 0);
 
-  const fetchData = async () => {
-    try {
-      const res = await fetch(`/api/dashboard/`)
-      if (!res.ok) {
-        throw new Error("Error Fetching Data")
-      }
-      const fetchedData: DashboardData = await res.json()
-      setData(fetchedData)
-      setLoading(false)
-    } catch (error) {
-      toast({
-        description: "Error fetching data",
-        variant: 'destructive'
-      })
-      setLoading(false)
-    }
-  }
+  useEffect(()=>{
+    mutate('/api/dashboard')
+  },[mutate])
 
-  useEffect(() => {
-    fetchData()
-  }, [])
-
-  if (loading || isLoading) {
+  if (isLoading) {
     return <Loading />
   }
 
@@ -185,7 +148,7 @@ const Page = () => {
                     outerRadius={100}
                     paddingAngle={2}
                   >
-                    {data.expenses.map((entry, index) => (
+                    {data?.expenses?.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={piechartConfig[entry._id as keyof typeof piechartConfig]?.color || piechartConfig.totalAmount.color}
@@ -243,21 +206,7 @@ const Page = () => {
             <h3 className='font-semibold text-lg mb-2'>
               Recent Activities
             </h3>
-            <div className='border-t-2 border-t-gray-300 pt-4'>
-              {data?.recentActivities.activities?.length > 0 ? (
-                data.recentActivities.activities.map((activity: any, index: number) => (
-                  <div key={index} className='flex items-center justify-between mb-4 last:mb-0'>
-                    <div className='flex items-center gap-2'>
-                      {/* You can add an icon here if needed */}
-                      <div className="font-medium flex items-center gap-2"><RxActivityLog size={40} className='text-white bg-blue-500 rounded-lg p-2 border font-semibold'/> <div className='flex flex-col gap-1'>{activity.type} <p className='text-xs text-gray-400'>{activity.date && new Date(activity.date).toLocaleDateString('en-IN')}</p></div></div>
-                    </div>
-                    {/* <p className='text-sm text-gray-500'>{activity.date}</p> */}
-                  </div>
-                ))
-              ) : (
-                <p className='text-center text-sm text-gray-500'> No Recent Activities</p>
-              )}
-            </div>
+            <RecentActivities data={data} />
           </div>
         </div>
       </div>

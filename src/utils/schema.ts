@@ -297,7 +297,11 @@ export const userSchema = new Schema({
   logoUrl: String,
   stampUrl: String,
   signatureUrl: String,
-
+  documents : [{
+    filename : String,
+    url : String,
+    uploadedDate : String
+  }],
   createdAt: { type: Date, default: Date.now }
 });
 

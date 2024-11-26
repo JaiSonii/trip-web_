@@ -10,6 +10,11 @@ import {
     FaWrench, // for repairs
     FaUserTie, // for union charges
   } from 'react-icons/fa';
+import { FaLocationDot } from 'react-icons/fa6';
+import { GiExpense } from 'react-icons/gi';
+import { IoMdDocument } from 'react-icons/io';
+import { IoPerson } from 'react-icons/io5';
+import { PiSteeringWheel } from 'react-icons/pi';
   
   export const icons = {
     'Detention/Halting Charges': <FaBalanceScale className="text-bottomNavBarColor"/>,
@@ -47,6 +52,19 @@ import {
 
   };
   
+export const recentIcons : Record<string,React.ReactNode> = {
+  'Created New Trip' :  <FaLocationDot size={40} className='text-white bg-blue-500 rounded-lg p-2 border font-semibold' />,
+  'Added New Customer' : <IoPerson size={40} className='text-white bg-blue-500 rounded-lg p-2 border font-semibold' />,
+  'Added New Driver' : <PiSteeringWheel size={40} className='text-white bg-blue-500 rounded-lg p-2 border font-semibold' />,
+  'Updated Driver Details' : <PiSteeringWheel size={40} className='text-white bg-blue-500 rounded-lg p-2 border font-semibold' />,
+  'Added Driver Document' : <IoMdDocument size={40} className='text-white bg-blue-500 rounded-lg p-2 border font-semibold' />,
+  'Added Trip Document' : <IoMdDocument size={40} className='text-white bg-blue-500 rounded-lg p-2 border font-semibold' />,
+  'Added Lorry Document' : <IoMdDocument size={40} className='text-white bg-blue-500 rounded-lg p-2 border font-semibold' />,
+  'Added New Expense' : <GiExpense size={40} className='text-white bg-blue-500 rounded-lg p-2 border font-semibold' />,
+  'Edited Expense' : <GiExpense size={40} className='text-white bg-blue-500 rounded-lg p-2 border font-semibold' />,
+  'Deleted Expense' : <GiExpense size={40} className='text-white bg-blue-500 rounded-lg p-2 border font-semibold' />,
+  'Edited Trip Details' :  <FaLocationDot size={40} className='text-white bg-blue-500 rounded-lg p-2 border font-semibold' />,
+}
 
   // Define the type for the keys of the icons object
 export type IconKey = 'Detention/Halting Charges' | 'Repair Expense' | 'Loading Charges' | 'Unloading Charges' | 'Union Charges' | 'Weight Charges' | 'Other Charges' | 'Material Loss' | 'Brokerage' | 'Late Fees' | 'TDS' | 'Mamul' | 'Driver bhatta' | 'Driver payment' | 'Fuel Expense' | 'Police Expense' | 'RTO Expense' | 'Toll Expense' | 'Union Expense' | 'Tyre Puncture' | 'Tyre Retread' | 'Tyre Purchase' | 'Roof Top Repair' | 'Showroom Service' | 'Regular Service' | 'Minor Repair' | 'Gear Maintenance' | 'Brake Oil Change' | 'Grease Oil Change' | 'Spare Parts Purchase' | 'Air Filter Change';

@@ -270,7 +270,7 @@ export async function PATCH(req: Request, { params }: { params: { driverId: stri
     if (contactNumber) driver.contactNumber = contactNumber;
     if (status) driver.status = status;
 
-    await driver.save();
+    await Promise.all([driver.save(), recentActivity('Updated Driver Detials', driver, user)]);
 
     return NextResponse.json({ driver: driver }, { status: 200 });
   } catch (err: any) {

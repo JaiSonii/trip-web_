@@ -3,6 +3,7 @@ import { verifyToken } from "@/utils/auth";
 import { connectToDatabase, userSchema } from "@/utils/schema";
 import { model, models } from "mongoose";
 import { NextResponse } from "next/server";
+import { v4 as uuidV4 } from 'uuid'
 
 const User = models.User || model('User', userSchema)
 
@@ -24,6 +25,61 @@ export async function GET(req: Request) {
   }
 }
 
+
+export async function PATCH(req: Request) {
+  try {
+    // Verify token
+    const { user, error } = await verifyToken(req);
+    if (!user || error) {
+      return NextResponse.json({ error: 'Unauthorized access', status: 401 });
+    }
+
+    // Parse form data
+    const formdata = await req.formData();
+    const filename = formdata.get('filename') as string;
+    const file = formdata.get('file') as File;
+
+    if (!file) {
+      return NextResponse.json({ error: 'File is required', status: 400 });
+    }
+
+    // Convert file to buffer
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+    const fileName = `users/${user}/${uuidV4()}`;
+    const contentType = file.type;
+
+    // Upload file to S3
+    const s3Filename = await uploadFileToS3(fileBuffer, fileName, contentType);
+    const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3Filename}${contentType === 'application/pdf' ? '.pdf' : ''}`;
+
+    // Prepare document data
+    const docData = {
+      filename : filename,
+      uploadedDate : new Date(Date.now()),
+      url: fileUrl,
+    };
+
+    // Update user's document list
+    const updatedUser = await User.findOneAndUpdate(
+      { user_id: user },
+      { $push: { documents: { $each: [docData], $position: 0 } } },
+      { new: true, projection: { user_id: 0 } } // Exclude `user_id` from the returned data
+    );
+
+    if (!updatedUser) {
+      return NextResponse.json({ error: 'User not found', status: 400 });
+    }
+
+    return NextResponse.json({
+      message: 'Document added successfully',
+      status: 200,
+      user: updatedUser,
+    });
+  } catch (error) {
+    console.error('Error updating user documents:', error);
+    return NextResponse.json({ error: 'Internal Server Error', status: 500 });
+  }
+}
 export async function PUT(req: Request) {
   try {
     // Verify user
@@ -57,10 +113,10 @@ export async function PUT(req: Request) {
     const logoUrl = await uploadIfPresent(logoFile, 'logos');
     const stampUrl = await uploadIfPresent(stampFile, 'stamps');
     const signatureUrl = await uploadIfPresent(signatureFile, 'signatures');
-    
+
 
     // Update data with S3 URLs
-    
+
 
     // Connect to database and update user
     await connectToDatabase();
@@ -75,7 +131,6 @@ export async function PUT(req: Request) {
     if (signatureUrl) updatedUser.signatureUrl = signatureUrl;
 
     await updatedUser.save()
-    console.log(updatedUser)
 
     return NextResponse.json({ status: 200, user: updatedUser });
   } catch (error) {
