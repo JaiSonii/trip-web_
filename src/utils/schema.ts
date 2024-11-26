@@ -467,8 +467,8 @@ export const otherDocumentsSchema = new Schema({
   user_id : {type : String, required : true},
   filename : String,
   url : String,
-  uploadedDate : String,
-  validityDate : String
+  uploadedDate : Date,
+  validityDate : Date
 })
 
 

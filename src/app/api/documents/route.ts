@@ -82,7 +82,7 @@ export async function POST(req: Request) {
         user_id: user,
         filename: data.filename,
         url: fileUrl,
-        uploadedDate: new Date(),
+        uploadedDate: new Date(Date.now()),
         validityDate: data.validityDate || null, // Handle optional validityDate
       });
   

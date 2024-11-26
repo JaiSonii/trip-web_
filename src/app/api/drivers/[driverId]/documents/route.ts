@@ -73,7 +73,7 @@ export async function PUT(req: Request, { params }: { params: { driverId: string
                 filename: filename || '',
                 type: docType,
                 validityDate: validity,
-                uploadedDate: new Date(),
+                uploadedDate: new Date(Date.now()),
                 url: fileUrl,
             };
         } else {
