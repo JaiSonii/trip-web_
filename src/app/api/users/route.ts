@@ -74,7 +74,7 @@ export async function PATCH(req: Request) {
 
       // Upload file to S3
       const s3Filename = await uploadFileToS3(fileBuffer, fileName, contentType);
-      const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3Filename}`;
+      const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3Filename}${contentType === 'application/pdf' ? '.pdf' : ''}`;
 
       // Prepare document data
       uploadedDocuments.push({

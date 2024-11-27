@@ -77,7 +77,7 @@ export async function POST(req: Request) {
 
       // Upload file to S3
       const s3FileName = await uploadFileToS3(fileBuffer, fileName, contentType);
-      const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3FileName}`;
+      const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3FileName}${contentType === 'application/pdf' ? '.pdf' : ''}`;
 
       // Create a new document record
       const newDocument = new OtherDocuments({
