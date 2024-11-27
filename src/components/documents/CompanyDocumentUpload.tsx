@@ -95,7 +95,6 @@ const CompanyDocumentUpload: React.FC<Props> = ({ open, setOpen, setDocs }) => {
           data.append(`filename${index}`, formData.filenames[index] || file.name);
         });
       
-        console.log('FormData:', Array.from(data.entries())); // Debug FormData contents
       
         try {
           const response = await fetch(`/api/users`, {

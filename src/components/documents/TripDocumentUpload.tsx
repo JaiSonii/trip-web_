@@ -230,7 +230,7 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip, d
             const res = await fetch(`/api/documents/${documentId}?movingto=trip`, {
                 method: 'PATCH',
                 body: JSON.stringify({
-                    driverId: formData.tripId,
+                    tripId: formData.tripId,
                     filename: formData.filename,
                     validityDate: new Date(formData.validityDate),
                     docType: formData.docType

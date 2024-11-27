@@ -39,7 +39,6 @@ export async function PATCH(req: Request) {
     const files: File[] = [];
     const filenames: string[] = [];
 
-    console.log(formData)
 
     // Collect all files and filenames
     for (const [key, value] of formData.entries()) {
