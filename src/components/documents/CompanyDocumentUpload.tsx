@@ -1,52 +1,41 @@
-import {useState } from 'react';
+'use client'
+
+import { useState } from 'react';
 import { Button } from '../ui/button';
 import { motion } from 'framer-motion'
 import { createWorker } from 'tesseract.js';
-import { mutate } from 'swr';
-import { Loader2 } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
+import FileUploader from '../FileUploader';
 
 interface DocumentForm {
-    filename: string;
-    file: File | null;
+    files: File[];
+    filenames: string[];
 }
 
 type Props = {
     open: boolean;
     setOpen: (open: boolean) => void;
-    setUser : any
+    setDocs: any
 };
 
-const CompanyDocumentUpload: React.FC<Props> = ({ open, setOpen, setUser }) => {
+const CompanyDocumentUpload: React.FC<Props> = ({ open, setOpen, setDocs }) => {
     const [formData, setFormData] = useState<DocumentForm>({
-        filename: '',
-        file: null,
+        files: [],
+        filenames: [],
     });
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-    const [searchTerm, setSearchTerm] = useState('');
-    const {toast} = useToast()
+    const { toast } = useToast()
 
-
-
-    // Filter drivers based on search term
-
-
-
-    // Handle option selection for lorry (driver)
-    const handleOptionSelect = (value: string) => {
-        setFormData((prev) => ({ ...prev, driverId: value }));
-    };
-
-    // Handle input changes
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value,
-        });
+    // Handle input changes for filenames
+    const handleFilenameChange = (index: number, value: string) => {
+        setFormData(prevData => ({
+            ...prevData,
+            filenames: prevData.filenames.map((filename, i) => i === index ? value : filename),
+        }));
     };
 
     const extractTextFromImage = async (file: File): Promise<string> => {
@@ -57,78 +46,84 @@ const CompanyDocumentUpload: React.FC<Props> = ({ open, setOpen, setUser }) => {
     };
 
     // Handle file change
-    // Handle file change
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        e.preventDefault(); // prevent any accidental form submission due to file input change
+        e.preventDefault();
 
-        
         if (e.target.files) {
-            const file = e.target.files[0] as File;
-            setFormData({
-                ...formData,
-                filename : file.name,
-                file: file,
-            });
+            const newFiles = Array.from(e.target.files);
+            setFormData(prevData => ({
+                files: [...prevData.files, ...newFiles],
+                filenames: [...prevData.filenames, ...newFiles.map(file => file.name)],
+            }));
         }
     };
 
+    const handleFilesChange = (files: File[]) => {
+        setFormData(prevData => ({
+            files: [...prevData.files, ...files],
+            filenames: [...prevData.filenames, ...files.map(file => file.name)],
+        }));
+    };
+
+    // Remove file
+    const removeFile = (index: number) => {
+        setFormData(prevData => ({
+            files: prevData.files.filter((_, i) => i !== index),
+            filenames: prevData.filenames.filter((_, i) => i !== index),
+        }));
+    };
 
     // Handle form submission
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        setLoading(true)
         e.preventDefault();
-
-        if (!formData.file || !formData.filename) {
-            setError('Please upload a document and enter filename.');
-            toast({
-                description : 'Please upload a document and enter filename.',
-                variant : 'warning'
-            })
-            return;
+      
+        if (formData.files.length === 0) {
+          setError('Please upload at least one document.');
+          toast({
+            description: 'Please upload at least one document.',
+            variant: 'warning',
+          });
+          return;
         }
-
-        setLoading(true);
-        setError('');
-        setSuccessMessage('');
-
+      
         const data = new FormData();
-        data.append('file', formData.file);
-        data.append('filename', formData.filename);
-
+      
+        formData.files.forEach((file, index) => {
+          data.append(`file${index}`, file);
+          // Ensure a filename is always provided
+          data.append(`filename${index}`, formData.filenames[index] || file.name);
+        });
+      
+        console.log('FormData:', Array.from(data.entries())); // Debug FormData contents
+      
         try {
-            const response = await fetch(`/api/users`, {
-                method: 'PATCH',
-                body: data,
-            });
-
-            setLoading(false);
-
-            if (response.ok) {
-                setSuccessMessage('Document uploaded successfully!');
-                setError('');
-                setFormData({
-                    filename: '',
-                    file: null,
-                });
-                setOpen(false);
-                const data = await response.json()
-                setUser(data.user)
-            } else {
-                const errorData = await response.json();
-                setError(errorData.message || 'Something went wrong.');
-                toast({
-                    description : 'Failed to upload document',
-                    variant : 'destructive'
-                })
-            }
-        } catch (err) {
-            setLoading(false);
-            setError('Failed to upload document.');
-            toast({
-                description : 'Failed to upload document',
-                variant : 'destructive'
-            })
+          const response = await fetch(`/api/users`, {
+            method: 'PATCH',
+            body: data,
+          });
+      
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Unknown error');
+          }
+      
+          const responseData = await response.json();
+          setSuccessMessage(responseData.message);
+          setFormData({ files: [], filenames: [] });
+          setOpen(false);
+          setDocs(responseData.user.documents);
+        } catch (err : any) {
+          setError(err.message);
+          toast({
+            description: err.message,
+            variant: 'destructive',
+          });
         }
-    };
+        setLoading(false)
+      };
+      
+
 
     if (!open) {
         return null;
@@ -142,12 +137,12 @@ const CompanyDocumentUpload: React.FC<Props> = ({ open, setOpen, setUser }) => {
                 duration: 0.5,
                 ease: [0, 0.71, 0.2, 1.01]
             }} className="w-full max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md flex flex-col z-50">
-            <h1 className="text-2xl font-semibold mb-4 text-black">Upload Document</h1>
+            <h1 className="text-2xl font-semibold mb-4 text-black">Upload Documents</h1>
 
             {/* Loading indicator */}
             {loading && (
                 <div className="flex justify-center mb-4">
-                    <Loader2 className='animate-spin text-bottomNavBarColor' /> 
+                    <Loader2 className='animate-spin text-bottomNavBarColor' />
                 </div>
             )}
 
@@ -155,39 +150,42 @@ const CompanyDocumentUpload: React.FC<Props> = ({ open, setOpen, setUser }) => {
             {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
 
             <form onSubmit={handleSubmit}>
-                
-
                 {/* File upload input */}
                 <div className="mb-4">
-                    <label className="block text-gray-700">Upload File(pdf)*</label>
-                    <input
-                        type="file"
-                        name="file"
-                        onChange={handleFileChange}
-                        className="w-full mt-1 p-2 border rounded"
-                        accept="application/pdf, image/*"
-                        required
-                    />
+                    <label className="block text-gray-700 mb-2">Upload Files (PDF or Image)*</label>
+                    <FileUploader onFilesChange={handleFilesChange} />
                 </div>
 
-                {/* Filename input */}
-                <div className="mb-4">
-                    <label className="block text-gray-700">Filename*</label>
-                    <input
-                        type="text"
-                        name="filename"
-                        value={formData.filename}
-                        onChange={handleChange}
-                        className="w-full mt-1 p-2 border rounded"
-                        placeholder=""
-                    />
-                </div>
-
-
+                {/* Display uploaded files */}
+                {formData.files.length > 0 && (
+                    <div className="mb-4">
+                        <h3 className="text-lg font-semibold mb-2">Uploaded Files:</h3>
+                        <ul className="space-y-2">
+                            {formData.files.map((file, index) => (
+                                <li key={index} className="flex items-center justify-between bg-gray-100 p-2 rounded">
+                                    <input
+                                        type="text"
+                                        value={formData.filenames[index]}
+                                        onChange={(e) => handleFilenameChange(index, e.target.value)}
+                                        className="flex-grow mr-2 p-1 border rounded"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => removeFile(index)}
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
 
                 {/* Submit button */}
                 <div className="flex items-center space-x-2 justify-end">
-                    <Button type="submit" >
+                    <Button type="submit">
                         Submit
                     </Button>
                     <Button variant={'outline'} onClick={() => setOpen(false)}>
@@ -200,3 +198,4 @@ const CompanyDocumentUpload: React.FC<Props> = ({ open, setOpen, setUser }) => {
 };
 
 export default CompanyDocumentUpload;
+

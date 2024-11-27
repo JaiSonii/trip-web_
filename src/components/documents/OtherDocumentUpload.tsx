@@ -1,225 +1,232 @@
-import {useState } from 'react';
+'use client'
+
+import { useState } from 'react';
 import { Button } from '../ui/button';
 import { motion } from 'framer-motion'
-import { createWorker } from 'tesseract.js';
-import { mutate } from 'swr';
-import { Loader2 } from 'lucide-react';
+import { Loader2, X, Edit2 } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
+import FileUploader from '../FileUploader';
+import { Input } from '../ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import {v4 as uuidV4} from 'uuid'
+
+interface FileData {
+  id: string;
+  file: File;
+  filename: string;
+  validityDate: string;
+}
 
 interface DocumentForm {
-    filename: string;
-    file: File | null;
-    validityDate: string ;  // ISO string for the date input
+  files: FileData[];
 }
 
 type Props = {
-    open: boolean;
-    setOpen: (open: boolean) => void;
-    setUser : any
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  setUser: any;
 };
 
 const OtherDocumentUpload: React.FC<Props> = ({ open, setOpen, setUser }) => {
-    const [formData, setFormData] = useState<DocumentForm>({
-        filename: '',
-        file: null,
-        validityDate : ''
-    });
+  const [formData, setFormData] = useState<DocumentForm>({
+    files: [],
+  });
 
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
-    const [searchTerm, setSearchTerm] = useState('');
-    const {toast} = useToast()
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const { toast } = useToast();
 
+  const handleFilesChange = (files: File[]) => {
+    const newFiles = files.map(file => ({
+      id: uuidV4(),
+      file,
+      filename: file.name,
+      validityDate: '',
+    }));
+    setFormData(prevData => ({
+      ...prevData,
+      files: [...prevData.files, ...newFiles],
+    }));
+  };
 
+  const removeFile = (id: string) => {
+    setFormData(prevData => ({
+      ...prevData,
+      files: prevData.files.filter(file => file.id !== id),
+    }));
+  };
 
-    // Filter drivers based on search term
+  const updateFileData = (id: string, data: Partial<FileData>) => {
+    setFormData(prevData => ({
+      ...prevData,
+      files: prevData.files.map(file => 
+        file.id === id ? { ...file, ...data } : file
+      ),
+    }));
+  };
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-
-    // Handle option selection for lorry (driver)
-    const handleOptionSelect = (value: string) => {
-        setFormData((prev) => ({ ...prev, driverId: value }));
-    };
-
-    // Handle input changes
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData({
-            ...formData,
-            [name]: value,
-        });
-    };
-
-    const extractTextFromImage = async (file: File): Promise<string> => {
-        const worker = await createWorker('eng');
-        const { data: { text } } = await worker.recognize(file);
-        await worker.terminate();
-        return text;
-    };
-
-    // Handle file change
-    // Handle file change
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        e.preventDefault(); // prevent any accidental form submission due to file input change
-
-        
-        if (e.target.files) {
-            const file = e.target.files[0] as File;
-            setFormData({
-                ...formData,
-                filename : file.name,
-                file: file,
-            });
-        }
-    };
-
-
-    // Handle form submission
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        if (!formData.file || !formData.filename) {
-            setError('Please upload a document and enter filename.');
-            toast({
-                description : 'Please upload a document and enter filename.',
-                variant : 'warning'
-            })
-            return;
-        }
-
-        setLoading(true);
-        setError('');
-        setSuccessMessage('');
-
-        const data = new FormData();
-        data.append('file', formData.file);
-        data.append('data', JSON.stringify({
-            filename: formData.filename,
-            validityDate: formData.validityDate,
-        }));
-
-        try {
-            const response = await fetch(`/api/documents`, {
-                method: 'POST',
-                body: data,
-            });
-
-            setLoading(false);
-
-            if (response.ok) {
-                setSuccessMessage('Document uploaded successfully!');
-                setError('');
-                setFormData({
-                    filename: '',
-                    file: null,
-                    validityDate : ''
-                });
-                setOpen(false);
-                const data = await response.json()
-                setUser((prev : any[])=>[
-                    {
-                        ...data.document,
-                    },
-                    ...prev
-                ])
-            } else {
-                const errorData = await response.json();
-                setError(errorData.message || 'Something went wrong.');
-                toast({
-                    description : 'Failed to upload document',
-                    variant : 'destructive'
-                })
-            }
-        } catch (err) {
-            setLoading(false);
-            setError('Failed to upload document.');
-            toast({
-                description : 'Failed to upload document',
-                variant : 'destructive'
-            })
-        }
-    };
-
-    if (!open) {
-        return null;
+    if (formData.files.length === 0) {
+      setError('Please upload at least one document.');
+      toast({
+        description: 'Please upload at least one document.',
+        variant: 'warning'
+      });
+      return;
     }
 
-    return (
-        <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{
-                duration: 0.5,
-                ease: [0, 0.71, 0.2, 1.01]
-            }} className="w-full max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md flex flex-col z-50">
-            <h1 className="text-2xl font-semibold mb-4 text-black">Upload Document</h1>
+    setLoading(true);
+    setError('');
+    setSuccessMessage('');
 
-            {/* Loading indicator */}
-            {loading && (
-                <div className="flex justify-center mb-4">
-                    <Loader2 className='animate-spin text-bottomNavBarColor' /> 
-                </div>
-            )}
+    const data = new FormData();
+    formData.files.forEach((fileData) => {
+      data.append(`file-${fileData.id}`, fileData.file);
+    });
+    data.append('filesData', JSON.stringify(formData.files.map(({ id, filename, validityDate }) => ({ id, filename, validityDate }))));
 
-            {error && <p className="text-red-500 mb-4">{error}</p>}
-            {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
+    try {
+      const response = await fetch(`/api/documents`, {
+        method: 'POST',
+        body: data,
+      });
 
-            <form onSubmit={handleSubmit}>
-                
+      setLoading(false);
 
-                {/* File upload input */}
-                <div className="mb-4">
-                    <label className="block text-gray-700">Upload File(pdf)*</label>
-                    <input
-                        type="file"
-                        name="file"
-                        onChange={handleFileChange}
-                        className="w-full mt-1 p-2 border rounded"
-                        accept="application/pdf, image/*"
-                        required
-                    />
-                </div>
+      if (response.ok) {
+        const responseData = await response.json();
+        setSuccessMessage('Documents uploaded successfully!');
+        setError('');
+        setFormData({ files: [] });
+        setOpen(false);
+        setUser((prev: any[]) => [
+          ...responseData.documents,
+          ...prev
+        ]);
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || 'Something went wrong.');
+        toast({
+          description: 'Failed to upload documents',
+          variant: 'destructive'
+        });
+      }
+    } catch (err) {
+      setLoading(false);
+      setError('Failed to upload documents.');
+      toast({
+        description: 'Failed to upload documents',
+        variant: 'destructive'
+      });
+    }
+  };
 
-                {/* Filename input */}
-                <div className="mb-4">
-                    <label className="block text-gray-700">Filename*</label>
-                    <input
-                        type="text"
-                        name="filename"
-                        value={formData.filename}
-                        onChange={handleChange}
-                        className="w-full mt-1 p-2 border rounded"
-                        placeholder=""
-                    />
-                </div>
+  if (!open) {
+    return null;
+  }
 
-                <div className="mb-4">
-                    <label className="block text-gray-700">Validity(optional)</label>
-                    <input
-                        type="date"
-                        name="validityDate"
-                        value={formData.validityDate ? new Date(formData.validityDate).toISOString() : ''}
-                        onChange={handleChange}
-                        className="w-full mt-1 p-2 border rounded"
-                        placeholder=""
-                    />
-                </div>
+  return (
+    <motion.div
+      initial={{ opacity: 0, scale: 0.5 }}
+      animate={{ opacity: 1, scale: 1 }}
+      transition={{
+        duration: 0.5,
+        ease: [0, 0.71, 0.2, 1.01]
+      }} 
+      className="w-full max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md flex flex-col z-50"
+    >
+      <h1 className="text-2xl font-semibold mb-4 text-black">Upload Documents</h1>
 
+      {loading && (
+        <div className="flex justify-center mb-4">
+          <Loader2 className='animate-spin text-bottomNavBarColor' />
+        </div>
+      )}
 
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+      {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
 
-                {/* Submit button */}
-                <div className="flex items-center space-x-2 justify-end">
-                    <Button type="submit" >
-                        Submit
+      <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">Upload Files (PDF or Image)*</label>
+          <FileUploader onFilesChange={handleFilesChange} />
+        </div>
+
+        {formData.files.length > 0 && (
+          <div className="mb-4 max-h-[400px] overflow-auto thin-scrollbar">
+            <h3 className="text-lg font-semibold mb-2">Uploaded Files:</h3>
+            <ul className="space-y-2">
+              {formData.files.map((fileData) => (
+                <li key={fileData.id} className="flex items-center justify-between bg-gray-100 p-2 rounded">
+                  <span>{fileData.filename}</span>
+                  <div className="flex items-center space-x-2">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button variant="ghost" size="sm">
+                          <Edit2 className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Edit File Details</DialogTitle>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <label htmlFor="filename" className="text-right">
+                              Filename
+                            </label>
+                            <Input
+                              id="filename"
+                              value={fileData.filename}
+                              onChange={(e) => updateFileData(fileData.id, { filename: e.target.value })}
+                              className="col-span-3"
+                            />
+                          </div>
+                          <div className="grid grid-cols-4 items-center gap-4">
+                            <label htmlFor="validity" className="text-right">
+                              Validity Date
+                            </label>
+                            <Input
+                              id="validity"
+                              type="date"
+                              value={fileData.validityDate}
+                              onChange={(e) => updateFileData(fileData.id, { validityDate: e.target.value })}
+                              className="col-span-3"
+                            />
+                          </div>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeFile(fileData.id)}
+                    >
+                      <X className="h-4 w-4" />
                     </Button>
-                    <Button variant={'outline'} onClick={() => setOpen(false)}>
-                        Cancel
-                    </Button>
-                </div>
-            </form>
-        </motion.div>
-    );
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div className="flex items-center space-x-2 justify-end">
+          <Button type="submit">
+            Submit
+          </Button>
+          <Button variant={'outline'} onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+        </div>
+      </form>
+    </motion.div>
+  );
 };
 
 export default OtherDocumentUpload;
+

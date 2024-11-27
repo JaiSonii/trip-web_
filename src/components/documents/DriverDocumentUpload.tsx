@@ -2,13 +2,15 @@ import { useEffect, useMemo, useState } from 'react';
 import { Button } from '../ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { motion } from 'framer-motion'
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { getDocType } from '@/helpers/ImageOperation';
 import { createWorker } from 'tesseract.js';
 import { extractLatestDate } from '@/helpers/ImageOperation';
 import { mutate } from 'swr';
 import { useExpenseCtx } from '@/context/context';
 import { Loader2 } from 'lucide-react';
+import SingleFileUploader from '../SingleFileUploader';
+import { useToast } from '../hooks/use-toast';
 
 interface DocumentForm {
     filename: string;
@@ -22,13 +24,15 @@ type Props = {
     open: boolean;
     driverId?: string;
     setOpen: (open: boolean) => void;
+    documentId?: string;
+    setDocuments?: any
 };
 
-const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
+const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId, documentId, setDocuments }) => {
     const { drivers } = useExpenseCtx()
     const [formData, setFormData] = useState<DocumentForm>({
         filename: '',
-        validityDate: new Date().toISOString().split('T')[0],
+        validityDate: '',
         docType: '',
         file: null,
         driverId: driverId || ''
@@ -39,6 +43,8 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
     const [successMessage, setSuccessMessage] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const router = useRouter()
+    const { toast } = useToast()
+    const isOtherPage = usePathname() === '/user/documents/otherDocuments'
 
 
 
@@ -81,16 +87,16 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
 
     // Handle file change
     // Handle file change
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        e.preventDefault(); // prevent any accidental form submission due to file input change
+    const handleFileChange = async (file: File) => {
+        // e.preventDefault(); // prevent any accidental form submission due to file input change
 
         const types = new Set(['License', 'Aadhar', 'PAN', 'Police Verification'])
 
         const fileData = new FormData();
-        if (e.target.files) {
-            const file = e.target.files[0];
+        if (file) {
             setFormData({
                 ...formData,
+                filename: file.name,
                 file: file,
             });
 
@@ -117,6 +123,10 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
                     setLoading(false);
 
                     if (!res.ok) {
+                        toast({
+                            description: 'Failed to get validity and docType. Please enter manually.',
+                            variant: 'destructive'
+                        })
                         setError('Failed to get validity and docType. Please enter manually.');
                         return;
                     }
@@ -128,14 +138,18 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
                     }
                     setFormData({
                         ...formData,
-                        file: e.target.files[0],
-                        filename : e.target.files[0].name,
+                        file: file,
+                        filename: file.name,
                         validityDate: new Date(data.validity).toISOString().split('T')[0],
                         docType: types.has(data.docType) ? data.docType : 'Other',
                     });
                 }
             } catch (error) {
                 setLoading(false);
+                toast({
+                    description: 'Failed to get validity and docType. Please enter manually.',
+                    variant: 'destructive'
+                })
                 setError('Error occurred while validating document. Please enter manually.');
             }
         }
@@ -148,6 +162,15 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
 
         if (!formData.file) {
             setError('Please upload a document.');
+            return;
+        }
+        if(!formData.docType || !formData.validityDate){
+            setError('Please fill out all fields')
+            toast({
+                description: 'Please fill out all fields',
+                variant: 'warning'
+            })
+            setLoading(false)
             return;
         }
 
@@ -182,15 +205,72 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
                 setOpen(false);
                 mutate('/api/documents/recent')
                 router.refresh()
+                toast({
+                    description: 'Document uploaded successfully',
+                    variant: 'default'
+                })
             } else {
                 const errorData = await response.json();
+                toast({
+                    description: 'Something went wrong',
+                    variant: 'destructive'
+                })
                 setError(errorData.message || 'Something went wrong.');
             }
         } catch (err) {
             setLoading(false);
+            toast({
+                description: 'Something went wrong',
+                variant: 'destructive'
+            })
             setError('Failed to upload document.');
         }
     };
+
+    const handleMove = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        setLoading(true)
+        if(!formData.docType || !formData.validityDate){
+            setError('Please fill out all fields')
+            toast({
+                description: 'Please fill out all fields',
+                variant: 'warning'
+            })
+            setLoading(false)
+            return;
+        }
+        try {
+            const res = await fetch(`/api/documents/${documentId}?movingto=driver`, {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    driverId: formData.driverId,
+                    filename: formData.filename,
+                    validityDate: new Date(formData.validityDate),
+                    docType: formData.docType
+                })
+            })
+            if (res.ok) {
+                toast({
+                    description: 'Document moved successfully!',
+                    variant: 'default'
+                })
+                const data = await res.json();
+            } else {
+                toast({
+                    description: 'Failed to move document!',
+                    variant: 'destructive'
+                })
+            }
+        } catch (error) {
+            toast({
+                description: 'Internal Server Error',
+                variant: 'destructive'
+            })
+        }
+        setOpen(false)
+        setLoading(false)
+        setDocuments((prev: any) => prev.filter((doc: any) => doc._id !== documentId))
+    }
 
     if (!open) {
         return null;
@@ -204,19 +284,17 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
                 duration: 0.5,
                 ease: [0, 0.71, 0.2, 1.01]
             }} className="w-full max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md flex flex-col">
-            <h1 className="text-2xl font-semibold mb-4 text-black">Upload Document</h1>
+            <h1 className="text-2xl font-semibold mb-4 text-black">{isOtherPage ? 'Moving to Driver Document' : "Upload Document"}</h1>
 
             {/* Loading indicator */}
-            {loading && (
-                <div className="flex justify-center mb-4">
-                    <Loader2 className='animate-spin text-bottomNavBarColor' /> 
-                </div>
-            )}
+
 
             {error && <p className="text-red-500 mb-4">{error}</p>}
             {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={isOtherPage ? handleMove : handleSubmit}>
+
+                {!isOtherPage && <SingleFileUploader onFileChange={handleFileChange} />}
                 {/* Lorry (driver) select */}
                 <div className="mb-4">
                     <label className="block text-sm text-gray-700">Driver*</label>
@@ -257,18 +335,7 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
                     </Select>
                 </div>
 
-                {/* File upload input */}
-                <div className="mb-4">
-                    <label className="block text-gray-700">Upload File(pdf)*</label>
-                    <input
-                        type="file"
-                        name="file"
-                        onChange={handleFileChange}
-                        className="w-full mt-1 p-2 border rounded"
-                        accept="application/pdf, image/*"
-                        required
-                    />
-                </div>
+
 
                 {/* Filename input */}
                 <div className="mb-4">
@@ -318,8 +385,12 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId }) => {
 
                 {/* Submit button */}
                 <div className="flex items-center space-x-2 justify-end">
-                    <Button type="submit" >
-                        Submit
+                    <Button type="submit" disabled={loading}>
+                        {loading ? (
+                            <div className="flex items-center justify-center ">
+                                <Loader2 className='animate-spin text-white' />
+                            </div>
+                        ) : 'Submit'}
                     </Button>
                     <Button variant={'outline'} onClick={() => setOpen(false)}>
                         Cancel

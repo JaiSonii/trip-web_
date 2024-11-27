@@ -22,6 +22,7 @@ import otpPic from '@/assets/otp-pic.png';
 import Link from "next/link";
 import { loadingIndicator } from "./ui/LoadingIndicator";
 import { isValidPhone } from "@/utils/validate";
+import { Loader2 } from "lucide-react";
 
 function OtpLogin() {
   const router = useRouter();
@@ -184,7 +185,7 @@ function OtpLogin() {
                     className="w-full text-center bg-[#FF8833] text-white rounded-full"
                     disabled={isPending}
                   >
-                    {isPending ? loadingIndicator : "Send OTP"}
+                    {isPending ? <Loader2 className="text-white animate-spin text-center" /> : "Send OTP"}
                   </Button>
                 </motion.div>
               </motion.form>
@@ -221,7 +222,7 @@ function OtpLogin() {
                   className="w-full text-center bg-[#FF8833] text-white mt-4 rounded-full text-md"
                   disabled={isPending}
                 >
-                  {isPending ? loadingIndicator : "Verify OTP"}
+                  {isPending ?  <Loader2 className="text-white animate-spin text-center" /> : "Verify OTP"}
                 </Button>
                 {/* <Button
                   type="submit"

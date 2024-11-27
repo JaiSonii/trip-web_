@@ -7,13 +7,19 @@ import { GoOrganization } from 'react-icons/go';
 import dynamic from 'next/dynamic';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 import { useRecentDocsCtx } from '@/context/recentDocs';
-import { IoDocument } from 'react-icons/io5';
+import { BiCloudUpload } from 'react-icons/bi';
+import { useSWRConfig } from 'swr';
 
 const RecentDocuments = dynamic(() => import('@/components/documents/RecentDocuments'), { ssr: false });
 
 const DocumentsPage = () => {
   const { documents, counts, docsLoading } = useRecentDocsCtx()
   const [error, setError] = useState('');
+  const {mutate} = useSWRConfig()
+
+  useEffect(()=>{
+    mutate('/api/documents/recent')
+  },[mutate])
 
   // const fetchRecentDocuments = async () => {
   //   try {
@@ -60,9 +66,9 @@ const DocumentsPage = () => {
       icon: <GoOrganization className='text-bottomNavBarColor' size={40} />
     },
     {
-      title: 'Other Documents',
+      title: 'Quick Uploads',
       link: '/user/documents/otherDocuments',
-      icon: <IoDocument className='text-bottomNavBarColor' size={40} />
+      icon: <BiCloudUpload className='text-bottomNavBarColor' size={40} />
     }
   ];
 
@@ -91,7 +97,7 @@ const DocumentsPage = () => {
                   {type.title === 'Driver Documents' && counts.driverDocuments + ' files'}
                   {type.title === 'Lorry Documents' && counts.truckDocuments + ' files'}
                   {type.title === 'Company Documents' && 'X files'}
-                  {type.title === 'Other Documents' && 'X files'}
+                  {type.title === 'Quick Uploads' && 'X files'}
                 </p>
               </div>
             </div>

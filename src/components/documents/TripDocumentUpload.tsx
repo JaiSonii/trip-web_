@@ -4,7 +4,7 @@ import { loadingIndicator } from '@/components/ui/LoadingIndicator'; // Ensure t
 import { ITrip, TruckModel } from '@/utils/interface';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { motion } from 'framer-motion'
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { createWorker } from 'tesseract.js';
 import { getDocType } from '@/helpers/ImageOperation';
 import { extractLatestDate } from '@/helpers/ImageOperation';
@@ -12,6 +12,8 @@ import { mutate } from 'swr';
 import { statuses } from '@/utils/schema';
 import { useExpenseCtx } from '@/context/context';
 import { Loader2 } from 'lucide-react';
+import SingleFileUploader from '../SingleFileUploader';
+import { useToast } from '../hooks/use-toast';
 
 interface DocumentForm {
     filename: string;
@@ -19,27 +21,30 @@ interface DocumentForm {
     docType: string;
     file: File | null;
     tripId: string;
-    
+
 }
 
 type Props = {
     open: boolean;
     tripId?: string;
     setOpen: (open: boolean) => void;
-    setTrip? : any
+    setTrip?: any
+    documentId?: string
+    setDocuments?: any
 };
 
-const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip }) => {
+const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip, documentId, setDocuments }) => {
     const { trips } = useExpenseCtx()
-    console.log(trips)
+    const { toast } = useToast()
     const [formData, setFormData] = useState<DocumentForm>({
         filename: '',
-        validityDate: new Date().toISOString().split('T')[0],
+        validityDate: '',
         docType: '',
         file: null,
         tripId: tripId || ''
     });
 
+    const isOtherPage = usePathname() === '/user/documents/otherDocuments'
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
@@ -91,25 +96,26 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip })
     };
 
     // Handle file change
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        e.preventDefault()
+    const handleFileChange = async (file: File) => {
+        // e.preventDefault()
         const fileData = new FormData();
         const types = new Set(['E-Way Bill', 'POD', 'Bilty'])
-        if (e.target.files) {
+        if (file) {
             setFormData({
                 ...formData,
-                file: e.target.files[0],
+                file: file,
             });
 
-            fileData.append('file', e.target.files[0] as File);
+            fileData.append('file', file as File);
             setLoading(true);
             try {
-                if (e.target.files[0].type.includes('image/')) {
-                    const text = await extractTextFromImage(e.target.files[0]);
+                if (file.type.includes('image/')) {
+                    const text = await extractTextFromImage(file);
                     const type = getDocType(text)
                     const validity: string = extractLatestDate(text) as any
                     setFormData((prev) => ({
                         ...prev,
+                        filename: file.name,
                         docType: types.has(type) ? type : 'Other',
                         validityDate: new Date(validity || Date.now()).toISOString().split('T')[0]
                     }))
@@ -124,6 +130,10 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip })
                     setLoading(false);
 
                     if (!res.ok) {
+                        toast({
+                            description: 'Failed to get validity and docType. Please enter manually',
+                            variant: 'destructive'
+                        })
                         setError('Failed to get validity and docType. Please enter manually.');
                         return;
                     }
@@ -135,14 +145,18 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip })
                     }
                     setFormData({
                         ...formData,
-                        file: e.target.files[0],
-                        filename : e.target.files[0].name,
+                        file: file,
+                        filename: file.name,
                         validityDate: new Date(data.validity).toISOString().split('T')[0],
                         docType: types.has(data.docType) ? data.docType : 'Other',
                     });
                 }
             } catch (error) {
                 setLoading(false);
+                toast({
+                    description: 'Error occured while validating document',
+                    variant: 'destructive'
+                })
                 setError('Error occurred while validating document.');
             }
         }
@@ -188,10 +202,10 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip })
                 setOpen(false)
                 mutate('/api/documents/recent')
                 const data = await response.json();
-                if(setTrip) {
-                    setTrip((prev : any) =>({
+                if (setTrip) {
+                    setTrip((prev: any) => ({
                         ...prev,
-                        documents : data.documents
+                        documents: data.documents
                     }))
                 }
                 router.refresh()
@@ -201,9 +215,49 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip })
             }
         } catch (err) {
             setLoading(false);
+            toast({
+                description: 'Error uploading document',
+                variant: 'destructive'
+            })
             setError('Failed to upload document.');
         }
     };
+
+    const handleMove = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        setLoading(true)
+        try {
+            const res = await fetch(`/api/documents/${documentId}?movingto=trip`, {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    driverId: formData.tripId,
+                    filename: formData.filename,
+                    validityDate: new Date(formData.validityDate),
+                    docType: formData.docType
+                })
+            })
+            if (res.ok) {
+                toast({
+                    description: 'Document moved successfully!',
+                    variant: 'default'
+                })
+                const data = await res.json();
+            } else {
+                toast({
+                    description: 'Failed to move document!',
+                    variant: 'destructive'
+                })
+            }
+        } catch (error) {
+            toast({
+                description: 'Internal Server Error',
+                variant: 'destructive'
+            })
+        }
+        setOpen(false)
+        setLoading(false)
+        setDocuments((prev: any) => prev.filter((doc: any) => doc._id !== documentId))
+    }
 
     if (!open) {
         return null;
@@ -217,19 +271,17 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip })
                 duration: 0.5,
                 ease: [0, 0.71, 0.2, 1.01]
             }} className="w-full max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md flex flex-col">
-            <h1 className="text-2xl font-semibold mb-4 text-black">Upload Document</h1>
+            <h1 className="text-2xl font-semibold mb-4 text-black">{isOtherPage ? 'Moving to Trip Document' : 'Upload Document'}</h1>
 
             {/* Loading indicator */}
-            {loading && (
-                <div className="flex justify-center mb-4">
-                    <Loader2 className='animate-spin text-bottomNavBarColor' /> 
-                </div>
-            )}
+
 
             {error && <p className="text-red-500 mb-4">{error}</p>}
             {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
 
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={isOtherPage ? handleMove : handleSubmit}>
+
+                {!isOtherPage && <SingleFileUploader onFileChange={handleFileChange} />}
                 {/* Lorry (trip) select */}
                 <div className="mb-4">
                     <label className="block text-sm text-gray-700">Trip*</label>
@@ -303,7 +355,7 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip })
                 </div>
 
                 {/* File upload input */}
-                <div className="mb-4">
+                {/* <div className="mb-4">
                     <label className="block text-gray-700">Upload File(pdf)*</label>
                     <input
                         type="file"
@@ -313,7 +365,8 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip })
                         accept="application/pdf, image/*"
                         required
                     />
-                </div>
+                </div> */}
+
 
                 {/* Filename input */}
                 <div className="mb-4">
@@ -362,10 +415,14 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip })
 
                 {/* Submit button */}
                 <div className="flex items-center space-x-2 justify-end">
-                    <Button type="submit" >
-                        Submit
+                    <Button type="submit" disabled={loading} >
+                        {loading ? (
+                            <div className="flex justify-center ">
+                                <Loader2 className='animate-spin text-white' />
+                            </div>
+                        ) : 'Submit'}
                     </Button>
-                    <Button variant={'outline'} onClick={() => setOpen(false)}>
+                    <Button variant={'outline'} onClick={() => setOpen(false)} disabled={loading}>
                         Cancel
                     </Button>
                 </div>

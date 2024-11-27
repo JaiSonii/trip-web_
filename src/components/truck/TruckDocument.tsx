@@ -8,6 +8,9 @@ import dynamic from 'next/dynamic';
 import RecentDocuments from '../documents/RecentDocuments';
 import Link from 'next/link';
 import TruckDocumentUpload from '../documents/TruckDocumentUpload';
+import { FaChevronRight } from 'react-icons/fa6';
+import { Loader2 } from 'lucide-react';
+import { useToast } from '../hooks/use-toast';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -19,6 +22,8 @@ const TruckDocuments: React.FC<TruckDocumentProps> = ({ truckNo }) => {
 
     const [documents, setDocuments] = useState<any>([]);
     const [modalOpen, setModalOpen] = useState(false)
+    const [loading, setLoading] = useState(true)
+    const { toast } = useToast()
 
     useEffect(() => {
         const fetchTruck = async () => {
@@ -28,34 +33,47 @@ const TruckDocuments: React.FC<TruckDocumentProps> = ({ truckNo }) => {
                 setDocuments(data.truck.documents);
             } catch (error) {
                 console.log(error)
-                alert('Failed to load documents');
+                toast({
+                    description: 'Failed to load documents',
+                    variant: 'destructive'
+                })
             }
-
+            setLoading(false)
         };
 
         fetchTruck();
     }, [truckNo]);
 
 
+
     return (
         <div className="p-6 bg-gray-100 min-h-screen">
             <div className="flex items-center justify-between mb-4 border-b-2 border-gray-300 pb-2">
                 <h1 className="text-2xl font-semibold text-black flex items-center space-x-2">
-                    <Link href="/user/documents" className="hover:underline text-gray-800">
-                        Docs
-                    </Link>
-                    <span className="text-gray-500">{`>`}</span>
-                    <Link href="/user/documents/truckDocuments" className="hover:underline text-gray-800">
-                        Lorry Docs
-                    </Link>
-                    <span className="text-gray-500">{`>`}</span>
+                    <Button variant={'link'}>
+                        <Link href="/user/documents" className="text-2xl font-semibold hover:underline">
+                            Docs
+                        </Link>
+                    </Button>
+                    <FaChevronRight className="text-lg text-gray-500" />
+                    <Button variant={'link'}>
+                        <Link href="/user/documents/truckDocuments" className="text-2xl font-semibold hover:underline">
+                            Lorry Docs
+                        </Link>
+                    </Button>
+
+                    <FaChevronRight className="text-lg text-gray-500" />
                     <span className="text-black">{truckNo}</span>
                 </h1>
                 <Button onClick={() => setModalOpen(true)}>
                     Upload Document
                 </Button>
             </div>
-            <RecentDocuments docs={documents} />
+            {loading ?
+                <div className='flex flex-col items-center justify-center'><Loader2 className='text-bottomNavBarColor animate-spin' /><p className='text-black'>fetching documents...</p></div> :
+                <RecentDocuments docs={documents} />
+            }
+
             {modalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
                     <TruckDocumentUpload open={modalOpen} setOpen={setModalOpen} truckNo={truckNo} />

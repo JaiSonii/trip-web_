@@ -8,6 +8,7 @@ import React, { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import TripDocumentUpload from '@/components/documents/TripDocumentUpload'
+import { FaChevronRight } from 'react-icons/fa6'
 
 const TripDocumentsPage = () => {
     const { tripId } = useParams() as { tripId: string };
@@ -53,15 +54,21 @@ const TripDocumentsPage = () => {
                 {/* Title and Upload Button */}
                 <div className="flex items-center justify-between mb-6 border-b-2 border-gray-300 pb-2">
                     <h1 className="text-2xl font-semibold text-black flex items-center space-x-2">
-                        <Link href="/user/documents" className="hover:underline text-gray-800">
-                            Docs
-                        </Link>
-                        <span className="text-gray-500">{`>`}</span>
-                        <Link href="/user/documents/tripDocuments" className="hover:underline text-gray-800">
-                            Trip Docs
-                        </Link>
-                        <span className="text-gray-500">{`>`}</span>
-                        <span className="text-black">Trip...</span>
+                        <Button variant={'link'}>
+                            <Link href="/user/documents"  className="text-2xl font-semibold hover:underline">
+                                Docs
+                            </Link>
+                        </Button>
+
+                        <FaChevronRight className="text-lg text-gray-500" />
+                        <Button variant={'link'}>
+                            <Link href="/user/documents/tripDocuments"  className="text-2xl font-semibold hover:underline">
+                                Trip Docs
+                            </Link>
+                        </Button>
+
+                        <FaChevronRight className="text-lg text-gray-500" />
+                        <span className="text-2xl font-semibold hover:underline">Trip...</span>
                     </h1>
 
                     <Button

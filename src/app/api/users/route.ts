@@ -35,43 +35,68 @@ export async function PATCH(req: Request) {
     }
 
     // Parse form data
-    const formdata = await req.formData();
-    const filename = formdata.get('filename') as string;
-    const file = formdata.get('file') as File;
+    const formData = await req.formData();
+    const files: File[] = [];
+    const filenames: string[] = [];
 
-    if (!file) {
-      return NextResponse.json({ error: 'File is required', status: 400 });
+    console.log(formData)
+
+    // Collect all files and filenames
+    for (const [key, value] of formData.entries()) {
+      if (key.startsWith('filename')) {
+        filenames.push(value as string);
+      } else if (key.startsWith('file')) {
+        files.push(value as File);
+      }
     }
 
-    // Convert file to buffer
-    const fileBuffer = Buffer.from(await file.arrayBuffer());
-    const fileName = `users/${user}/${uuidV4()}`;
-    const contentType = file.type;
 
-    // Upload file to S3
-    const s3Filename = await uploadFileToS3(fileBuffer, fileName, contentType);
-    const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3Filename}${contentType === 'application/pdf' ? '.pdf' : ''}`;
 
-    // Prepare document data
-    const docData = {
-      filename : filename,
-      uploadedDate : new Date(Date.now()),
-      url: fileUrl,
-    };
+    // Validation: Ensure files and filenames match
+    if (files.length === 0) {
+      return NextResponse.json({ error: 'At least one file is required', status: 400 });
+    }
+    if (files.length !== filenames.length) {
+      return NextResponse.json({ error: 'Mismatched files and filenames', status: 400 });
+    }
+
+    const uploadedDocuments = [];
+
+    // Process each file
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const filename = filenames[i] || file.name;
+
+      // Convert file to buffer
+      const fileBuffer = Buffer.from(await file.arrayBuffer());
+      const fileName = `users/${user}/${uuidV4()}`;
+      const contentType = file.type;
+
+      // Upload file to S3
+      const s3Filename = await uploadFileToS3(fileBuffer, fileName, contentType);
+      const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3Filename}`;
+
+      // Prepare document data
+      uploadedDocuments.push({
+        filename,
+        uploadedDate: new Date(),
+        url: fileUrl,
+      });
+    }
 
     // Update user's document list
     const updatedUser = await User.findOneAndUpdate(
       { user_id: user },
-      { $push: { documents: { $each: [docData], $position: 0 } } },
+      { $push: { documents: { $each: uploadedDocuments, $position: 0 } } },
       { new: true, projection: { user_id: 0 } } // Exclude `user_id` from the returned data
     );
 
     if (!updatedUser) {
-      return NextResponse.json({ error: 'User not found', status: 400 });
+      return NextResponse.json({ error: 'User not found', status: 404 });
     }
 
     return NextResponse.json({
-      message: 'Document added successfully',
+      message: `${uploadedDocuments.length} document(s) added successfully`,
       status: 200,
       user: updatedUser,
     });
@@ -80,6 +105,7 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ error: 'Internal Server Error', status: 500 });
   }
 }
+
 export async function PUT(req: Request) {
   try {
     // Verify user
@@ -102,7 +128,7 @@ export async function PUT(req: Request) {
 
       // Upload file to S3
       const s3FileName = await uploadFileToS3(fileBuffer, fileName, contentType);
-      return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3FileName}`;
+      return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3FileName}${contentType === 'application/pdf'? '.pdf' : ''}`;
     };
 
     // Upload files if present

@@ -1,49 +1,83 @@
 'use client';
 
 import Link from 'next/link';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { FaChevronRight } from 'react-icons/fa6';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import dynamic from 'next/dynamic';
-import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 import { useToast } from '@/components/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import CompanyDocumentUploadModal from '@/components/documents/company-document-upload-modal';
+import debounce from 'lodash/debounce';
+import filter from 'lodash/filter';
 
 const RecentDocuments = dynamic(() => import('@/components/documents/RecentDocuments'), { ssr: false })
+
+interface Document {
+  id: string;
+  filename: string;
+  url: string;
+  uploadedDate: string;
+  // Add other properties as needed
+}
 
 const CompanyDocuments = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState<string>('');
-  const [user, setUser] = useState<any>()
-  const [message, setMessage] = useState('')
-  const [loading, setLoading] = useState(true)
-  const { toast } = useToast()
+  const [docs, setDocs] = useState<Document[]>([]);
+  const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   const fetchDocuments = async () => {
     try {
-      setMessage('fetching documents...')
-      const res = await fetch(`/api/users`)
-      const data = res.ok ? await res.json() : setMessage('Failed to fetch documents');
-      setUser(data.user)
-      console.log(data)
-      setMessage('')
+      setMessage('Fetching documents...');
+      const res = await fetch(`/api/users`);
+      if (!res.ok) {
+        throw new Error('Failed to fetch documents');
+      }
+      const data = await res.json();
+      setDocs(data.user.documents);
+      setMessage('');
     } catch (error) {
       toast({
         description: 'Failed to fetch documents',
         variant: 'destructive'
-      })
-      console.log(error)
-      setMessage('Failed to fetch documents')
+      });
+      console.error(error);
+      setMessage('Failed to fetch documents');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchDocuments()
+    fetchDocuments();
   }, []);
+
+  const filteredDocs = useMemo(() => {
+    return filter(docs, (doc) => 
+      doc.filename?.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [docs, searchTerm]);
+
+  const debouncedSearch = useMemo(
+    () => debounce((value: string) => {
+      setSearchTerm(value);
+    }, 300),
+    []
+  );
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    debouncedSearch(e.target.value);
+  };
+
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
 
   return (
     <div className="p-6 bg-gray-100 min-h-screen">
@@ -60,20 +94,27 @@ const CompanyDocuments = () => {
         <div className="flex items-center space-x-4">
           <Input
             type="text"
-            placeholder="Search"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Search documents"
+            onChange={handleSearch}
             className="px-4 py-2 rounded-md border border-gray-300"
+            aria-label="Search documents"
           />
-          <CompanyDocumentUploadModal setUser={setUser} />
+          <CompanyDocumentUploadModal setDocs={setDocs} />
         </div>
       </div>
 
       <div className="py-4">
         {loading ? (
-          <p className="text-center">{loadingIndicator} {message}</p>
+          <p className="text-center flex items-center justify-center">
+            <Loader2 className="text-bottomNavBarColor mr-2 animate-spin" />
+            {message}
+          </p>
+        ) : filteredDocs.length > 0 ? (
+          <RecentDocuments docs={filteredDocs} />
+        ) : searchTerm ? (
+          <p className="text-center">No documents found matching &quot;{searchTerm}&quot;</p>
         ) : (
-          user?.documents?.length > 0 ? <RecentDocuments docs={user.documents} /> : <p>No documents found</p>
+          <p className="text-center">No documents found</p>
         )}
       </div>
     </div>

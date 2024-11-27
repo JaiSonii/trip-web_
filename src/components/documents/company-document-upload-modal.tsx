@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button';
 import CompanyDocumentUpload from '@/components/documents/CompanyDocumentUpload';
 
 type Props = {
-  setUser: React.Dispatch<React.SetStateAction<any>>;
+  setDocs: React.Dispatch<React.SetStateAction<any>>;
 };
 
-const CompanyDocumentUploadModal: React.FC<Props> = ({ setUser }) => {
+const CompanyDocumentUploadModal: React.FC<Props> = ({ setDocs }) => {
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
@@ -17,8 +17,8 @@ const CompanyDocumentUploadModal: React.FC<Props> = ({ setUser }) => {
         Upload Document
       </Button>
       {modalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50">
-          <CompanyDocumentUpload open={modalOpen} setOpen={setModalOpen} setUser={setUser} />
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50 z-50 -left-4">
+          <CompanyDocumentUpload open={modalOpen} setOpen={setModalOpen} setDocs={setDocs} />
         </div>
       )}
     </>
