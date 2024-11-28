@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { IDriver } from '@/utils/interface';
 import { loadingIndicator } from '../ui/LoadingIndicator';
 import { FaChevronRight } from 'react-icons/fa6';
+import { useToast } from '../hooks/use-toast';
 
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -25,18 +26,27 @@ const DriverDocuments: React.FC<TripDocumentProps> = ({ driverId }) => {
     const [modalOpen, setModalOpen] = useState(false)
     const [driver, setDriver] = useState<IDriver>()
     const [loading, setLaoding] = useState(true)
+    const {toast} = useToast()
 
     useEffect(() => {
         const fetchDriver = async () => {
             try {
                 const response = await fetch(`/api/drivers/${driverId}`);
-                const data = response.ok ? await response.json() : alert('Failed to load documents');
-                console.log(data)
-                setDocuments(data.documents);
+                if(!response.ok){
+                    toast({
+                        description : 'Failed to load documents',
+                        variant : 'destructive'
+                    })
+                    return
+                }
+                const data = await response.json();
+                setDocuments(data.driver.documents);
                 setDriver(data)
             } catch (error) {
-                console.log(error)
-                alert('Failed to load documents');
+                toast({
+                    description : 'Failed to load documents',
+                    variant : 'destructive'
+                })
             } finally {
                 setLaoding(false)
             }
@@ -77,7 +87,7 @@ const DriverDocuments: React.FC<TripDocumentProps> = ({ driverId }) => {
             <RecentDocuments docs={documents} />
             {modalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-                    <DriverDocumentUpload open={modalOpen} setOpen={setModalOpen} driverId={driverId} />
+                    <DriverDocumentUpload open={modalOpen} setOpen={setModalOpen} driverId={driverId} setDocuments={setDocuments}/>
                 </div>
             )}
         </div>

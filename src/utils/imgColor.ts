@@ -1,9 +1,7 @@
-
-
 export function getDominantColor(imageSrc: string): Promise<string> {
     return new Promise((resolve, reject) => {
         const img = new Image();
-        img.crossOrigin = "Anonymous"; // Allow cross-origin image processing if the image is from another domain
+        img.crossOrigin = "Anonymous"; // Allow cross-origin image processing
         img.src = imageSrc;
 
         img.onload = function () {
@@ -16,12 +14,14 @@ export function getDominantColor(imageSrc: string): Promise<string> {
                 return;
             }
 
-            // Set canvas size to the image size
-            canvas.width = img.width;
-            canvas.height = img.height;
+            // Scale down the image for faster processing
+            const scaledWidth = 50;
+            const scaledHeight = (img.height / img.width) * scaledWidth;
+            canvas.width = scaledWidth;
+            canvas.height = scaledHeight;
 
-            // Draw the image onto the canvas
-            ctx.drawImage(img, 0, 0);
+            // Draw the scaled image onto the canvas
+            ctx.drawImage(img, 0, 0, scaledWidth, scaledHeight);
 
             // Get the pixel data
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
@@ -37,7 +37,6 @@ export function getDominantColor(imageSrc: string): Promise<string> {
     });
 }
 
-
 function calculateDominantColor(data: Uint8ClampedArray): string {
     const colorCounts: { [key: string]: number } = {};
     let maxCount = 0;
@@ -48,6 +47,11 @@ function calculateDominantColor(data: Uint8ClampedArray): string {
         const r = data[i];
         const g = data[i + 1];
         const b = data[i + 2];
+        const a = data[i + 3]; // Alpha channel
+
+        // Skip fully transparent pixels
+        if (a === 0) continue;
+
         const color = `${r},${g},${b}`; // Combine RGB values as a string
 
         // Count occurrences of each color
@@ -63,5 +67,3 @@ function calculateDominantColor(data: Uint8ClampedArray): string {
     // Return the dominant color in rgb() format
     return dominantColor ? `rgb(${dominantColor})` : "rgb(0,0,0)";
 }
-
-

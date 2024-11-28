@@ -186,8 +186,6 @@ export async function GET(req: Request, { params }: { params: { driverId: string
     ]);
 
 
-
-
     if (!drivers) {
       return NextResponse.json({ message: 'Driver not found' }, { status: 404 });
     }

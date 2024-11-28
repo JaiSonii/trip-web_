@@ -27,9 +27,10 @@ type Props = {
     setOpen: (open: boolean) => void;
     documentId?: string;
     setDocuments?: any
+    setTruck? : any 
 };
 
-const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo, documentId, setDocuments }) => {
+const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo, documentId, setDocuments, setTruck }) => {
     const { trucks } = useExpenseCtx()
     const [formData, setFormData] = useState<DocumentForm>({
         filename: '',
@@ -196,7 +197,15 @@ const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo, document
                 });
                 setOpen(false)
                 mutate('/api/documents/recent')
-                router.refresh()
+                const data = await response.json()
+                if(setDocuments){
+                    setDocuments((prev : any)=>[data.document,...prev])
+                }else if(setTruck){
+                    setTruck((prev : any)=>({
+                        ...prev,
+                        documents : [data.document, ...prev.documents]
+                    }))
+                }
                 toast({
                     description: 'Document uploaded successfully',
                     variant: 'default'

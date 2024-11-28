@@ -18,6 +18,7 @@ interface DocumentForm {
     docType: string;
     file: File | null;
     driverId: string;
+
 }
 
 type Props = {
@@ -26,9 +27,10 @@ type Props = {
     setOpen: (open: boolean) => void;
     documentId?: string;
     setDocuments?: any
+    setDriver? : any
 };
 
-const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId, documentId, setDocuments }) => {
+const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId, documentId, setDocuments, setDriver }) => {
     const { drivers } = useExpenseCtx()
     const [formData, setFormData] = useState<DocumentForm>({
         filename: '',
@@ -203,8 +205,19 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId, docume
                     driverId: ''
                 });
                 setOpen(false);
+                const data = await response.json()
                 mutate('/api/documents/recent')
-                router.refresh()
+                if(setDocuments){
+                    setDocuments((prev : any)=>[
+                        {...data.document},
+                        ...prev
+                    ])
+                }else if(setDriver){
+                    setDriver((prev : any)=>({
+                        ...prev,
+                        documents : [data.document, ...prev.documents]
+                    }))
+                }
                 toast({
                     description: 'Document uploaded successfully',
                     variant: 'default'

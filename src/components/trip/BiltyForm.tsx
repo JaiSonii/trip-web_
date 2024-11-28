@@ -199,7 +199,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
       await new Promise((resolve) => setTimeout(resolve, 200)); // Small delay to ensure color is applied
       generatePDF(billRef, { filename: `Bilty-${tab}-${selectedCopy + " Copy"}-${trip.LR}-${formData.truckNo}-${trip.trip_id}` });
     }
-    if (!user.companyName || !user.address || !user.gstNumber) {
+    if (!user.companyName || !user.address || !user.gstNumber || !user.company || !user.panNumber || !user.pincode || !user.city || !user.email) {
       try {
         const res = await fetch('/api/users', {
           method: 'PUT',

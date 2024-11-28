@@ -67,6 +67,8 @@ export async function PUT(req: Request, { params }: { params: { driverId: string
         // Check if the document type already exists in the documents array
         const existingDocIndex = driver.documents.findIndex((doc: any) => doc.type === docType);
 
+        let document
+
         if (existingDocIndex !== -1) {
             // Replace the existing document with the new one
             driver.documents[existingDocIndex] = {
@@ -76,15 +78,17 @@ export async function PUT(req: Request, { params }: { params: { driverId: string
                 uploadedDate: new Date(Date.now()),
                 url: fileUrl,
             };
+            document = driver.documents[existingDocIndex]
         } else {
             // Add new document if not found
-            driver.documents.push({
+            driver.documents.unshift({
                 filename: filename || '',
                 type: docType,
                 validityDate: validity,
                 uploadedDate: new Date(),
                 url: fileUrl,
             });
+            document = driver.documents[0]
         }
 
         // Save the updated trip document
@@ -97,7 +101,7 @@ export async function PUT(req: Request, { params }: { params: { driverId: string
         }, user)]);
 
         // Return success response
-        return NextResponse.json({ message: 'Document uploaded successfully', status: 200 });
+        return NextResponse.json({ message: 'Document uploaded successfully', status: 200, document : document });
 
     } catch (error) {
         // Log the error and return server error response

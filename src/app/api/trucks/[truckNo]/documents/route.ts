@@ -69,6 +69,7 @@ export async function PUT(req: Request, { params }: { params: { truckNo: string 
         // Check if the document type already exists in the documents array
         const existingDocIndex = truck.documents.findIndex((doc: any) => doc.type === docType);
 
+        let document
         if (existingDocIndex !== -1) {
             // Replace the existing document with the new one
             truck.documents[existingDocIndex] = {
@@ -78,15 +79,17 @@ export async function PUT(req: Request, { params }: { params: { truckNo: string 
                 uploadedDate: new Date(Date.now()),
                 url: fileUrl,
             };
+            document = truck.documents[existingDocIndex];
         } else {
             // Add new document if not found
-            truck.documents.push({
+            truck.documents.unshift({
                 filename: filename || '',
                 type: docType,
                 validityDate: validity,
                 uploadedDate: new Date(),
                 url: fileUrl,
             });
+            document = truck.documents[0]
         }
 
         // Save the updated trip document
@@ -99,7 +102,7 @@ export async function PUT(req: Request, { params }: { params: { truckNo: string 
         }, user)]);
 
         // Return success response
-        return NextResponse.json({ message: 'Document uploaded successfully', status: 200 });
+        return NextResponse.json({ message: 'Document uploaded successfully', status: 200 , document});
 
     } catch (error) {
         // Log the error and return server error response
