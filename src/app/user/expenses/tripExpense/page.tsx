@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import debounce from 'lodash.debounce';
 import { TbFilterSearch } from 'react-icons/tb';
 import dynamic from 'next/dynamic';
+import { ExpenseHeader } from '@/components/ExpenseHeader';
 
 const TripExpense: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
@@ -178,54 +179,7 @@ const TripExpense: React.FC = () => {
   return (
     <div className="w-full h-full">
 
-      <div className=" flex items-center justify-between w-full mb-1 gap-16">
-        <div className='flex items-center space-x-2'>
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Button variant="outline">Select Columns</Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem asChild>
-                <label className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={Object.values(visibleColumns).every(Boolean)}
-                    onChange={(e) => handleSelectAll(e.target.checked)}
-                  />
-                  <span>Select All</span>
-                </label>
-              </DropdownMenuItem>
-              {Object.keys(visibleColumns).map((column) => (
-                <DropdownMenuItem key={column} asChild>
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={visibleColumns[column as keyof typeof visibleColumns]}
-                      onChange={() => handleToggleColumn(column as keyof typeof visibleColumns)}
-                    />
-                    <span>{column.charAt(0).toUpperCase() + column.slice(1)}</span>
-                  </label>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <input type='text' onChange={handleSearch} placeholder='Search...' />
-        </div>
-
-        <div className='flex items-center space-x-2'>
-          <Button onClick={() => {
-            setSelected(null)
-            setModalOpen(true)
-          }}>
-            Trip Expense     <IoAddCircle className='mt-1' />
-          </Button>
-          <div className="flex items-center space-x-4">
-            <Button onClick={() => setFilterModalOpen(true)}>
-              <TbFilterSearch />
-            </Button>
-          </div>
-        </div>
-      </div>
+<ExpenseHeader visibleColumns={visibleColumns} handleSearch={handleSearch} handleSelectAll={handleSelectAll} handleToggleColumn={handleToggleColumn} sortedExpense={sortedExpense} setSelected={setSelected } setModalOpen={setModalOpen} setFilterModalOpen={setFilterModalOpen} />
 
       <div className="">
         <Table className="">

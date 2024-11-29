@@ -1,5 +1,5 @@
 import { verifyToken } from "@/utils/auth";
-import { connectToDatabase, driverSchema, tripSchema, truckSchema } from "@/utils/schema";
+import { connectToDatabase, driverSchema, otherDocumentsSchema, tripSchema, truckSchema, userSchema } from "@/utils/schema";
 import { model, models } from "mongoose";
 import { NextResponse } from "next/server";
 
@@ -7,6 +7,8 @@ import { NextResponse } from "next/server";
 const Trip = models.Trip || model('Trip', tripSchema);
 const Driver = models.Driver || model('Driver', driverSchema);
 const Truck = models.Truck || model('Truck', truckSchema);
+const User = models.User || model('User', userSchema);
+const OtherDocuments = models.OtherDocuments || model('OtherDocuments', otherDocumentsSchema);
 
 export async function GET(req: Request) {
     try {
@@ -19,62 +21,91 @@ export async function GET(req: Request) {
         // Connect to the database
         await connectToDatabase();
 
-        // Use Promise.all for parallel queries and MongoDB aggregation to optimize the process
-        const [tripResults, driverResults, truckResults] = await Promise.all([
+        // Use Promise.all for parallel queries
+        const [tripResults, driverResults, truckResults, userResults, otherResults] = await Promise.all([
             Trip.aggregate([
                 { $match: { user_id: user } },
                 { $project: { documents: 1 } },
-                { $unwind: '$documents' },
-                { $sort: { 'documents.uploadedDate': -1 } }, // Sort documents by uploadedDate
-                { $limit: 5 } // Limit to the latest 5 documents
+                { $unwind: { path: "$documents", preserveNullAndEmptyArrays: true } },
+                { $sort: { "documents.uploadedDate": -1 } },
+                { $limit: 5 }
             ]),
             Driver.aggregate([
                 { $match: { user_id: user } },
                 { $project: { documents: 1 } },
-                { $unwind: '$documents' },
-                { $sort: { 'documents.uploadedDate': -1 } },
+                { $unwind: { path: "$documents", preserveNullAndEmptyArrays: true } },
+                { $sort: { "documents.uploadedDate": -1 } },
                 { $limit: 5 }
             ]),
             Truck.aggregate([
                 { $match: { user_id: user } },
                 { $project: { documents: 1 } },
-                { $unwind: '$documents' },
-                { $sort: { 'documents.uploadedDate': -1 } },
+                { $unwind: { path: "$documents", preserveNullAndEmptyArrays: true } },
+                { $sort: { "documents.uploadedDate": -1 } },
+                { $limit: 5 }
+            ]),
+            User.aggregate([
+                { $match: { user_id: user } },
+                { $project: { documents: 1 } },
+                { $unwind: { path: "$documents", preserveNullAndEmptyArrays: true } },
+                { $sort: { "documents.uploadedDate": -1 } },
+                { $limit: 5 }
+            ]),
+            OtherDocuments.aggregate([
+                { $match: { user_id: user } },
+                { $sort: { uploadedDate: -1 } },
                 { $limit: 5 }
             ])
         ]);
 
         // Combine and get the latest 5 documents across all collections
-        const allDocuments = [...tripResults, ...driverResults, ...truckResults]
-            .sort((a, b) => new Date(b.documents.uploadedDate).getTime() - new Date(a.documents.uploadedDate).getTime())
-            .slice(0, 5); // Get latest 5 documents across all collections
+        const allDocuments = [...tripResults, ...driverResults, ...truckResults, ...userResults, ...otherResults]
+            .map(doc => doc.documents || doc) // Ensure consistent structure for "documents"
+            .sort((a, b) => new Date(b.uploadedDate).getTime() - new Date(a.uploadedDate).getTime())
+            .slice(0, 5);
 
-        // Count documents for trips, drivers, and trucks
-        const [tripDocumentsCount, driverDocumentsCount, truckDocumentsCount] = await Promise.all([
+        // Count documents for each collection
+        const [tripDocumentsCount, driverDocumentsCount, truckDocumentsCount, userDocumentsCount, otherDocumentsCount] = await Promise.all([
             Trip.aggregate([
                 { $match: { user_id: user } },
-                { $group: { _id: null, count: { $sum: { $size: { '$ifNull': ["$documents", []] } } } } },
+                { $project: { documents: { $ifNull: ["$documents", []] } } }, // Ensure documents field exists
+                { $group: { _id: null, count: { $sum: { $size: "$documents" } } } } // Sum up the sizes of the documents array
             ]).then(res => res[0]?.count || 0),
 
             Driver.aggregate([
                 { $match: { user_id: user } },
-                { $group: { _id: null, count: { $sum: { $size: { '$ifNull': ["$documents", []] } } } } },
+                { $project: { documents: { $ifNull: ["$documents", []] } } },
+                { $group: { _id: null, count: { $sum: { $size: "$documents" } } } }
             ]).then(res => res[0]?.count || 0),
 
             Truck.aggregate([
                 { $match: { user_id: user } },
-                { $group: { _id: null, count: { $sum: { $size: { '$ifNull': ["$documents", []] } } } } },
+                { $project: { documents: { $ifNull: ["$documents", []] } } },
+                { $group: { _id: null, count: { $sum: { $size: "$documents" } } } }
             ]).then(res => res[0]?.count || 0),
+
+            User.aggregate([
+                { $match: { user_id: user } },
+                { $project: { documents: { $ifNull: ["$documents", []] } } },
+                { $group: { _id: null, count: { $sum: { $size: "$documents" } } } }
+            ]).then(res => res[0]?.count || 0),
+
+            OtherDocuments.aggregate([
+                { $match: { user_id: user } },
+                { $count: "count" } // Directly count documents matching the condition
+            ]).then(res => res[0]?.count || 0)
         ]);
 
 
         // Return the latest 5 documents along with document counts
         return NextResponse.json({
-            documents: allDocuments.map(doc => doc.documents),
+            documents: allDocuments,
             counts: {
                 tripDocuments: tripDocumentsCount,
                 driverDocuments: driverDocumentsCount,
                 truckDocuments: truckDocumentsCount,
+                companyDocuments: userDocumentsCount,
+                otherDocuments: otherDocumentsCount
             },
             status: 200
         });
@@ -83,4 +114,3 @@ export async function GET(req: Request) {
         return NextResponse.json({ error: 'Internal Server Error', status: 500 });
     }
 }
-

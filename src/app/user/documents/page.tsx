@@ -96,8 +96,8 @@ const DocumentsPage = () => {
                   {type.title === 'Trip Documents' && counts.tripDocuments + ' files'}
                   {type.title === 'Driver Documents' && counts.driverDocuments + ' files'}
                   {type.title === 'Lorry Documents' && counts.truckDocuments + ' files'}
-                  {type.title === 'Company Documents' && 'X files'}
-                  {type.title === 'Quick Uploads' && 'X files'}
+                  {type.title === 'Company Documents' && counts.companyDocuments + ' files'}
+                  {type.title === 'Quick Uploads' && counts.otherDocuments + ' files'}
                 </p>
               </div>
             </div>

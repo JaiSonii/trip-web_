@@ -1,108 +1,88 @@
 'use client'
-import { IDriver, ITrip, TruckModel } from '@/utils/interface'
-import React, { useEffect, useState } from 'react'
-import { Button } from './ui/button'
-import { fuelAndDriverChargeTypes, maintenanceChargeTypes, officeExpenseTypes } from '@/utils/utilArray'
+
+import React, { useState, useMemo, useCallback } from 'react'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 import { useExpenseCtx } from '@/context/context'
+import { fuelAndDriverChargeTypes, maintenanceChargeTypes, officeExpenseTypes } from '@/utils/utilArray'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
 
 type Props = {
     monthYearOptions: string[]
     paymentModes: string[]
     onClose: () => void
-    isOpen: boolean // Modal open state
+    isOpen: boolean
     handleFilter: (filter: any) => void
 }
 
-
-
 const ExpenseFilterModal: React.FC<Props> = ({ onClose, isOpen, monthYearOptions, paymentModes, handleFilter }) => {
-    const { trips, drivers, shops, trucks, isLoading, error } = useExpenseCtx();
+    const { trips, drivers, shops, trucks } = useExpenseCtx()
     const pathname = usePathname()
-    let ulOptions = ['Trucks', 'Month and Year', 'Expense Type', 'Driver', 'Shop', 'Payment Mode']
-    pathname === '/user/expenses/tripExpense' ? ulOptions.push('Trips') : null
-    pathname === '/user/expenses/officeExpense' ? ulOptions = ['Month and Year', 'Expense Type','Shop', 'Payment Mode'] : null
 
-    let expenseTypes = []
-    if(pathname === '/user/expenses/tripExpense'){
-        expenseTypes = Array.from(fuelAndDriverChargeTypes)
-    }else if(pathname === '/user/expenses/truckExpense'){
-        expenseTypes = Array.from(maintenanceChargeTypes)
-    }else{
-        expenseTypes = Array.from(officeExpenseTypes)
-    }
+    const [selectedFilters, setSelectedFilters] = useState({
+        trucks: [] as string[],
+        monthYear: [] as string[],
+        paymentModes: [] as string[],
+        drivers: [] as string[],
+        shops: [] as string[],
+        trips: [] as string[],
+        expenseTypes: [] as string[]
+    })
 
-    // States for selected filters
-    const [selectedTrucks, setSelectedTrucks] = useState<string[]>([])
-    const [selectedMonthYears, setSelectedMonthYears] = useState<string[]>([])
-    const [selectedPaymentModes, setSelectedPaymentModes] = useState<string[]>([])
-    const [selectedDrivers, setSelectedDrivers] = useState<string[]>([])
-    const [selectedShops, setSelectedShops] = useState<string[]>([])
-    const [selectedTrips, setSelectedTrips] = useState<string[]>([])
-    const [selectedExpenses, setSelectedExpenses] = useState<string[]>([])
+    const [searchQuery, setSearchQuery] = useState('')
+    const [activeCategory, setActiveCategory] = useState('Month and Year')
 
-    const [render, setRender] = useState('Month and Year')
+    const filterCategories = useMemo(() => {
+        let categories = ['Month and Year', 'Expense Type', 'Payment Mode', 'Shop']
+        if (pathname !== '/user/expenses/officeExpense') {
+            categories.unshift('Trucks', 'Driver')
+        }
+        if (pathname === '/user/expenses/tripExpense' || pathname === '/user/expenses') {
+            categories.push('Trips')
+        }
+        return categories
+    }, [pathname])
 
+    const expenseTypes = useMemo(() => {
+        if (pathname === '/user/expenses/tripExpense') {
+            return Array.from(fuelAndDriverChargeTypes)
+        } else if (pathname === '/user/expenses/truckExpense') {
+            return Array.from(maintenanceChargeTypes)
+        } else if (pathname === '/user/expenses/officeExpense') {
+            return Array.from(officeExpenseTypes)
+        } else {
+            return [...fuelAndDriverChargeTypes, ...maintenanceChargeTypes, ...officeExpenseTypes]
+        }
+    }, [pathname])
 
+    const handleCheckboxChange = useCallback((category: string, value: string) => {
+        setSelectedFilters(prev => ({
+            ...prev,
+            [category]: prev[category as keyof typeof selectedFilters].includes(value)
+                ? prev[category as keyof typeof selectedFilters].filter(item => item !== value)
+                : [...prev[category as keyof typeof selectedFilters], value]
+        }))
+    }, [])
 
-
-    // Handler functions to update states for checkboxes
-    const handleTruckChange = (truckNo: string) => {
-        setSelectedTrucks(prev =>
-            prev.includes(truckNo)
-                ? prev.filter(truck => truck !== truckNo)
-                : [...prev, truckNo]
+    const filterItems = useCallback((items: any[], key: string) => {
+        return items.filter(item =>
+            item[key].toLowerCase().includes(searchQuery.toLowerCase())
         )
-    }
+    }, [searchQuery])
 
-    const handleDriverChange = (driverId: string) => {
-        setSelectedDrivers(prev =>
-            prev.includes(driverId)
-                ? prev.filter(driver => driver !== driverId)
-                : [...prev, driverId]
-        )
-    }
+    const handleSelectAll = useCallback((category: string, items: string[]) => {
+        setSelectedFilters(prev => ({
+            ...prev,
+            [category]: prev[category as keyof typeof selectedFilters].length === items.length ? [] : items
+        }))
+    }, [])
 
-    const handleShopChange = (shopId: string) => {
-        setSelectedShops(prev =>
-            prev.includes(shopId)
-                ? prev.filter(shop => shop !== shopId)
-                : [...prev, shopId]
-        )
-    }
-
-    const handleTripChange = (tripId: string) => {
-        setSelectedTrips(prev =>
-            prev.includes(tripId)
-                ? prev.filter(trip => trip !== tripId)
-                : [...prev, tripId]
-        )
-    }
-
-    const handleExpenseChange = (expense: string) => {
-        setSelectedExpenses(prev =>
-            prev.includes(expense)
-                ? prev.filter(expense => expense !== expense)
-                : [...prev, expense]
-        )
-    }
-
-    const handleMonthYearChange = (monYear: string) => {
-        setSelectedMonthYears(prev =>
-            prev.includes(monYear)
-                ? prev.filter(monthYear => monthYear !== monYear)
-                : [...prev, monYear]
-        )
-    }
-
-    const handlePaymentModeChange = (mode: string) => {
-        setSelectedPaymentModes(prev =>
-            prev.includes(mode)
-                ? prev.filter(paymentMode => paymentMode !== mode)
-                : [...prev, mode]
-        )
-    }
+    const isAllSelected = useCallback((category: string, items: string[]) => {
+        return selectedFilters[category as keyof typeof selectedFilters].length === items.length
+    }, [selectedFilters])
 
     if (!isOpen) return null
 
@@ -111,11 +91,9 @@ const ExpenseFilterModal: React.FC<Props> = ({ onClose, isOpen, monthYearOptions
             <motion.div
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: 1 }}
-                transition={{
-                    duration: 0.5,
-                    ease: [0, 0.71, 0.2, 1.01]
-                }} className="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl max-h-[800px]">
-                {/* Modal Header */}
+                transition={{ duration: 0.3, ease: [0, 0.71, 0.2, 1.01] }}
+                className="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl max-h-[80vh] flex flex-col"
+            >
                 <div className="flex justify-between items-center border-b pb-2 mb-4">
                     <h2 className="text-lg font-semibold">Expense Filter</h2>
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
@@ -123,165 +101,235 @@ const ExpenseFilterModal: React.FC<Props> = ({ onClose, isOpen, monthYearOptions
                     </button>
                 </div>
 
-                {/* Modal Body */}
-                <div className="space-y-4 grid grid-cols-3">
+                <Input
+                    type="text"
+                    placeholder="Search..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="mb-4"
+                />
 
-
-                    <div className='col-span-1 border-r-2 border-gray-300 px-4'>
-
-                        <ul className='flex flex-col space-y-2'>
-                            {ulOptions.map((option, index) => (
-                                <li key={index} onClick={() => setRender(option)} className={`p-4 text-black font-normal text-lg hover:bg-hoverColor cursor-pointer border-b-2 border-gray-200 rounded-lg ${render === option ? 'bg-lightOrange' : ''}`}>
-                                    {option}
-                                </li>
-                            ))}
-                        </ul>
+                <div className="flex flex-col md:flex-row gap-4">
+                    <div className="w-full md:w-1/4 space-y-2">
+                        {filterCategories.map((category) => (
+                            <Button
+                                key={category}
+                                variant={activeCategory === category ? "newyork" : "outline"}
+                                className="w-full justify-start"
+                                onClick={() => setActiveCategory(category)}
+                            >
+                                {category}
+                            </Button>
+                        ))}
                     </div>
-                    <div className='col-span-2'>
-                        {pathname !== '/user/expenses/officeExpense' && trucks && render === 'Trucks' && (
-                            <div className='relative h-full overflow-auto p-4 text-black font-normal text-lg'>
-                                {trucks.map(truck => (
-                                    <div key={truck.truckNo} className="flex items-center space-x-2 border-b-2 border-gray-200">
-                                        <input
-                                            type="checkbox"
-                                            value={truck.truckNo}
-                                            checked={selectedTrucks.includes(truck.truckNo)}
-                                            onChange={() => handleTruckChange(truck.truckNo)}
-                                            className="accent-bottomNavBarColor hover:accent-opacity-80"
+
+                    <div className="w-full md:w-3/4 border rounded-lg p-4 max-h-[300px] overflow-y-auto thin-scrollbar">
+                        {activeCategory === 'Trucks' && trucks && (
+                            <>
+                                <div className="flex items-center space-x-2 py-2 border-b mb-2">
+                                    <Checkbox
+                                        id="select-all-trucks"
+                                        checked={isAllSelected('trucks', trucks.map(truck => truck.truckNo))}
+                                        onCheckedChange={() => handleSelectAll('trucks', trucks.map(truck => truck.truckNo))}
+                                    />
+                                    <label htmlFor="select-all-trucks">Select All</label>
+                                </div>
+                                {filterItems(trucks, 'truckNo').map(truck => (
+                                    <div key={truck.truckNo} className="flex items-center space-x-2 py-2">
+                                        <Checkbox
+                                            id={`truck-${truck.truckNo}`}
+                                            checked={selectedFilters.trucks.includes(truck.truckNo)}
+                                            onCheckedChange={() => handleCheckboxChange('trucks', truck.truckNo)}
                                         />
-                                        <label >{truck.truckNo}</label>
+                                        <label htmlFor={`truck-${truck.truckNo}`}>{truck.truckNo}</label>
                                     </div>
                                 ))}
-                            </div>
+                            </>
                         )}
-
-                        {monthYearOptions && render === 'Month and Year' && (
+                        {activeCategory === 'Month and Year' && (
                             <>
-                                <div className='relative max-h-[400px] overflow-auto text-black font-normal text-lg p-4'>
-
-                                    {monthYearOptions.map((monYear, index) => (
-                                        <div key={index} className="flex items-center space-x-2 border-b-2 border-gray-200">
-                                            <input
-                                                type="checkbox"
-                                                value={monYear}
-                                                checked={selectedMonthYears.includes(monYear)}
-                                                onChange={() => handleMonthYearChange(monYear)}
-                                                className="accent-bottomNavBarColor hover:accent-opacity-80"
-                                            />
-                                            <label >{monYear}</label>
-                                        </div>
-                                    ))}
-                                </div></>
-
-                        )}
-
-                        {paymentModes && render === 'Payment Mode' && (
-                            <div className='relative max-h-[400px] overflow-auto text-black font-normal text-lg p-4'>
-                                {paymentModes.map((mode, index) => (
-                                    <div key={index} className="flex items-center space-x-2 border-b-2 border-gray-200">
-                                        <input
-                                            type="checkbox"
-                                            value={mode}
-                                            checked={selectedPaymentModes.includes(mode)}
-                                            onChange={() => handlePaymentModeChange(mode)}
-                                            className="accent-bottomNavBarColor hover:accent-opacity-80"
+                                <div className="flex items-center space-x-2 py-2 border-b mb-2">
+                                    <Checkbox
+                                        id="select-all-month-year"
+                                        checked={isAllSelected('monthYear', monthYearOptions)}
+                                        onCheckedChange={() => handleSelectAll('monthYear', monthYearOptions)}
+                                    />
+                                    <label htmlFor="select-all-month-year">Select All</label>
+                                </div>
+                                {monthYearOptions.filter(monYear => monYear.toLowerCase().includes(searchQuery.toLowerCase())).map((monYear, index) => (
+                                    <div key={index} className="flex items-center space-x-2 py-2">
+                                        <Checkbox
+                                            id={`month-year-${index}`}
+                                            checked={selectedFilters.monthYear.includes(monYear)}
+                                            onCheckedChange={() => handleCheckboxChange('monthYear', monYear)}
                                         />
-                                        <label htmlFor={`paymentMode-${index}`}>
-                                            {mode}
+                                        <label htmlFor={`month-year-${index}`}>{monYear}</label>
+                                    </div>
+                                ))}
+                            </>
+                        )}
+                        {activeCategory === 'Payment Mode' && (
+                            <>
+                                <div className="flex items-center space-x-2 py-2 border-b mb-2">
+                                    <Checkbox
+                                        id="select-all-payment-modes"
+                                        checked={isAllSelected('paymentModes', paymentModes)}
+                                        onCheckedChange={() => handleSelectAll('paymentModes', paymentModes)}
+                                    />
+                                    <label htmlFor="select-all-payment-modes">Select All</label>
+                                </div>
+                                {paymentModes.filter(mode => mode.toLowerCase().includes(searchQuery.toLowerCase())).map((mode, index) => (
+                                    <div key={index} className="flex items-center space-x-2 py-2">
+                                        <Checkbox
+                                            id={`payment-mode-${index}`}
+                                            checked={selectedFilters.paymentModes.includes(mode)}
+                                            onCheckedChange={() => handleCheckboxChange('paymentModes', mode)}
+                                        />
+                                        <label htmlFor={`payment-mode-${index}`}>{mode}</label>
+                                    </div>
+                                ))}
+                            </>
+                        )}
+                        {activeCategory === 'Driver' && drivers && (
+                            <>
+                                <div className="flex items-center space-x-2 py-2 border-b mb-2">
+                                    <Checkbox
+                                        id="select-all-drivers"
+                                        checked={isAllSelected('drivers', drivers.map(driver => driver.driver_id))}
+                                        onCheckedChange={() => handleSelectAll('drivers', drivers.map(driver => driver.driver_id))}
+                                    />
+                                    <label htmlFor="select-all-drivers">Select All</label>
+                                </div>
+                                {filterItems(drivers, 'name').map(driver => (
+                                    <div key={driver.driver_id} className="flex items-center space-x-2 py-2">
+                                        <Checkbox
+                                            id={`driver-${driver.driver_id}`}
+                                            checked={selectedFilters.drivers.includes(driver.driver_id)}
+                                            onCheckedChange={() => handleCheckboxChange('drivers', driver.driver_id)}
+                                        />
+                                        <label htmlFor={`driver-${driver.driver_id}`}>{driver.name} • {driver.contactNumber}</label>
+                                    </div>
+                                ))}
+                            </>
+                        )}
+                        {activeCategory === 'Shop' && shops && (
+                            <>
+                                <div className="flex items-center space-x-2 py-2 border-b mb-2">
+                                    <Checkbox
+                                        id="select-all-shops"
+                                        checked={isAllSelected('shops', shops.map(shop => shop.shop_id))}
+                                        onCheckedChange={() => handleSelectAll('shops', shops.map(shop => shop.shop_id))}
+                                    />
+                                    <label htmlFor="select-all-shops">Select All</label>
+                                </div>
+                                {filterItems(shops, 'name').map(shop => (
+                                    <div key={shop.shop_id} className="flex items-center space-x-2 py-2">
+                                        <Checkbox
+                                            id={`shop-${shop.shop_id}`}
+                                            checked={selectedFilters.shops.includes(shop.shop_id)}
+                                            onCheckedChange={() => handleCheckboxChange('shops', shop.shop_id)}
+                                        />
+                                        <label htmlFor={`shop-${shop.shop_id}`}>{shop.name}</label>
+                                    </div>
+                                ))}
+                            </>
+                        )}
+                        {activeCategory === 'Trips' && trips && (
+                            <>
+                                <div className="flex items-center space-x-2 py-2 border-b mb-2">
+                                    <Checkbox
+                                        id="select-all-trips"
+                                        checked={isAllSelected('trips', trips.map(trip => trip.trip_id))}
+                                        onCheckedChange={() => handleSelectAll('trips', trips.map(trip => trip.trip_id))}
+                                    />
+                                    <label htmlFor="select-all-trips">Select All</label>
+                                </div>
+                                {filterItems(trips, 'LR').map(trip => (
+                                    <div key={trip.trip_id} className="flex items-center space-x-2 py-2">
+                                        <Checkbox
+                                            id={`trip-${trip.trip_id}`}
+                                            checked={selectedFilters.trips.includes(trip.trip_id)}
+                                            onCheckedChange={() => handleCheckboxChange('trips', trip.trip_id)}
+                                        />
+                                        <label htmlFor={`trip-${trip.trip_id}`} className="flex-1 grid grid-cols-4 gap-2 items-center">
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <p className="text-left truncate">{trip.LR}</p>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>{trip.LR}</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <p className="text-left truncate">{trip.route.origin.split(',')[0]} &rarr; {trip.route.destination.split(',')[0]}</p>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>{trip.route.origin} &rarr; {trip.route.destination}</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <p className="text-left truncate">{trip.truck}</p>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>{trip.truck}</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <p className="text-left truncate">{new Date(trip.startDate).toLocaleDateString('en-IN')}</p>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>{new Date(trip.startDate).toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
                                         </label>
                                     </div>
                                 ))}
-                            </div>
+                            </>
                         )}
 
-                        {pathname !== '/user/expenses/officeExpense' && drivers && render === 'Driver' && (
-                            <div className='relative max-h-[400px] overflow-auto p-4 text-black font-normal text-lg'>
-                                {drivers.map(driver => (
-                                    <div key={driver.driver_id} className="flex items-center space-x-2 border-b-2 border-gray-200">
-                                        <input
-                                            type="checkbox"
-                                            value={driver.driver_id}
-                                            checked={selectedDrivers.includes(driver.driver_id)}
-                                            onChange={() => handleDriverChange(driver.driver_id)}
-                                            className="accent-bottomNavBarColor hover:accent-opacity-80"
+                        {activeCategory === 'Expense Type' && (
+                            <>
+                                <div className="flex items-center space-x-2 py-2 border-b mb-2">
+                                    <Checkbox
+                                        id="select-all-expense-types"
+                                        checked={isAllSelected('expenseTypes', expenseTypes)}
+                                        onCheckedChange={() => handleSelectAll('expenseTypes', expenseTypes)}
+                                    />
+                                    <label htmlFor="select-all-expense-types">Select All</label>
+                                </div>
+                                {expenseTypes.filter(type => type.toLowerCase().includes(searchQuery.toLowerCase())).map((expense, index) => (
+                                    <div key={index} className="flex items-center space-x-2 py-2">
+                                        <Checkbox
+                                            id={`expense-type-${index}`}
+                                            checked={selectedFilters.expenseTypes.includes(expense)}
+                                            onCheckedChange={() => handleCheckboxChange('expenseTypes', expense)}
                                         />
-                                        <label >{driver.name} • {driver.contactNumber}</label>
+                                        <label htmlFor={`expense-type-${index}`} className="whitespace-nowrap">{expense}</label>
                                     </div>
                                 ))}
-                            </div>
-                        )}
-
-                        {shops && render === 'Shop' && (
-                            <div className='relative max-h-[400px] overflow-auto p-4 text-black font-normal text-lg'>
-                                {shops.map(shop => (
-                                    <div key={shop.shop_id} className="flex items-center space-x-2 border-b-2 border-gray-200">
-                                        <input
-                                            type="checkbox"
-                                            value={shop.shop_id}
-                                            checked={selectedShops.includes(shop.shop_id)}
-                                            onChange={() => handleShopChange(shop.shop_id)}
-                                            className="accent-bottomNavBarColor hover:accent-opacity-80"
-                                        />
-                                        <label >{shop.name} </label>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        {pathname === '/user/expenses/tripExpense' && trips && render === 'Trips' && (
-                            <div className='relative max-h-[400px] overflow-auto p-4 text-black font-normal text-lg'>
-                                {trips.map(trip => (
-                                    <div key={trip.trip_id} className="flex items-center space-x-2 border-b-2 border-gray-200">
-                                        <input
-                                            type="checkbox"
-                                            value={trip.trip_id}
-                                            checked={selectedTrips.includes(trip.trip_id)}
-                                            onChange={() => handleTripChange(trip.trip_id)}
-                                            className="accent-bottomNavBarColor hover:accent-opacity-80"
-                                        />
-                                        <label className='whitespace-nowrap'>{trip.LR} • {trip.route.origin.split(',')[0]} &rarr; {trip.route.destination.split(',')[0]} • {trip.truck}</label>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-
-                        {render === 'Expense Type' && (
-                            <div className='relative max-h-[400px] overflow-auto p-4 text-black font-normal text-lg'>
-                                {expenseTypes.map((expense, index) => (
-                                    <div key={index} className="flex items-center space-x-2 border-b-2 border-gray-200">
-                                        <input
-                                            type="checkbox"
-                                            value={expense}
-                                            checked={selectedExpenses.includes(expense)}
-                                            onChange={() => handleExpenseChange(expense)}
-                                            className="accent-bottomNavBarColor hover:accent-opacity-80"
-                                        />
-                                        <label className='whitespace-nowrap'>{expense}</label>
-                                    </div>
-                                ))}
-                            </div>
+                            </>
                         )}
                     </div>
                 </div>
 
-                {/* Modal Footer */}
                 <div className="mt-6 flex justify-end space-x-4">
-                    <Button variant={'outline'}
-                        onClick={onClose}
-                    >
+                    <Button variant="outline" onClick={onClose}>
                         Cancel
                     </Button>
                     <Button
                         onClick={() => {
-                            handleFilter({
-                                trucks: selectedTrucks,
-                                monthYear: selectedMonthYears,
-                                paymentModes: selectedPaymentModes,
-                                drivers: selectedDrivers,
-                                trips: selectedTrips,
-                                shops: selectedShops,
-                                expenseTypes: selectedExpenses
-                            })
+                            handleFilter(selectedFilters)
                             onClose()
                         }}
                     >
@@ -293,4 +341,5 @@ const ExpenseFilterModal: React.FC<Props> = ({ onClose, isOpen, monthYearOptions
     )
 }
 
-export default ExpenseFilterModal
+export default React.memo(ExpenseFilterModal)
+

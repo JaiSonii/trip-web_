@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { Roboto } from 'next/font/google';
 import { Toaster } from "@/components/ui/toaster";
 import { useEffect } from "react";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 // Import Roboto font from Google Fonts
 const roboto = Roboto({
@@ -51,9 +52,11 @@ export default function RootLayout({
           <div className="w-screen text-black">
             <MainLayout>{children}</MainLayout>
             <Toaster />
+            <SpeedInsights />
           </div>
         </div>
       </body>
+
     </html>
   );
 }

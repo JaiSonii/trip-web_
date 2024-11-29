@@ -46,7 +46,7 @@ const placeholders: { [key: string]: string } = {
   amount: 'Enter Total Amount',
   advance: 'Enter Advance Amount Paid',
   balance: 'Enter Remaining Balance',
-  commission: 'Enter Commission Amount',
+  commision: 'Enter Commission Amount',
   hamali: 'Enter Hamali Charges',
   extraWeight: 'Enter Extra Weight (if any)',
   cashAC: 'Enter Dasti Account Charges',
@@ -74,13 +74,16 @@ interface FormDataType {
   from: string;
   to: string;
   truckHireCost: string;
+  commision: string;
   weight: string;
   material: string;
   unit: string;
   noOfBags: string;
+  vehicleOwner : string;
   advance: string;
   hamali: string;
   extraWeight: string;
+  billingtype: string;
   cashAC: string;
   extra: string;
   TDS: string;
@@ -102,7 +105,7 @@ const steps = [
   },
   {
     title: 'Trip Details',
-    fields: ['from', 'to', 'truckNo', 'truckHireCost', 'material', 'weight', 'unit', 'noOfBags', 'advance', 'hamali']
+    fields: ['from', 'to', 'truckNo', 'truckHireCost', 'material', 'weight', 'unit', 'noOfBags', 'advance', 'hamali', 'commision']
   },
   {
     title: 'Extra Details',
@@ -133,7 +136,10 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
     truckHireCost: trip.truckHireCost || '',
     weight: trip.weight || '',
     material: trip.material || '',
+    vehicleOwner : trip.supplierName || '',
     unit: '',
+    billingtype: trip.billingType || '',
+    commision: '',
     noOfBags: '',
     advance: '',
     hamali: '',
@@ -287,109 +293,145 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
   }
 
   function Bilty({ formData, color }: { formData: FormDataType, color: string }) {
+    const netBalance = Number(formData.truckHireCost) - Number(formData.advance) - Number(formData.commision) - Number(formData.hamali) - Number(formData.cashAC) - Number(formData.extra) - Number(formData.TDS) - Number(formData.tire) - Number(formData.spareParts)
     return (
-      <Card className="relative max-w-2xl mx-auto p-6 font-sans text-sm shadow-md border-2 border-gray-200">
-        <div className="absolute top-2 right-2 text-right text-xs mt-2">
-          <p>📞 {formData.contactNumber}{formData.email && `, ✉️ ${formData.email}`}</p>
-        </div>
-        <div className="text-center mt-8">
-          <h1 className="text-orange-600 text-lg font-bold">CHALLAN/FREIGHT MEMO</h1>
-          <h2 className="text-2xl font-bold text-gray-800 mt-2">{formData.companyName}</h2>
+      <Card className="relative max-w-[800px] mx-auto font-sans text-sm shadow-md bg-white p-0">
+
+        <div className='border border-black border-b-0 p-2'>
+          <div className="flex justify-between items-center mb-5">
+            <h1 className="text-lg font-semibold uppercase text-center border-b-2 border-gray-500 pb-1">Challan / Freight Memo</h1>
+            <div className="text-right text-xs">
+              <p>📞 {formData.contactNumber}{formData.email && `, ✉️ ${formData.email}`}</p>
+            </div>
+          </div>
+
+          <div className="text-center mb-5">
+            <div className="flex items-center justify-center">
+              <Image src="https://www.awajahi.com/awajahi%20logo.png" alt="Company Logo" width={80} height={80} />
+              <div className="ml-4">
+                <h2 className="text-3xl font-semibold text-gray-800"><CompanyHeader formData={formData} /></h2>
+                <p className="text-lg font-normal uppercase text-gray-700">Fleet Owners and Transport Contractors</p>
+              </div>
+            </div>
+            <p className="text-sm text-gray-600 mt-2">
+              {formData.address}, {formData.city}, {formData.pincode}
+            </p>
+          </div>
         </div>
 
-        <div className="text-center mt-2">
-          <p className="text-sm text-gray-600">
-            {formData.address},<br /> {formData.city}, {formData.pincode}
-          </p>
-        </div>
 
-        <table className="w-full border-collapse mt-6">
+        <table className="w-full border-collapse">
           <tbody>
             <tr>
-              <td className="border border-gray-300 p-2 bg-gray-50">Trailer No.: {formData.truckNo}</td>
-              <td className="border border-gray-300 p-2 bg-gray-50">Challan No.: {formData.challanNo}</td>
-              <td className="border border-gray-300 p-2 bg-gray-50">Date: {new Date(formData.date).toLocaleDateString('en-IN')}</td>
+              <td className="border border-black p-2">Trailer No.: <strong>{formData.truckNo}</strong></td>
+              <td className="border border-black p-2">Challan No.: <strong>{formData.challanNo}</strong></td>
+              <td className="border border-black p-2">Date: <strong>{new Date(formData.date).toLocaleDateString('en-IN')}</strong></td>
             </tr>
             <tr>
-              <td className="border border-gray-300 p-2">Material: {formData.material}</td>
-              <td className="border border-gray-300 p-2">From: {formData.from}</td>
-              <td className="border border-gray-300 p-2">To: {formData.to}</td>
+              <td className="border border-black p-2">Material: <strong>{formData.material}</strong></td>
+              <td className="border border-black p-2">From: <strong>{formData.from}</strong></td>
+              <td className="border border-black p-2">To: <strong>{formData.to}</strong></td>
             </tr>
             <tr>
-              <td className="border border-gray-300 p-2">Vehicle Owner: </td>
-              <td className="border border-gray-300 p-2" colSpan={2}>PAN No.: {formData.pan}</td>
+              <td className="border border-black p-2">Vehicle Owner: <strong>{formData.vehicleOwner}</strong></td>
+              <td className="border border-black p-2" colSpan={2}>PAN No.: <strong>{formData.pan}</strong></td>
             </tr>
             <tr>
-              <td className="border border-gray-300 p-2 align-top" rowSpan={14} style={{ width: '50%' }}>
-                <strong className="text-gray-700">DASTI TO DRIVER:</strong>
-                <div className="whitespace-pre-line mt-2 text-sm">
-                  {formData.cashAC}
-                </div>
+              <td className="border border-black p-2">
+                <strong>Dasti to Driver:</strong>
               </td>
-              <td className="border border-gray-300 p-2 bg-gray-50">Rate</td>
-              <td className="border border-gray-300 p-2 bg-gray-50">{trip.billingType}</td>
+              <td className="border border-black p-2">Rate</td>
+              <td className="border border-black p-2"><strong>{formData.billingtype}</strong></td>
             </tr>
             <tr>
-              <td className="border border-gray-300 p-2">Truck Hire Cost</td>
-              <td className="border border-gray-300 p-2">{formatNumber(formData.truckHireCost)}</td>
+              <td className="border border-black p-2 align-top" rowSpan={14}>
+                <div className="whitespace-pre-wrap text-sm italic">{formData.cashAC}</div>
+              </td>
+              <td className="border border-black p-2">Truck Hire Cost</td>
+              <td className="border border-black p-2"><strong>{formatNumber(formData.truckHireCost)}</strong></td>
             </tr>
             <tr>
-              <td className="border border-gray-300 p-2 bg-gray-50">Weight</td>
-              <td className="border border-gray-300 p-2 bg-gray-50">{formData.weight}</td>
+              <td className="border border-black p-2">Weight</td>
+              <td className="border border-black p-2"><strong>{formData.weight}</strong></td>
             </tr>
             <tr>
-              <td className="border border-gray-300 p-2">Advance</td>
-              <td className="border border-gray-300 p-2">{formatNumber(formData.advance)}</td>
+              <td className="border border-black p-2">Total Freight</td>
+              <td className="border border-black p-2"><strong>{formatNumber(formData.truckHireCost)}</strong></td>
             </tr>
             <tr>
-              <td className="border border-gray-300 p-2 bg-gray-50">Balance</td>
-              <td className="border border-gray-300 p-2 bg-gray-50">{formatNumber(Number(formData.truckHireCost) - Number(formData.advance))}</td>
+              <td className="border border-black p-2">Advance</td>
+              <td className="border border-black p-2"><strong>{formatNumber(formData.advance)}</strong></td>
             </tr>
             <tr>
-              <td className="border border-gray-300 p-2">Hamali</td>
-              <td className="border border-gray-300 p-2">{formatNumber(formData.hamali)}</td>
+              <td className="border border-black p-2">Balance</td>
+              <td className="border border-black p-2"><strong>{formatNumber(Number(formData.truckHireCost) - Number(formData.advance))}</strong></td>
             </tr>
             <tr>
-              <td className="border border-gray-300 p-2 bg-gray-50">Extra Weight</td>
-              <td className="border border-gray-300 p-2 bg-gray-50">{formData.extraWeight}</td>
+              <td className="border border-black p-2">Commission</td>
+              <td className="border border-black p-2"><strong>{formatNumber(formData.commision)}</strong></td>
             </tr>
             <tr>
-              <td className="border border-gray-300 p-2">Extra</td>
-              <td className="border border-gray-300 p-2">{formData.extra}</td>
+              <td className="border border-black p-2">Hamali</td>
+              <td className="border border-black p-2"><strong>{formatNumber(formData.hamali)}</strong></td>
             </tr>
             <tr>
-              <td className="border border-gray-300 p-2 bg-gray-50">TDS</td>
-              <td className="border border-gray-300 p-2 bg-gray-50">{formData.TDS}</td>
+              <td className="border border-black p-2">Extra Weight</td>
+              <td className="border border-black p-2"><strong>{formData.extraWeight}</strong></td>
             </tr>
             <tr>
-              <td className="border border-gray-300 p-2">Tyre</td>
-              <td className="border border-gray-300 p-2">{formData.tire}</td>
+              <td className="border border-black p-2">Cash DASTI A/C</td>
+              <td className="border border-black p-2"><strong>{formatNumber(formData.cashAC)}</strong></td>
             </tr>
             <tr>
-              <td className="border border-gray-300 p-2 bg-gray-50">Spare Parts</td>
-              <td className="border border-gray-300 p-2 bg-gray-50">{formData.spareParts}</td>
+              <td className="border border-black p-2">Extra</td>
+              <td className="border border-black p-2"><strong>{formData.extra}</strong></td>
             </tr>
             <tr>
-              <td className="border border-gray-300 p-2" colSpan={3}>
-                <strong>LR Rec. date: {new Date(formData.date).toLocaleDateString('en-IN')}</strong>
-                <p className="mt-2"></p>
-                <strong>Payment date:</strong>
+              <td className="border border-black p-2">TDS</td>
+              <td className="border border-black p-2"><strong>{formData.TDS}</strong></td>
+            </tr>
+            <tr>
+              <td className="border border-black p-2">Tyre</td>
+              <td className="border border-black p-2"><strong>{formData.tire}</strong></td>
+            </tr>
+            <tr>
+              <td className="border border-black p-2">Spare Parts</td>
+              <td className="border border-black p-2"><strong>{formData.spareParts}</strong></td>
+            </tr>
+            <tr>
+              <td className="border border-black p-2 font-bold">Net Balance</td>
+              <td className="border border-black p-2 font-bold"><strong>{formatNumber(netBalance)}</strong></td>
+            </tr>
+            <tr>
+              <td className="border border-black p-2" colSpan={3}>
+                <strong>LR Rec. Date: {new Date(formData.date).toLocaleDateString('en-IN')}</strong>
+                <p><strong>Payment Date:</strong></p>
               </td>
             </tr>
           </tbody>
         </table>
 
-        <div className="text-xs mt-4">
-          <p><strong>Conditions:</strong> Vehicle owner is responsible for the safe and timely delivery of the consignment and would be fined in case of late delivery and damages.</p>
+        <div className='border border-black border-t-0 p-2'>
+          <div className="mt-4 text-sm">
+            <strong>Conditions:</strong>
+            <div className="flex justify-between items-center gap-8">
+              <p>Vehicle owner is responsible for the safe and timely delivery of the consignment and would be fined in case of late delivery and damages.</p>
+              <span className='whitespace-nowrap'>For {formData.companyName}</span>
+            </div>
+            <div className="text-right mt-4">
+              <p>Cashier/Accountant</p>
+            </div>
+          </div>
+
+          <div className="text-center text-xs mt-4 py-4">
+            <p className="flex items-center justify-center">
+              Powered by
+              <Image src="https://www.awajahi.com/awajahi%20logo.png" alt="Awajahi logo" width={20} height={20} className="mx-1" />
+              Awajahi
+            </p>
+          </div>
         </div>
 
-        <div className="text-center text-xs mt-4 flex items-center justify-center">
-          <span className='flex items-center space-x-1'>
-            Powered by
-            <Image src={logo} alt='Awajahi logo' width={15} height={15} className='mx-1' />
-            Awajahi
-          </span>
-        </div>
       </Card>
     );
 
@@ -459,30 +501,6 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
                         );
                       }
 
-                      // if (field === "consigner" || field === "consignee") {
-                      //   const group = formData[field];
-                      //   return (
-                      //     <div key={field} className="mb-4 col-span-2">
-                      //       <h3 className="font-semibold mb-2 capitalize">{field} Details</h3>
-                      //       <div className="grid grid-cols-2 gap-4">
-                      //         {Object.keys(group).map((subField) => (
-                      //           <div className="mb-1" key={subField}>
-                      //             <label htmlFor={`${field}.${subField}`} className="text-xs text-gray-500">
-                      //               {placeholders[subField]}
-                      //             </label>
-                      //             <Input
-                      //               id={`${field}.${subField}`}
-                      //               name={`${field}.${subField}`}
-                      //               value={group[subField]}
-                      //               onChange={handleInputChange}
-                      //               className="mt-1"
-                      //             />
-                      //           </div>
-                      //         ))}
-                      //       </div>
-                      //     </div>
-                      //   );
-                      // }
 
                       return (
                         <div key={field} className="mb-1">

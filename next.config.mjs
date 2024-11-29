@@ -18,6 +18,12 @@ const nextConfig = {
         port: '',
         pathname: '/**', // Allow all paths from the second bucket
       },
+      {
+        protocol: 'https',
+        hostname: `www.awajahi.com`,
+        port: '',
+        pathname: '/**', // Allow all paths from the second bucket
+      },
     ],
   },
 };

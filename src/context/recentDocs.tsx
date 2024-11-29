@@ -8,6 +8,8 @@ const RecentDocsCtx = createContext<{
         tripDocuments: number,
         driverDocuments: number,
         truckDocuments: number,
+        companyDocuments: 0,
+        otherDocuments: 0,
     },
     error: any,
     docsLoading: boolean
@@ -17,6 +19,8 @@ const RecentDocsCtx = createContext<{
         tripDocuments: 0,
         driverDocuments: 0,
         truckDocuments: 0,
+        companyDocuments: 0,
+        otherDocuments: 0,
     },
     docsLoading: false,
     error: null,
@@ -43,6 +47,8 @@ export const RecentDocumentsProvider = ({ children }: Props) => {
         tripDocuments: 0,
         driverDocuments: 0,
         truckDocuments: 0,
+        companyDocuments : 0,
+        otherDocuments: 0,
     };
 
     return (

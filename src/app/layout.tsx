@@ -3,7 +3,6 @@ import './globals.css';
 import { cn } from "@/lib/utils";
 import { Roboto as FontSans } from "next/font/google";
 import Script from "next/script";
-import Analytics from "@/lib/analytics";
 
 // Load Roboto font with multiple weights
 const fontSans = FontSans({
@@ -91,6 +90,7 @@ export default function RootLayout({
       >
         {children}
         {/* <Analytics /> */}
+        
       </body>
     </html>
   );
