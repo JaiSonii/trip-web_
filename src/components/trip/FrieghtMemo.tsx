@@ -307,7 +307,7 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
 
           <div className="text-center mb-5">
             <div className="flex items-center justify-center">
-              <Image src="https://www.awajahi.com/awajahi%20logo.png" alt="Company Logo" width={80} height={80} />
+              <Image src={formData.logo} alt="Company Logo" width={80} height={80} />
               <div className="ml-4">
                 <h2 className="text-3xl font-semibold text-gray-800"><CompanyHeader formData={formData} /></h2>
                 <p className="text-lg font-normal uppercase text-gray-700">Fleet Owners and Transport Contractors</p>
