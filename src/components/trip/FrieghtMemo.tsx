@@ -57,7 +57,7 @@ const placeholders: { [key: string]: string } = {
   truckNo: 'Enter Truck Number',
   logo: 'Upload Company Logo',
   challanNo: 'Enter Challan Number',
-  lrdate : 'Enter LR Rec. Date (if applicable)',
+  lrdate: 'Enter LR Rec. Date (if applicable)',
 };
 
 
@@ -80,7 +80,7 @@ interface FormDataType {
   material: string;
   unit: string;
   noOfBags: string;
-  vehicleOwner : string;
+  vehicleOwner: string;
   advance: string;
   hamali: string;
   extraWeight: string;
@@ -91,7 +91,7 @@ interface FormDataType {
   tire: string;
   spareParts: string;
   truckNo: string;
-  lrdate : string
+  lrdate: string
   logo: string;
 }
 
@@ -103,7 +103,7 @@ const steps = [
   },
   {
     title: 'Frieght Memo Details',
-    fields: ['date', 'challanNo','lrdate']
+    fields: ['date', 'challanNo', 'lrdate']
   },
   {
     title: 'Trip Details',
@@ -139,7 +139,7 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
     truckHireCost: trip.truckHireCost || '',
     weight: trip.weight || '',
     material: trip.material || '',
-    vehicleOwner : trip.supplierName || '',
+    vehicleOwner: trip.supplierName || '',
     unit: '',
     billingtype: trip.billingType || '',
     commision: '',
@@ -151,7 +151,7 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
     extra: '',
     TDS: '',
     tire: '',
-    lrdate : new Date(trip?.dates[2] || Date.now()).toISOString().split('T')[0],
+    lrdate: new Date(trip?.dates[2] || Date.now()).toISOString().split('T')[0],
     spareParts: '',
     truckNo: trip.truck || '',
     challanNo: '',
@@ -162,36 +162,57 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
 
   const fetchUser = async () => {
     try {
-      const [res, paymentsRes] = await Promise.all([fetch('/api/users'), fetch(`/api/suppliers/${trip.supplier}/payments/trips/${trip.trip_id}`)])
-      if (!res.ok || !paymentsRes.ok) {
+      const [userRes, paymentsRes] = await Promise.allSettled([
+        fetch('/api/users'),
+        fetch(`/api/suppliers/${trip.supplier}/payments/trips/${trip.trip_id}`)
+      ]);
+
+      // Process user response
+      if (userRes.status === 'fulfilled' && userRes.value.ok) {
+        const data = await userRes.value.json();
+        const user = data.user;
+        setUser(user);
+        setFormData((prev) => ({
+          ...prev,
+          companyName: user.company,
+          address: user.address,
+          contactNumber: user.phone,
+          gstNumber: user.gstNumber,
+          logo: user.logoUrl,
+          pincode: user.pincode,
+          email: user.email,
+          city: user.city,
+          pan: user.panNumber,
+        }));
+      } else {
         toast({
-          description: 'Failed to fetch Details',
-          variant: 'destructive'
-        })
-        return
+          description: 'Failed to fetch user details',
+          variant: 'destructive',
+        });
       }
-      const data = await res.json()
-      const paymentsData = await paymentsRes.json()
-      setPayments(paymentsData.supplierAccounts)
-      const user = data.user
-      setUser(user)
-      setFormData((prev) => ({
-        ...prev,
-        companyName: user.company,
-        address: user.address,
-        contactNumber: user.phone,
-        gstNumber: user.gstNumber,
-        logo: user.logoUrl,
-        pincode: user.pincode,
-        email: user.email,
-        city: user.city,
-        pan: user.panNumber,
-        advance: paymentsData.totalAmount
-      }))
+
+      // Process payments response
+      if (paymentsRes.status === 'fulfilled' && paymentsRes.value.ok) {
+        const paymentsData = await paymentsRes.value.json();
+        setPayments(paymentsData.supplierAccounts);
+        setFormData((prev) => ({
+          ...prev,
+          advance: paymentsData.totalAmount,
+        }));
+      } else {
+        toast({
+          description: 'Failed to fetch payment details',
+          variant: 'destructive',
+        });
+      }
     } catch (error) {
-      alert('Failed to fetch User Details')
+      console.error('Error fetching details:', error);
+      toast({
+        description: 'An unexpected error occurred',
+        variant: 'destructive',
+      });
     }
-  }
+  };
 
   useEffect(() => {
     if (isOpen) fetchUser();
@@ -322,7 +343,7 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
               {formData.address}, {formData.city}, {formData.pincode}
             </p>
             <p className='text-sm text-gray-600 mt-2'>
-            {formData.email && ` ✉️ ${formData.email}`}
+              {formData.email && ` ✉️ ${formData.email}`}
             </p>
           </div>
         </div>
@@ -353,7 +374,7 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
             </tr>
             <tr>
               <td className="border border-black p-2 align-top" rowSpan={14}>
-                <div className="whitespace-pre-wrap text-sm italic flex flex-col gap-4">{payments?.map((payment : any, index : number)=>(
+                <div className="whitespace-pre-wrap text-sm italic flex flex-col gap-4">{payments?.map((payment: any, index: number) => (
                   <div key={payment._id} className='flex items-center justify-start gap-4 font-semibold text-gray-900'>
                     <p>{index + 1}. </p>
                     <p> {new Date(payment.date).toLocaleDateString('en-IN')} -</p>
