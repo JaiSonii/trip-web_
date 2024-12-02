@@ -107,47 +107,44 @@ export async function PATCH(req: Request) {
 
 export async function PUT(req: Request) {
   try {
-    // Verify user
     const { user, error } = await verifyToken(req);
     if (!user || error) {
-      return NextResponse.json({ error, status: 401 });
+      console.error("Token verification error:", error);
+      return NextResponse.json({ error: 'Unauthorized access', status: 401 });
     }
 
-    // Parse form data
     const formData = await req.formData();
+    if (!formData.has('data')) {
+      return NextResponse.json({ error: 'Missing required data field', status: 400 });
+    }
+
     const data = JSON.parse(formData.get('data') as string);
 
-    // Helper function to upload files
     const uploadIfPresent = async (file: File | null, folder: string) => {
       if (!file) return '';
 
-      const fileBuffer = Buffer.from(await file.arrayBuffer());
-      const fileName = `${folder}/${user}`;
-      const contentType = file.type;
+      try {
+        const fileBuffer = Buffer.from(await file.arrayBuffer());
+        const fileName = `${folder}/${user}`;
+        const contentType = file.type;
 
-      // Upload file to S3
-      const s3FileName = await uploadFileToS3(fileBuffer, fileName, contentType);
-      return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3FileName}${contentType === 'application/pdf'? '.pdf' : ''}`;
+        const s3FileName = await uploadFileToS3(fileBuffer, fileName, contentType);
+        return `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3FileName}${contentType === 'application/pdf' ? '.pdf' : ''}`;
+      } catch (error) {
+        console.error(`Error uploading ${folder} file:`, error);
+        throw new Error(`Failed to upload ${folder} file`);
+      }
     };
 
-    // Upload files if present
-    const logoFile = formData.get('logo') as File | null;
-    const stampFile = formData.get('stamp') as File | null;
-    const signatureFile = formData.get('signature') as File | null;
+    const logoUrl = await uploadIfPresent(formData.get('logo') as File | null, 'logos');
+    const stampUrl = await uploadIfPresent(formData.get('stamp') as File | null, 'stamps');
+    const signatureUrl = await uploadIfPresent(formData.get('signature') as File | null, 'signatures');
 
-    const logoUrl = await uploadIfPresent(logoFile, 'logos');
-    const stampUrl = await uploadIfPresent(stampFile, 'stamps');
-    const signatureUrl = await uploadIfPresent(signatureFile, 'signatures');
-
-
-    // Update data with S3 URLs
-
-
-    // Connect to database and update user
     await connectToDatabase();
     const updatedUser = await User.findOneAndUpdate({ user_id: user }, data, { new: true });
 
     if (!updatedUser) {
+      console.error('User not found:', user);
       return NextResponse.json({ error: 'User not found', status: 400 });
     }
 
@@ -155,7 +152,7 @@ export async function PUT(req: Request) {
     if (stampUrl) updatedUser.stampUrl = stampUrl;
     if (signatureUrl) updatedUser.signatureUrl = signatureUrl;
 
-    await updatedUser.save()
+    await updatedUser.save();
 
     return NextResponse.json({ status: 200, user: updatedUser });
   } catch (error) {
@@ -163,3 +160,4 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: 'Internal Server Error', status: 500 });
   }
 }
+

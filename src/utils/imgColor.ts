@@ -1,4 +1,4 @@
-export function getDominantColor(imageSrc: string): Promise<string> {
+export function getBestLogoColor(imageSrc: string): Promise<string> {
     return new Promise((resolve, reject) => {
         const img = new Image();
         img.crossOrigin = "Anonymous"; // Allow cross-origin image processing
@@ -26,8 +26,8 @@ export function getDominantColor(imageSrc: string): Promise<string> {
             // Get the pixel data
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
 
-            // Calculate the dominant color
-            const color = calculateDominantColor(imageData);
+            // Calculate the best logo color
+            const color = calculateAccurateDominantColor(imageData);
             resolve(color);
         };
 
@@ -37,10 +37,39 @@ export function getDominantColor(imageSrc: string): Promise<string> {
     });
 }
 
-function calculateDominantColor(data: Uint8ClampedArray): string {
+function calculateAccurateDominantColor(data: Uint8ClampedArray): string {
     const colorCounts: { [key: string]: number } = {};
-    let maxCount = 0;
-    let dominantColor: string | null = null;
+    let maxWeight = 0;
+    let bestColor: string | null = null;
+
+    // Helper to convert RGB to HSL
+    const rgbToHsl = (r: number, g: number, b: number) => {
+        r /= 255;
+        g /= 255;
+        b /= 255;
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        let h = 0,
+            s = 0,
+            l = (max + min) / 2;
+
+        if (max !== min) {
+            const delta = max - min;
+            s = l > 0.5 ? delta / (2 - max - min) : delta / (max + min);
+            if (max === r) h = (g - b) / delta + (g < b ? 6 : 0);
+            else if (max === g) h = (b - r) / delta + 2;
+            else h = (r - g) / delta + 4;
+            h /= 6;
+        }
+
+        return { h, s, l }; // h: [0,1], s: [0,1], l: [0,1]
+    };
+
+    // Helper to check if a color is suitable
+    const isColorSuitable = (r: number, g: number, b: number) => {
+        const { s, l } = rgbToHsl(r, g, b);
+        return s > 0.2 && l > 0.2 && l < 0.8; // Exclude low saturation and very bright/dark colors
+    };
 
     // Loop through pixel data (RGBA format)
     for (let i = 0; i < data.length; i += 4) {
@@ -52,18 +81,24 @@ function calculateDominantColor(data: Uint8ClampedArray): string {
         // Skip fully transparent pixels
         if (a === 0) continue;
 
+        // Skip unsuitable colors
+        if (!isColorSuitable(r, g, b)) continue;
+
         const color = `${r},${g},${b}`; // Combine RGB values as a string
 
-        // Count occurrences of each color
-        colorCounts[color] = (colorCounts[color] || 0) + 1;
+        // Weight color based on brightness and saturation
+        const { s, l } = rgbToHsl(r, g, b);
+        const weight = s * 100 + l * 50; // Adjust weights as needed
 
-        // Update the dominant color
-        if (colorCounts[color] > maxCount) {
-            maxCount = colorCounts[color];
-            dominantColor = color;
+        colorCounts[color] = (colorCounts[color] || 0) + weight;
+
+        // Update the best color
+        if (colorCounts[color] > maxWeight) {
+            maxWeight = colorCounts[color];
+            bestColor = color;
         }
     }
 
-    // Return the dominant color in rgb() format
-    return dominantColor ? `rgb(${dominantColor})` : "rgb(0,0,0)";
+    // Fallback to a neutral gray if no valid color is found
+    return bestColor ? `rgb(${bestColor})` : "rgb(128,128,128)";
 }

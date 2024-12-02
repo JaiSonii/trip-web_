@@ -25,7 +25,7 @@ export const metadata: Metadata = {
     description: "Explore Awajahi for reliable and efficient transportation services across India.",
     url: "https://www.awajahi.com",
     type: "website",
-    locale: "en_US",
+    locale: "en_IN",
     images: [
       {
         url: "https://www.awajahi.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fawajahi%20logo.e4977a4d.png&w=64&q=75",
@@ -89,7 +89,6 @@ export default function RootLayout({
         )}
       >
         {children}
-        {/* <Analytics /> */}
         
       </body>
     </html>

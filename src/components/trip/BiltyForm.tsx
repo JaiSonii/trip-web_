@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ITrip } from '@/utils/interface'
 import generatePDF from 'react-to-pdf';
 import Image from 'next/image'
-import { getDominantColor } from '@/utils/imgColor'
+import { getBestLogoColor } from '@/utils/imgColor'
 
 type ConsignerConsigneeType = {
   gstNumber: string;
@@ -249,7 +249,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
     useEffect(() => {
       async function fetchDominantColor() {
         try {
-          const color = await getDominantColor(formData.logo);
+          const color = await getBestLogoColor(formData.logo);
           setDominantColor(color);
         } catch (error) {
           console.error("Failed to fetch dominant color:", error);

@@ -86,8 +86,6 @@ const EditTripForm: React.FC<Props> = ({ onSubmit, trip }) => {
             trucks={trucks}
             formData={formData}
             handleChange={handleChange}
-            selectedTruck={selectedTruck}
-            hasSupplier={hasSupplier}
             setFormData={setFormData}
         />
     ), [trucks, formData.truck, handleChange, selectedTruck, hasSupplier]);

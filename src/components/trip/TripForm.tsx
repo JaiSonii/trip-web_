@@ -296,8 +296,6 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
             trucks={trucks}
             formData={formData}
             handleChange={handleChange}
-            selectedTruck={selectedTruck}
-            hasSupplier={hasSupplier}
             setFormData={setFormData}
           />
         </div>

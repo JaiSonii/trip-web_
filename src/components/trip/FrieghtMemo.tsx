@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ITrip, PaymentBook } from '@/utils/interface'
 import generatePDF from 'react-to-pdf';
 import Image from 'next/image'
-import { getDominantColor } from '@/utils/imgColor'
+import { getBestLogoColor } from '@/utils/imgColor'
 import { formatNumber } from '@/utils/utilArray'
 import logo from '@/assets/awajahi logo.png'
 import { useToast } from '../hooks/use-toast'
@@ -56,7 +56,8 @@ const placeholders: { [key: string]: string } = {
   spareParts: 'Enter Spare Parts Cost (if applicable)',
   truckNo: 'Enter Truck Number',
   logo: 'Upload Company Logo',
-  challanNo: 'Enter Challan Number'
+  challanNo: 'Enter Challan Number',
+  lrdate : 'Enter LR Rec. Date (if applicable)',
 };
 
 
@@ -90,6 +91,7 @@ interface FormDataType {
   tire: string;
   spareParts: string;
   truckNo: string;
+  lrdate : string
   logo: string;
 }
 
@@ -101,7 +103,7 @@ const steps = [
   },
   {
     title: 'Frieght Memo Details',
-    fields: ['date', 'challanNo']
+    fields: ['date', 'challanNo','lrdate']
   },
   {
     title: 'Trip Details',
@@ -121,6 +123,7 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
   const [showBill, setShowBill] = useState(false)
   const [selectedCopy, setSelectedCopy] = useState('Consigner')
   const [user, setUser] = useState<any>()
+  const [payments, setPayments] = useState<any[]>([])
   const [formData, setFormData] = useState<FormDataType>({
     gstNumber: '',
     pan: '',
@@ -148,6 +151,7 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
     extra: '',
     TDS: '',
     tire: '',
+    lrdate : new Date(trip?.dates[2] || Date.now()).toISOString().split('T')[0],
     spareParts: '',
     truckNo: trip.truck || '',
     challanNo: '',
@@ -168,6 +172,7 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
       }
       const data = await res.json()
       const paymentsData = await paymentsRes.json()
+      setPayments(paymentsData.supplierAccounts)
       const user = data.user
       setUser(user)
       setFormData((prev) => ({
@@ -215,9 +220,9 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
 
   const downloadAllPDFs = async () => {
     await new Promise((resolve) => setTimeout(resolve, 200)); // Small delay to ensure color is applied
-    generatePDF(billRef, { filename: `FM-${trip.LR}-${formData.truckNo}-${trip.trip_id}` });
+    generatePDF(billRef, { filename: `FM-${trip.LR}-${formData.truckNo}` });
 
-    if (!user.companyName || !user.address || !user.gstNumber || !user.pincode || !user.email || !user.city || !user.panNumber) {
+    if (!user.companyName || !user.address || !user.gstNumber || !user.pincode || !user.email || !user.city || !user.panNumber || !user.company) {
       const data = new FormData()
       data.append('data', JSON.stringify({
         companyName: user.company || formData.companyName,
@@ -269,7 +274,7 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
     useEffect(() => {
       async function fetchDominantColor() {
         try {
-          const color = await getDominantColor(formData.logo);
+          const color = await getBestLogoColor(formData.logo);
           setDominantColor(color);
         } catch (error) {
           console.error("Failed to fetch dominant color:", error);
@@ -301,13 +306,13 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
           <div className="flex justify-between items-center mb-5">
             <h1 className="text-lg font-semibold uppercase text-center border-b-2 border-gray-500 pb-1">Challan / Freight Memo</h1>
             <div className="text-right text-xs">
-              <p>📞 {formData.contactNumber}{formData.email && `, ✉️ ${formData.email}`}</p>
+              <p>📞 {formData.contactNumber}</p>
             </div>
           </div>
 
           <div className="text-center mb-5">
             <div className="flex items-center justify-center">
-              <Image src="https://www.awajahi.com/awajahi%20logo.png" alt="Company Logo" width={80} height={80} />
+              <Image src={formData.logo} alt="Company Logo" width={80} height={80} />
               <div className="ml-4">
                 <h2 className="text-3xl font-semibold text-gray-800"><CompanyHeader formData={formData} /></h2>
                 <p className="text-lg font-normal uppercase text-gray-700">Fleet Owners and Transport Contractors</p>
@@ -315,6 +320,9 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
             </div>
             <p className="text-sm text-gray-600 mt-2">
               {formData.address}, {formData.city}, {formData.pincode}
+            </p>
+            <p className='text-sm text-gray-600 mt-2'>
+            {formData.email && ` ✉️ ${formData.email}`}
             </p>
           </div>
         </div>
@@ -345,7 +353,13 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
             </tr>
             <tr>
               <td className="border border-black p-2 align-top" rowSpan={14}>
-                <div className="whitespace-pre-wrap text-sm italic">{formData.cashAC}</div>
+                <div className="whitespace-pre-wrap text-sm italic flex flex-col gap-4">{payments?.map((payment : any, index : number)=>(
+                  <div key={payment._id} className='flex items-center justify-start gap-4 font-semibold text-gray-900'>
+                    <p>{index + 1}. </p>
+                    <p> {new Date(payment.date).toLocaleDateString('en-IN')} -</p>
+                    <p> ₹{formatNumber(payment.amount)}/-</p>
+                  </div>
+                ))}</div>
               </td>
               <td className="border border-black p-2">Truck Hire Cost</td>
               <td className="border border-black p-2"><strong>{formatNumber(formData.truckHireCost)}</strong></td>
@@ -404,7 +418,7 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
             </tr>
             <tr>
               <td className="border border-black p-2" colSpan={3}>
-                <strong>LR Rec. Date: {new Date(formData.date).toLocaleDateString('en-IN')}</strong>
+                <strong>LR Rec. Date: {new Date(formData.lrdate).toLocaleDateString('en-IN')}</strong>
                 <p><strong>Payment Date:</strong></p>
               </td>
             </tr>
@@ -418,7 +432,7 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
               <p>Vehicle owner is responsible for the safe and timely delivery of the consignment and would be fined in case of late delivery and damages.</p>
               <span className='whitespace-nowrap'>For {formData.companyName}</span>
             </div>
-            <div className="text-right mt-4">
+            <div className="text-right mt-12">
               <p>Cashier/Accountant</p>
             </div>
           </div>

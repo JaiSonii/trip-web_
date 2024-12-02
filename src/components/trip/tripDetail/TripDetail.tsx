@@ -210,8 +210,8 @@ const TripDetails = () => {
                   <span>Undo Status</span>
                 </div>
               </Button>
-              <ViewBillButton />
-              {trip.truckHireCost ? <Button variant={'outline'} onClick={()=>setFmModalOpen(true)}>Generate FM/Challan</Button> : null}
+              <ViewBillButton trips={[]} />
+              <Button variant={'outline'} onClick={()=>setFmModalOpen(true)}>Generate FM/Challan</Button>
               <Button onClick={() => setBiltyModalOpen(true)}>Generate Bilty</Button>
               
               {/* Add more buttons as needed */}

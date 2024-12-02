@@ -167,7 +167,6 @@ export async function GET(req: Request, { params }: { params: { tripId: string }
       },
       {
         $project: {
-          partyDetails: 0,
           supplierDetails: 0,
           driverDetails: 0,
         }
