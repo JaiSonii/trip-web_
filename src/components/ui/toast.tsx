@@ -29,19 +29,19 @@ const toastVariants = cva(
   {
     variants: {
       variant: {
-        default: "border bg-background text-foreground",
-        destructive:
-          "destructive group border-destructive bg-destructive text-destructive-foreground",
-        warning: "warning group border-warning bg-warning text-warning-foreground",
+        default: "border border-green-500 bg-green-500 text-red-50", // Green success styling
+        warning: "border border-yellow-400 bg-yellow-400 text-yellow-900", // Yellow warning styling
+        destructive: "border border-red-500 bg-red-500 text-red-50", // Red destructive styling
         featureUpdate:
-          "featureUpdate group border-[#FE8631] bg-[#FE8631] text-white",
+          "border-[#FE8631] bg-[#FE8631] text-white", // Custom feature update styling
       },
     },
     defaultVariants: {
-      variant: "default",
+      variant: "default", // Default to success variant
     },
   }
 );
+
 
 
 const Toast = React.forwardRef<

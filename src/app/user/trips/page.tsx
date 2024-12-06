@@ -1,6 +1,6 @@
 'use client';
 
-import React, {  useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import debounce from 'lodash.debounce';
 import { FaTruck, FaCalendarAlt, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
@@ -28,6 +28,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import useSWR from 'swr';
 import dynamic from 'next/dynamic';
+import { useToast } from '@/components/hooks/use-toast';
 
 const EditTripForm = dynamic(() => import('@/components/trip/EditTripForm'), {
   ssr: false,
@@ -48,45 +49,17 @@ const columnOptions = [
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
 export default function TripsPage() {
-  // const { trips: ctxTrips } = useExpenseCtx();
   const router = useRouter();
-  // const [trips, setTrips] = useState<ITrip[] | null>([]);
   const [loading, setLoading] = useState(false);
-  // const [error, setError] = useState<string | null>(null);
   const [selectedStatus, setSelectedStatus] = useState<number | undefined>();
   const [visibleColumns, setVisibleColumns] = useState<string[]>(columnOptions.map(col => col.label));
   const [sortConfig, setSortConfig] = useState<{ key: keyof ITrip | null; direction: 'asc' | 'desc' }>({ key: null, direction: 'asc' });
   const [searchQuery, setSearchQuery] = useState('');
   const [openOptionsId, setOpenOptionsId] = useState<string | null>(null);
-  // const { mutate } = useSWRConfig();
   const [edit, setEdit] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<ITrip | null>(null);
+  const {toast} = useToast()
 
-
-
-  // const fetchTrips = useCallback(async (status?: number) => {
-  //   setLoading(true);
-  //   setError(null);
-  //   try {
-  //     const queryParam = status !== undefined ? `?status=${status}` : '';
-  //     const res = await fetch(`/api/trips${queryParam}`);
-  //     if (!res.ok) throw new Error('Failed to fetch trips');
-  //     const data = await res.json();
-  //     setTrips(data.trips);
-  //   } catch (err) {
-  //     setError((err as Error).message);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }, []);
-
-  // useEffect(() => {
-  //   if (ctxTrips.length > 0) {
-  //     setTrips(ctxTrips);
-  //   } else {
-  //     fetchTrips();
-  //   }
-  // }, [ctxTrips, fetchTrips]);
 
   const { trips: ctxTrips, isLoading } = useExpenseCtx()
 
@@ -207,7 +180,10 @@ export default function TripsPage() {
 
       const newData = await res.json()
       if (newData.status === 400) {
-        alert(newData.message)
+        toast({
+          description:newData.message,
+          variant : 'destructive'
+        })
         return
       }
 
@@ -225,9 +201,16 @@ export default function TripsPage() {
       ])
       setLoading(false)
       mutate() // Revalidate the data after editing
+      toast({
+        description: "Trip Edited Successfully",
+      })
 
     } catch (error) {
       console.error('Error editing trip:', error)
+      toast({
+        description: "Error Editing Trip",
+        variant : 'destructive'
+      })
     } finally {
       setSelectedTrip(null)
       setEdit(false)
@@ -415,18 +398,39 @@ function renderCellContent(columnValue: string, trip: ITrip) {
             <span>{new Date(trip.startDate).toLocaleDateString('en-IN')}</span>
           </div>
           <div>
-            <span className='font-medium text-xs text-gray-500 whitespace-nowrap'>
+            <span className='font-medium flex gap-[1px] text-xs text-gray-500 whitespace-nowrap'>
               EWB Validity :
               {(() => {
                 const eWayBillDoc = trip.documents?.find(doc => doc.type === 'E-Way Bill');
-                return eWayBillDoc?.validityDate
-                  ? new Date(eWayBillDoc.validityDate as any).toLocaleDateString('en-IN',{
-                    day : '2-digit',
-                    month : '2-digit',
-                    year : '2-digit'
-                  })
-                  : 'N/A';
+                if (!eWayBillDoc?.validityDate) {
+                  return 'N/A';
+                }
+
+                const validityDate = new Date(eWayBillDoc.validityDate);
+                const currentDate = new Date(Date.now());
+                const timeDifference = validityDate.getTime() - currentDate.getTime(); // Difference in milliseconds
+                const daysRemaining = timeDifference / (1000 * 60 * 60 * 24); // Convert to days
+
+                let textColorClass = ''; // Class for text color
+                if (daysRemaining < 0) {
+                  textColorClass = 'text-red-500'; // Expired
+                } else if (daysRemaining <= 2) {
+                  textColorClass = 'text-yellow-500'; // Near expiry
+                } else {
+                  textColorClass = 'text-green-500'; // Valid
+                }
+
+                return (
+                  <p className={textColorClass}>
+                    {validityDate.toLocaleDateString('en-IN', {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: '2-digit',
+                    })}
+                  </p>
+                );
               })()}
+
             </span>
 
           </div>
