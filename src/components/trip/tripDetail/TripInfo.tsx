@@ -3,6 +3,8 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { MdEdit } from "react-icons/md";
 import Link from 'next/link';
+import { useTrip } from '@/context/tripContext';
+import { ewbColor } from '@/utils/EwayBillColor';
 
 interface TripInfoProps {
   label: string;
@@ -15,6 +17,7 @@ interface TripInfoProps {
 }
 
 const TripInfo: React.FC<TripInfoProps> = ({ label, value, tripId, startDate, validityDate, supplierId, supplierName }) => {
+  const {trip} = useTrip()
   const [notes, setNotes] = useState<string>('');
   const [isEditingNotes, setIsEditingNotes] = useState<boolean>(false);
 
@@ -54,7 +57,7 @@ const TripInfo: React.FC<TripInfoProps> = ({ label, value, tripId, startDate, va
                 <span>START DATE :  {formatDate(startDate)}</span>
               )}
               {validityDate && (
-                <span>E-WAY BILL VALIDITY :  {formatDate(validityDate)}</span>
+                <span className='flex gap-1'>E-WAY BILL VALIDITY :  {ewbColor(trip)}</span>
               )}
             </div>
           )}

@@ -292,7 +292,7 @@ export async function GET(req: Request) {
 
         <div class="footer">
   Generated with 
-  <img src="https://www.awajahi.com/_next/image?url=%2F_next%2Fstatic%2Fmedia%2Fawajahi%20logo.e4977a4d.png&w=64&q=75" alt="Awajahi logo" class="footer-logo" /> 
+  <img src="https://www.awajahi.com/awajahi%20logo.png" alt="Awajahi logo" class="footer-logo" /> 
   Awajahi.com
 </div>
 

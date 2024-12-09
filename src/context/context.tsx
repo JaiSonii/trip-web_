@@ -58,17 +58,22 @@ type Props = {
     children: React.ReactNode;
 };
 
-export const ExpenseProvider = ({ children }: Props) => {
-    const { data: tripsData, error: tripsError, isLoading: tripsLoading } = useSWR("/api/trips", fetcher);
-    const { data: driversData, error: driversError, isLoading: driversLoading } = useSWR("/api/drivers", fetcher);
-    const { data: trucksData, error: trucksError, isLoading: trucksLoading } = useSWR("/api/trucks", fetcher);
-    const { data: shopsData, error: shopsError, isLoading: shopsLoading } = useSWR("/api/shopkhata", fetcher);
-    const { data: partiesData, error: partiesError, isLoading: partiesLoading } = useSWR("/api/parties", fetcher);
-    const { data: suppliersData, error: suppliersError, isLoading: suppliersLoading } = useSWR("/api/suppliers", fetcher);
-    const { data: dashData, error: dashError, isLoading: dashLoading } = useSWR('/api/dashboard', fetcher);
+const config = {
+    revalidateOnFocus: false,
+    refreshInterval: 0, 
+}
 
-    const isLoading = tripsLoading || driversLoading || trucksLoading || shopsLoading;
-    const error = tripsError || driversError || trucksError || shopsError;
+export const ExpenseProvider = ({ children }: Props) => {
+    const { data: tripsData, error: tripsError, isLoading: tripsLoading } = useSWR("/api/trips", fetcher, config);
+    const { data: driversData, error: driversError, isLoading: driversLoading } = useSWR("/api/drivers", fetcher, config);
+    const { data: trucksData, error: trucksError, isLoading: trucksLoading } = useSWR("/api/trucks", fetcher, config);
+    const { data: shopsData, error: shopsError, isLoading: shopsLoading } = useSWR("/api/shopkhata", fetcher, config);
+    const { data: partiesData, error: partiesError, isLoading: partiesLoading } = useSWR("/api/parties", fetcher, config);
+    const { data: suppliersData, error: suppliersError, isLoading: suppliersLoading } = useSWR("/api/suppliers", fetcher, config);
+    const { data: dashData, error: dashError, isLoading: dashLoading } = useSWR('/api/dashboard', fetcher, config);
+
+    const isLoading = tripsLoading || driversLoading || trucksLoading || shopsLoading || partiesLoading || suppliersLoading || dashLoading;
+    const error = tripsError || driversError || trucksError || shopsError || partiesError || suppliersError || dashError;
 
     const trips = tripsData?.trips || [];
     const drivers = driversData?.drivers || [];

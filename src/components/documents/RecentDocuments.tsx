@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import Image from 'next/image'
 import { useToast } from '../hooks/use-toast'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 import TripDocumentUpload from './TripDocumentUpload'
 import TruckDocumentUpload from './TruckDocumentUpload'
 import DriverDocumentUpload from './DriverDocumentUpload'

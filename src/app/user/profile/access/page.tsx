@@ -7,7 +7,6 @@ import { useRouter } from 'next/navigation';
 import Loading from '@/app/user/loading';
 
 const AccessPage: React.FC = () => {
-  const router = useRouter();
   const params = useSearchParams();
   const userId = params.get('user_id');
   const [phone, setPhone] = useState<string>('');

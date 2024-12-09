@@ -4,19 +4,15 @@ import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { X } from 'lucide-react'
+import { Loader2, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ITrip, PaymentBook } from '@/utils/interface'
-import generatePDF from 'react-to-pdf';
-import Image from 'next/image'
+import { FMDataType, ITrip } from '@/utils/interface'
 import { getBestLogoColor } from '@/utils/imgColor'
-import { formatNumber } from '@/utils/utilArray'
-import logo from '@/assets/awajahi logo.png'
 import { useToast } from '../hooks/use-toast'
-import { Card, CardContent, CardHeader, CardTitle } from '../ui/card'
-import { Separator } from '@radix-ui/react-select'
-import { Table, TableBody, TableRow, TableCell } from '../ui/table'
+import { FMemo } from '@/utils/DocGeneration'
+import 'jspdf/dist/polyfills.es.js';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
 
 
@@ -60,42 +56,6 @@ const placeholders: { [key: string]: string } = {
   lrdate: 'Enter LR Rec. Date (if applicable)',
 };
 
-
-interface FormDataType {
-  gstNumber: string;
-  pan: string;
-  companyName: string;
-  address: string;
-  city: string;
-  pincode: string;
-  contactNumber: string;
-  email: string;
-  date: Date;
-  challanNo: string
-  from: string;
-  to: string;
-  truckHireCost: string;
-  commision: string;
-  weight: string;
-  material: string;
-  unit: string;
-  noOfBags: string;
-  vehicleOwner: string;
-  advance: string;
-  hamali: string;
-  extraWeight: string;
-  billingtype: string;
-  cashAC: string;
-  extra: string;
-  TDS: string;
-  tire: string;
-  spareParts: string;
-  truckNo: string;
-  lrdate: string
-  logo: string;
-}
-
-
 const steps = [
   {
     title: 'Company Details',
@@ -121,10 +81,10 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
 
   const [currentStep, setCurrentStep] = useState(0)
   const [showBill, setShowBill] = useState(false)
-  const [selectedCopy, setSelectedCopy] = useState('Consigner')
+  const [pdfDownloading, setPDFDownloading] = useState(false)
   const [user, setUser] = useState<any>()
   const [payments, setPayments] = useState<any[]>([])
-  const [formData, setFormData] = useState<FormDataType>({
+  const [formData, setFormData] = useState<FMDataType>({
     gstNumber: '',
     pan: '',
     companyName: '',
@@ -157,7 +117,6 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
     challanNo: '',
     logo: ''
   })
-  const billRef = useRef<HTMLDivElement>(null)
   const { toast } = useToast()
 
   const fetchUser = async () => {
@@ -218,32 +177,38 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
     if (isOpen) fetchUser();
   }, [isOpen])
 
-  const biltyColor = useMemo(() => {
-    const copy = selectedCopy
-    switch (copy) {
-      case 'Consigner':
-        return 'bg-red-100'
-      case 'Consignee':
-        return 'bg-blue-100'
-      case 'Driver':
-        return 'bg-yellow-100'
-      case 'Office':
-        return 'bg-green-100'
-
-
-      default:
-        break;
-    }
-  }, [selectedCopy])
 
 
 
 
   const downloadAllPDFs = async () => {
-    await new Promise((resolve) => setTimeout(resolve, 200)); // Small delay to ensure color is applied
-    generatePDF(billRef, { filename: `FM-${trip.LR}-${formData.truckNo}` });
+    const pdf = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a4'
+    });
+    const element = document.getElementById(`fmemo`);
+    if (element) {
+      setPDFDownloading(true);
+      const canvas = await html2canvas(element, { scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
 
-    if (!user.companyName || !user.address || !user.gstNumber || !user.pincode || !user.email || !user.city || !user.panNumber || !user.company) {
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      const imgY = (pdfHeight - imgHeight * ratio) / 2;
+
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+
+    }
+    pdf.save(`Challan-${trip.LR}-${formData.truckNo}.pdf`);
+    setPDFDownloading(false);
+
+    if ((!user.companyName && formData.companyName) || (!user.address && formData.address) || (!user.gstNumber && formData.gstNumber) || (!user.panNumber && formData.pan) || (!user.pincode && formData.pincode) || (!user.city && formData.city) || (!user.email && formData.email)) {
       const data = new FormData()
       data.append('data', JSON.stringify({
         companyName: user.company || formData.companyName,
@@ -267,9 +232,6 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
       }
     }
   };
-
-
-
 
   if (!isOpen) return null
 
@@ -318,159 +280,7 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
     );
   }
 
-  function Bilty({ formData, color }: { formData: FormDataType, color: string }) {
-    const netBalance = Number(formData.truckHireCost) - Number(formData.advance) - Number(formData.commision) - Number(formData.hamali) - Number(formData.cashAC) - Number(formData.extra) - Number(formData.TDS) - Number(formData.tire) - Number(formData.spareParts)
-    return (
-      <Card className="relative max-w-[800px] mx-auto font-sans text-sm shadow-md bg-white p-0">
 
-        <div className='border border-black border-b-0 p-2'>
-          <div className="flex justify-between items-center mb-5">
-            <h1 className="text-lg font-semibold uppercase text-center border-b-2 border-gray-500 pb-1">Challan / Freight Memo</h1>
-            <div className="text-right text-xs">
-              <p>📞 {formData.contactNumber}</p>
-            </div>
-          </div>
-
-          <div className="text-center mb-5">
-            <div className="flex items-center justify-center">
-              <Image src={formData.logo} alt="Company Logo" width={80} height={80} />
-              <div className="ml-4">
-                <h2 className="text-3xl font-semibold text-gray-800"><CompanyHeader formData={formData} /></h2>
-                <p className="text-lg font-normal uppercase text-gray-700">Fleet Owners and Transport Contractors</p>
-              </div>
-            </div>
-            <p className="text-sm text-gray-600 mt-2">
-              {formData.address}, {formData.city}, {formData.pincode}
-            </p>
-            <p className='text-sm text-gray-600 mt-2'>
-              {formData.email && ` ✉️ ${formData.email}`}
-            </p>
-          </div>
-        </div>
-
-
-        <table className="w-full border-collapse">
-          <tbody>
-            <tr>
-              <td className="border border-black p-2">Trailer No.: <strong>{formData.truckNo}</strong></td>
-              <td className="border border-black p-2">Challan No.: <strong>{formData.challanNo}</strong></td>
-              <td className="border border-black p-2">Date: <strong>{new Date(formData.date).toLocaleDateString('en-IN')}</strong></td>
-            </tr>
-            <tr>
-              <td className="border border-black p-2">Material: <strong>{formData.material}</strong></td>
-              <td className="border border-black p-2">From: <strong>{formData.from}</strong></td>
-              <td className="border border-black p-2">To: <strong>{formData.to}</strong></td>
-            </tr>
-            <tr>
-              <td className="border border-black p-2">Vehicle Owner: <strong>{formData.vehicleOwner}</strong></td>
-              <td className="border border-black p-2" colSpan={2}>PAN No.: <strong>{formData.pan}</strong></td>
-            </tr>
-            <tr>
-              <td className="border border-black p-2">
-                <strong>Dasti to Driver:</strong>
-              </td>
-              <td className="border border-black p-2">Rate</td>
-              <td className="border border-black p-2"><strong>{formData.billingtype}</strong></td>
-            </tr>
-            <tr>
-              <td className="border border-black p-2 align-top" rowSpan={14}>
-                <div className="whitespace-pre-wrap text-sm italic flex flex-col gap-4">{payments?.map((payment: any, index: number) => (
-                  <div key={payment._id} className='flex items-center justify-start gap-4 font-semibold text-gray-900'>
-                    <p>{index + 1}. </p>
-                    <p> {new Date(payment.date).toLocaleDateString('en-IN')} -</p>
-                    <p> ₹{formatNumber(payment.amount)}/-</p>
-                  </div>
-                ))}</div>
-              </td>
-              <td className="border border-black p-2">Truck Hire Cost</td>
-              <td className="border border-black p-2"><strong>{formatNumber(formData.truckHireCost)}</strong></td>
-            </tr>
-            <tr>
-              <td className="border border-black p-2">Weight</td>
-              <td className="border border-black p-2"><strong>{formData.weight}</strong></td>
-            </tr>
-            <tr>
-              <td className="border border-black p-2">Total Freight</td>
-              <td className="border border-black p-2"><strong>{formatNumber(formData.truckHireCost)}</strong></td>
-            </tr>
-            <tr>
-              <td className="border border-black p-2">Advance</td>
-              <td className="border border-black p-2"><strong>{formatNumber(formData.advance)}</strong></td>
-            </tr>
-            <tr>
-              <td className="border border-black p-2">Balance</td>
-              <td className="border border-black p-2"><strong>{formatNumber(Number(formData.truckHireCost) - Number(formData.advance))}</strong></td>
-            </tr>
-            <tr>
-              <td className="border border-black p-2">Commission</td>
-              <td className="border border-black p-2"><strong>{formatNumber(formData.commision)}</strong></td>
-            </tr>
-            <tr>
-              <td className="border border-black p-2">Hamali</td>
-              <td className="border border-black p-2"><strong>{formatNumber(formData.hamali)}</strong></td>
-            </tr>
-            <tr>
-              <td className="border border-black p-2">Extra Weight</td>
-              <td className="border border-black p-2"><strong>{formData.extraWeight}</strong></td>
-            </tr>
-            <tr>
-              <td className="border border-black p-2">Cash DASTI A/C</td>
-              <td className="border border-black p-2"><strong>{formatNumber(formData.cashAC)}</strong></td>
-            </tr>
-            <tr>
-              <td className="border border-black p-2">Extra</td>
-              <td className="border border-black p-2"><strong>{formData.extra}</strong></td>
-            </tr>
-            <tr>
-              <td className="border border-black p-2">TDS</td>
-              <td className="border border-black p-2"><strong>{formData.TDS}</strong></td>
-            </tr>
-            <tr>
-              <td className="border border-black p-2">Tyre</td>
-              <td className="border border-black p-2"><strong>{formData.tire}</strong></td>
-            </tr>
-            <tr>
-              <td className="border border-black p-2">Spare Parts</td>
-              <td className="border border-black p-2"><strong>{formData.spareParts}</strong></td>
-            </tr>
-            <tr>
-              <td className="border border-black p-2 font-bold">Net Balance</td>
-              <td className="border border-black p-2 font-bold"><strong>{formatNumber(netBalance)}</strong></td>
-            </tr>
-            <tr>
-              <td className="border border-black p-2" colSpan={3}>
-                <strong>LR Rec. Date: {new Date(formData.lrdate).toLocaleDateString('en-IN')}</strong>
-                <p><strong>Payment Date:</strong></p>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div className='border border-black border-t-0 p-2'>
-          <div className="mt-4 text-sm">
-            <strong>Conditions:</strong>
-            <div className="flex justify-between items-center gap-8">
-              <p>Vehicle owner is responsible for the safe and timely delivery of the consignment and would be fined in case of late delivery and damages.</p>
-              <span className='whitespace-nowrap'>For {formData.companyName}</span>
-            </div>
-            <div className="text-right mt-12">
-              <p>Cashier/Accountant</p>
-            </div>
-          </div>
-
-          <div className="text-center text-xs mt-4 py-4">
-            <p className="flex items-center justify-center">
-              Powered by
-              <Image src="https://www.awajahi.com/awajahi%20logo.png" alt="Awajahi logo" width={20} height={20} className="mx-1" />
-              Awajahi
-            </p>
-          </div>
-        </div>
-
-      </Card>
-    );
-
-  }
 
   return (
     <motion.div
@@ -545,7 +355,7 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
                           <Input
                             id={field}
                             name={field}
-                            value={formData[field as keyof FormDataType] as string || ""}
+                            value={formData[field as keyof FMDataType] as string || ""}
                             onChange={handleInputChange}
                             className="mt-1"
                           />
@@ -572,15 +382,18 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
           </>
         ) : (
           <div className="w-full">
-            <div ref={billRef} className="p-2">
-              <Bilty formData={formData} color={biltyColor as string} />
+            <div className="sticky bottom-0 left-0 right-0 bg-white p-4 border-b border-gray-200">
+              <div className="flex justify-between max-w-5xl mx-auto">
+                <Button variant="outline" onClick={() => setShowBill(false)}>
+                  Edit Form
+                </Button>
+                <Button disabled={pdfDownloading} onClick={() => downloadAllPDFs()}>{pdfDownloading ?  <Loader2 className='text-white animate-spin' /> : 'Download as PDF'}</Button>
+              </div>
             </div>
-            <div className="mt-4 flex justify-between">
-              <Button variant="outline" onClick={() => setShowBill(false)}>
-                Edit Form
-              </Button>
-              <Button onClick={() => downloadAllPDFs()}>Download PDF</Button>
+            <div id='fmemo' className="p-2">
+              <FMemo formData={formData} payments={payments} />
             </div>
+
           </div>
         )}
       </motion.div>

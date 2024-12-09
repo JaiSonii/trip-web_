@@ -1,25 +1,18 @@
 'use client'
 
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { X } from 'lucide-react'
+import { Loader2, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ITrip } from '@/utils/interface'
-import generatePDF from 'react-to-pdf';
-import Image from 'next/image'
-import { getBestLogoColor } from '@/utils/imgColor'
+import { ConsignerConsigneeType, EWBFormDataType, ITrip } from '@/utils/interface'
+import { Bilty } from '@/utils/DocGeneration'
+import 'jspdf/dist/polyfills.es.js';
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
-type ConsignerConsigneeType = {
-  gstNumber: string;
-  name: string;
-  address: string;
-  city: string;
-  pincode: string;
-  contactNumber: string;
-};
 
 type Props = {
   isOpen: boolean
@@ -49,30 +42,6 @@ const placeholders: { [key: string]: string } = {
   name: 'Enter Name'
 };
 
-type FormDataType = {
-  gstNumber: string
-  pan: string
-  companyName: string
-  address: string
-  city: string
-  pincode: string
-  contactNumber: string
-  email: string
-  date: Date
-  LR: string
-  consigner: ConsignerConsigneeType
-  consignee: ConsignerConsigneeType
-  material: string
-  weight: string
-  unit: string
-  paidBy: 'consigner' | 'consignee' | 'agent'
-  ewayBillNo: string
-  invoiceNo: string
-  truckNo: string
-  logo: string
-  signature: string
-}
-
 const steps = [
   {
     title: 'Company Details',
@@ -98,9 +67,9 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
 
   const [currentStep, setCurrentStep] = useState(0)
   const [showBill, setShowBill] = useState(false)
-  const [selectedCopy, setSelectedCopy] = useState('Consigner')
   const [user, setUser] = useState<any>()
-  const [formData, setFormData] = useState<FormDataType>({
+  const [pdfDownloading, setPDFDownloading] = useState(false)
+  const [formData, setFormData] = useState<EWBFormDataType>({
     gstNumber: '',
     pan: '',
     companyName: '',
@@ -157,10 +126,10 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
         gstNumber: user.gstNumber,
         logo: user.logoUrl,
         signature: user.signatureUrl,
-        pincode : user.pincode,
-        pan : user.panNumber,
-        city : user.city,
-        email : user.email
+        pincode: user.pincode,
+        pan: user.panNumber,
+        city: user.city,
+        email: user.email
 
       }))
     } catch (error) {
@@ -172,8 +141,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
     if (isOpen) fetchUser();
   }, [isOpen])
 
-  const biltyColor = useMemo(() => {
-    const copy = selectedCopy
+  const biltyColor = (copy: string) => {
     switch (copy) {
       case 'Consigner':
         return 'bg-red-100'
@@ -188,30 +156,59 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
       default:
         break;
     }
-  }, [selectedCopy])
+  }
 
 
 
 
   const downloadAllPDFs = async () => {
+    const pdf = new jsPDF({
+      orientation: 'landscape',
+      unit: 'mm',
+      format: 'a4'
+    });
+
     for (const tab of tabs) {
-      setSelectedCopy(tab); // Set the color for each PDF
-      await new Promise((resolve) => setTimeout(resolve, 200)); // Small delay to ensure color is applied
-      generatePDF(billRef, { filename: `Bilty-${tab}-${selectedCopy + " Copy"}-${trip.LR}-${formData.truckNo}-${trip.trip_id}` });
+      const element = document.getElementById(`bilty-${tab}`);
+      setPDFDownloading(true)
+      if (element) {
+        const canvas = await html2canvas(element, { scale: 2 });
+        const imgData = canvas.toDataURL('image/png');
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = canvas.width;
+        const imgHeight = canvas.height;
+        const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+
+        const imgX = (pdfWidth - imgWidth * ratio) / 2;
+        const imgY = (pdfHeight - imgHeight * ratio) / 2;
+
+        pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+
+        if (tab !== tabs[tabs.length - 1]) {
+          pdf.addPage();
+        }
+      }
     }
-    if (!user.companyName || !user.address || !user.gstNumber || !user.company || !user.panNumber || !user.pincode || !user.city || !user.email) {
+
+    pdf.save(`Bilty-${trip.LR}-${formData.truckNo}.pdf`);
+    setPDFDownloading(false)
+    if ((!user.companyName && formData.companyName) || (!user.address && formData.address) || (!user.gstNumber && formData.gstNumber) || (!user.panNumber && formData.pan) || (!user.pincode && formData.pincode) || (!user.city && formData.city) || (!user.email && formData.email)) {
       try {
+        const formdata = new FormData()
+        formdata.append('data', JSON.stringify({
+          companyName: user.company || formData.companyName,
+          address: user.address || formData.address,
+          gstNumber: user.gstNumber || formData.gstNumber,
+          pincode: user.pincode || formData.pincode,
+          panNumber: user.panNumber || formData.pan,
+          city: user.city || formData.city,
+          email: user.email || formData.email,
+        }))
         const res = await fetch('/api/users', {
           method: 'PUT',
-          body: JSON.stringify({
-            companyName: user.company || formData.companyName,
-            address: user.address || formData.address,
-            gstNumber: user.gstNumber || formData.gstNumber,
-            pincode : user.pincode || formData.pincode,
-            panNumber : user.panNumber || formData.pan,
-            city : user.city || formData.city,
-            email : user.email || formData.email,
-          })
+          body: formdata
         })
         if (!res.ok) {
           alert('Failed to update user details')
@@ -221,8 +218,6 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
       }
     }
   };
-
-
 
 
   if (!isOpen) return null
@@ -243,291 +238,6 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
 
   const progressPercentage = ((currentStep + 1) / steps.length) * 100
 
-  function CompanyHeader({ formData }: { formData: { logo: string; companyName: string } }) {
-    const [dominantColor, setDominantColor] = useState("black");
-
-    useEffect(() => {
-      async function fetchDominantColor() {
-        try {
-          const color = await getBestLogoColor(formData.logo);
-          setDominantColor(color);
-        } catch (error) {
-          console.error("Failed to fetch dominant color:", error);
-          setDominantColor("black"); // Fallback color
-        }
-      }
-
-      if (formData.logo) {
-        fetchDominantColor();
-      }
-    }, [formData.logo]);
-
-    return (
-      <h1
-        className={`text-3xl font-bold`}
-        style={{ color: dominantColor }}
-      >
-        {formData.companyName}
-      </h1>
-    );
-  }
-
-  function Bilty({ formData, color }: { formData: FormDataType, color: string }) {
-    return (
-
-
-      <div className={`border border-black  w-full h-full ${color} relative max-w-[1000px]`}>
-
-        <section className="px-6 py-2 w-full">
-          <div className="flex items-center gap-8 justify-center">
-            <div className="flex justify-center">
-              {formData.logo ?
-                <div>
-                  <Image src={formData.logo} alt='logo' width={60} height={60} className='' />
-                </div>
-                :
-                <div className=" bg-gray-300 text-white text-center flex items-center justify-center rounded-full"
-                  style={{ width: "70px", height: "70px" }}></div>
-              }
-
-            </div>
-
-            <div className="text-center py-2 border-b border-black">
-              <CompanyHeader formData={formData} />
-              <h2 className="text-lg font-normal text-gray-700">FLEET OWNERS & TRANSPORT CONTRACTOR</h2>
-              <span className="text-sm text-gray-600 whitespace-nowrap">
-                {formData.address}
-              </span>
-            </div>
-
-            <div className="text-right text-gray-700 absolute top-2 right-2">
-              <div className="flex items-center gap-1">
-                <div>
-                  <img src="https://img.icons8.com/ios-filled/50/000000/phone.png" alt="Phone Icon"
-                    height="20px" width="20px" />
-                </div>
-                <div>
-                  <p className="text-xs">{formData.contactNumber}</p>
-                  <p className="text-xs">{formData.contactNumber}</p>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        <div className="grid grid-cols-4 gap-6">
-          <div className="col-span-3">
-            <section className="">
-              <div className="grid grid-cols-3 gap-10 ">
-                <div className=" col-span-1 border-y-2 border-r-2 border-black p-1">
-                  <p className="text-xs font-semibold text-black text-center mb-2 whitespace-nowrap">SCHEDULE OF
-                    DEMURRAGE</p>
-                  <p className="text-xs text-black whitespace-nowrap">Demurrage chargebl after……………</p>
-                  <p className="text-xs text-black whitespace-nowrap">days from today@RS…….………</p>
-                  <p className="text-xs text-black whitespace-nowrap">perday per Qtl. On weight charged</p>
-                </div >
-                <div className="flex flex-col">
-                  <span
-                    className="text-sm font-semibold text-center p-2 border-b border-black text-[#FF0000] whitespace-nowrap ">{selectedCopy.toUpperCase() + " COPY"}</span>
-                  <span
-                    className="text-sm font-normal text-center p-2 border-b border-black text-black whitespace-nowrap">AT
-                    CARRIERS RISK</span>
-                  <span
-                    className="text-[#FF0000] text-sm font-semibold text-center p-2 whitespace-nowrap">INSURANCE</span>
-                </div>
-                <div className="flex-col w-full col-span-1">
-                  <div className="border-2 p-1 border-black">
-                    <p className="text-sm text-black text-center font-semibold">Caution</p>
-                    <p className="text-xs text-black" style={{ fontSize: "10px" }}>This Consignment will not be
-                      detaineddiverted. rerouted or rebooked
-                      withoutConsignee Bank&apos;s written permission.Will be delivered at the destination</p>
-                  </div>
-
-                  <div className="py-1 text-black border-b border-black">
-                    <span className="text-xs font-semibold">Address of Delivery Office :</span>
-                  </div>
-                  <div className="flex gap-24 text-xs font-semibold">
-                    <p>State :</p>
-                    <p>Tel : {formData.consignee.contactNumber}</p>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section className=" mt-4">
-              <div className="grid grid-cols-9 gap-10">
-                <div className="border-2 border-[#FF0000] text-[#FF0000] p-1 border-l-0 col-span-3">
-                  <h3 className="text-xs text-[#FF0000] text-center">NOTICE</h3>
-                  <p className=" text-[10px]">The consignment covered by this Lorry ceipt shall be stored
-                    at the destination Under the control of the Transport Operator
-                    and shall be delivered to or to the order of the Consignee
-                    Bank whose name is mentioned in the Lorry Receipt. It will
-                    under no circumstances be delivered to anyone without the
-                    written authority from the Consignee banker or its order.
-                    endorsed on the Consignee copy</p>
-                </div>
-                <div className="col-span-3 border border-black p-2 text-xs text-black">
-                  <p>The Customer has stated that:</p>
-                  <p>He has insured the consignment Company ………………</p>
-                  <p>Policy No. ……… Date ……</p>
-                  <p>Amount …………… Date ………</p>
-                </div>
-                <div className="col-span-3 text-xs text-black p-1 border-2 border-black flex flex-col gap-1">
-                  <span className="text-xs">CONSIGNMENT NOTE</span>
-                  <span>No. : <span className='text-red-500'>{formData.LR}</span></span>
-                  <span>Date : <span className='text-red-500'>{new Date(formData.date).toLocaleDateString('en-IN')}</span></span>
-                </div>
-
-
-
-
-              </div>
-            </section>
-
-            <section className=" mt-4">
-              <div className="grid grid-cols-9 gap-10 ">
-                <div className="col-span-6 font-semibold text-black border-t-2 border-black border-l-0" style={{ fontSize: "small" }}>
-                  <div className='border-b-2 border-r-2 border-black p-1'>
-                    <p>Consigner Name and Address :</p>
-                    <p className=" text-red-500">{formData.consigner.name + " " + formData.consigner.address}</p>
-                  </div>
-                  <div className='border-b-2 border-r-2 border-black p-1'>
-                    <p>Consignee Name and Address :</p>
-                    <p className=" text-red-500">{formData.consignee.name + " " + formData.consignee.address}</p>
-                  </div>
-
-                </div>
-
-                <div className="col-span-3 p-2 text-xs text-black">
-                  <div className="mb-2">
-                    <label className="text-[10px]">From :</label>
-                    <p className="border border-black rounded-lg p-2 mt-2 text-red-500">{trip?.route.origin}</p>
-                    <label className="text-[10px]">To :</label>
-                    <p className="border border-black rounded-lg p-2 mt-2 text-red-500">{trip?.route.destination}</p>
-
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section className=" mt-4">
-              <table className="table-auto w-full text-xs">
-                <thead className="font-semibold text-center">
-                  <tr>
-                    <th className="border p-2 border-black">Packages</th>
-                    <th className="border p-2 border-black">Description (said to contain)</th>
-                    <th className="border p-2 border-black">Actual</th>
-                    <th className="border p-2 border-black">Charged</th>
-                    <th className="border p-2 border-black">Rate</th>
-                    <th className="border p-2 border-black">Amount to pay/paid</th>
-                  </tr>
-                </thead>
-                <tbody className="text-center text-red-500">
-                  {formData.material?.split(',').map((item: string, index: number) => (
-                    <tr key={index}>
-                      <td className="border p-2 border-black">{index + 1}</td>
-                      <td className="border p-2 border-black">{item}</td>
-                      <td className="border p-2 border-black">Fixed</td>
-                      <td className="border p-2 border-black">Fixed</td>
-                      <td className="border p-2 border-black">
-                        <div className='flex flex-col gap-3 text-black text-left text-[10px]'>
-                          <p>Mazdoor</p>
-                          <p>Hire Charges</p>
-                          <p>Sur. Ch.</p>
-                          <p>St. Ch.</p>
-                          <p>Risk Ch.</p>
-                          <p className='mt-2 text-xs'>TOTAL</p>
-                        </div>
-                      </td>
-                      <td className="border border-black">
-                        <div className='flex flex-col justify-between'>
-                        <div className='flex font-semibold gap-4 flex-col items-center py-3 justify-between'>
-                          <p>TO</p>
-                          <p>BE</p>
-                          <p>BILLED</p>
-                        </div>
-                        <div className='border-t border-black h-1'>
-
-                        </div>
-                        </div>
-                        
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </section>
-
-          </div>
-          <div className="col-span-1 border border-black border-r-0">
-            <div className="text-[11px] border-b-2 border-black">
-              <div className="border-b-2 p-1 border-black flex flex-col">
-                <span>Address of Issuing Office : </span>
-                <span>Name and Address of Agent : <span className='text-red-500'>{formData.companyName}</span></span>
-              </div>
-              <div className="flex items-center justify-center text-center p-16 text-lg text-red-500">{formData.city}</div>
-            </div>
-            <div className="border-b-2 border-black">
-              <div className="border-b-2 border-black p-1">
-                <p className="text-xs text-black">SERVICE TAX TO BE PAID BY</p>
-              </div>
-              <div className="grid grid-cols-3 text-[10px] h-[25px]">
-                <div className="flex items-center justify-center border-r-2 border-black p-1 overflow-hidden">
-                  CONSIGNER
-                </div>
-                <div className="flex items-center justify-center border-r-2 border-black p-1 overflow-hidden">
-                  CONSIGNEE
-                </div>
-                <div className="flex items-center justify-center p-1 overflow-hidden">
-                  SIGNATORY
-                </div>
-              </div>
-            </div>
-
-            <div className="border-b-2 border-black text-xs flex flex-col gap-4 max-h-[100px] h-full">
-              <h3 className="text-black text-center">Service Tax Reg No.</h3>
-              <span className="mt-4 text-black">PAN No.</span>
-            </div>
-            <div className=" text-black text-[10px] flex flex-col gap-3 p-1">
-              <span className="underline text-black">Private Mark</span>
-              <span>
-                ST No :
-              </span>
-              <span>
-                CST No :
-              </span>
-              <span>
-                DO No. :
-              </span>
-              <span>
-                INV No. : <span className='text-red-500'>{formData.invoiceNo}</span>
-              </span>
-              <span>
-                Date : <span className='text-red-500'>{new Date(formData.date).toLocaleDateString('en-IN')}</span>
-              </span>
-              <span>
-                Lorry No. : <span className='text-red-500'>{formData.truckNo}</span>
-              </span>
-            </div>
-
-          </div>
-          <div className="text-xs p-4 flex gap-6 justify-between w-full">
-            <span className="text-black whitespace-nowrap">
-              Value : <span className="text-red-500">As Per Invoice</span>
-            </span>
-            <span className="text-black text-xs whitespace-nowrap flex gap-4">
-              Signature of Transport Operator : {formData.signature ? <Image src={formData.signature} width={40} height={40} alt='user signature' /> : null}
-            </span>
-
-          </div>
-        </div>
-
-      </div>
-
-
-    )
-  }
 
   return (
     <motion.div
@@ -559,20 +269,6 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
             />
           </div> :
           <div className="flex items-start gap-16 mb-4">
-            {tabs.map((tab) => (
-              <div
-                key={tab}
-                className={`cursor-pointer px-4 py-2 transition duration-300 ease-in-out font-semibold rounded-md text-black hover:bg-[#3190F540] ${selectedCopy === tab
-                  ? 'border-b-2 border-[#3190F5] rounded-b-none'
-                  : 'border-transparent'
-                  }`}
-                onClick={() => setSelectedCopy(tab)}
-              >
-                <div className="flex items-center space-x-2">
-                  <span>{tab + " Copy"}</span>
-                </div>
-              </div>
-            ))}
           </div>}
         {!showBill ?
           <form onSubmit={(e) => e.preventDefault()}>
@@ -589,7 +285,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
                 {currentStep === 0 && (
                   <>
                     <div className='grid grid-cols-2 gap-2'>
-                      {(steps[currentStep].fields as (keyof FormDataType)[]).map((field) => (
+                      {(steps[currentStep].fields as (keyof EWBFormDataType)[]).map((field) => (
                         <div key={field} className="mb-1">
                           <label htmlFor={field} className='text-xs text-gray-500'>{placeholders[field]}</label>
                           <Input
@@ -773,18 +469,27 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
           </form>
           :
           <div className='w-full'>
-            <div ref={billRef} className='p-4'>
-              <Bilty formData={formData} color={biltyColor as string} />
-            </div>
+            {showBill && (
+              <div className="sticky bottom-0 left-0 right-0 bg-white p-4 border-b border-gray-200">
+                <div className="flex justify-between max-w-5xl mx-auto">
+                  <Button variant="outline" onClick={() => setShowBill(false)}>
+                    Edit Form
+                  </Button>
+                  <Button disabled={pdfDownloading} onClick={() => downloadAllPDFs()}>{pdfDownloading ?  <Loader2 className='text-white animate-spin' /> : 'Download as PDF'}</Button>
+                </div>
+              </div>
+            )}
+            <div ref={billRef} className='pb-4'>
+              {tabs.map((tab) => (
+                <div key={tab} id={`bilty-${tab}`} className='my-10'>
+                  <Bilty formData={formData} color={biltyColor(tab) as string} selectedCopy={tab} />
+                </div>
+              ))}
 
-            <div className="mt-4 flex justify-between">
-              <Button variant='outline' onClick={() => setShowBill(false)}>Edit Form</Button>
-              <Button onClick={() => downloadAllPDFs()}>Download PDF</Button>
             </div>
           </div>
         }
 
-        {/* <footer className='text-red-500 text-xs mt-4'>*currently under development</footer> */}
       </motion.div>
 
 

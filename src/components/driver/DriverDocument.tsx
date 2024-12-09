@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { pdfjs } from 'react-pdf';
 import { Button } from '../ui/button';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -11,7 +10,6 @@ import { FaChevronRight } from 'react-icons/fa6';
 import { useToast } from '../hooks/use-toast';
 
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface TripDocumentProps {
     driverId: string;

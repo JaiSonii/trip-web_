@@ -80,6 +80,14 @@ export interface ITrip extends Document {
   balance : number
 }
 
+export interface Idoc{
+  filename : string,
+  type : string,
+  validityDate : Date,
+  uploadedDate : Date,
+  url : string
+}
+
 
 // interfaces/Party.ts
 
@@ -157,4 +165,71 @@ export interface ISupplierAccount extends Document{
   date : string
   notes : string
   refNo : string
+}
+
+export type ConsignerConsigneeType = {
+  gstNumber: string;
+  name: string;
+  address: string;
+  city: string;
+  pincode: string;
+  contactNumber: string;
+};
+
+export type EWBFormDataType = {
+  gstNumber: string
+  pan: string
+  companyName: string
+  address: string
+  city: string
+  pincode: string
+  contactNumber: string
+  email: string
+  date: Date
+  LR: string
+  consigner: ConsignerConsigneeType
+  consignee: ConsignerConsigneeType
+  material: string
+  weight: string
+  unit: string
+  paidBy: 'consigner' | 'consignee' | 'agent'
+  ewayBillNo: string
+  invoiceNo: string
+  truckNo: string
+  logo: string
+  signature: string
+}
+
+export interface FMDataType {
+  gstNumber: string;
+  pan: string;
+  companyName: string;
+  address: string;
+  city: string;
+  pincode: string;
+  contactNumber: string;
+  email: string;
+  date: Date;
+  challanNo: string
+  from: string;
+  to: string;
+  truckHireCost: string;
+  commision: string;
+  weight: string;
+  material: string;
+  unit: string;
+  noOfBags: string;
+  vehicleOwner: string;
+  advance: string;
+  hamali: string;
+  extraWeight: string;
+  billingtype: string;
+  cashAC: string;
+  extra: string;
+  TDS: string;
+  tire: string;
+  spareParts: string;
+  truckNo: string;
+  lrdate: string
+  logo: string;
 }

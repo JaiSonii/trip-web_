@@ -4,7 +4,6 @@ import React, { FormEvent, useEffect, useState, useTransition } from "react";
 import {
   InputOTP,
   InputOTPGroup,
-  InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { Input } from "@/components/ui/input";
@@ -20,7 +19,6 @@ import whiteLogo from '@/assets/awajahi-white-logo.png';
 import logo from '@/assets/awajahi logo.png'
 import otpPic from '@/assets/otp-pic.png';
 import Link from "next/link";
-import { loadingIndicator } from "./ui/LoadingIndicator";
 import { isValidPhone } from "@/utils/validate";
 import { Loader2 } from "lucide-react";
 

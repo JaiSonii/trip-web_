@@ -28,7 +28,7 @@ export default function DriversPage() {
   const {mutate} = useSWRConfig()
 
   useEffect(()=>{
-    mutate('/api/trips')
+    mutate('/api/drivers')
   },[mutate])
 
   const debouncedSearch = useMemo(

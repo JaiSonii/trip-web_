@@ -1,28 +1,34 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
+
 import React, { useState, Suspense, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import Loading from "@/app/user/loading";
-import generatePDF from "react-to-pdf";
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
+
+import { useToast } from "@/components/hooks/use-toast";
+import dynamic from "next/dynamic";
 
 const ReportPage: React.FC = () => {
-  const params = useSearchParams();
-  const userId = params.get("user_id");
   const [month, setMonth] = useState<string>("");
   const [year, setYear] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [isModalOpen, setModalOpen] = useState<boolean>(false);
+  const [reportGernerating, setReportGenerating] = useState<boolean>(false);
   const [reportContent, setReportContent] = useState<string | null>(null);
-  const contentRef = useRef<any>(null)
+  const reportRef = useRef<any>(null)
+  const { toast } = useToast()
+  const Report = dynamic(()=>import('@/components/Report'), {ssr : false})
 
   const handleGenerateReport = async () => {
     if (!month || !year) {
-      alert("Please select both month and year");
+      toast({
+        description: 'Please select month and year',
+        variant: 'warning'
+      })
       return;
     }
-
+    setReportGenerating(true);
     const response = await fetch(
       `/api/generateReport?month=${month}&year=${year}`
     );
@@ -34,19 +40,14 @@ const ReportPage: React.FC = () => {
     } else {
       setError("Failed to generate report");
     }
+    setReportGenerating(false);
   };
 
-  const handleDownloadPDF = async () => {
-    try {
-      await generatePDF(contentRef, { filename: `Report-${month}-${year}.pdf` });
-    } catch (error) {
-      alert('Failed to download pdf')
-    }
-  };
+
 
   return (
     <Suspense fallback={<Loading />}>
-      <div className="max-w-4xl container border border-gray-300 shadow-md rounded-lg p-8">
+      <div className="max-w-4xl container border border-gray-300 shadow-md rounded-lg p-8 overflow-hidden">
         <h2 className="text-2xl font-bold text-bottomNavBarColor mb-4">
           Generate Report
         </h2>
@@ -90,8 +91,8 @@ const ReportPage: React.FC = () => {
             />
           </div>
 
-          <Button type="button" className="mt-6 w-full" onClick={handleGenerateReport}>
-            Generate Report
+          <Button disabled={reportGernerating} type="button" className="mt-6" onClick={handleGenerateReport}>
+            {reportGernerating ? <Loader2 className="text-white animate-spin" /> : 'Generate Report'}
           </Button>
         </div>
 
@@ -100,23 +101,7 @@ const ReportPage: React.FC = () => {
         </div>
 
         {isModalOpen && reportContent && (
-          <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white max-w-4xl max-h-[700px] w-full p-6 rounded-lg shadow-lg overflow-auto">
-              <div className="flex justify-between">
-                <h3 className="text-lg font-semibold mb-4">Generated Report</h3>
-                <Button variant='ghost' size='icon' onClick={() => setModalOpen(false)}><X /></Button>
-              </div>
-
-              <div ref={contentRef}
-                className="overflow-auto border border-gray-300 rounded-md p-4"
-                dangerouslySetInnerHTML={{ __html: reportContent }}
-              />
-              <Button className="mt-4 w-full" onClick={handleDownloadPDF}>
-                Download as PDF
-              </Button>
-
-            </div>
-          </div>
+          <Report reportContent={reportContent} setModalOpen={setModalOpen} reportRef={reportRef} month={month} year={year}/>
         )}
       </div>
     </Suspense>

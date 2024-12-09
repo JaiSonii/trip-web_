@@ -1,10 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { pdfjs } from 'react-pdf';
-import RenderDocument from '../RenderDocument';
 import { Button } from '../ui/button';
-import dynamic from 'next/dynamic';
 import RecentDocuments from '../documents/RecentDocuments';
 import Link from 'next/link';
 import TruckDocumentUpload from '../documents/TruckDocumentUpload';
@@ -12,7 +9,6 @@ import { FaChevronRight } from 'react-icons/fa6';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface TruckDocumentProps {
     truckNo: string;

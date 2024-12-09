@@ -2,10 +2,8 @@
 
 import React from 'react';
 import { FaArrowRight } from 'react-icons/fa';
-import { pdfjs } from 'react-pdf';
 import dynamic from 'next/dynamic';
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface TripDocumentProps {
     ewbValidityDate: Date;
