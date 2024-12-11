@@ -232,4 +232,5 @@ export interface FMDataType {
   truckNo: string;
   lrdate: string
   logo: string;
+  signature : string;
 }

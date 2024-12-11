@@ -10,12 +10,9 @@ import { motion } from 'framer-motion';
 import Loading from '../loading';
 import { useTrip } from '@/context/tripContext';
 import { Frown, Loader2 } from 'lucide-react';
+import TripDetails from '@/components/trip/tripDetail/TripDetail';
 
 // Dynamically import components
-const TripDetails = dynamic(() => import('@/components/trip/tripDetail/TripDetail'), {
-  loading: () => <div className='flex items-center justify-center'> <Loader2 className='animate-spin text-bottomNavBarColor' /></div>,
-  ssr: false,
-});
 const EditTripForm = dynamic(() => import('@/components/trip/EditTripForm'), {
   loading: () => <div className='flex items-center justify-center'> <Loader2 className='animate-spin text-bottomNavBarColor' /></div>,
   ssr: false,

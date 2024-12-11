@@ -1,22 +1,22 @@
 'use client';
 import Loading from '../loading';
 import { Button } from '@/components/ui/button';
-import { IDriver, IExpense, TruckModel } from '@/utils/interface';
+import { IDriver, IExpense, } from '@/utils/interface';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { MdDelete, MdEdit, MdPayment } from 'react-icons/md';
-import { DeleteExpense, fetchTruckExpense, handleAddCharge, handleAddExpense, handleDelete, handleEditExpense } from '@/helpers/ExpenseOperation';
+import { MdDelete, MdEdit } from 'react-icons/md';
+import { DeleteExpense, fetchTruckExpense, handleAddExpense, handleEditExpense } from '@/helpers/ExpenseOperation';
 import { icons, IconKey } from '@/utils/icons';
 import { FaCalendarAlt, FaSort, FaSortDown, FaSortUp, FaTruck } from 'react-icons/fa';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { IoAddCircle } from 'react-icons/io5';
+
 import { formatNumber, generateMonthYearOptions } from '@/utils/utilArray';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import debounce from 'lodash.debounce';
-import { useRouter } from 'next/navigation';
-import { TbFilterSearch } from 'react-icons/tb';
 import dynamic from 'next/dynamic';
 import { ExpenseHeader } from '@/components/ExpenseHeader';
+import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 
+const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), { ssr: false , loading : ()=><div>{loadingIndicator}</div>})
+const ExpenseFilterModal = dynamic(() => import('@/components/ExpenseFilterModal'), { ssr: false, loading : ()=><div>{loadingIndicator}</div> })
 const TruckExpense: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -26,10 +26,6 @@ const TruckExpense: React.FC = () => {
   const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
   const [searchQuery, setSearchQuery] = useState('')
   const [filterModalOpen, setFilterModalOpen] = useState(false)
-  const router = useRouter()
-
-  const ExpenseFilterModal = dynamic(() => import('@/components/ExpenseFilterModal'), { ssr: false })
-  const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), { ssr: false })
 
   const monthYearOptions = generateMonthYearOptions()
 

@@ -158,67 +158,73 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
     }
   }
 
-
-
-
   const downloadAllPDFs = async () => {
     const pdf = new jsPDF({
       orientation: 'landscape',
       unit: 'mm',
-      format: 'a4'
+      format: 'a4',
     });
-
+  
+    setPDFDownloading(true);
+  
+    // Remove the initial blank page
+    pdf.deletePage(1);
+  
     for (const tab of tabs) {
       const element = document.getElementById(`bilty-${tab}`);
-      setPDFDownloading(true)
       if (element) {
         const canvas = await html2canvas(element, { scale: 2 });
-        const imgData = canvas.toDataURL('image/png');
-
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const imgWidth = canvas.width;
-        const imgHeight = canvas.height;
-        const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-
-        const imgX = (pdfWidth - imgWidth * ratio) / 2;
-        const imgY = (pdfHeight - imgHeight * ratio) / 2;
-
-        pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
-
-        if (tab !== tabs[tabs.length - 1]) {
-          pdf.addPage();
-        }
+        const imgData = canvas.toDataURL('image/jpeg');
+  
+        const padding = 10; // 10mm padding on each side
+        const imgWidth = canvas.width / 2; // Divide by 2 because of scale: 2
+        const imgHeight = canvas.height / 2;
+  
+        // Set the PDF page size to match the image size plus padding
+        pdf.addPage([imgWidth + padding * 2, imgHeight + padding * 2], 'landscape');
+        pdf.addImage(imgData, 'JPEG', padding, padding, imgWidth, imgHeight);
       }
     }
-
+  
     pdf.save(`Bilty-${trip.LR}-${formData.truckNo}.pdf`);
-    setPDFDownloading(false)
-    if ((!user.companyName && formData.companyName) || (!user.address && formData.address) || (!user.gstNumber && formData.gstNumber) || (!user.panNumber && formData.pan) || (!user.pincode && formData.pincode) || (!user.city && formData.city) || (!user.email && formData.email)) {
+    setPDFDownloading(false);
+  
+    if (
+      (!user.companyName && formData.companyName) ||
+      (!user.address && formData.address) ||
+      (!user.gstNumber && formData.gstNumber) ||
+      (!user.panNumber && formData.pan) ||
+      (!user.pincode && formData.pincode) ||
+      (!user.city && formData.city) ||
+      (!user.email && formData.email)
+    ) {
       try {
-        const formdata = new FormData()
-        formdata.append('data', JSON.stringify({
-          companyName: user.company || formData.companyName,
-          address: user.address || formData.address,
-          gstNumber: user.gstNumber || formData.gstNumber,
-          pincode: user.pincode || formData.pincode,
-          panNumber: user.panNumber || formData.pan,
-          city: user.city || formData.city,
-          email: user.email || formData.email,
-        }))
+        const formdata = new FormData();
+        formdata.append(
+          'data',
+          JSON.stringify({
+            companyName: user.company || formData.companyName,
+            address: user.address || formData.address,
+            gstNumber: user.gstNumber || formData.gstNumber,
+            pincode: user.pincode || formData.pincode,
+            panNumber: user.panNumber || formData.pan,
+            city: user.city || formData.city,
+            email: user.email || formData.email,
+          })
+        );
         const res = await fetch('/api/users', {
           method: 'PUT',
-          body: formdata
-        })
+          body: formdata,
+        });
         if (!res.ok) {
-          alert('Failed to update user details')
+          alert('Failed to update user details');
         }
       } catch (error) {
-        alert('Failed to update user details')
+        alert('Failed to update user details');
       }
     }
   };
-
+  
 
   if (!isOpen) return null
 

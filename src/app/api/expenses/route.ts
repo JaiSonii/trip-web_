@@ -159,6 +159,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+    
     try {
         const { user, error } = await verifyToken(req)
         if (!user || error) {

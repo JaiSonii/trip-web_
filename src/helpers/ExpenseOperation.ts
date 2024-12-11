@@ -1,6 +1,8 @@
+
 import { IExpense } from "@/utils/interface";
 
-export const handleAddExpense = async (expense: IExpense, file?: File | null) => {
+
+export const handleAddExpense = async (expense: IExpense, file?: File | null, toast? : any) => {
   try {
     const formdata = new FormData()
     formdata.append('expense', JSON.stringify(expense))
@@ -10,17 +12,22 @@ export const handleAddExpense = async (expense: IExpense, file?: File | null) =>
       body: formdata
     })
     if (!res.ok) {
-      alert('Error adding expense')
+      toast && toast({
+        description: `error adding expense`,
+        variant: 'destructive'
+    });
     }
     const data = await res.json()
     return data.expense
   } catch (error: any) {
-    alert(error.message)
-    console.log(error)
+    toast && toast({
+      description: `Failed to add expense`,
+      variant: 'destructive'
+  });
   }
 }
 
-export const handleEditExpense = async (expense: IExpense, id : string, file?: File | null) => {
+export const handleEditExpense = async (expense: IExpense, id: string, file?: File | null, toast? : any) => {
   try {
     const formdata = new FormData()
     formdata.append('expense', JSON.stringify(expense))
@@ -30,17 +37,22 @@ export const handleEditExpense = async (expense: IExpense, id : string, file?: F
       body: formdata
     })
     if (!res.ok) {
-      alert('Error adding expense')
+      toast && toast({
+        description: `error editing expense`,
+        variant: 'destructive'
+      });
     }
     const data = await res.json()
     return data.expense
   } catch (error: any) {
-    alert(error.message)
-    console.log(error)
+    toast && toast({
+      description: `Failed to edit Expense`,
+      variant: 'destructive'
+    });
   }
 }
 
-export const DeleteExpense = async(id : string)=>{
+export const DeleteExpense = async (id: string) => {
   try {
     const res = await fetch(`/api/expenses/${id}`, {
       method: 'DELETE',

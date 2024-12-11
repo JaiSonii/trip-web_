@@ -12,6 +12,10 @@ import debounce from 'lodash.debounce';
 import dynamic from 'next/dynamic';
 import ExpenseTable from '@/components/ExpenseTable';
 import { ExpenseHeader } from '@/components/ExpenseHeader';
+import { loadingIndicator } from '@/components/ui/LoadingIndicator';
+
+const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), { ssr: false , loading : ()=><div>{loadingIndicator}</div>})
+const ExpenseFilterModal = dynamic(() => import('@/components/ExpenseFilterModal'), { ssr: false, loading : ()=><div>{loadingIndicator}</div> })
 
 const TripExpense: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
@@ -23,8 +27,7 @@ const TripExpense: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterModalOpen, setFilterModalOpen] = useState(false)
 
-  const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), { ssr: false })
-  const ExpenseFilterModal = dynamic(() => import('@/components/ExpenseFilterModal'), { ssr: false })
+
 
 
   const monthYearOptions = generateMonthYearOptions()

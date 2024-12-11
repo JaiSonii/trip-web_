@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { FaChevronUp, FaChevronDown } from 'react-icons/fa';
 import { formatNumber } from '@/utils/utilArray';
 import dynamic from 'next/dynamic';
+import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 
 interface ProfitProps {
   charges: TripExpense[];
@@ -18,6 +19,8 @@ interface ProfitProps {
   tripExpense: IExpense[];
 }
 
+const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), { ssr: false, loading : ()=><div className='flex items-center justify-center'>{loadingIndicator}</div> });
+
 const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, driverId, truckNo, truckCost = 0, tripExpense }) => {
   const [showTotalCharges, setShowTotalCharges] = useState(false);
   const [showTotalDeductions, setShowTotalDeductions] = useState(false);
@@ -26,7 +29,7 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
   const [truckExpenses, setTruckExpenses] = useState<IExpense[]>(tripExpense);
   const [selectedExpense, setSelectedExpense] = useState<IExpense | null>(null);
 
-  const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), { ssr: false });
+
 
   // Memoize calculations to avoid unnecessary recalculations
   const totalChargesAmount = useMemo(

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ITrip, PaymentBook, TripExpense, } from '@/utils/interface';
-import TruckHeader from './TruckHeader';
+import { ITrip, TripExpense, } from '@/utils/interface';
 import TripInfo from './TripInfo';
 import TripStatus from './TripStatus';
 import StatusButton from './TripFunctions/StatusButton'; // Replace with your actual StatusButton component
@@ -12,9 +11,13 @@ import { Button } from '@/components/ui/button';
 import { UndoIcon } from 'lucide-react';
 import { formatNumber } from '@/utils/utilArray';
 import Link from 'next/link';
-import BiltyForm from '../BiltyForm';
+
 import { useTrip } from '@/context/tripContext';
-import FrieghtMemo from '../FrieghtMemo';
+import dynamic from 'next/dynamic';
+import { loadingIndicator } from '@/components/ui/LoadingIndicator';
+
+const BiltyForm = dynamic(()=>import('../BiltyForm'), {ssr : false, loading : ()=>loadingIndicator})
+const FrieghtMemo = dynamic(()=>import('../FrieghtMemo'), {ssr : false, loading : ()=>loadingIndicator})
 
 
 const TripDetails = () => {
@@ -23,16 +26,8 @@ const TripDetails = () => {
   const [biltyModalOpen, setBiltyModalOpen] = useState(false)
   const [fmModalOpen, setFmModalOpen] = useState(false)
 
-  // useEffect(() => {
-  //   const balance = () => {
-  //     if (trip) {
-  //       const pending = fetchBalance(trip)
-  //       setBalance(pending)
-  //     }
-  //   }
-  //   balance()
 
-  // }, [trip, charges, accounts])
+
 
   useEffect(() => {
     const sorted = trip.tripCharges?.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime());

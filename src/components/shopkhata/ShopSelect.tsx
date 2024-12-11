@@ -39,7 +39,7 @@ const ShopSelect: React.FC<Props> = ({ shops, formData, handleChange }) => {
 
   return (
     <div>
-      <label className="block text-sm text-gray-700">Shop</label>
+      <label>Shop</label>
       <Select name="shop" value={formData.shop_id} onValueChange={handleOptionSelect}>
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Select Shop" />

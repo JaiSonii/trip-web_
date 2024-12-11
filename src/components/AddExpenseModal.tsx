@@ -3,16 +3,16 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { fuelAndDriverChargeTypes, maintenanceChargeTypes, officeExpenseTypes } from '@/utils/utilArray';
-import { IDriver, IExpense, ITrip, TruckModel } from '@/utils/interface';
+import {  ITrip } from '@/utils/interface';
 import { motion } from 'framer-motion';
-import { useParams, usePathname } from 'next/navigation';
+import {  usePathname } from 'next/navigation';
 import { statuses } from '@/utils/schema';
 import DriverSelect from './trip/DriverSelect';
 import ShopSelect from './shopkhata/ShopSelect';
 import { useExpenseCtx } from '@/context/context';
 import Image from 'next/image';
-import Link from 'next/link';
 import PreviewDocument from './documents/PreviewDocument';
+import { useToast } from './hooks/use-toast';
 
 interface ChargeModalProps {
     isOpen: boolean;
@@ -65,9 +65,9 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
     const truckpage = pathname === '/user/expenses/truckExpense' || pathname.startsWith('/user/trucks/')
     const trippage = pathname === '/user/expenses/tripExpense' || pathname.startsWith('/user/trips/')
     const officepage = pathname === '/user/expenses/officeExpense'
+    const { toast } = useToast()
 
 
-    const [driverName, setDriverName] = useState('');
     const [selectedCategory, setSelectedCategory] = useState(truckpage ? 'Truck Expense' : trippage ? 'Trip Expense' : officepage ? 'Office Expense' : '');
     const [trip, setTrip] = useState<ITrip | undefined>()
     const [file, setFile] = useState<File | null>()
@@ -113,11 +113,11 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
         else if (selectedCategory === 'Trip Expense') return Array.from(fuelAndDriverChargeTypes)
         else if (selectedCategory === 'Office Expense') return Array.from(officeExpenseTypes)
         if (selected) {
-            if ((!selected.trip_id || selected.trip_id === '')  && selected.truck) {
+            if ((!selected.trip_id || selected.trip_id === '') && selected.truck) {
                 setSelectedCategory('Truck Expense')
                 return Array.from(maintenanceChargeTypes)
             }
-            if (selected.trip_id && selected.trip_id !== ''){
+            if (selected.trip_id && selected.trip_id !== '') {
                 setSelectedCategory('Trip Expense')
                 return Array.from(fuelAndDriverChargeTypes)
             }
@@ -143,6 +143,12 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
     useEffect(() => {
         if (formData.paymentMode === 'Paid By Driver' && trip) {
             setFormData((prevData) => ({ ...prevData, driver: trip.driver }));
+        }
+        if (formData.paymentMode !== 'Paid By Driver' && formData.driver) {
+            setFormData((prevData) => ({ ...prevData, driver: '' }));
+        }
+        if (formData.paymentMode !== 'Credit' && formData.shop_id) {
+            setFormData((prevData) => ({ ...prevData, shop_id: '' }));
         }
     }, [trip, formData.paymentMode])
 
@@ -193,7 +199,10 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
         if (formData.paymentMode === 'Paid By Driver' && !formData.driver) missingFields.push("Driver");
 
         if (missingFields.length > 0) {
-            alert(`Please fill in the following fields: ${missingFields.join(", ")}`);
+            toast({
+                description: `Please fill in the following fields: ${missingFields.join(", ")}`,
+                variant: 'warning'
+            });
             return
         }
 
@@ -260,7 +269,7 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
                                             height={120}
                                             alt='Preview'
                                             className='rounded-md shadow-md '
-                                            
+
                                         />
                                     ) : (
                                         <iframe
@@ -269,14 +278,14 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
                                             height='120'
                                             className='border border-gray-300 rounded-md shadow-md '
                                             title='PDF Preview'
-                                            
+
                                         />
                                     )}
-                                    <Button variant={'link'} onClick={()=>setModalOpen(true)}>
+                                    <Button variant={'link'} onClick={() => setModalOpen(true)}>
                                         Open Document
                                     </Button>
                                 </div>
-                                <PreviewDocument isOpen={modalOpen} onClose={()=>setModalOpen(false) } documentUrl={fileUrl} />
+                                <PreviewDocument isOpen={modalOpen} onClose={() => setModalOpen(false)} documentUrl={fileUrl} />
                             </div>
                         )}
 

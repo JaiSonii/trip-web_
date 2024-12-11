@@ -4,19 +4,21 @@ import Loading from '../loading';
 import { Button } from '@/components/ui/button';
 import { IExpense } from '@/utils/interface';
 import React, { useEffect, useState, Suspense, useCallback, useMemo } from 'react';
-import { MdDelete, MdEdit, MdPayment } from 'react-icons/md';
+import { MdDelete, MdEdit } from 'react-icons/md';
 import { FaCalendarAlt, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
-import { IoAddCircle } from 'react-icons/io5';
+
 import { icons, IconKey } from '@/utils/icons';
 import { formatNumber, generateMonthYearOptions } from '@/utils/utilArray';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { TbFilterSearch } from 'react-icons/tb';
+
 import debounce from 'lodash.debounce';
 import dynamic from 'next/dynamic';
 import { handleAddExpense, handleEditExpense } from '@/helpers/ExpenseOperation';
 import { ExpenseHeader } from '@/components/ExpenseHeader';
+import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 
+const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), { ssr: false , loading : ()=><div>{loadingIndicator}</div>})
+const ExpenseFilterModal = dynamic(() => import('@/components/ExpenseFilterModal'), { ssr: false, loading : ()=><div>{loadingIndicator}</div> })
 const OfficeExpense: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true);
@@ -34,10 +36,8 @@ const OfficeExpense: React.FC = () => {
     const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
     const [searchQuery, setSearchQuery] = useState('')
     const [filterModalOpen, setFilterModalOpen] = useState(false)
-    const [shops, setShops] = useState<any[]>([])
 
-    const ExpenseFilterModal = dynamic(() => import('@/components/ExpenseFilterModal'), { ssr: false })
-    const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), { ssr: false })
+
 
     const handleSelectAll = (selectAll: boolean) => {
         setVisibleColumns({
@@ -187,18 +187,6 @@ const OfficeExpense: React.FC = () => {
         getBook();
     }, [month, year]);
 
-    useEffect(() => {
-        const fetchShops = async () => {
-            try {
-                const res = await fetch('/api/shopkhata')
-                const data = await res.json()
-                setShops(data.shops)
-            } catch (error) {
-                console.error(error)
-            }
-        }
-        fetchShops()
-    }, [])
 
     if (loading) return <Loading />;
     if (error) return <div className="text-red-500">Error: {error}</div>;

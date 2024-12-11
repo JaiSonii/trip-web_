@@ -115,7 +115,8 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
     spareParts: '',
     truckNo: trip.truck || '',
     challanNo: '',
-    logo: ''
+    logo: '',
+    signature : ''
   })
   const { toast } = useToast()
 
@@ -142,6 +143,7 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
           email: user.email,
           city: user.city,
           pan: user.panNumber,
+          signature : user.signatureUrl
         }));
       } else {
         toast({
@@ -182,32 +184,55 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
 
 
   const downloadAllPDFs = async () => {
-    const pdf = new jsPDF({
-      orientation: 'landscape',
-      unit: 'mm',
-      format: 'a4'
-    });
-    const element = document.getElementById(`fmemo`);
-    if (element) {
-      setPDFDownloading(true);
-      const canvas = await html2canvas(element, { scale: 2 });
-      const imgData = canvas.toDataURL('image/png');
-
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-
-      const imgX = (pdfWidth - imgWidth * ratio) / 2;
-      const imgY = (pdfHeight - imgHeight * ratio) / 2;
-
-      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
-
+    const element = document.getElementById('fmemo');
+    if (!element) {
+      console.error('Element with id "fmemo" not found');
+      return;
     }
-    pdf.save(`Challan-${trip.LR}-${formData.truckNo}.pdf`);
-    setPDFDownloading(false);
 
+    setPDFDownloading(true);
+    try {
+      console.log('Capturing element as image...');
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        logging: true,
+        useCORS: true
+      });
+
+      console.log('Canvas generated. Dimensions:', canvas.width, 'x', canvas.height);
+      const imgData = canvas.toDataURL('image/jpeg');
+      console.log('Image data URL length:', imgData.length);
+
+      const padding = 10; // 10mm padding on all sides
+      const imgWidth = canvas.width / 2;
+      const imgHeight = canvas.height / 2;
+      const pdfWidth = (imgWidth * 25.4) / 96 + (padding * 2);
+      const pdfHeight = (imgHeight * 25.4) / 96 + (padding * 2);
+
+      console.log('Calculated PDF dimensions:', pdfWidth, 'x', pdfHeight, 'mm');
+
+      const pdf = new jsPDF({
+        orientation: pdfWidth > pdfHeight ? 'landscape' : 'portrait',
+        unit: 'mm',
+        format: [pdfWidth, pdfHeight]
+      });
+
+      const imgX = padding;
+      const imgY = padding;
+
+      console.log('Adding image to PDF...');
+      pdf.addImage(imgData, 'JPEG', imgX, imgY, pdfWidth - (padding * 2), pdfHeight - (padding * 2));
+
+      console.log('Saving PDF...');
+      pdf.save(`Challan-${trip.LR}-${formData.truckNo}.pdf`);
+
+      console.log('PDF generation complete');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Failed to generate PDF');
+    } finally {
+      setPDFDownloading(false);
+    }
     if ((!user.companyName && formData.companyName) || (!user.address && formData.address) || (!user.gstNumber && formData.gstNumber) || (!user.panNumber && formData.pan) || (!user.pincode && formData.pincode) || (!user.city && formData.city) || (!user.email && formData.email)) {
       const data = new FormData()
       data.append('data', JSON.stringify({
@@ -387,7 +412,7 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
                 <Button variant="outline" onClick={() => setShowBill(false)}>
                   Edit Form
                 </Button>
-                <Button disabled={pdfDownloading} onClick={() => downloadAllPDFs()}>{pdfDownloading ?  <Loader2 className='text-white animate-spin' /> : 'Download as PDF'}</Button>
+                <Button disabled={pdfDownloading} onClick={() => downloadAllPDFs()}>{pdfDownloading ? <Loader2 className='text-white animate-spin' /> : 'Download as PDF'}</Button>
               </div>
             </div>
             <div id='fmemo' className="p-2">
