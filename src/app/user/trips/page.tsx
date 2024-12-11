@@ -59,7 +59,7 @@ export default function TripsPage() {
   const [openOptionsId, setOpenOptionsId] = useState<string | null>(null);
   const [edit, setEdit] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<ITrip | null>(null);
-  const {toast} = useToast()
+  const { toast } = useToast()
 
 
   const { trips: ctxTrips, isLoading } = useExpenseCtx()
@@ -130,12 +130,42 @@ export default function TripsPage() {
 
     if (searchQuery) {
       const lowercaseQuery = searchQuery.toLowerCase();
-      filteredTrips = filteredTrips.filter((trip) =>
+
+      // Split the query into potential origin and destination keywords
+      const routeParts = lowercaseQuery.split(/\s*->\s*|\s+/).filter(Boolean);
+      const queryOrigin = routeParts[0] || '';
+      const queryDestination = routeParts[1] || '';
+
+      // Filter trips matching origin and destination
+      const routeMatches = filteredTrips.filter((trip) => {
+        const origin = trip.route?.origin?.toLowerCase() || '';
+        const destination = trip.route?.destination?.toLowerCase() || '';
+
+        // Match if both origin and destination are provided
+        if (queryOrigin && queryDestination) {
+          return (
+            (origin.includes(queryOrigin) && destination.includes(queryDestination)) ||
+            (origin.includes(queryDestination) && destination.includes(queryOrigin)) // Handle reverse route
+          );
+        }
+
+        // Match if only one of them is provided
+        return origin.includes(queryOrigin) || destination.includes(queryOrigin);
+      });
+
+      // Filter trips matching other string fields
+      const otherFieldMatches = filteredTrips.filter((trip) =>
         Object.values(trip).some(value =>
           typeof value === 'string' && value.toLowerCase().includes(lowercaseQuery)
         )
       );
+
+      // Combine the results, avoiding duplicates
+      const combinedResults = [...new Set([...routeMatches, ...otherFieldMatches])];
+
+      filteredTrips = combinedResults;
     }
+
 
     if (sortConfig.key) {
       filteredTrips.sort((a, b) => {
@@ -182,8 +212,8 @@ export default function TripsPage() {
       const newData = await res.json()
       if (newData.status === 400) {
         toast({
-          description:newData.message,
-          variant : 'destructive'
+          description: newData.message,
+          variant: 'destructive'
         })
         return
       }
@@ -210,7 +240,7 @@ export default function TripsPage() {
       console.error('Error editing trip:', error)
       toast({
         description: "Error Editing Trip",
-        variant : 'destructive'
+        variant: 'destructive'
       })
     } finally {
       setSelectedTrip(null)

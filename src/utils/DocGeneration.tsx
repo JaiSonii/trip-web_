@@ -431,7 +431,7 @@ export function FMemo({ formData, payments }: { formData: FMDataType, payments: 
             <span className='whitespace-nowrap'>For {formData.companyName}</span>
           </div>
           <div className="text-right mt-6">
-            {formData.signature && <Image src={formData.signature} alt="signature" height={40} width={40} />}
+            {formData.signature && <div className="flex justify-end"><Image src={formData.signature} alt="signature" height={50} width={50} /></div>}
             <p>Cashier/Accountant</p>
           </div>
         </div>

@@ -276,35 +276,6 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
 
   const progressPercentage = ((currentStep + 1) / steps.length) * 100
 
-  function CompanyHeader({ formData }: { formData: { logo: string; companyName: string } }) {
-    const [dominantColor, setDominantColor] = useState("black");
-
-    useEffect(() => {
-      async function fetchDominantColor() {
-        try {
-          const color = await getBestLogoColor(formData.logo);
-          setDominantColor(color);
-        } catch (error) {
-          console.error("Failed to fetch dominant color:", error);
-          setDominantColor("black"); // Fallback color
-        }
-      }
-
-      if (formData.logo) {
-        fetchDominantColor();
-      }
-    }, [formData.logo]);
-
-    return (
-      <h1
-        className={`text-3xl font-bold`}
-        style={{ color: dominantColor }}
-      >
-        {formData.companyName}
-      </h1>
-    );
-  }
-
 
 
   return (
