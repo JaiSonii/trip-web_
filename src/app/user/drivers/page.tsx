@@ -19,17 +19,17 @@ type SortConfig = {
 };
 
 export default function DriversPage() {
-  
+
   const router = useRouter();
   const { drivers, isLoading } = useExpenseCtx();
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: 'asc' });
   const [searchQuery, setSearchQuery] = useState('');
 
-  const {mutate} = useSWRConfig()
+  const { mutate } = useSWRConfig()
 
-  useEffect(()=>{
+  useEffect(() => {
     mutate('/api/drivers')
-  },[mutate])
+  }, [mutate])
 
   const debouncedSearch = useMemo(
     () => debounce((query: string) => setSearchQuery(query), 300),
@@ -42,13 +42,13 @@ export default function DriversPage() {
 
   const sortedDrivers = useMemo(() => {
     if (!drivers || drivers.length === 0) return [];
-    
+
     let sortableDrivers = [...drivers];
 
     if (searchQuery) {
       const lowercaseQuery = searchQuery.toLowerCase();
       sortableDrivers = sortableDrivers.filter((driver) =>
-        Object.values(driver).some(value => 
+        Object.values(driver).some(value =>
           typeof value === 'string' && value.toLowerCase().includes(lowercaseQuery)
         )
       );
@@ -125,8 +125,9 @@ export default function DriversPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedDrivers.map((driver) => (
+          {sortedDrivers.map((driver, index) => (
             <TableRow
+              index={index + 1}
               key={driver.driver_id}
               className="border-t hover:bg-blue-100 cursor-pointer transition-colors"
               onClick={() => router.push(`/user/drivers/${driver.driver_id}`)}
@@ -145,9 +146,8 @@ export default function DriversPage() {
               </TableCell>
               <TableCell className="border p-4">
                 <span
-                  className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                    driver.status === 'Available' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                  }`}
+                  className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${driver.status === 'Available' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                    }`}
                 >
                   {driver.status}
                 </span>

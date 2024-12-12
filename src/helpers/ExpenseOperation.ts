@@ -18,6 +18,9 @@ export const handleAddExpense = async (expense: IExpense, file?: File | null, to
     });
     }
     const data = await res.json()
+    toast({
+      description : "Expense added successfully"
+    })
     return data.expense
   } catch (error: any) {
     toast && toast({
@@ -43,6 +46,9 @@ export const handleEditExpense = async (expense: IExpense, id: string, file?: Fi
       });
     }
     const data = await res.json()
+    toast({
+      description : "Expense edited successfully"
+    })
     return data.expense
   } catch (error: any) {
     toast && toast({

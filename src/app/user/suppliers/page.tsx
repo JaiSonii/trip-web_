@@ -194,8 +194,9 @@ const SuppliersPage = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredAndSortedSuppliers?.map((supplier: any) => (
+            {filteredAndSortedSuppliers?.map((supplier: any, index) => (
               <TableRow
+                index = {index + 1}
                 key={supplier.supplier_id as string}
                 onClick={() => router.push(`suppliers/${supplier.supplier_id}/trips`)}
               >

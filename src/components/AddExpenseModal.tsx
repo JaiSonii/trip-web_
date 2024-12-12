@@ -3,9 +3,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { fuelAndDriverChargeTypes, maintenanceChargeTypes, officeExpenseTypes } from '@/utils/utilArray';
-import {  ITrip } from '@/utils/interface';
+import { IExpense, ITrip } from '@/utils/interface';
 import { motion } from 'framer-motion';
-import {  usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { statuses } from '@/utils/schema';
 import DriverSelect from './trip/DriverSelect';
 import ShopSelect from './shopkhata/ShopSelect';
@@ -23,6 +23,7 @@ interface ChargeModalProps {
     categories: string[]
     tripId?: string
     truckNo?: string
+    setDrafts?: any
 }
 
 interface TripExpense {
@@ -41,7 +42,7 @@ interface TripExpense {
     shop_id?: string
 }
 
-const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClose, onSave, driverId, selected, tripId, truckNo }) => {
+const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClose, onSave, driverId, selected, tripId, truckNo, setDrafts }) => {
 
     const { trips, drivers, shops, trucks, isLoading, error } = useExpenseCtx();
 
@@ -73,6 +74,34 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
     const [file, setFile] = useState<File | null>()
     const [fileUrl, setFileUrl] = useState<string | null>(selected?.url || null);
     const [modalOpen, setModalOpen] = useState(false)
+
+
+    const savetoDraft = async () => {
+        try {
+            const formdata = new FormData()
+            if (file) {
+                formdata.append('file', file);
+            }
+            formdata.append('expense', JSON.stringify(formData))
+            const res = await fetch('/api/expenses/draft', {
+                method: 'POST',
+                body: formdata
+            })
+            if (!res.ok) throw new Error('Failed to save draft')
+            const data = await res.json()
+            setDrafts((prev: IExpense[])=>[
+                ...prev,
+                data.expense
+            ])
+        } catch (error) {
+            toast({
+                description: 'Failed to save draft',
+                variant: 'destructive'
+            })
+        }finally{
+            onClose()
+        }
+    }
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const selectedFile = e.target.files ? e.target.files[0] : null;
@@ -468,32 +497,35 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
                             className="w-full p-2 border border-gray-300 rounded-md"
                         />
                     </div>
-
-                    <div className="flex justify-end gap-2">
-                        <Button variant="outline" onClick={() => {
-                            setFormData({
-                                id: undefined,
-                                trip_id: '',
-                                partyBill: false,
-                                amount: 0,
-                                date: new Date(),
-                                expenseType: '',
-                                notes: '',
-                                partyAmount: 0,
-                                paymentMode: 'Cash',
-                                transactionId: '',
-                                driver: '',
-                                truck: '',
-                                shop_id: ''
-                            })
-                            onClose()
-                        }}>
-                            Cancel
-                        </Button>
-                        <Button onClick={handleSave}>
-                            Save
-                        </Button>
+                    <div className={`${!selected ? 'flex justify-between' : ''}`}>
+                        {!selected && <Button variant={'outline'} onClick={() => savetoDraft()}>Save as Draft</Button>}
+                        <div className="flex justify-end gap-2">
+                            <Button variant="outline" onClick={() => {
+                                setFormData({
+                                    id: undefined,
+                                    trip_id: '',
+                                    partyBill: false,
+                                    amount: 0,
+                                    date: new Date(),
+                                    expenseType: '',
+                                    notes: '',
+                                    partyAmount: 0,
+                                    paymentMode: 'Cash',
+                                    transactionId: '',
+                                    driver: '',
+                                    truck: '',
+                                    shop_id: ''
+                                })
+                                onClose()
+                            }}>
+                                Cancel
+                            </Button>
+                            <Button onClick={handleSave}>
+                                Save
+                            </Button>
+                        </div>
                     </div>
+
                 </motion.div>
             </div>
         </div>

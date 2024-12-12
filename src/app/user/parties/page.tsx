@@ -64,35 +64,6 @@ const PartiesPage = () => {
     return <FaSort />
   }
 
-  // useEffect(() => {
-  //   const fetchParties = async () => {
-
-  //     try {
-  //       const res = await fetch('/api/parties', {
-  //         method: 'GET',
-  //         headers: {
-  //           'Content-Type': 'application/json',
-  //         },
-  //       });
-
-  //       if (res.ok) {
-  //         const data = await res.json(); // Parse the response body as JSON
-  //         console.log(data)
-  //         setParties(data.parties);
-  //         setLoading(false)
-  //       }
-
-
-  //     } catch (err) {
-
-  //       setError((err as Error).message);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchParties();
-  // }, []);
 
   if (isLoading) {
     return <Loading />;
@@ -130,7 +101,7 @@ const PartiesPage = () => {
           </TableHeader>
           <TableBody>
             {sortedParties.map((party, index) => (
-              <TableRow key={party.party_id as string} className="border-t w-full cursor-pointer" onClick={() => router.push(`/user/parties/${party.party_id}/trips`)}>
+              <TableRow index={index + 1} key={party.party_id as string} className="border-t w-full cursor-pointer" onClick={() => router.push(`/user/parties/${party.party_id}/trips`)}>
                 <TableCell>
                   <div className='flex items-center space-x-2'>
                     <GoOrganization className="text-bottomNavBarColor" />

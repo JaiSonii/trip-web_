@@ -10,14 +10,18 @@ import {
   ToastViewport,
 } from "@/components/ui/toast"
 import { ReactElement } from "react"
+import { HiThumbUp } from "react-icons/hi"
 import { IoWarning } from "react-icons/io5"
+import { MdError } from "react-icons/md"
 
 
 
 export function Toaster() {
   const { toasts } = useToast()
   const variantIcons: Record<string, ReactElement>= {
-    warning : <IoWarning />
+    warning : <IoWarning />,
+    destructive : <MdError />,
+    default : <HiThumbUp />
   }
 
   return (
@@ -26,7 +30,7 @@ export function Toaster() {
         return (
           <Toast key={id} {...props}>
             <div className="flex gap-2 items-center">
-              {props.variant ? variantIcons[props.variant] : ''}
+              {props.variant ? variantIcons[props.variant] : variantIcons['default']}
             <div className="grid gap-1">
               {title && <ToastTitle>{title}</ToastTitle>}
               {description && (

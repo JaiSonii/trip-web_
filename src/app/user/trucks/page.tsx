@@ -92,6 +92,10 @@ export default function TrucksPage() {
     return <FaSort />;
   }, [sortConfig]);
 
+  const truncateText = (text: string, maxLength: number) => {
+    return text?.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+  };
+
   if (isLoading) return <Loading />;
 
   if (!trucks || trucks.length === 0) {
@@ -136,10 +140,11 @@ export default function TrucksPage() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {sortedTrucks.map((truck) => {
+          {sortedTrucks.map((truck, index) => {
             const Icon = truckTypesIcons.find(item => item.type === truck.truckType)?.Icon;
             return (
               <TableRow
+                index = {index + 1}
                 key={truck.truckNo}
                 className="border-t hover:bg-gray-100 transition-colors duration-200 cursor-pointer"
                 onClick={() => router.push(`/user/trucks/${truck.truckNo}`)}
@@ -185,7 +190,7 @@ export default function TrucksPage() {
                         href={`/user/suppliers/${truck.supplier}/trips`} 
                         onClick={(e) => e.stopPropagation()}
                       >
-                        {truck.supplierName}
+                        {truncateText(truck.supplierName as string, 20)}
                       </Link>
                     </Button>
                   ) : (

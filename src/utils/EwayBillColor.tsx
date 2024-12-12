@@ -13,7 +13,7 @@ export function ewbColor(trip : ITrip | any) {
 
     let textColorClass = ''; // Class for text color
     if(trip.status >= 1){
-      textColorClass = 'text-green-500'
+      textColorClass = 'text-gray-500'
     }
     else if (daysRemaining < 0) {
       textColorClass = 'text-red-500'; // Expired

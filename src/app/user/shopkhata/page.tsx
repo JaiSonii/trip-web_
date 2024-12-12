@@ -125,7 +125,7 @@ const ShopKhataPage = () => {
           </TableHeader>
           <TableBody>
             {filteredAndSortedShops.map((shop, index) => (
-              <TableRow key={shop.shop_id as string} className="border-t w-full cursor-pointer" onClick={() => router.push(`/user/shopkhata/${shop.shop_id}`)}>
+              <TableRow index={index + 1} key={shop.shop_id as string} className="border-t w-full cursor-pointer" onClick={() => router.push(`/user/shopkhata/${shop.shop_id}`)}>
                 <TableCell>
                   <div className='flex items-center space-x-2'>
                     <GoOrganization className="text-bottomNavBarColor" />

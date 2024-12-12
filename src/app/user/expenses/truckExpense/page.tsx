@@ -1,22 +1,22 @@
 'use client';
 import Loading from '../loading';
-import { Button } from '@/components/ui/button';
-import { IDriver, IExpense, } from '@/utils/interface';
+import { IExpense, } from '@/utils/interface';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { MdDelete, MdEdit } from 'react-icons/md';
+
 import { DeleteExpense, fetchTruckExpense, handleAddExpense, handleEditExpense } from '@/helpers/ExpenseOperation';
-import { icons, IconKey } from '@/utils/icons';
-import { FaCalendarAlt, FaSort, FaSortDown, FaSortUp, FaTruck } from 'react-icons/fa';
+
+import { FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
 
 import { formatNumber, generateMonthYearOptions } from '@/utils/utilArray';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import debounce from 'lodash.debounce';
 import dynamic from 'next/dynamic';
 import { ExpenseHeader } from '@/components/ExpenseHeader';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator';
+import ExpenseTable from '@/components/ExpenseTable';
+import { useToast } from '@/components/hooks/use-toast';
 
-const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), { ssr: false , loading : ()=><div>{loadingIndicator}</div>})
-const ExpenseFilterModal = dynamic(() => import('@/components/ExpenseFilterModal'), { ssr: false, loading : ()=><div>{loadingIndicator}</div> })
+const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), { ssr: false, loading: () => <div>{loadingIndicator}</div> })
+const ExpenseFilterModal = dynamic(() => import('@/components/ExpenseFilterModal'), { ssr: false, loading: () => <div>{loadingIndicator}</div> })
 const TruckExpense: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -26,6 +26,7 @@ const TruckExpense: React.FC = () => {
   const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
   const [searchQuery, setSearchQuery] = useState('')
   const [filterModalOpen, setFilterModalOpen] = useState(false)
+  const {toast} = useToast()
 
   const monthYearOptions = generateMonthYearOptions()
 
@@ -35,8 +36,8 @@ const TruckExpense: React.FC = () => {
     expenseType: true,
     notes: true,
     truck: true,
+    ledger: true,
     action: true,
-    ledger: true
   });
 
 
@@ -44,7 +45,6 @@ const TruckExpense: React.FC = () => {
     try {
       const res = await fetch(`/api/expenses/truckExpense?filter=${encodeURIComponent(JSON.stringify(filter))}`)
       const data = await res.json()
-      console.log(data)
       setTruckExpenseBook(data.truckExpense)
     } catch (error) {
       console.log(error)
@@ -114,7 +114,6 @@ const TruckExpense: React.FC = () => {
   const getBook = async (month: string | null, year: string | null) => {
     try {
       setLoading(true);
-      console.log(month, year)
       const truckExpenses = await fetchTruckExpense(month, year);
       setTruckExpenseBook(truckExpenses);
     } catch (error) {
@@ -126,7 +125,7 @@ const TruckExpense: React.FC = () => {
 
   const handleExpense = async (expense: IExpense | any, id?: string, file?: File | null) => {
     try {
-      const data = selected ? await handleEditExpense(expense, selected._id as string, file) : await handleAddExpense(expense, file)
+      const data = selected ? await handleEditExpense(expense, selected._id as string, file, toast) : await handleAddExpense(expense, file, toast)
       selected ?
         setTruckExpenseBook((prev) => (
           prev.map((exp) => exp._id === data._id ? ({ ...exp, ...data }) : exp)
@@ -134,10 +133,14 @@ const TruckExpense: React.FC = () => {
           { ...data },
           ...prev
         ])
-
+        toast({
+          description: `Expense ${selected ? 'edited' : 'added'} successfully`
+        })
     } catch (error) {
-      console.error(error);
-      alert('Please try again')
+      toast({
+        description: 'Please try again',
+        variant: 'destructive'
+      })
     } finally {
       setSelected(null)
       setModalOpen(false);
@@ -159,6 +162,21 @@ const TruckExpense: React.FC = () => {
     }));
   };
 
+  const handleDelete = async (id: string) => {
+    try {
+      const expense = await DeleteExpense(id)
+      setTruckExpenseBook(truckExpenseBook.filter((item) => item._id !== expense._id));
+      toast({
+        description: 'Expense deleted successfully'
+      })
+    } catch (error) {
+      toast({
+        description: 'Failed to Delete Expense',
+        variant: 'destructive'
+      })
+    }
+  }
+
   const handleSelectAll = (selectAll: boolean) => {
     setVisibleColumns({
       date: selectAll,
@@ -167,7 +185,7 @@ const TruckExpense: React.FC = () => {
       notes: selectAll,
       truck: selectAll,
       action: selectAll,
-      ledger: selectAll
+      ledger: selectAll,
     });
   };
 
@@ -178,103 +196,16 @@ const TruckExpense: React.FC = () => {
 
 
       <div className="">
-        <Table className="">
-          <TableHeader>
-            <TableRow className="">
-              {visibleColumns.date && <TableHead onClick={() => requestSort('date')} className="">
-                <div className='flex justify-between'>
-                  Date {getSortIcon('date')}
-                </div>
-              </TableHead>}
-              {visibleColumns.amount && <TableHead onClick={() => requestSort('amount')} className="">
-                <div className='flex justify-between'>
-                  Amount {getSortIcon('amount')}
-                </div>
-              </TableHead>}
-              {visibleColumns.expenseType && <TableHead onClick={() => requestSort('expenseType')} className="">
-                <div className='flex justify-between'>
-                  Expense Type {getSortIcon('expenseType')}
-                </div>
-              </TableHead>}
-              {visibleColumns.ledger && <TableHead className="">
-                <div className='flex justify-between'>
-                  Payment Mode
-                </div>
-              </TableHead>}
-              {visibleColumns.notes && <TableHead onClick={() => requestSort('notes')} className="">
-                <div className='flex justify-between'>
-                  Notes {getSortIcon('notes')}
-                </div>
-              </TableHead>}
-              {visibleColumns.truck && <TableHead className="">
-                <div className='flex justify-between'>
-                  Lorry
-                </div>
-              </TableHead>}
-              {visibleColumns.action && <TableHead className="">Action</TableHead>}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedExpense.length > 0 ? (
-              sortedExpense.map((expense, index) => (
-                <TableRow key={index} className="border-t hover:bg-indigo-100 cursor-pointer transition-colors">
-                  {visibleColumns.date && (
-                    <TableCell className="border p-4">
-                      <div className='flex items-center space-x-2'>
-                        <FaCalendarAlt className='text-bottomNavBarColor' />
-                        <span>{new Date(expense.date).toISOString().split('T')[0]}</span>
-                      </div>
-                    </TableCell>
-                  )}
-                  {visibleColumns.amount && <TableCell className="border p-4">₹{formatNumber(expense.amount)}</TableCell>}
-                  {visibleColumns.expenseType && (
-                    <TableCell className="border p-4">
-                      <div className="flex items-center space-x-2">
-                        {icons[expense.expenseType as IconKey]}
-                        <span>{expense.expenseType}</span>
-                      </div>
-                    </TableCell>
-                  )}
-                  {visibleColumns.ledger && (
-                    <TableCell className="border p-4">
-                      <div className="flex items-center justify-between">
-                        <p>{expense.paymentMode}</p><p className='whitespace-nowrap'> {expense.driverName || expense.shopName}</p>
-                      </div>
-                    </TableCell>
-                  )}
-                  {visibleColumns.notes && <TableCell className="border p-4">{expense.notes || 'N/A'}</TableCell>}
-                  {visibleColumns.truck && (
-                    <TableCell className="border p-4">
-                      <div className='flex items-center space-x-2'>
-                        <FaTruck className='text-bottomNavBarColor' />
-                        <span>{expense.truck || ''}</span>
-                      </div>
-                    </TableCell>
-                  )}
-                  {visibleColumns.action && (
-                    <TableCell className="border p-4">
-                      <div className="flex items-center space-x-2">
-                        <Button variant="outline" onClick={() => { setSelected(expense); setModalOpen(true); }} size="sm">
-                          <MdEdit />
-                        </Button>
-                        <Button variant="destructive" onClick={async () => {
-                          await DeleteExpense(expense._id as string);
-                          setTruckExpenseBook((prev) => prev.filter((item) => item._id !== expense._id));
-                        }} size={"sm"}>
-                          <MdDelete />
-                        </Button>
-                      </div>
-                    </TableCell>
-                  )}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={8} className="text-center p-4 text-gray-500">No expenses found</TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+        <ExpenseTable
+          sortedExpense={sortedExpense}
+          handleDelete={handleDelete}
+          visibleColumns={visibleColumns}
+          requestSort={requestSort}
+          getSortIcon={getSortIcon}
+          setSelected={setSelected}
+          setTruckExpenseBook={setTruckExpenseBook}
+          setModalOpen={setModalOpen}
+        />
       </div>
 
 

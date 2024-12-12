@@ -373,6 +373,39 @@ ExpenseSchema = new Schema({
   url : String
 })
 
+export const draftExpenseSchema = new Schema({
+  user_id : {
+    type :String,
+    required : true
+  },
+  trip_id : {
+    type : String
+  },
+  truck : {
+    type : String,
+    default : ''
+  },
+  expenseType : {
+    type : String
+  },
+  paymentMode :{
+    type : String,
+  },
+  transaction_id : String,
+  driver : String,
+  amount : {
+    type : Number,
+  },
+  shop_id : String,
+  date : {
+    type : Date,
+    default : ()=>new Date(Date.now()),
+    
+  },
+  notes : String,
+  url : String
+})
+
 export const supplierAccountSchema = new Schema({
   user_id : {
     type : String,

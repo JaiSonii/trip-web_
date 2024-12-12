@@ -13,9 +13,10 @@ import dynamic from 'next/dynamic';
 import ExpenseTable from '@/components/ExpenseTable';
 import { ExpenseHeader } from '@/components/ExpenseHeader';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator';
+import { useToast } from '@/components/hooks/use-toast';
 
-const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), { ssr: false , loading : ()=><div>{loadingIndicator}</div>})
-const ExpenseFilterModal = dynamic(() => import('@/components/ExpenseFilterModal'), { ssr: false, loading : ()=><div>{loadingIndicator}</div> })
+const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), { ssr: false, loading: () => <div>{loadingIndicator}</div> })
+const ExpenseFilterModal = dynamic(() => import('@/components/ExpenseFilterModal'), { ssr: false, loading: () => <div>{loadingIndicator}</div> })
 
 const TripExpense: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
@@ -26,6 +27,7 @@ const TripExpense: React.FC = () => {
   const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
   const [searchQuery, setSearchQuery] = useState('')
   const [filterModalOpen, setFilterModalOpen] = useState(false)
+  const { toast } = useToast()
 
 
 
@@ -137,16 +139,21 @@ const TripExpense: React.FC = () => {
     try {
       const expense = await DeleteExpense(id)
       setTruckExpenseBook(truckExpenseBook.filter((item) => item._id !== expense._id));
+      toast({
+        description: 'Expense deleted successfully'
+      })
     } catch (error) {
-      alert('Failed to delete expense')
-      console.log(error)
+      toast({
+        description: 'Failed to Delete Expense',
+        variant: 'destructive'
+      })
     }
   }
 
   const handleExpense = async (expense: IExpense | any, id?: string, file?: File | null) => {
     console.log(file)
     try {
-      const data = selected ? await handleEditExpense(expense, selected._id as string, file) : await handleAddExpense(expense, file)
+      const data = selected ? await handleEditExpense(expense, selected._id as string, file, toast) : await handleAddExpense(expense, file, toast)
       selected ?
         setTruckExpenseBook((prev) => (
           prev.map((exp) => exp._id === data._id ? ({ ...exp, ...data }) : exp)
@@ -154,10 +161,14 @@ const TripExpense: React.FC = () => {
           { ...data },
           ...prev
         ])
-
+      toast({
+        description: `Expense ${selected ? 'edited' : 'added'} successfully`
+      })
     } catch (error) {
-      console.error(error);
-      alert('Please try again')
+      toast({
+        description: 'Please try again',
+        variant: 'destructive'
+      })
     } finally {
       setSelected(null)
       setModalOpen(false);
@@ -195,7 +206,7 @@ const TripExpense: React.FC = () => {
   return (
     <div className="w-full h-full">
 
-      <ExpenseHeader visibleColumns={visibleColumns} handleSearch={handleSearch} handleSelectAll={handleSelectAll} handleToggleColumn={handleToggleColumn} sortedExpense={sortedExpense} setSelected={setSelected } setModalOpen={setModalOpen} setFilterModalOpen={setFilterModalOpen} />
+      <ExpenseHeader visibleColumns={visibleColumns} handleSearch={handleSearch} handleSelectAll={handleSelectAll} handleToggleColumn={handleToggleColumn} sortedExpense={sortedExpense} setSelected={setSelected} setModalOpen={setModalOpen} setFilterModalOpen={setFilterModalOpen} />
 
       <div className="">
         <ExpenseTable

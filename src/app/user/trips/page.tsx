@@ -363,8 +363,9 @@ export default function TripsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {sortedTrips.map((trip: ITrip) => (
+              {sortedTrips.map((trip: ITrip, index: number) => (
                 <TableRow
+                  index={index + 1}
                   key={trip.trip_id}
                   className="hover:bg-orange-50 cursor-pointer transition-colors duration-200"
                   onClick={() => router.push(`/user/trips/${trip.trip_id}`)}
