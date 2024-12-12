@@ -120,7 +120,8 @@ export async function GET(req: Request) {
         }
       },
       { $replaceRoot: { newRoot: '$party' } }, // Replace the root with the full party document
-      { $project: { trips: 0, tripExpenses: 0, tripAccounts: 0 } } // Optionally remove trips and tripExpenses if not needed in the final output
+      { $project: { trips: 0, tripExpenses: 0, tripAccounts: 0 } }, // Optionally remove trips and tripExpenses if not needed in the final output
+      { $sort: { name: 1 } }
     ]);
 
 
