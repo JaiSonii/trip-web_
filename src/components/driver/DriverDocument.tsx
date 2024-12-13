@@ -8,6 +8,7 @@ import { IDriver } from '@/utils/interface';
 import { loadingIndicator } from '../ui/LoadingIndicator';
 import { FaChevronRight } from 'react-icons/fa6';
 import { useToast } from '../hooks/use-toast';
+import { CloudUpload } from 'lucide-react';
 
 
 
@@ -24,16 +25,16 @@ const DriverDocuments: React.FC<TripDocumentProps> = ({ driverId }) => {
     const [modalOpen, setModalOpen] = useState(false)
     const [driver, setDriver] = useState<IDriver>()
     const [loading, setLaoding] = useState(true)
-    const {toast} = useToast()
+    const { toast } = useToast()
 
     useEffect(() => {
         const fetchDriver = async () => {
             try {
                 const response = await fetch(`/api/drivers/${driverId}`);
-                if(!response.ok){
+                if (!response.ok) {
                     toast({
-                        description : 'Failed to load documents',
-                        variant : 'destructive'
+                        description: 'Failed to load documents',
+                        variant: 'destructive'
                     })
                     return
                 }
@@ -42,8 +43,8 @@ const DriverDocuments: React.FC<TripDocumentProps> = ({ driverId }) => {
                 setDriver(data)
             } catch (error) {
                 toast({
-                    description : 'Failed to load documents',
-                    variant : 'destructive'
+                    description: 'Failed to load documents',
+                    variant: 'destructive'
                 })
             } finally {
                 setLaoding(false)
@@ -62,30 +63,30 @@ const DriverDocuments: React.FC<TripDocumentProps> = ({ driverId }) => {
             <div className="flex items-center justify-between mb-4 border-b-2 border-gray-300 pb-2">
                 <h1 className="text-2xl font-semibold text-black flex items-center space-x-2">
                     <Button variant={'link'}>
-                        <Link href="/user/documents"  className="text-2xl font-semibold hover:underline">
+                        <Link href="/user/documents" className="text-2xl font-semibold hover:underline">
                             Docs
                         </Link>
                     </Button>
 
                     <FaChevronRight className="text-lg text-gray-500" />
                     <Button variant={'link'}>
-                        <Link href="/user/documents/driverDocuments"  className="text-2xl font-semibold hover:underline">
+                        <Link href="/user/documents/driverDocuments" className="text-2xl font-semibold hover:underline">
                             Driver Docs
                         </Link>
                     </Button>
 
                     <FaChevronRight className="text-lg text-gray-500" />
-                    <span  className="text-2xl font-semibold hover:underline">{driver?.name}</span>
+                    <span className="text-2xl font-semibold hover:underline">{driver?.name}</span>
                 </h1>
-                <Button onClick={() => setModalOpen(true)}>
-                    Upload Document
-                </Button>
+                <div className='flex justify-end my-2 fixed right-4 bottom-4'>
+                    <Button onClick={() => setModalOpen(true)} className='rounded-full h-full py-2'><CloudUpload size={40} /></Button>
+                </div>
             </div>
             {loading && loadingIndicator}
             <RecentDocuments docs={documents} />
             {modalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-                    <DriverDocumentUpload open={modalOpen} setOpen={setModalOpen} driverId={driverId} setDocuments={setDocuments}/>
+                    <DriverDocumentUpload open={modalOpen} setOpen={setModalOpen} driverId={driverId} setDocuments={setDocuments} />
                 </div>
             )}
         </div>

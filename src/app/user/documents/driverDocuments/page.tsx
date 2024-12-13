@@ -13,6 +13,7 @@ import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 import { FaIdCardAlt, FaRegCheckCircle, FaThLarge } from 'react-icons/fa';
 import { useExpenseCtx } from '@/context/context';
 import Image from 'next/image'
+import { CloudUpload } from 'lucide-react';
 
 const DriverDocuments = () => {
   const { drivers, isLoading } = useExpenseCtx()
@@ -70,7 +71,7 @@ const DriverDocuments = () => {
         setLoading(false)
       }
     }
-  },[type])
+  }, [type])
 
   useEffect(() => {
     fetchDocuments()
@@ -116,9 +117,9 @@ const DriverDocuments = () => {
               )}
             </Button>
           )}
-          <Button onClick={() => setModalOpen(true)}>
-            Upload Document
-          </Button>
+          <div className='flex justify-end my-2 fixed right-4 bottom-4'>
+            <Button onClick={() => setModalOpen(true)} className='rounded-full h-full py-2'><CloudUpload size={40} /></Button>
+          </div>
         </div>
       </div>
 

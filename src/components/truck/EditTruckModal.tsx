@@ -130,7 +130,7 @@ const EditTruckModal: React.FC<EditTruckModalProps> = ({ truck, isOpen, onClose,
 
     return (
         <>
-            <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
+            <div className="modal-class"></div>
             <div className="fixed inset-0 flex items-center justify-center z-50">
                 <div className="bg-white text-black p-4 max-w-md w-full mx-auto shadow-md rounded-md relative">
                     {saving && (

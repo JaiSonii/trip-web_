@@ -108,7 +108,7 @@ const AddPaymentModal = ({ isOpen, onClose, onSave, supplierId }: AddPaymentModa
 
     return (
         <>
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 overflow-auto">
+            <div className="modal-class overflow-auto">
                 <div className="bg-white p-6 rounded shadow-lg w-3/4 max-w-xl">
                     <h2 className="text-xl font-bold mb-4">Add Payment</h2>
                     <div className="mb-4">

@@ -70,7 +70,7 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave }) =>
 
   return (
     <>
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div>
+    <div className="modal-class"></div>
     <motion.div
           initial={{ opacity: 0, scale: 0.5 }}
           animate={{ opacity: 1, scale: 1 }}

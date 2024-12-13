@@ -57,7 +57,7 @@ const EditChargeModal: React.FC<EditChargeModalProps> = ({ isOpen, onClose, onSa
   if (!isOpen) return null;
 
   return (
-    <><div className="fixed inset-0 bg-black bg-opacity-50 z-40"></div><motion.div
+    <><div className="modal-class"></div><motion.div
       initial={{ opacity: 0, scale: 0.5 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{

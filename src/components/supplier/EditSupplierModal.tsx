@@ -25,7 +25,7 @@ const EditSupplierModal = ({ supplier, isOpen, onClose, onSave }: EditSupplierMo
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="modal-class">
             <div className="bg-white p-6 rounded shadow-lg w-96">
                 <h2 className="text-xl font-bold mb-4">Edit Supplier</h2>
                 <div className="mb-4">
