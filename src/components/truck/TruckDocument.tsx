@@ -6,7 +6,7 @@ import RecentDocuments from '../documents/RecentDocuments';
 import Link from 'next/link';
 import TruckDocumentUpload from '../documents/TruckDocumentUpload';
 import { FaChevronRight } from 'react-icons/fa6';
-import { Loader2 } from 'lucide-react';
+import { CloudUpload, Loader2 } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
 
 
@@ -61,9 +61,9 @@ const TruckDocuments: React.FC<TruckDocumentProps> = ({ truckNo }) => {
                     <FaChevronRight className="text-lg text-gray-500" />
                     <span className="text-black">{truckNo}</span>
                 </h1>
-                <Button onClick={() => setModalOpen(true)}>
-                    Upload Document
-                </Button>
+                <div className='flex justify-end my-2 fixed right-4 bottom-4'>
+                    <Button onClick={() => setModalOpen(true)} className='rounded-full h-full py-2'><CloudUpload size={40} /></Button>
+                </div>
             </div>
             {loading ?
                 <div className='flex flex-col items-center justify-center'><Loader2 className='text-bottomNavBarColor animate-spin' /><p className='text-black'>fetching documents...</p></div> :
@@ -72,7 +72,7 @@ const TruckDocuments: React.FC<TruckDocumentProps> = ({ truckNo }) => {
 
             {modalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-                    <TruckDocumentUpload open={modalOpen} setOpen={setModalOpen} truckNo={truckNo} setDocuments={setDocuments}/>
+                    <TruckDocumentUpload open={modalOpen} setOpen={setModalOpen} truckNo={truckNo} setDocuments={setDocuments} />
                 </div>
             )}
         </div>

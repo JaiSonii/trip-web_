@@ -14,6 +14,7 @@ import folderIcon from '@/assets/folder-icon.png'
 import Image from 'next/image';
 import { TbReceiptTax } from 'react-icons/tb';
 import TruckDocumentUpload from '@/components/documents/TruckDocumentUpload';
+import { CloudUpload } from 'lucide-react';
 
 const TruckDocArray = [
   {
@@ -40,7 +41,7 @@ const TruckDocArray = [
 
     icon: <FaFolderOpen className='text-bottomNavBarColor' size={70} /> // Folder icon for "Other" category
   },
-  
+
   {
     title: 'Tax',
 
@@ -79,7 +80,7 @@ const TruckDocuments = () => {
       const data = await res.json();
       if (res.ok && data.documents.length > 0) {
         setDocuments(data.documents);
-        
+
         setMessage('');
       } else {
         setDocuments([]);
@@ -148,7 +149,9 @@ const TruckDocuments = () => {
               )}
             </Button>
           )}
-          <Button onClick={() => setModalOpen(true)}>Upload Document</Button>
+          <div className='flex justify-end my-2 fixed right-4 bottom-4'>
+            <Button onClick={() => setModalOpen(true)} className='rounded-full h-full py-2'><CloudUpload size={40} /></Button>
+          </div>
         </div>
       </div>
 

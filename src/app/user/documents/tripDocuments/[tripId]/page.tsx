@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic'
 import Link from 'next/link'
 import TripDocumentUpload from '@/components/documents/TripDocumentUpload'
 import { FaChevronRight } from 'react-icons/fa6'
+import { CloudUpload } from 'lucide-react'
 
 const TripDocumentsPage = () => {
     const { tripId } = useParams() as { tripId: string };
@@ -55,14 +56,14 @@ const TripDocumentsPage = () => {
                 <div className="flex items-center justify-between mb-6 border-b-2 border-gray-300 pb-2">
                     <h1 className="text-2xl font-semibold text-black flex items-center space-x-2">
                         <Button variant={'link'}>
-                            <Link href="/user/documents"  className="text-2xl font-semibold hover:underline">
+                            <Link href="/user/documents" className="text-2xl font-semibold hover:underline">
                                 Docs
                             </Link>
                         </Button>
 
                         <FaChevronRight className="text-lg text-gray-500" />
                         <Button variant={'link'}>
-                            <Link href="/user/documents/tripDocuments"  className="text-2xl font-semibold hover:underline">
+                            <Link href="/user/documents/tripDocuments" className="text-2xl font-semibold hover:underline">
                                 Trip Docs
                             </Link>
                         </Button>
@@ -71,11 +72,9 @@ const TripDocumentsPage = () => {
                         <span className="text-2xl font-semibold hover:underline">Trip...</span>
                     </h1>
 
-                    <Button
-                        onClick={() => setModalOpen(true)}
-                    >
-                        Upload Document
-                    </Button>
+                    <div className='flex justify-end my-2 fixed right-4 bottom-4'>
+                        <Button onClick={() => setModalOpen(true)} className='rounded-full h-full py-2'><CloudUpload size={40} /></Button>
+                    </div>
                 </div>
 
                 {/* Trip Documents Component */}

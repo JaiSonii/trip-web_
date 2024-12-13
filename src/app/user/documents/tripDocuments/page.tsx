@@ -17,6 +17,7 @@ import biltyIcon from '@/assets/bilty-icon.png';
 import folderIcon from '@/assets/folder-icon.png'
 import { FaThLarge } from 'react-icons/fa';
 import TripDocumentUpload from '@/components/documents/TripDocumentUpload';
+import { CloudUpload } from 'lucide-react';
 
 const TripDocumentsLanding = () => {
   const TripDocArray = [
@@ -123,7 +124,9 @@ const TripDocumentsLanding = () => {
               )}
             </Button>
           )}
-          <Button onClick={() => setModalOpen(true)}>Upload Document</Button>
+          <div className='flex justify-end my-2 fixed right-4 bottom-4'>
+            <Button onClick={() => setModalOpen(true)} className='rounded-full h-full py-2'><CloudUpload size={40} /></Button>
+          </div>
         </div>
       </div>
 
