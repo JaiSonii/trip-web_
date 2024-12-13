@@ -190,6 +190,9 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip, d
             setLoading(false);
 
             if (response.ok) {
+                toast({
+                    description: 'Documents uploaded successfully!',
+                  })
                 setSuccessMessage('Document uploaded successfully!');
                 setError('');
                 setFormData({

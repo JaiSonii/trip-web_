@@ -44,7 +44,7 @@ interface TripExpense {
 
 const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClose, onSave, driverId, selected, tripId, truckNo, setDrafts }) => {
 
-    const { trips, drivers, shops, trucks, isLoading, error } = useExpenseCtx();
+    const { trips : ctxTrips, drivers, shops, trucks, isLoading, error } = useExpenseCtx();
 
     const [formData, setFormData] = useState<TripExpense>({
         id: selected?._id || undefined,
@@ -75,6 +75,13 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
     const [fileUrl, setFileUrl] = useState<string | null>(selected?.url || null);
     const [modalOpen, setModalOpen] = useState(false)
 
+    const trips = useMemo(()=>{
+        let initialTrips = [...ctxTrips]
+        if(formData.truck && selectedCategory === 'Trip Expense'){
+            initialTrips = initialTrips.filter(trip=>trip.truck === formData.truck)
+        }
+        return initialTrips
+    },[formData.truck, selectedCategory])
 
     const savetoDraft = async () => {
         try {
@@ -398,6 +405,7 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
                                                         ></div>
                                                     </div>
                                                 </div>
+                                                <p className='whitespace-nowrap'>{trip.LR}</p>
                                             </div>
                                         </SelectItem>
                                     ))}

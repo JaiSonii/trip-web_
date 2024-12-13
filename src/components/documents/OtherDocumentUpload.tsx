@@ -24,7 +24,7 @@ interface DocumentForm {
 type Props = {
   open: boolean;
   setOpen: (open: boolean) => void;
-  setUser: any;
+  setUser?: any;
 };
 
 const OtherDocumentUpload: React.FC<Props> = ({ open, setOpen, setUser }) => {
@@ -97,6 +97,9 @@ const OtherDocumentUpload: React.FC<Props> = ({ open, setOpen, setUser }) => {
       setLoading(false);
 
       if (response.ok) {
+        toast({
+          description: 'Documents uploaded successfully!',
+        })
         const responseData = await response.json();
         setSuccessMessage('Documents uploaded successfully!');
         setError('');
@@ -139,12 +142,6 @@ const OtherDocumentUpload: React.FC<Props> = ({ open, setOpen, setUser }) => {
       className="w-full max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md flex flex-col z-50"
     >
       <h1 className="text-2xl font-semibold mb-4 text-black">Upload Documents</h1>
-
-      {loading && (
-        <div className="flex justify-center mb-4">
-          <Loader2 className='animate-spin text-bottomNavBarColor' />
-        </div>
-      )}
 
       {error && <p className="text-red-500 mb-4">{error}</p>}
       {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
@@ -216,10 +213,10 @@ const OtherDocumentUpload: React.FC<Props> = ({ open, setOpen, setUser }) => {
         )}
 
         <div className="flex items-center space-x-2 justify-end">
-          <Button type="submit">
-            Submit
+          <Button type="submit" disabled={loading}>
+          {loading ? <Loader2 className='text-white animate-spin' /> : 'Submit'}
           </Button>
-          <Button variant={'outline'} onClick={() => setOpen(false)}>
+          <Button variant={'outline'} onClick={() => setOpen(false)} disabled={loading}>
             Cancel
           </Button>
         </div>

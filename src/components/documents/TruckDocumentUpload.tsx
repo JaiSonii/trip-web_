@@ -186,6 +186,9 @@ const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo, document
             setLoading(false);
 
             if (response.ok) {
+                toast({
+                    description: 'Documents uploaded successfully!',
+                  })
                 setSuccessMessage('Document uploaded successfully!');
                 setError('');
                 setFormData({

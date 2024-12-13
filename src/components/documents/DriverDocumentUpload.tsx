@@ -195,6 +195,9 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId, docume
             setLoading(false);
 
             if (response.ok) {
+                toast({
+                    description: 'Documents uploaded successfully!',
+                  })
                 setSuccessMessage('Document uploaded successfully!');
                 setError('');
                 setFormData({

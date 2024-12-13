@@ -16,7 +16,7 @@ interface DocumentForm {
 type Props = {
     open: boolean;
     setOpen: (open: boolean) => void;
-    setDocs: any
+    setDocs?: any
 };
 
 const CompanyDocumentUpload: React.FC<Props> = ({ open, setOpen, setDocs }) => {
@@ -106,7 +106,9 @@ const CompanyDocumentUpload: React.FC<Props> = ({ open, setOpen, setDocs }) => {
             const errorData = await response.json();
             throw new Error(errorData.error || 'Unknown error');
           }
-      
+          toast({
+            description: 'Documents uploaded successfully!',
+          })
           const responseData = await response.json();
           setSuccessMessage(responseData.message);
           setFormData({ files: [], filenames: [] });
@@ -137,13 +139,6 @@ const CompanyDocumentUpload: React.FC<Props> = ({ open, setOpen, setDocs }) => {
                 ease: [0, 0.71, 0.2, 1.01]
             }} className="w-full max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md flex flex-col z-50">
             <h1 className="text-2xl font-semibold mb-4 text-black">Upload Documents</h1>
-
-            {/* Loading indicator */}
-            {loading && (
-                <div className="flex justify-center mb-4">
-                    <Loader2 className='animate-spin text-bottomNavBarColor' />
-                </div>
-            )}
 
             {error && <p className="text-red-500 mb-4">{error}</p>}
             {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
@@ -184,10 +179,10 @@ const CompanyDocumentUpload: React.FC<Props> = ({ open, setOpen, setDocs }) => {
 
                 {/* Submit button */}
                 <div className="flex items-center space-x-2 justify-end">
-                    <Button type="submit">
-                        Submit
+                    <Button type="submit" disabled={loading}>
+                        {loading ? <Loader2 className='text-white animate-spin' /> : 'Submit'}
                     </Button>
-                    <Button variant={'outline'} onClick={() => setOpen(false)}>
+                    <Button variant={'outline'} onClick={() => setOpen(false)} disabled={loading}>
                         Cancel
                     </Button>
                 </div>

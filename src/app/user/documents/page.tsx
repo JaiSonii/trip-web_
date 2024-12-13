@@ -9,17 +9,32 @@ import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 import { useRecentDocsCtx } from '@/context/recentDocs';
 import { BiCloudUpload } from 'react-icons/bi';
 import { useSWRConfig } from 'swr';
+import { Button } from '@/components/ui/button';
+import { CloudUpload, X } from 'lucide-react';
+import { motion } from 'framer-motion';
+import TruckDocumentUpload from '@/components/documents/TruckDocumentUpload';
+import TripDocumentUpload from '@/components/documents/TripDocumentUpload';
+import DriverDocumentUpload from '@/components/documents/DriverDocumentUpload';
+import CompanyDocumentUpload from '@/components/documents/CompanyDocumentUpload';
+import OtherDocumentUpload from '@/components/documents/OtherDocumentUpload';
 
 const RecentDocuments = dynamic(() => import('@/components/documents/RecentDocuments'), { ssr: false });
 
 const DocumentsPage = () => {
   const { documents, counts, docsLoading } = useRecentDocsCtx()
   const [error, setError] = useState('');
-  const {mutate} = useSWRConfig()
+  const { mutate } = useSWRConfig()
+  const [open, setOpen] = useState(false)
+  const [tripOpen, setTripOpen] = useState(false);
+  const [truckOpen, setTruckOpen] = useState(false);
+  const [driverOpen, setDriverOpen] = useState(false);
+  const [companyOpen, setCompanyOpen] = useState(false);
+  const [otherOpen, setOtherOpen] = useState(false);
 
-  useEffect(()=>{
+
+  useEffect(() => {
     mutate('/api/documents/recent')
-  },[mutate])
+  }, [mutate])
 
   // const fetchRecentDocuments = async () => {
   //   try {
@@ -72,6 +87,29 @@ const DocumentsPage = () => {
     }
   ];
 
+  const openModal = (title: string) => {
+    setOpen(false)
+    switch (title) {
+      case 'Trip Documents':
+        setTripOpen(!tripOpen);
+        break;
+      case 'Truck Documents':
+        setTruckOpen(!truckOpen);
+        break;
+      case 'Driver Documents':
+        setDriverOpen(!driverOpen);
+        break;
+      case 'Company Documents':
+        setCompanyOpen(!companyOpen);
+        break;
+      case 'Quick Uploads':
+        setOtherOpen(!otherOpen);
+        break;
+      default:
+        break;
+    }
+  }
+
   // useEffect(() => {
   //   fetchRecentDocuments();
   // }, []);
@@ -80,6 +118,10 @@ const DocumentsPage = () => {
     <div className="p-6 bg-gray-100 min-h-screen">
       <div className="flex items-center justify-between mb-4 border-b-2 border-gray-300 pb-2">
         <h1 className="text-2xl font-semibold text-black">Documents</h1>
+      </div>
+
+      <div className='flex justify-end my-2 fixed right-4 bottom-4'>
+        <Button onClick={() => setOpen(true)} className='rounded-full h-full py-2'><CloudUpload size={40} /></Button>
       </div>
 
       <div className="grid grid-cols-5 gap-4 border-b-2 border-gray-300 py-4">
@@ -113,6 +155,70 @@ const DocumentsPage = () => {
         {error && <p className="text-red-500">{error}</p>}
         {documents && <RecentDocuments docs={documents} />}
       </div>
+      {
+        open &&
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 flex items-center justify-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{
+              duration: 0.2,
+              ease: [0.4, 0, 0.2, 1]
+            }}
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden"
+          >
+            <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Select Document Type</h2>
+              <Button variant="ghost" size="icon" onClick={() => setOpen(false)}>
+                <X className="h-5 w-5" />
+              </Button>
+            </div>
+            <div className="p-6 grid grid-cols-2 sm:grid-cols-5 gap-6">
+              {documentTypes.map(({ title, icon }) => (
+                <Button
+                  key={title}
+                  variant="outline"
+                  className="flex flex-col items-center justify-center h-32 hover:bg-gray-50 dark:hover:bg-gray-700"
+                  onClick={() => openModal(title)}
+                >
+                  {/* Replace with your actual icon component */}
+                  <div className="text-3xl mb-2">{icon}</div>
+                  <p className="text-sm font-medium">{title.split(' ')[0]}</p>
+                </Button>
+              ))}
+            </div>
+
+
+          </motion.div>
+
+        </div>
+      }
+      {truckOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <TruckDocumentUpload open={truckOpen} setOpen={setTruckOpen} />
+        </div>
+      )}
+      {tripOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <TripDocumentUpload open={tripOpen} setOpen={setTripOpen} />
+        </div>
+      )}
+      {driverOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <DriverDocumentUpload open={driverOpen} setOpen={setDriverOpen} />
+        </div>
+      )}
+      {companyOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <CompanyDocumentUpload open={companyOpen} setOpen={setCompanyOpen} />
+        </div>
+      )}
+      {otherOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+          <OtherDocumentUpload open={otherOpen} setOpen={setOtherOpen} />
+        </div>
+      )}
     </div>
   );
 };

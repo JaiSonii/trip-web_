@@ -7,7 +7,7 @@ import RecentDocuments from '@/components/documents/RecentDocuments';
 import { useTrip } from '@/context/tripContext';
 import { Button } from '@/components/ui/button';
 import TripDocumentUpload from '@/components/documents/TripDocumentUpload';
-import { Frown } from 'lucide-react';
+import { CloudUpload, Frown } from 'lucide-react';
 
 const Page = () => {
   const {tripId} = useParams()
@@ -20,11 +20,10 @@ const Page = () => {
 
   return (
     <div className='mx-auto p-4'>
-      <div className='flex justify-end my-2'>
-      <Button onClick={()=>setIsOpen(true)}>Upload Document</Button>
+      <div className='flex justify-end my-2 fixed right-4 bottom-4'>
+      <Button onClick={()=>setIsOpen(true)} className='rounded-full h-full py-2'><CloudUpload size={40}/></Button>
       </div>
-      
-      {/* Truck Animation */}
+
       <RecentDocuments docs={trip?.documents || []} />
       {isOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">

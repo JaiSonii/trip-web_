@@ -8,6 +8,7 @@ import { useTruck } from '@/context/truckContext'
 import RecentDocuments from '@/components/documents/RecentDocuments'
 import { loadingIndicator } from '@/components/ui/LoadingIndicator'
 import TruckDocumentUpload from '@/components/documents/TruckDocumentUpload'
+import { CloudUpload } from 'lucide-react'
 
 const documentTypes = ["RC", "Insurance", "Permit", "Pollution Certificate"]
 
@@ -21,11 +22,10 @@ const TruckDocuments = () => {
    
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="container mx-auto px-4">
+      <div className="mb-2 flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-800">Truck Documents</h1>
-        <Button onClick={()=>setIsModalOpen(true)}>
-          Uplaod Document
+        <Button onClick={()=>setIsModalOpen(true)}className='rounded-full h-full py-2'><CloudUpload size={30}/>
         </Button>
       </div>
 
