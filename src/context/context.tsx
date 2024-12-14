@@ -1,4 +1,4 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, useState } from "react";
 import useSWR from "swr";
 import { ITrip, IDriver, TruckModel, IParty, ISupplier, IExpense } from "@/utils/interface";
 
@@ -64,6 +64,7 @@ const config = {
 }
 
 export const ExpenseProvider = ({ children }: Props) => {
+
     const { data: tripsData, error: tripsError, isLoading: tripsLoading } = useSWR("/api/trips", fetcher, config);
     const { data: driversData, error: driversError, isLoading: driversLoading } = useSWR("/api/drivers", fetcher, config);
     const { data: trucksData, error: trucksError, isLoading: trucksLoading } = useSWR("/api/trucks", fetcher, config);
@@ -71,6 +72,7 @@ export const ExpenseProvider = ({ children }: Props) => {
     const { data: partiesData, error: partiesError, isLoading: partiesLoading } = useSWR("/api/parties", fetcher, config);
     const { data: suppliersData, error: suppliersError, isLoading: suppliersLoading } = useSWR("/api/suppliers", fetcher, config);
     const { data: dashData, error: dashError, isLoading: dashLoading } = useSWR('/api/dashboard', fetcher, config);
+    
 
     const isLoading = tripsLoading || driversLoading || trucksLoading || shopsLoading || partiesLoading || suppliersLoading || dashLoading;
     const error = tripsError || driversError || trucksError || shopsError || partiesError || suppliersError || dashError;

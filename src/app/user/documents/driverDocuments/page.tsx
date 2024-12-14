@@ -189,11 +189,8 @@ const DriverDocuments = () => {
         </div>
       )}
 
-      {modalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
           <DriverDocumentUpload open={modalOpen} setOpen={setModalOpen} />
-        </div>
-      )}
+        
     </div>
   );
 };

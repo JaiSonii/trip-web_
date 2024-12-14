@@ -13,29 +13,27 @@ import { CloudUpload } from 'lucide-react'
 const documentTypes = ["RC", "Insurance", "Permit", "Pollution Certificate"]
 
 const TruckDocuments = () => {
-  const {truck, setTruck, loading} = useTruck()
+  const { truck, setTruck, loading } = useTruck()
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  if(loading){
+  if (loading) {
     return <div>{loadingIndicator}</div>
   }
-   
+
 
   return (
     <div className="container mx-auto px-4">
       <div className="mb-2 flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-800">Truck Documents</h1>
-        <Button onClick={()=>setIsModalOpen(true)}className='rounded-full h-full py-2'><CloudUpload size={30}/>
+        <Button onClick={() => setIsModalOpen(true)} className='rounded-full h-full py-2'><CloudUpload size={30} />
         </Button>
       </div>
 
       <RecentDocuments docs={truck?.documents} />
 
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className='p-0 max-w-lg'>
-         <TruckDocumentUpload truckNo={truck?.truckNo} open={isModalOpen} setOpen={setIsModalOpen} setTruck={setTruck} />
-        </DialogContent>
-      </Dialog>
+
+      <TruckDocumentUpload truckNo={truck?.truckNo} open={isModalOpen} setOpen={setIsModalOpen} setTruck={setTruck} />
+
     </div>
   )
 }

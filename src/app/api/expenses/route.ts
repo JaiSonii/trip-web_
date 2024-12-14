@@ -169,6 +169,7 @@ export async function POST(req: Request) {
         const file = formdata.get('file') as File
 
         const expenseData = JSON.parse(formdata.get('expense') as string);
+        console.log(expenseData)
         await connectToDatabase()
         const newExpense = new Expense({
             user_id: user,

@@ -194,31 +194,22 @@ const DocumentsPage = () => {
 
         </div>
       }
-      {truckOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-          <TruckDocumentUpload open={truckOpen} setOpen={setTruckOpen} />
-        </div>
-      )}
-      {tripOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-          <TripDocumentUpload open={tripOpen} setOpen={setTripOpen} />
-        </div>
-      )}
-      {driverOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-          <DriverDocumentUpload open={driverOpen} setOpen={setDriverOpen} />
-        </div>
-      )}
-      {companyOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-          <CompanyDocumentUpload open={companyOpen} setOpen={setCompanyOpen} />
-        </div>
-      )}
-      {otherOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-          <OtherDocumentUpload open={otherOpen} setOpen={setOtherOpen} />
-        </div>
-      )}
+
+      <TruckDocumentUpload open={truckOpen} setOpen={setTruckOpen} />
+
+
+
+      <TripDocumentUpload open={tripOpen} setOpen={setTripOpen} />
+
+
+      <DriverDocumentUpload open={driverOpen} setOpen={setDriverOpen} />
+
+
+      <CompanyDocumentUpload open={companyOpen} setOpen={setCompanyOpen} />
+
+
+      <OtherDocumentUpload open={otherOpen} setOpen={setOtherOpen} />
+
     </div>
   );
 };

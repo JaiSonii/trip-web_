@@ -1,7 +1,5 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '../ui/button';
-import { loadingIndicator } from '@/components/ui/LoadingIndicator'; // Ensure this component is available
-import { ITrip, TruckModel } from '@/utils/interface';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { motion } from 'framer-motion'
 import { usePathname, useRouter } from 'next/navigation';
@@ -192,7 +190,7 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip, d
             if (response.ok) {
                 toast({
                     description: 'Documents uploaded successfully!',
-                  })
+                })
                 setSuccessMessage('Document uploaded successfully!');
                 setError('');
                 setFormData({
@@ -267,98 +265,101 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip, d
     }
 
     return (
-        <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{
-                duration: 0.5,
-                ease: [0, 0.71, 0.2, 1.01]
-            }} className="w-full max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md flex flex-col">
-            <h1 className="text-2xl font-semibold mb-4 text-black">{isOtherPage ? 'Moving to Trip Document' : 'Upload Document'}</h1>
+        <div
+            className="modal-class"
+        >
+            <motion.div
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{
+                    duration: 0.5,
+                    ease: [0, 0.71, 0.2, 1.01]
+                }} className="w-full max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md flex flex-col">
+                <h1 className="text-2xl font-semibold mb-4 text-black">{isOtherPage ? 'Moving to Trip Document' : 'Upload Document'}</h1>
 
-            {/* Loading indicator */}
+                {/* Loading indicator */}
 
 
-            {error && <p className="text-red-500 mb-4">{error}</p>}
-            {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
+                {error && <p className="text-red-500 mb-4">{error}</p>}
+                {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
 
-            <form onSubmit={isOtherPage ? handleMove : handleSubmit}>
+                <form onSubmit={isOtherPage ? handleMove : handleSubmit}>
 
-                {!isOtherPage && <SingleFileUploader onFileChange={handleFileChange} />}
-                {/* Lorry (trip) select */}
-                <div className="mb-4">
-                    <label className="block text-sm text-gray-700">Trip*</label>
-                    <Select name="tripId" defaultValue={formData.tripId} onValueChange={handleOptionSelect}>
-                        <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select Trip" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <div className="p-2">
-                                <input
-                                    type="text"
-                                    placeholder="Search..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                            </div>
-                            {filteredTrips && filteredTrips.length > 0 ? (
-                                filteredTrips.map((trip) => (
-                                    <SelectItem key={trip.trip_id} value={trip.trip_id}>
-                                        <div className="flex items-center justify-between w-full p-2 space-x-4">
+                    {!isOtherPage && <SingleFileUploader onFileChange={handleFileChange} />}
+                    {/* Lorry (trip) select */}
+                    <div className="mb-4">
+                        <label className="block text-sm text-gray-700">Trip*</label>
+                        <Select name="tripId" defaultValue={formData.tripId} onValueChange={handleOptionSelect}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select Trip" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <div className="p-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Search..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                </div>
+                                {filteredTrips && filteredTrips.length > 0 ? (
+                                    filteredTrips.map((trip) => (
+                                        <SelectItem key={trip.trip_id} value={trip.trip_id}>
+                                            <div className="flex items-center justify-between w-full p-2 space-x-4">
 
-                                            {/* Display route origin to destination */}
-                                            <span className="font-semibold text-gray-700 whitespace-nowrap">
-                                                {trip.route.origin.split(',')[0]} &rarr; {trip.route.destination.split(',')[0]}
-                                            </span>
-
-                                            {/* Status indicator with progress bar */}
-                                            <div className="flex flex-col w-1/2 space-y-1">
-                                                {/* Status label */}
-                                                <span className="text-sm text-gray-600">
-                                                    {statuses[trip.status as number]}
+                                                {/* Display route origin to destination */}
+                                                <span className="font-semibold text-gray-700 whitespace-nowrap">
+                                                    {trip.route.origin.split(',')[0]} &rarr; {trip.route.destination.split(',')[0]}
                                                 </span>
 
-                                                {/* Progress bar for status */}
-                                                <div className="relative w-full h-1 bg-gray-200 rounded">
-                                                    <div
-                                                        className={`absolute top-0 left-0 h-1 rounded transition-width duration-500 ${trip.status === 0
-                                                            ? 'bg-red-500'
-                                                            : trip.status === 1
-                                                                ? 'bg-yellow-500'
-                                                                : trip.status === 2
-                                                                    ? 'bg-blue-500'
-                                                                    : trip.status === 3
-                                                                        ? 'bg-green-500'
-                                                                        : 'bg-green-800'
-                                                            }`}
-                                                        style={{ width: `${(trip.status as number / 4) * 100}%` }}
-                                                    />
+                                                {/* Status indicator with progress bar */}
+                                                <div className="flex flex-col w-1/2 space-y-1">
+                                                    {/* Status label */}
+                                                    <span className="text-sm text-gray-600">
+                                                        {statuses[trip.status as number]}
+                                                    </span>
+
+                                                    {/* Progress bar for status */}
+                                                    <div className="relative w-full h-1 bg-gray-200 rounded">
+                                                        <div
+                                                            className={`absolute top-0 left-0 h-1 rounded transition-width duration-500 ${trip.status === 0
+                                                                ? 'bg-red-500'
+                                                                : trip.status === 1
+                                                                    ? 'bg-yellow-500'
+                                                                    : trip.status === 2
+                                                                        ? 'bg-blue-500'
+                                                                        : trip.status === 3
+                                                                            ? 'bg-green-500'
+                                                                            : 'bg-green-800'
+                                                                }`}
+                                                            style={{ width: `${(trip.status as number / 4) * 100}%` }}
+                                                        />
+                                                    </div>
                                                 </div>
+
+                                                {/* LR number */}
+                                                <span className="text-sm text-gray-600 whitespace-nowrap">
+                                                    {trip.LR}
+                                                </span>
+
+                                                {/* Start date */}
+                                                <span className="text-sm text-gray-600 whitespace-nowrap">
+                                                    {new Date(trip.startDate).toISOString().split('T')[0]}
+                                                </span>
+
                                             </div>
+                                        </SelectItem>
 
-                                            {/* LR number */}
-                                            <span className="text-sm text-gray-600 whitespace-nowrap">
-                                                {trip.LR}
-                                            </span>
+                                    ))
+                                ) : (
+                                    <div className="p-2 text-gray-500">No Trips found</div>
+                                )}
+                            </SelectContent>
+                        </Select>
+                    </div>
 
-                                            {/* Start date */}
-                                            <span className="text-sm text-gray-600 whitespace-nowrap">
-                                                {new Date(trip.startDate).toISOString().split('T')[0]}
-                                            </span>
-
-                                        </div>
-                                    </SelectItem>
-
-                                ))
-                            ) : (
-                                <div className="p-2 text-gray-500">No Trips found</div>
-                            )}
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                {/* File upload input */}
-                {/* <div className="mb-4">
+                    {/* File upload input */}
+                    {/* <div className="mb-4">
                     <label className="block text-gray-700">Upload File(pdf)*</label>
                     <input
                         type="file"
@@ -371,66 +372,67 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip, d
                 </div> */}
 
 
-                {/* Filename input */}
-                <div className="mb-4">
-                    <label className="block text-gray-700">Filename</label>
-                    <input
-                        type="text"
-                        name="filename"
-                        value={formData.filename}
-                        onChange={handleChange}
-                        className="w-full mt-1 p-2 border rounded"
-                        placeholder="(optional)"
-                    />
-                </div>
+                    {/* Filename input */}
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Filename</label>
+                        <input
+                            type="text"
+                            name="filename"
+                            value={formData.filename}
+                            onChange={handleChange}
+                            className="w-full mt-1 p-2 border rounded"
+                            placeholder="(optional)"
+                        />
+                    </div>
 
-                {/* Document Type select */}
-                <div className="mb-4">
-                    <label className="block text-gray-700">Document Type*</label>
-                    <select
-                        name="docType"
-                        value={formData.docType}
-                        onChange={handleChange}
-                        required
-                    >
-                        <option value="">Select Document Type</option>
-                        <option value="E-Way Bill">E-Way Bill</option>
-                        <option value="POD">POD (Proof of Delivery)</option>
-                        <option value="Bilty">Bilty</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
+                    {/* Document Type select */}
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Document Type*</label>
+                        <select
+                            name="docType"
+                            value={formData.docType}
+                            onChange={handleChange}
+                            required
+                        >
+                            <option value="">Select Document Type</option>
+                            <option value="E-Way Bill">E-Way Bill</option>
+                            <option value="POD">POD (Proof of Delivery)</option>
+                            <option value="Bilty">Bilty</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
 
-                {/* Validity Date input */}
-                <div className="mb-4">
-                    <label className="block text-gray-700">Validity Date*</label>
-                    <input
-                        type="date"
-                        name="validityDate"
-                        value={formData.validityDate}
-                        onChange={handleChange}
-                        className="w-full mt-1 p-2 border rounded"
-                        required
-                    />
-                </div>
+                    {/* Validity Date input */}
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Validity Date*</label>
+                        <input
+                            type="date"
+                            name="validityDate"
+                            value={formData.validityDate}
+                            onChange={handleChange}
+                            className="w-full mt-1 p-2 border rounded"
+                            required
+                        />
+                    </div>
 
 
 
-                {/* Submit button */}
-                <div className="flex items-center space-x-2 justify-end">
-                    <Button type="submit" disabled={loading} >
-                        {loading ? (
-                            <div className="flex justify-center ">
-                                <Loader2 className='animate-spin text-white' />
-                            </div>
-                        ) : 'Submit'}
-                    </Button>
-                    <Button variant={'outline'} onClick={() => setOpen(false)} disabled={loading}>
-                        Cancel
-                    </Button>
-                </div>
-            </form>
-        </motion.div>
+                    {/* Submit button */}
+                    <div className="flex items-center space-x-2 justify-end">
+                        <Button type="submit" disabled={loading} >
+                            {loading ? (
+                                <div className="flex justify-center ">
+                                    <Loader2 className='animate-spin text-white' />
+                                </div>
+                            ) : 'Submit'}
+                        </Button>
+                        <Button variant={'outline'} onClick={() => setOpen(false)} disabled={loading}>
+                            Cancel
+                        </Button>
+                    </div>
+                </form>
+            </motion.div>
+        </div>
     );
 };
 

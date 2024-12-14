@@ -27,7 +27,7 @@ type Props = {
     setOpen: (open: boolean) => void;
     documentId?: string;
     setDocuments?: any
-    setTruck? : any 
+    setTruck?: any
 };
 
 const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo, documentId, setDocuments, setTruck }) => {
@@ -188,7 +188,7 @@ const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo, document
             if (response.ok) {
                 toast({
                     description: 'Documents uploaded successfully!',
-                  })
+                })
                 setSuccessMessage('Document uploaded successfully!');
                 setError('');
                 setFormData({
@@ -201,12 +201,12 @@ const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo, document
                 setOpen(false)
                 mutate('/api/documents/recent')
                 const data = await response.json()
-                if(setDocuments){
-                    setDocuments((prev : any)=>[data.document,...prev])
-                }else if(setTruck){
-                    setTruck((prev : any)=>({
+                if (setDocuments) {
+                    setDocuments((prev: any) => [data.document, ...prev])
+                } else if (setTruck) {
+                    setTruck((prev: any) => ({
                         ...prev,
-                        documents : [data.document, ...prev.documents]
+                        documents: [data.document, ...prev.documents]
                     }))
                 }
                 toast({
@@ -272,122 +272,126 @@ const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo, document
     }
 
     return (
-        <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{
-                duration: 0.5,
-                ease: [0, 0.71, 0.2, 1.01]
-            }} className="w-full max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md flex flex-col">
-            <h1 className="text-2xl font-semibold mb-4 text-black">{isOtherPage ? 'Moving to Truck Document' : 'Upload Document'}</h1>
-
-            {/* Loading indicator */}
+        <div className='modal-class'>
 
 
-            {error && <p className="text-red-500 mb-4">{error}</p>}
-            {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
+            <motion.div
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{
+                    duration: 0.5,
+                    ease: [0, 0.71, 0.2, 1.01]
+                }} className="w-full max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md flex flex-col">
+                <h1 className="text-2xl font-semibold mb-4 text-black">{isOtherPage ? 'Moving to Truck Document' : 'Upload Document'}</h1>
 
-            <form onSubmit={isOtherPage ? handleMove : handleSubmit}>
-            {!isOtherPage && <SingleFileUploader onFileChange={handleFileChange} />}
-                {/* Lorry (trip) select */}
-                <div className="mb-4">
-                    <label className="block text-sm text-gray-700">Lorry*</label>
-                    <Select name="truckNo" defaultValue={formData.truckNo} value={formData.truckNo} onValueChange={handleOptionSelect}>
-                        <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select Lorry" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <div className="p-2">
-                                <input
-                                    type="text"
-                                    placeholder="Search..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                            </div>
-                            {filteredTrucks.length > 0 ? (
-                                filteredTrucks.map((truck) => (
-                                    <SelectItem key={truck.truckNo} value={truck.truckNo}>
-                                        <span>{truck.truckNo}</span>
-                                        <span
-                                            className={`ml-2 p-1 rounded ${truck.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
-                                        >
-                                            {truck.status}
-                                        </span>
-                                    </SelectItem>
-                                ))
-                            ) : (
-                                <div className="p-2 text-gray-500">No lorries found</div>
-                            )}
-                        </SelectContent>
-                    </Select>
-                </div>
-
-                {/* File upload input */}
-
-                {/* Filename input */}
-                <div className="mb-4">
-                    <label className="block text-gray-700">Filename</label>
-                    <input
-                        type="text"
-                        name="filename"
-                        value={formData.filename}
-                        onChange={handleChange}
-                        className="w-full mt-1 p-2 border rounded"
-                        placeholder="(optional)"
-                    />
-                </div>
-
-                {/* Document Type select */}
-                <div className="mb-4">
-                    <label className="block text-gray-700">Document Type*</label>
-                    <select
-                        name="docType"
-                        value={formData.docType}
-                        onChange={handleChange}
-                        required
-                    >
-                        <option value="" disabled>Select Document Type</option>
-                        <option value="Registration Certificate">Registration Certificate</option>
-                        <option value="Permit">Permit</option>
-                        <option value="Insurance">Insurance</option>
-                        <option value="Pollution Certificate">Pollution Certificate</option>
-                        <option value="Fitness Certificate">Fitness Certificate</option>
-                        <option value="Tax">Tax</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-
-                {/* Validity Date input */}
-                <div className="mb-4">
-                    <label className="block text-gray-700">Validity Date*</label>
-                    <input
-                        type="date"
-                        name="validityDate"
-                        value={formData.validityDate}
-                        onChange={handleChange}
-                        className="w-full mt-1 p-2 border rounded"
-                        required
-                    />
-                </div>
+                {/* Loading indicator */}
 
 
+                {error && <p className="text-red-500 mb-4">{error}</p>}
+                {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
 
-                {/* Submit button */}
-                <div className="flex items-center space-x-2 justify-end">
-                    <Button type="submit" >
-                        {loading ? (
-                            <div className="flex justify-center ">
-                                <Loader2 className='animate-spin text-white' />
-                            </div>
-                        ) : 'Submit'}
-                    </Button>
-                    <Button variant={'outline'} onClick={() => setOpen(false)}>
-                        Cancel
-                    </Button>
-                </div>
-            </form>
-        </motion.div>
+                <form onSubmit={isOtherPage ? handleMove : handleSubmit}>
+                    {!isOtherPage && <SingleFileUploader onFileChange={handleFileChange} />}
+                    {/* Lorry (trip) select */}
+                    <div className="mb-4">
+                        <label className="block text-sm text-gray-700">Lorry*</label>
+                        <Select name="truckNo" defaultValue={formData.truckNo} value={formData.truckNo} onValueChange={handleOptionSelect}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select Lorry" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <div className="p-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Search..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                </div>
+                                {filteredTrucks.length > 0 ? (
+                                    filteredTrucks.map((truck) => (
+                                        <SelectItem key={truck.truckNo} value={truck.truckNo}>
+                                            <span>{truck.truckNo}</span>
+                                            <span
+                                                className={`ml-2 p-1 rounded ${truck.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+                                            >
+                                                {truck.status}
+                                            </span>
+                                        </SelectItem>
+                                    ))
+                                ) : (
+                                    <div className="p-2 text-gray-500">No lorries found</div>
+                                )}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {/* File upload input */}
+
+                    {/* Filename input */}
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Filename</label>
+                        <input
+                            type="text"
+                            name="filename"
+                            value={formData.filename}
+                            onChange={handleChange}
+                            className="w-full mt-1 p-2 border rounded"
+                            placeholder="(optional)"
+                        />
+                    </div>
+
+                    {/* Document Type select */}
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Document Type*</label>
+                        <select
+                            name="docType"
+                            value={formData.docType}
+                            onChange={handleChange}
+                            required
+                        >
+                            <option value="" disabled>Select Document Type</option>
+                            <option value="Registration Certificate">Registration Certificate</option>
+                            <option value="Permit">Permit</option>
+                            <option value="Insurance">Insurance</option>
+                            <option value="Pollution Certificate">Pollution Certificate</option>
+                            <option value="Fitness Certificate">Fitness Certificate</option>
+                            <option value="Tax">Tax</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    {/* Validity Date input */}
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Validity Date*</label>
+                        <input
+                            type="date"
+                            name="validityDate"
+                            value={formData.validityDate}
+                            onChange={handleChange}
+                            className="w-full mt-1 p-2 border rounded"
+                            required
+                        />
+                    </div>
+
+
+
+                    {/* Submit button */}
+                    <div className="flex items-center space-x-2 justify-end">
+                        <Button type="submit" >
+                            {loading ? (
+                                <div className="flex justify-center ">
+                                    <Loader2 className='animate-spin text-white' />
+                                </div>
+                            ) : 'Submit'}
+                        </Button>
+                        <Button variant={'outline'} onClick={() => setOpen(false)}>
+                            Cancel
+                        </Button>
+                    </div>
+                </form>
+            </motion.div>
+        </div>
     );
 };
 

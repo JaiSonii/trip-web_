@@ -39,11 +39,8 @@ const DriverDocuments = () => {
         </Button>
       </div>
 
-      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className='p-0'>
+      
           <DriverDocumentUpload open={isModalOpen} setOpen={setIsModalOpen} setDriver={setDriver} driverId={driver.driver_id} />
-        </DialogContent>
-      </Dialog>
 
       <div>
         <RecentDocuments docs={driver?.documents} />

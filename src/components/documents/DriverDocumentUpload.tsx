@@ -27,7 +27,7 @@ type Props = {
     setOpen: (open: boolean) => void;
     documentId?: string;
     setDocuments?: any
-    setDriver? : any
+    setDriver?: any
 };
 
 const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId, documentId, setDocuments, setDriver }) => {
@@ -166,7 +166,7 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId, docume
             setError('Please upload a document.');
             return;
         }
-        if(!formData.docType || !formData.validityDate){
+        if (!formData.docType || !formData.validityDate) {
             setError('Please fill out all fields')
             toast({
                 description: 'Please fill out all fields',
@@ -197,7 +197,7 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId, docume
             if (response.ok) {
                 toast({
                     description: 'Documents uploaded successfully!',
-                  })
+                })
                 setSuccessMessage('Document uploaded successfully!');
                 setError('');
                 setFormData({
@@ -210,15 +210,15 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId, docume
                 setOpen(false);
                 const data = await response.json()
                 mutate('/api/documents/recent')
-                if(setDocuments){
-                    setDocuments((prev : any)=>[
-                        {...data.document},
+                if (setDocuments) {
+                    setDocuments((prev: any) => [
+                        { ...data.document },
                         ...prev
                     ])
-                }else if(setDriver){
-                    setDriver((prev : any)=>({
+                } else if (setDriver) {
+                    setDriver((prev: any) => ({
                         ...prev,
-                        documents : [data.document, ...prev.documents]
+                        documents: [data.document, ...prev.documents]
                     }))
                 }
                 toast({
@@ -246,7 +246,7 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId, docume
     const handleMove = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         setLoading(true)
-        if(!formData.docType || !formData.validityDate){
+        if (!formData.docType || !formData.validityDate) {
             setError('Please fill out all fields')
             toast({
                 description: 'Please fill out all fields',
@@ -293,127 +293,131 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId, docume
     }
 
     return (
-        <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{
-                duration: 0.5,
-                ease: [0, 0.71, 0.2, 1.01]
-            }} className="w-full max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md flex flex-col">
-            <h1 className="text-2xl font-semibold mb-4 text-black">{isOtherPage ? 'Moving to Driver Document' : "Upload Document"}</h1>
+        <div className='modal-class'>
+            <motion.div
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{
+                    duration: 0.5,
+                    ease: [0, 0.71, 0.2, 1.01]
+                }} className="w-full max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md flex flex-col">
+                <h1 className="text-2xl font-semibold mb-4 text-black">{isOtherPage ? 'Moving to Driver Document' : "Upload Document"}</h1>
 
-            {/* Loading indicator */}
-
-
-            {error && <p className="text-red-500 mb-4">{error}</p>}
-            {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
-
-            <form onSubmit={isOtherPage ? handleMove : handleSubmit}>
-
-                {!isOtherPage && <SingleFileUploader onFileChange={handleFileChange} />}
-                {/* Lorry (driver) select */}
-                <div className="mb-4">
-                    <label className="block text-sm text-gray-700">Driver*</label>
-                    <Select name="driver" defaultValue={formData.driverId} onValueChange={handleOptionSelect}>
-                        <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select Driver" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <div className="p-2">
-                                <input
-                                    type="text"
-                                    placeholder="Search..."
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="w-full p-2 border border-gray-300 rounded-md"
-                                />
-                            </div>
-                            {filteredDrivers.length > 0 ? (
-                                filteredDrivers.map((driver) => (
-                                    <SelectItem key={driver.driver_id} value={driver.driver_id} >
-                                        <div className='grid grid-cols-3 text-left w-full gap-4'>
-                                            <p className='col-span-1'>{driver.name}</p>
-                                            <p className='col-span-1'>{driver.contactNumber}</p>
-                                            <p
-                                                className={`col-span-1 p-1 rounded ${driver.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
-                                            >
-                                                {driver.status}
-                                            </p>
-                                        </div>
+                {/* Loading indicator */}
 
 
-                                    </SelectItem>
-                                ))
-                            ) : (
-                                <div className="p-2 text-gray-500">No drivers found</div>
-                            )}
-                        </SelectContent>
-                    </Select>
-                </div>
+                {error && <p className="text-red-500 mb-4">{error}</p>}
+                {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
+
+                <form onSubmit={isOtherPage ? handleMove : handleSubmit}>
+
+                    {!isOtherPage && <SingleFileUploader onFileChange={handleFileChange} />}
+                    {/* Lorry (driver) select */}
+                    <div className="mb-4">
+                        <label className="block text-sm text-gray-700">Driver*</label>
+                        <Select name="driver" defaultValue={formData.driverId} onValueChange={handleOptionSelect}>
+                            <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Select Driver" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <div className="p-2">
+                                    <input
+                                        type="text"
+                                        placeholder="Search..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="w-full p-2 border border-gray-300 rounded-md"
+                                    />
+                                </div>
+                                {filteredDrivers.length > 0 ? (
+                                    filteredDrivers.map((driver) => (
+                                        <SelectItem key={driver.driver_id} value={driver.driver_id} >
+                                            <div className='grid grid-cols-3 text-left w-full gap-4'>
+                                                <p className='col-span-1'>{driver.name}</p>
+                                                <p className='col-span-1'>{driver.contactNumber}</p>
+                                                <p
+                                                    className={`col-span-1 p-1 rounded ${driver.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+                                                >
+                                                    {driver.status}
+                                                </p>
+                                            </div>
 
 
-
-                {/* Filename input */}
-                <div className="mb-4">
-                    <label className="block text-gray-700">Filename</label>
-                    <input
-                        type="text"
-                        name="filename"
-                        value={formData.filename}
-                        onChange={handleChange}
-                        className="w-full mt-1 p-2 border rounded"
-                        placeholder="(optional)"
-                    />
-                </div>
-
-                {/* Document Type select */}
-                <div className="mb-4">
-                    <label className="block text-gray-700">Document Type*</label>
-                    <select
-                        name="docType"
-                        value={formData.docType}
-                        onChange={handleChange}
-                        required
-                    >
-                        <option value="" disabled>Select Document Type</option>
-                        <option value="License">License</option>
-                        <option value="Aadhar">Aadhar</option>
-                        <option value="PAN">PAN (Permanent Account Number)</option>
-                        <option value="Police Verification">Police Verification</option>
-                        <option value="Other">Other</option>
-                    </select>
-                </div>
-
-                {/* Validity Date input */}
-                <div className="mb-4">
-                    <label className="block text-gray-700">Validity Date*</label>
-                    <input
-                        type="date"
-                        name="validityDate"
-                        value={formData.validityDate}
-                        onChange={handleChange}
-                        className="w-full mt-1 p-2 border rounded"
-                        required
-                    />
-                </div>
+                                        </SelectItem>
+                                    ))
+                                ) : (
+                                    <div className="p-2 text-gray-500">No drivers found</div>
+                                )}
+                            </SelectContent>
+                        </Select>
+                    </div>
 
 
 
-                {/* Submit button */}
-                <div className="flex items-center space-x-2 justify-end">
-                    <Button type="submit" disabled={loading}>
-                        {loading ? (
-                            <div className="flex items-center justify-center ">
-                                <Loader2 className='animate-spin text-white' />
-                            </div>
-                        ) : 'Submit'}
-                    </Button>
-                    <Button variant={'outline'} onClick={() => setOpen(false)}>
-                        Cancel
-                    </Button>
-                </div>
-            </form>
-        </motion.div>
+                    {/* Filename input */}
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Filename</label>
+                        <input
+                            type="text"
+                            name="filename"
+                            value={formData.filename}
+                            onChange={handleChange}
+                            className="w-full mt-1 p-2 border rounded"
+                            placeholder="(optional)"
+                        />
+                    </div>
+
+                    {/* Document Type select */}
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Document Type*</label>
+                        <select
+                            name="docType"
+                            value={formData.docType}
+                            onChange={handleChange}
+                            required
+                        >
+                            <option value="" disabled>Select Document Type</option>
+                            <option value="License">License</option>
+                            <option value="Aadhar">Aadhar</option>
+                            <option value="PAN">PAN (Permanent Account Number)</option>
+                            <option value="Police Verification">Police Verification</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+
+                    {/* Validity Date input */}
+                    <div className="mb-4">
+                        <label className="block text-gray-700">Validity Date*</label>
+                        <input
+                            type="date"
+                            name="validityDate"
+                            value={formData.validityDate}
+                            onChange={handleChange}
+                            className="w-full mt-1 p-2 border rounded"
+                            required
+                        />
+                    </div>
+
+
+
+                    {/* Submit button */}
+                    <div className="flex items-center space-x-2 justify-end">
+                        <Button type="submit" disabled={loading}>
+                            {loading ? (
+                                <div className="flex items-center justify-center ">
+                                    <Loader2 className='animate-spin text-white' />
+                                </div>
+                            ) : 'Submit'}
+                        </Button>
+                        <Button variant={'outline'} onClick={() => setOpen(false)}>
+                            Cancel
+                        </Button>
+                    </div>
+                </form>
+            </motion.div>
+        </div>
+
+
     );
 };
 

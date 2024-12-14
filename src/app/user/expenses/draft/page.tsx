@@ -3,16 +3,14 @@ import Loading from '../loading';
 import { Button } from '@/components/ui/button';
 import { IExpense, } from '@/utils/interface';
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
-import { MdDelete, MdEdit } from 'react-icons/md';
-import { DeleteExpense, fetchTruckExpense, handleAddExpense, handleEditExpense } from '@/helpers/ExpenseOperation';
-import { icons, IconKey } from '@/utils/icons';
-import { FaCalendarAlt, FaSort, FaSortDown, FaSortUp, FaTruck } from 'react-icons/fa';
 
-import { formatNumber } from '@/utils/utilArray';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import {  handleAddExpense, } from '@/helpers/ExpenseOperation';
+;
+import { FaSort, FaSortDown, FaSortUp,  } from 'react-icons/fa';
+
 import debounce from 'lodash.debounce';
 import dynamic from 'next/dynamic';
-import { ExpenseHeader } from '@/components/ExpenseHeader';
+
 import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 import { TbPlus } from 'react-icons/tb';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -106,7 +104,6 @@ const DraftExpense: React.FC = () => {
             setLoading(true);
             const res = await fetch('/api/expenses/draft')
             const data = await res.json()
-
             setTruckExpenseBook(data.expenses);
         } catch (error) {
             setError((error as Error).message);

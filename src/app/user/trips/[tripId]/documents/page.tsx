@@ -25,11 +25,9 @@ const Page = () => {
       </div>
 
       <RecentDocuments docs={trip?.documents || []} />
-      {isOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+      
           <TripDocumentUpload open={isOpen} setOpen={setIsOpen} tripId={tripId as string} setTrip={setTrip}/>
-        </div>
-      )}
+        
     </div>
   );
 };

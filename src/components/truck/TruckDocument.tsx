@@ -70,11 +70,9 @@ const TruckDocuments: React.FC<TruckDocumentProps> = ({ truckNo }) => {
                 <RecentDocuments docs={documents} />
             }
 
-            {modalOpen && (
-                <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
+
                     <TruckDocumentUpload open={modalOpen} setOpen={setModalOpen} truckNo={truckNo} setDocuments={setDocuments} />
-                </div>
-            )}
+               
         </div>
     );
 };

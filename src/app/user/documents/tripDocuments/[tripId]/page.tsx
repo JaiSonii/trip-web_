@@ -88,13 +88,8 @@ const TripDocumentsPage = () => {
                 }
 
 
-
-                {/* Document Upload Modal */}
-                {modalOpen && (
-                    <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
                         <TripDocumentUpload open={modalOpen} setOpen={setModalOpen} tripId={tripId} />
-                    </div>
-                )}
+                   
             </div>
         </div>
 
