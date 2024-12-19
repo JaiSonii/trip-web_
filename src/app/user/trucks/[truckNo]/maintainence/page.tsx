@@ -20,7 +20,7 @@ const TruckMaintainenceBook = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [maintainenceBook, setMaintainenceBook] = useState<IExpense[] | any[]>([]);
   const [modelOpen, setModelOpen] = useState(false);
-  const [selected, setSelected] = useState<IExpense>();
+  const [selected, setSelected] = useState<IExpense | null>();
   const [error, setError] = useState<string | null>(null);
 
   const AddExpenseModal = dynamic(()=>import('@/components/AddExpenseModal'),{ssr : false})
@@ -139,7 +139,10 @@ const TruckMaintainenceBook = () => {
       </div>
       <AddExpenseModal
         isOpen={modelOpen}
-        onClose={() => setModelOpen(false)}
+        onClose={() => {
+          setModelOpen(false);
+          setSelected(null);
+      }}
         onSave={handleAddCharge}
         driverId={selected?.driver || ''}
         selected={selected} categories={['Truck Expense', 'Trip Expense', 'Office Expense']}      />

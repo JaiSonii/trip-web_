@@ -24,7 +24,7 @@ const OtherExpense = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [otherExpenses, setOtherExpenses] = useState<IExpense[] | any[]>([]);
   const [modelOpen, setModelOpen] = useState(false);
-  const [selected, setSelected] = useState<IExpense | undefined>();
+  const [selected, setSelected] = useState<IExpense | null>(null);
 
   const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), {
     loading: () => <Loading />,
@@ -150,7 +150,10 @@ const OtherExpense = () => {
       {modelOpen && (
         <AddExpenseModal
           isOpen={modelOpen}
-          onClose={() => setModelOpen(false)}
+          onClose={() => {
+            setModelOpen(false);
+            setSelected(null);
+        }}
           onSave={handleAddCharge}
           driverId={selected?.driver || ''}
           selected={selected} categories={['Truck Expense', 'Trip Expense', 'Office Expense']} />

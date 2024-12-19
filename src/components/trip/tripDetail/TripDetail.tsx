@@ -230,7 +230,7 @@ const TripDetails = () => {
 
 
       </div>
-      <BiltyForm isOpen={biltyModalOpen} onClose={() => setBiltyModalOpen(false)} trip={trip} />
+      <BiltyForm isOpen={biltyModalOpen} onClose={() => setBiltyModalOpen(false)} trip={trip} setTrip={setTrip}/>
       <FrieghtMemo isOpen={fmModalOpen} onClose={()=>setFmModalOpen(false)} trip={trip} />
     </div>
   );

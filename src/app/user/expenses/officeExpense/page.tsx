@@ -233,7 +233,8 @@ const OfficeExpense: React.FC = () => {
                     setSelected(null);
                 }}
                 onSave={handleExpense}
-                selected={selected} driverId={''} categories={['Truck Expense', 'Trip Expense', 'Office Expense']} />
+                selected={selected} driverId={''} categories={['Truck Expense', 'Trip Expense', 'Office Expense']} 
+                />
             <ExpenseFilterModal
                 isOpen={filterModalOpen}
                 paymentModes={['Online', 'Cash', 'Credit']}

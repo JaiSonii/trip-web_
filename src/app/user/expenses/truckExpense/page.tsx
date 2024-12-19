@@ -211,10 +211,14 @@ const TruckExpense: React.FC = () => {
 
       <AddExpenseModal
         isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false);
+          setSelected(null);
+      }}
         onSave={handleExpense}
         driverId={selected?.driver as string}
-        selected={selected} categories={['Truck Expense', 'Trip Expense', 'Office Expense']} />
+        selected={selected} categories={['Truck Expense', 'Trip Expense', 'Office Expense']} 
+        />
       <ExpenseFilterModal
         isOpen={filterModalOpen}
         onClose={() => setFilterModalOpen(false)}

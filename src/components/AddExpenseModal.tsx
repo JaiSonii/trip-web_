@@ -1,9 +1,9 @@
 'use client'
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { Dispatch, useEffect, useMemo, useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { fuelAndDriverChargeTypes, maintenanceChargeTypes, officeExpenseTypes } from '@/utils/utilArray';
-import { IExpense, ITrip } from '@/utils/interface';
+import { IDriver, IExpense, ITrip } from '@/utils/interface';
 import { motion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 import { statuses } from '@/utils/schema';
@@ -106,7 +106,7 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
             setDrafts((prev: IExpense[]) => [
                 {
                     ...data.expense,
-                    driverName: data.expense.driver ? drivers.find((driver) => driver.driver_id === data.expense.driver)?.driver_id : '',
+                    driverName: data.expense.driver ? drivers.find((driver) => driver.driver_id === data.expense.driver)?.driverName : '',
                     shopName: data.expense.shop_id ? shops.find((shop) => shop.id === data.expense.shop_id)?.shop_id : ''
                 },
                 ...prev,
@@ -148,7 +148,7 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
             if (data.status === 200) {
                 setDrafts((prev: IExpense[] | any[]) => prev.map(exp => exp._id === id ? {
                     ...data.expense,
-                    driverName: data.expense.driver ? drivers.find((driver) => driver.driver_id === data.expense.driver)?.driver_id : '',
+                    driverName: data.expense.driver ? drivers.find((driver) => driver.driver_id === data.expense.driver)?.driverName : '',
                     shopName: data.expense.shop_id ? shops.find((shop) => shop.id === data.expense.shop_id)?.shop_id : ''
                 } : exp))
             }
@@ -594,6 +594,25 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
                         <div className="flex justify-end gap-2">
                             <Button variant="outline" disabled={loading} onClick={() => {
                                 onClose()
+                                setFormData({
+                                    id: undefined,
+                                    trip_id: '',
+                                    partyBill: false,
+                                    amount: 0,
+                                    date: new Date(Date.now()),
+                                    expenseType: '',
+                                    notes: '',
+                                    partyAmount: 0,
+                                    paymentMode: 'Cash',
+                                    transactionId: '',
+                                    driver: '',
+                                    truck: '',
+                                    shop_id: '',
+                                    url: ''
+                                })
+                                setSelectedCategory('')
+                                setFile(null)
+                                setFileUrl('')
                             }}>
                                 Cancel
                             </Button>

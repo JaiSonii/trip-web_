@@ -12,12 +12,14 @@ import { Bilty } from '@/utils/DocGeneration'
 import 'jspdf/dist/polyfills.es.js';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
+import { useToast } from '../hooks/use-toast'
 
 
 type Props = {
   isOpen: boolean
   onClose: () => void
   trip: ITrip | any
+  setTrip : React.Dispatch<React.SetStateAction<any>>
 }
 
 const placeholders: { [key: string]: string } = {
@@ -63,8 +65,9 @@ const steps = [
 
 const tabs = ['Consigner', 'Consignee', 'Office', 'Driver']
 
-export default function BiltyForm({ isOpen, onClose, trip }: Props) {
+export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
 
+  const {toast} = useToast()
   const [currentStep, setCurrentStep] = useState(0)
   const [showBill, setShowBill] = useState(false)
   const [user, setUser] = useState<any>()
@@ -167,62 +170,111 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
   
     setPDFDownloading(true);
   
-    // Remove the initial blank page
-    pdf.deletePage(1);
+    try {
+      // Remove the initial blank page
+      pdf.deletePage(1);
   
-    for (const tab of tabs) {
-      const element = document.getElementById(`bilty-${tab}`);
-      if (element) {
-        const canvas = await html2canvas(element, { scale: 2 });
-        const imgData = canvas.toDataURL('image/jpeg');
+      // Generate PDF pages for all tabs
+      for (const tab of tabs) {
+        const element = document.getElementById(`bilty-${tab}`);
+        if (element) {
+          const canvas = await html2canvas(element, { scale: 2 });
+          const imgData = canvas.toDataURL('image/jpeg');
   
-        const padding = 10; // 10mm padding on each side
-        const imgWidth = canvas.width / 2; // Divide by 2 because of scale: 2
-        const imgHeight = canvas.height / 2;
+          const padding = 10; // 10mm padding on each side
+          const imgWidth = canvas.width / 2; // Divide by 2 because of scale: 2
+          const imgHeight = canvas.height / 2;
   
-        // Set the PDF page size to match the image size plus padding
-        pdf.addPage([imgWidth + padding * 2, imgHeight + padding * 2], 'landscape');
-        pdf.addImage(imgData, 'JPEG', padding, padding, imgWidth, imgHeight);
-      }
-    }
-  
-    pdf.save(`Bilty-${trip.LR}-${formData.truckNo}.pdf`);
-    setPDFDownloading(false);
-  
-    if (
-      (!user.companyName && formData.companyName) ||
-      (!user.address && formData.address) ||
-      (!user.gstNumber && formData.gstNumber) ||
-      (!user.panNumber && formData.pan) ||
-      (!user.pincode && formData.pincode) ||
-      (!user.city && formData.city) ||
-      (!user.email && formData.email)
-    ) {
-      try {
-        const formdata = new FormData();
-        formdata.append(
-          'data',
-          JSON.stringify({
-            companyName: user.company || formData.companyName,
-            address: user.address || formData.address,
-            gstNumber: user.gstNumber || formData.gstNumber,
-            pincode: user.pincode || formData.pincode,
-            panNumber: user.panNumber || formData.pan,
-            city: user.city || formData.city,
-            email: user.email || formData.email,
-          })
-        );
-        const res = await fetch('/api/users', {
-          method: 'PUT',
-          body: formdata,
-        });
-        if (!res.ok) {
-          alert('Failed to update user details');
+          // Set the PDF page size to match the image size plus padding
+          pdf.addPage([imgWidth + padding * 2, imgHeight + padding * 2], 'landscape');
+          pdf.addImage(imgData, 'JPEG', padding, padding, imgWidth, imgHeight);
         }
-      } catch (error) {
-        alert('Failed to update user details');
       }
+  
+      // Save the generated PDF to the user's local device
+      pdf.save(`Bilty-${trip.LR}-${formData.truckNo}.pdf`);
+  
+      // Update user details if necessary
+      if (
+        (!user.companyName && formData.companyName) ||
+        (!user.address && formData.address) ||
+        (!user.gstNumber && formData.gstNumber) ||
+        (!user.panNumber && formData.pan) ||
+        (!user.pincode && formData.pincode) ||
+        (!user.city && formData.city) ||
+        (!user.email && formData.email)
+      ) {
+        await updateUserDetails();
+      }
+  
+      // Save the PDF file to the backend
+      await savePDFToBackend(pdf);
+  
+      toast({
+        description: 'Bilty saved successfully to documents'
+      });
+    } catch (error) {
+      console.error('Error processing PDF:', error);
+      toast({
+        description: 'An error occurred while saving bilty',
+        variant: 'destructive',
+      });
+    } finally {
+      setPDFDownloading(false);
     }
+  };
+  
+  const updateUserDetails = async () => {
+    const formdata = new FormData();
+    formdata.append(
+      'data',
+      JSON.stringify({
+        companyName: user.companyName || formData.companyName,
+        address: user.address || formData.address,
+        gstNumber: user.gstNumber || formData.gstNumber,
+        panNumber: user.panNumber || formData.pan,
+        pincode: user.pincode || formData.pincode,
+        city: user.city || formData.city,
+        email: user.email || formData.email,
+      })
+    );
+  
+    const response = await fetch('/api/users', {
+      method: 'PUT',
+      body: formdata,
+    });
+  
+    if (!response.ok) {
+      throw new Error('Failed to update user details');
+    }
+  };
+  
+  const savePDFToBackend = async (pdf: jsPDF) => {
+    const pdfBlob = pdf.output('blob');
+    const file = new File([pdfBlob], `Bilty-${trip.LR}-${trip.truck}.pdf`, {
+      type: 'application/pdf',
+    });
+  
+    const formdata = new FormData();
+    formdata.append('file', file);
+    formdata.append('docType', 'E-Way Bill');
+    formdata.append('validityDate', new Date(formData.date)?.toISOString());
+    formdata.append('filename', `Bilty-${trip.LR}-${trip.truck}.pdf`);
+  
+    const response = await fetch(`/api/trips/${trip.trip_id}/documents`, {
+      method: 'PUT',
+      body: formdata,
+    });
+  
+    if (!response.ok) {
+      throw new Error('Failed to save bilty to documents');
+    }
+  
+    const data = await response.json();
+    setTrip((prev: ITrip | any) => ({
+      ...prev,
+      documents: data.documents,
+    }));
   };
   
 
@@ -258,7 +310,7 @@ export default function BiltyForm({ isOpen, onClose, trip }: Props) {
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 20 }}
         transition={{ type: 'spring', damping: 15 }}
-        className="bg-white p-6 rounded-lg shadow-lg max-w-5xl w-full max-h-[700px] overflow-y-auto thin-scrollbar"
+        className={`bg-white p-6 rounded-lg shadow-lg ${!showBill ? 'max-w-5xl' : 'max-w-7xl'} w-full max-h-[700px] overflow-y-auto thin-scrollbar`}
       >
         <div className='flex justify-between items-center mb-4'>
           <h1 className='font-semibold text-xl text-black'>Bilty Details</h1>

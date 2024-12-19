@@ -37,6 +37,7 @@ function CompanyHeader({ formData }: { formData: { logo: string; companyName: st
     </h1>
   );
 }
+
 export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormDataType, color: string, selectedCopy: string }) {
 
   return (
@@ -46,7 +47,7 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
           <div className="flex justify-center">
             {formData.logo ?
               <div>
-                <Image src={formData.logo} alt='logo' width={60} height={60} className='' />
+                <Image src={formData.logo} alt='logo' width={70} height={70} className='' />
               </div>
               :
               <div className=" bg-gray-300 text-white text-center flex items-center justify-center rounded-full"
@@ -55,9 +56,9 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
           </div>
           <div className="text-center py-2 border-b border-black">
             <CompanyHeader formData={formData} />
-            <h2 className="text-lg font-normal text-gray-700">FLEET OWNERS & TRANSPORT CONTRACTOR</h2>
-            <span className="text-sm text-gray-600 whitespace-nowrap">
-              {formData.address}
+            <h2 className="text-xl font-normal text-gray-700">FLEET OWNERS & TRANSPORT CONTRACTOR</h2>
+            <span className=" text-gray-600 whitespace-nowrap">
+              {formData.address}, {formData.city}, {formData.pincode}
             </span>
           </div>
 
@@ -69,7 +70,6 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
               </div>
               <div>
                 <p className="text-xs">{formData.contactNumber}</p>
-                <p className="text-xs">{formData.contactNumber}</p>
               </div>
             </div>
 
@@ -77,28 +77,28 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
         </div>
       </section>
 
-      <div className="grid grid-cols-4 gap-6">
+      <div className="grid grid-cols-4 gap-6 mt-8">
         <div className="col-span-3">
           <section className="">
-            <div className="grid grid-cols-3 gap-10 ">
-              <div className=" col-span-1 border-y-2 border-r-2 border-black p-1">
-                <p className="text-xs font-semibold text-black text-center mb-2 whitespace-nowrap">SCHEDULE OF
+            <div className="grid grid-cols-3 gap-2">
+              <div className=" col-span-1 border-y-2 border-r-2 border-black">
+                <p className="text-xs font-semibold text-black text-left mb-2 whitespace-nowrap p-2 border-b-2 border-black ">SCHEDULE OF
                   DEMURRAGE</p>
-                <p className="text-xs text-black whitespace-nowrap">Demurrage chargebl after……………</p>
-                <p className="text-xs text-black whitespace-nowrap">days from today@RS…….………</p>
-                <p className="text-xs text-black whitespace-nowrap">perday per Qtl. On weight charged</p>
+                <p className="text-xs text-black whitespace-nowrap pl-1">Demurrage chargebl after…………… days</p>
+                <p className="text-xs text-black whitespace-nowrap pl-1">from today@RS…….……… perday per Qtl.</p>
+                <p className="text-xs text-black whitespace-nowrap pl-1"> On weight charged</p>
               </div >
-              <div className="flex flex-col">
+              <div className="flex flex-col ">
                 <span
-                  className="text-sm font-semibold text-center p-2 border-b border-black text-[#FF0000] whitespace-nowrap ">{selectedCopy.toUpperCase() + " COPY"}</span>
+                  className=" font-semibold text-center p-2 border-b-2 border-black text-[#FF0000] whitespace-nowrap ">{selectedCopy.toUpperCase() + " COPY"}</span>
                 <span
-                  className="text-sm font-normal text-center p-2 border-b border-black text-black whitespace-nowrap">AT
+                  className=" font-normal text-center p-2 border-b-2 border-black text-black whitespace-nowrap">AT
                   CARRIERS RISK</span>
                 <span
-                  className="text-[#FF0000] text-sm font-semibold text-center p-2 whitespace-nowrap">INSURANCE</span>
+                  className="text-black  font-semibold text-center p-2 whitespace-nowrap">INSURANCE</span>
               </div>
               <div className="flex-col w-full col-span-1">
-                <div className="border-2 p-1 border-black">
+                <div className="border-2 p-2 border-black ">
                   <p className="text-sm text-black text-center font-semibold">Caution</p>
                   <p className="text-xs text-black" style={{ fontSize: "10px" }}>This Consignment will not be
                     detaineddiverted. rerouted or rebooked
@@ -106,7 +106,7 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
                 </div>
 
                 <div className="py-1 text-black border-b border-black">
-                  <span className="text-xs font-semibold">Address of Delivery Office :</span>
+                  <span className="text-xs font-semibold ">Address of Delivery Office :</span>
                 </div>
                 <div className="flex gap-24 text-xs font-semibold">
                   <p>State :</p>
@@ -117,8 +117,8 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
           </section>
 
           <section className=" mt-4">
-            <div className="grid grid-cols-9 gap-10">
-              <div className="border-2 border-[#FF0000] text-[#FF0000] p-1 border-l-0 col-span-3">
+            <div className="grid grid-cols-9 gap-2 items-end">
+              <div className="border-2 border-[#FF0000] text-[#FF0000] p-2 border-l-0 col-span-3 h-auto pb-2">
                 <h3 className="text-xs text-[#FF0000] text-center">NOTICE</h3>
                 <p className=" text-[10px]">The consignment covered by this Lorry ceipt shall be stored
                   at the destination Under the control of the Transport Operator
@@ -128,16 +128,16 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
                   written authority from the Consignee banker or its order.
                   endorsed on the Consignee copy</p>
               </div>
-              <div className="col-span-3 border border-black p-2 text-xs text-black">
+              <div className="col-span-3 border-2 border-black p-2 text-xs text-black h-auto">
                 <p>The Customer has stated that:</p>
                 <p>He has insured the consignment Company ………………</p>
                 <p>Policy No. ……… Date ……</p>
                 <p>Amount …………… Date ………</p>
               </div>
-              <div className="col-span-3 text-xs text-black p-1 border-2 border-black flex flex-col gap-1">
+              <div className="col-span-3 text-xs text-black p-2 border-2 border-black flex flex-col gap-1 h-auto pb-2">
                 <span className="text-xs">CONSIGNMENT NOTE</span>
-                <span>No. : <span className='text-red-500'>{formData.LR}</span></span>
-                <span>Date : <span className='text-red-500'>{new Date(formData.date).toLocaleDateString('en-IN')}</span></span>
+                <span>No. : <span className='text-red-500 font-semibold'>{formData.LR}</span></span>
+                <span>Date : <span className='text-red-500 font-semibold'>{new Date(formData.date).toLocaleDateString('en-IN')}</span></span>
               </div>
 
 
@@ -147,25 +147,24 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
           </section>
 
           <section className=" mt-4">
-            <div className="grid grid-cols-9 gap-10 ">
-              <div className="col-span-6 font-semibold text-black border-t-2 border-black border-l-0" style={{ fontSize: "small" }}>
-                <div className='border-b-2 border-r-2 border-black p-1'>
+            <div className="grid grid-cols-9 gap-2 items-start">
+              <div className="col-span-6 font-semibold text-black border-t-2 border-black border-l-0 h-auto" style={{ fontSize: "small" }}>
+                <div className='border-b-2 border-r-2 border-black p-2'>
                   <p>Consigner Name and Address :</p>
                   <p className=" text-red-500">{formData.consigner.name + " " + formData.consigner.address}</p>
                 </div>
-                <div className='border-b-2 border-r-2 border-black p-1'>
+                <div className='border-b-2 border-r-2 border-black p-2'>
                   <p>Consignee Name and Address :</p>
                   <p className=" text-red-500">{formData.consignee.name + " " + formData.consignee.address}</p>
                 </div>
 
               </div>
 
-              <div className="col-span-3 p-2 text-xs text-black">
+              <div className="col-span-3 p-2 text-xs text-black h-auto font-semibold">
                 <div className="mb-2">
-                  <label className="text-[10px]">From :</label>
-                  <p className="border border-black rounded-lg p-2 mt-2 text-red-500">{formData.consigner.address}</p>
-                  <label className="text-[10px]">To :</label>
-                  <p className="border border-black rounded-lg p-2 mt-2 text-red-500">{formData.consignee.address}</p>
+                  <p className="border-2 border-black p-2 mt-2 text-red-500 flex items-center"><p className="text-black">From : </p>{formData.consigner.address}</p>
+                 
+                  <p className="border-2 border-black p-2 mt-2 text-red-500 flex items-center"><p className="text-black">To : </p>{formData.consignee.address}</p>
 
                 </div>
               </div>
@@ -173,7 +172,8 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
           </section>
 
           <section className=" mt-4">
-            <table className="table-auto w-full text-xs">
+            .
+            <table className="table-auto w-full text-xs border border-black">
               <thead className="font-semibold text-center">
                 <tr>
                   <th className="border p-2 border-black">Packages</th>
@@ -189,7 +189,7 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
                   <th className="border p-2 border-black">Amount to pay/paid</th>
                 </tr>
               </thead>
-              <tbody className="text-center text-red-500">
+              <tbody className="text-center text-red-500 font-semibold">
                 {formData.material?.split(',').map((item: string, index: number) => (
                   <tr key={index}>
                     <td className="border p-2 border-black">{index + 1}</td>
@@ -197,7 +197,7 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
                     <td className="border p-2 border-black">Fixed</td>
                     <td className="border p-2 border-black">Fixed</td>
                     <td className="border p-2 border-black">
-                      <div className='flex flex-col gap-3 text-black text-left text-[10px]'>
+                      <div className='flex flex-col gap-3 text-black text-left '>
                         <p>Mazdoor</p>
                         <p>Hire Charges</p>
                         <p>Sur. Ch.</p>
@@ -226,36 +226,36 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
           </section>
 
         </div>
-        <div className="col-span-1 border border-black border-r-0">
+        <div className="col-span-1 border-2 border-black border-r-0">
           <div className="text-[11px] border-b-2 border-black">
-            <div className="border-b-2 p-1 border-black flex flex-col">
+            <div className="border-b-2 p-2 border-black flex flex-col">
               <span>Address of Issuing Office : </span>
-              <span>Name and Address of Agent : <span className='text-red-500'>{formData.companyName}</span></span>
+              <span>Name and Address of Agent : <span className='text-red-500 font-semibold'>{formData.companyName}</span></span>
             </div>
-            <div className="flex items-center justify-center text-center p-16 text-lg text-red-500">{formData.city}</div>
+            <div className="flex items-center justify-center text-center p-16 text-3xl font-semibold text-red-500">{formData.city}</div>
           </div>
           <div className="border-b-2 border-black">
-            <div className="border-b-2 border-black p-1">
+            <div className="border-b-2 border-black p-2">
               <p className="text-xs text-black">SERVICE TAX TO BE PAID BY</p>
             </div>
             <div className="grid grid-cols-3 text-[10px] h-[25px]">
-              <div className="flex items-center justify-center border-r-2 border-black p-1 overflow-hidden">
+              <div className="flex items-center justify-center border-r-2 border-black p-2 overflow-hidden">
                 CONSIGNER
               </div>
-              <div className="flex items-center justify-center border-r-2 border-black p-1 overflow-hidden">
+              <div className="flex items-center justify-center border-r-2 border-black p-2 overflow-hidden">
                 CONSIGNEE
               </div>
-              <div className="flex items-center justify-center p-1 overflow-hidden">
+              <div className="flex items-center justify-center p-2 overflow-hidden">
                 SIGNATORY
               </div>
             </div>
           </div>
 
-          <div className="border-b-2 border-black text-xs flex flex-col gap-4 max-h-[100px] h-full">
+          <div className="border-b-2 border-black text-xs flex flex-col gap-4 h-auto">
             <h3 className="text-black text-center">Service Tax Reg No.</h3>
-            <span className="mt-4 text-black">PAN No.</span>
+            <span className="mt-4 text-black mb-2 p-1 ">PAN No. {formData.pan}</span>
           </div>
-          <div className=" text-black text-[10px] flex flex-col gap-3 p-1">
+          <div className=" text-black text-xs font-semibold flex flex-col gap-3 p-2">
             <span className="underline text-black">Private Mark</span>
             <span>
               ST No :
@@ -280,7 +280,7 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
         </div>
         <div className="text-xs p-2 flex gap-6 justify-between w-full">
           <span className="text-black whitespace-nowrap">
-            Value : <span className="text-red-500">As Per Invoice</span>
+            Value : <span className="text-red-500 font-semibold">As Per Invoice</span>
           </span>
           <span className="text-black text-xs whitespace-nowrap flex gap-4">
             Signature of Transport Operator : {formData.signature ? <Image src={formData.signature} width={40} height={40} alt='user signature' /> : null}

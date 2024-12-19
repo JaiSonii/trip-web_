@@ -172,7 +172,10 @@ const TruckPage = () => {
       </div>
       <AddExpenseModal
         isOpen={modelOpen}
-        onClose={() => setModelOpen(false)}
+        onClose={() => {
+          setModelOpen(false);
+          setSelected(null);
+      }}
         onSave={handleExpense}
         truckNo={truckNo as string}
         categories={['Truck Expense', 'Trip Expense', 'Office Expense']} driverId={''}

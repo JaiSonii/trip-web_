@@ -23,7 +23,7 @@ const TruckFuelBook: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [tripDetails, setTripDetails] = useState<TripDetails>({});
   const [modelOpen, setModelOpen] = useState(false);
-  const [selected, setSelected] = useState<IExpense | undefined>(undefined);
+  const [selected, setSelected] = useState<IExpense | null>(null);
 
   const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), { ssr: false })
 
@@ -133,7 +133,10 @@ const TruckFuelBook: React.FC = () => {
       </div>
       <AddExpenseModal
         isOpen={modelOpen}
-        onClose={() => setModelOpen(false)}
+        onClose={() => {
+          setModelOpen(false);
+          setSelected(null);
+      }}
         onSave={handleAddCharge}
         driverId={selected?.driver || ''}
         selected={selected} categories={['Truck Expense', 'Trip Expense', 'Office Expense']}      />

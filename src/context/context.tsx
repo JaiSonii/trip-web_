@@ -25,7 +25,7 @@ interface DashboardData {
 
 const ExpenseCtx = createContext<{
     trips: ITrip[];
-    drivers: IDriver[];
+    drivers: IDriver[] | any[];
     shops: any[];
     trucks: TruckModel[] | any[];
     suppliers: ISupplier[] | any[];
