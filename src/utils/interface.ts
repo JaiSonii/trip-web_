@@ -198,6 +198,7 @@ export type EWBFormDataType = {
   truckNo: string
   logo: string
   signature: string
+  value : string | number
 }
 
 export interface FMDataType {

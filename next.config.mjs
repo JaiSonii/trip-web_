@@ -24,9 +24,16 @@ const nextConfig = {
         port: '',
         pathname: '/**', // Allow all paths from the second bucket
       },
+      {
+        protocol: 'https',
+        hostname: `img.icons8.com`,
+        port: '',
+        pathname: '/**', // Allow all paths from this bucket
+      },
     ],
   },
 };
 
 export default nextConfig;
  
+// 

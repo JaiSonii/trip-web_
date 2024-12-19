@@ -65,8 +65,8 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
           <div className="text-right text-gray-700 absolute top-2 right-2">
             <div className="flex items-center gap-1">
               <div>
-                <img src="https://img.icons8.com/ios-filled/50/000000/phone.png" alt="Phone Icon"
-                  height="20px" width="20px" />
+                {/* <Image src="https://img.icons8.com/ios-filled/50/000000/phone.png" alt="Phone Icon"
+                  height={20} width={20} /> */}
               </div>
               <div>
                 <p className="text-xs">{formData.contactNumber}</p>
@@ -163,7 +163,7 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
               <div className="col-span-3 p-2 text-xs text-black h-auto font-semibold">
                 <div className="mb-2">
                   <p className="border-2 border-black p-2 mt-2 text-red-500 flex items-center"><p className="text-black">From : </p>{formData.consigner.address}</p>
-                 
+
                   <p className="border-2 border-black p-2 mt-2 text-red-500 flex items-center"><p className="text-black">To : </p>{formData.consignee.address}</p>
 
                 </div>
@@ -171,8 +171,7 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
             </div>
           </section>
 
-          <section className=" mt-4">
-            .
+          <section className=" mt-2">
             <table className="table-auto w-full text-xs border border-black">
               <thead className="font-semibold text-center">
                 <tr>
@@ -181,8 +180,8 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
                   <th className="border border-black p-0" colSpan={2}>
                     <p className="p-2">Weight</p>
                     <div className="grid grid-cols-2 border-t border-black">
-                      <th className="border-r border-black p-2">Actual</th>
-                      <th className=" p-2">Charged</th>
+                      <th className="p-2">Actual</th>
+                      <th className="border-l border-black p-2">{formData.weight || "Charged"}</th>
                     </div>
                   </th>
                   <th className="border p-2 border-black">Rate</th>
@@ -195,7 +194,7 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
                     <td className="border p-2 border-black">{index + 1}</td>
                     <td className="border p-2 border-black">{item}</td>
                     <td className="border p-2 border-black">Fixed</td>
-                    <td className="border p-2 border-black">Fixed</td>
+                    <td className="border p-2 border-black">{formData.weight || 'Fixed'}</td>
                     <td className="border p-2 border-black">
                       <div className='flex flex-col gap-3 text-black text-left '>
                         <p>Mazdoor</p>
@@ -253,9 +252,13 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
 
           <div className="border-b-2 border-black text-xs flex flex-col gap-4 h-auto">
             <h3 className="text-black text-center">Service Tax Reg No.</h3>
-            <span className="mt-4 text-black mb-2 p-1 ">PAN No. {formData.pan}</span>
+            <div>
+            <p className="mt-4 text-black p-1 ">GST No. {formData.gstNumber}</p>
+            <p className=" text-black mb-2 p-1 ">PAN No. {formData.pan}</p>
+            </div>
+            
           </div>
-          <div className=" text-black text-xs font-semibold flex flex-col gap-3 p-2">
+          <div className=" text-black text-sm font-semibold flex flex-col justify-evenly gap-6 p-2">
             <span className="underline text-black">Private Mark</span>
             <span>
               ST No :
@@ -280,7 +283,7 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
         </div>
         <div className="text-xs p-2 flex gap-6 justify-between w-full">
           <span className="text-black whitespace-nowrap">
-            Value : <span className="text-red-500 font-semibold">As Per Invoice</span>
+            Value : <span className="text-red-500 font-semibold">{formData.value || "As Per Invoice"}</span>
           </span>
           <span className="text-black text-xs whitespace-nowrap flex gap-4">
             Signature of Transport Operator : {formData.signature ? <Image src={formData.signature} width={40} height={40} alt='user signature' /> : null}

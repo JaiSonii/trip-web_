@@ -41,7 +41,8 @@ const placeholders: { [key: string]: string } = {
   paidBy: 'Enter Payment Responsible Party',
   ewayBillNo: 'Enter E-Way Bill Number',
   invoiceNo: 'Enter Invoice Number',
-  name: 'Enter Name'
+  name: 'Enter Name',
+  value : 'Value'
 };
 
 const steps = [
@@ -105,6 +106,7 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
     paidBy: 'consigner',
     ewayBillNo: '',
     invoiceNo: '',
+    value : '',
     truckNo: trip.truck || '',
     logo: '',
     signature: ''
@@ -257,7 +259,7 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
   
     const formdata = new FormData();
     formdata.append('file', file);
-    formdata.append('docType', 'E-Way Bill');
+    formdata.append('docType', 'Bilty');
     formdata.append('validityDate', new Date(formData.date)?.toISOString());
     formdata.append('filename', `Bilty-${trip.LR}-${trip.truck}.pdf`);
   
@@ -507,7 +509,8 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
                       />
                     </div>
                     <div className="mb-4">
-                      <Input value="As per Invoice" disabled className="mt-1" />
+                      <label htmlFor='value'>Value</label>
+                      <Input id='value' name='value' value={formData.value} placeholder='As Per Invoice' className="mt-1" onChange={handleInputChange}/>
                     </div>
                   </>
                 )}
