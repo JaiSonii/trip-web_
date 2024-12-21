@@ -10,28 +10,36 @@ import { DateInputs } from './DateInputs';
 import { Button } from '../ui/button';
 import { useExpenseCtx } from '@/context/context';
 import { Loader2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { BillingInfo } from './BillingInfo';
+import { useToast } from '../hooks/use-toast';
 
 type Props = {
     trip: ITrip;
     onSubmit: (tripData: Partial<ITrip>) => void;
+    onClose: () => void
+    isOpen: boolean
 };
 
-const EditTripForm: React.FC<Props> = ({ onSubmit, trip }) => {
+const EditTripForm: React.FC<Props> = ({ onSubmit, trip, onClose, isOpen }) => {
     const { parties, trucks, drivers, isLoading } = useExpenseCtx();
+    const { toast } = useToast()
 
     const [formData, setFormData] = useState(() => ({
-        party: trip.party || '',
-        truck: trip.truck || '',
-        driver: trip.driver || '',
-        route: { origin: trip.route?.origin || '', destination: trip.route?.destination || '' },
-        billingType: trip.billingType || '',
-        amount: trip.amount || 0,
-        startDate: new Date(trip.startDate),
-        truckHireCost: trip.truckHireCost || 0,
-        LR: trip.LR || '',
-        material: trip.material || '',
-        notes: trip.notes || '',
-        ewbValidity: trip.documents?.find((doc) => doc.type === 'E-Way Bill')?.validityDate || null
+        party: trip?.party || '',
+        truck: trip?.truck || '',
+        driver: trip?.driver || '',
+        route: { origin: trip?.route?.origin || '', destination: trip?.route?.destination || '' },
+        billingType: trip?.billingType || '',
+        amount: trip?.amount || 0,
+        startDate: new Date(trip?.startDate),
+        truckHireCost: trip?.truckHireCost || 0,
+        LR: trip?.LR || '',
+        material: trip?.material || '',
+        notes: trip?.notes || '',
+        ewbValidity: trip?.documents?.find((doc) => doc.type === 'E-Way Bill')?.validityDate || null,
+        totalUnits: trip?.units || 0,
+        perUnit: trip?.rate || 0
     }));
 
     const [showDetails, setShowDetails] = useState(false);
@@ -68,7 +76,20 @@ const EditTripForm: React.FC<Props> = ({ onSubmit, trip }) => {
 
     const handleSubmit = useCallback((e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit(formData);
+        if (formData.amount - (trip.amount - trip.balance) < 0) {
+            toast({
+                description: 'Pending is Negative',
+                variant: 'warning'
+            })
+
+        }
+        const sanitizeInput = (value: string) => {
+            const sanitizedValue = parseFloat(value.replace(/,/g, '').trim())
+            return !isNaN(Number(sanitizedValue)) ? sanitizedValue : null
+        }
+
+        const sanitizedAmount = sanitizeInput(formData.amount.toString())
+        onSubmit({ ...formData, units: formData.totalUnits, rate: formData.perUnit, amount: Number(sanitizedAmount) });
     }, [formData, onSubmit]);
 
     const handleFocus = useCallback((e: React.FocusEvent<HTMLInputElement>) => {
@@ -94,6 +115,9 @@ const EditTripForm: React.FC<Props> = ({ onSubmit, trip }) => {
         <DriverSelect drivers={drivers} formData={formData} handleChange={handleChange} setFormData={setFormData} />
     ), [drivers, formData.driver, handleChange]);
 
+    if (!isOpen) {
+        return null
+    }
     if (isLoading) {
         return (
             <div className='flex items-center justify-center h-full'>
@@ -103,113 +127,116 @@ const EditTripForm: React.FC<Props> = ({ onSubmit, trip }) => {
     }
 
     return (
-        <div className="bg-white text-black h-full flex flex-col">
-            <div className="flex-grow overflow-y-auto p-4">
-                <form className="space-y-4" onSubmit={handleSubmit}>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {memoizedPartySelect}
-                        {memoizedTruckSelect}
-                    </div>
+        <div className="modal-class">
+            <div className="fixed inset-0 flex items-center justify-center z-50">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{
+                        duration: 0.5,
+                        ease: [0, 0.71, 0.2, 1.01]
+                    }}
+                    className="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl max-h-[700px] overflow-y-auto thin-scrollbar"
+                >
 
-                    {memoizedDriverSelect}
+                    <form className="space-y-4" onSubmit={handleSubmit}>
+                        <BillingInfo formData={formData} handleChange={handleChange} setFormData={setFormData} />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {memoizedPartySelect}
+                            {memoizedTruckSelect}
+                        </div>
 
-                    <RouteInputs formData={formData} handleChange={handleChange} />
+                        {memoizedDriverSelect}
 
-                    <div className='grid grid-cols-2 gap-2'>
-                        <div>
-                            <label className="block">
-                                <span className="block text-xs font-medium text-gray-700 mb-1">Freight Amount</span>
+                        <RouteInputs formData={formData} handleChange={handleChange} />
+
+                        <div className='grid grid-cols-2 gap-2'>
+
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">EWB Validity</label>
                                 <input
-                                    className="w-full p-2 border border-gray-300 rounded-md"
-                                    type="number"
-                                    name="amount"
-                                    value={formData.amount || ''}
-                                    placeholder="Freight Amount"
+                                    type="date"
+                                    name="ewbValidity"
+                                    value={formData.ewbValidity ? new Date(formData.ewbValidity).toISOString().split('T')[0] : ''}
                                     onChange={handleChange}
-                                    onFocus={handleFocus}
-                                    required
+                                    className="w-full p-2 border border-gray-300 rounded-md"
                                 />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">LR No</label>
+                                <input
+                                    type="text"
+                                    className="w-full p-2 border border-gray-300 rounded-md"
+                                    name="LR"
+                                    value={formData.LR}
+                                    onChange={handleChange}
+                                    placeholder="LR No"
+                                />
+                            </div>
+                        </div>
+
+
+
+                        <DateInputs formData={formData} handleChange={handleChange} />
+
+                        <div>
+                            <label className="flex items-center text-sm font-medium text-gray-700">
+                                <input
+                                    type="checkbox"
+                                    className="mr-2"
+                                    checked={showDetails}
+                                    onChange={() => setShowDetails(!showDetails)}
+                                />
+                                Edit More Details
                             </label>
                         </div>
-                        <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">EWB Validity</label>
-                            <input
-                                type="date"
-                                name="ewbValidity"
-                                value={formData.ewbValidity ? new Date(formData.ewbValidity).toISOString().split('T')[0] : ''}
-                                onChange={handleChange}
-                                className="w-full p-2 border border-gray-300 rounded-md"
-                            />
-                        </div>
+
+                        {showDetails && (
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Material Name</label>
+                                <input
+                                    type="text"
+                                    className="w-full p-2 border border-gray-300 rounded-md"
+                                    name="material"
+                                    value={formData.material}
+                                    placeholder="Material Name"
+                                    onChange={handleChange}
+                                />
+                            </div>
+                        )}
+
+                        {hasSupplier && (
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Truck Hire Cost</label>
+                                <input
+                                    type="number"
+                                    className="w-full p-2 border border-gray-300 rounded-md"
+                                    name="truckHireCost"
+                                    value={formData.truckHireCost}
+                                    placeholder="Truck Hire Cost"
+                                    onChange={handleChange}
+                                    onFocus={handleFocus}
+                                />
+                            </div>
+                        )}
+                    </form>
+                    <div className="p-4 bg-white border-t flex items-center justify-end gap-2">
+                        <Button onClick={() => onClose()} variant={'outline'}>
+                            Cancel
+                        </Button>
+                        <Button
+                            className=''
+                            type="submit"
+                            onClick={handleSubmit}
+                        >
+                            Submit
+                        </Button>
                     </div>
-
-                    <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">LR No</label>
-                        <input
-                            type="text"
-                            className="w-full p-2 border border-gray-300 rounded-md"
-                            name="LR"
-                            value={formData.LR}
-                            onChange={handleChange}
-                            placeholder="LR No"
-                        />
-                    </div>
-
-                    <DateInputs formData={formData} handleChange={handleChange} />
-
-                    <div>
-                        <label className="flex items-center text-sm font-medium text-gray-700">
-                            <input
-                                type="checkbox"
-                                className="mr-2"
-                                checked={showDetails}
-                                onChange={() => setShowDetails(!showDetails)}
-                            />
-                            Edit More Details
-                        </label>
-                    </div>
-
-                    {showDetails && (
-                        <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Material Name</label>
-                            <input
-                                type="text"
-                                className="w-full p-2 border border-gray-300 rounded-md"
-                                name="material"
-                                value={formData.material}
-                                placeholder="Material Name"
-                                onChange={handleChange}
-                            />
-                        </div>
-                    )}
-
-                    {hasSupplier && (
-                        <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Truck Hire Cost</label>
-                            <input
-                                type="number"
-                                className="w-full p-2 border border-gray-300 rounded-md"
-                                name="truckHireCost"
-                                value={formData.truckHireCost}
-                                placeholder="Truck Hire Cost"
-                                onChange={handleChange}
-                                onFocus={handleFocus}
-                            />
-                        </div>
-                    )}
-                </form>
-            </div>
-            <div className="p-4 bg-white border-t">
-                <Button
-                    className='w-full'
-                    type="submit"
-                    onClick={handleSubmit}
-                >
-                    Submit
-                </Button>
+                </motion.div>
             </div>
         </div>
     );
 };
 
 export default EditTripForm;
+

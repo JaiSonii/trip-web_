@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { useTrip } from '@/context/tripContext';
 import dynamic from 'next/dynamic';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator';
+import { useToast } from '@/components/hooks/use-toast';
 
 const BiltyForm = dynamic(()=>import('../BiltyForm'), {ssr : false, loading : ()=>loadingIndicator})
 const FrieghtMemo = dynamic(()=>import('../FrieghtMemo'), {ssr : false, loading : ()=>loadingIndicator})
@@ -25,6 +26,7 @@ const TripDetails = () => {
   const [charges, setCharges] = useState<TripExpense[]>([])
   const [biltyModalOpen, setBiltyModalOpen] = useState(false)
   const [fmModalOpen, setFmModalOpen] = useState(false)
+  const {toast} = useToast()
 
 
 
@@ -72,6 +74,9 @@ const TripDetails = () => {
         ...prev,
         ...resData.trip
       }));
+      toast({
+        description : 'Trip Status Updated'
+      })
     } catch (error) {
       alert(error)
       console.log('Error settling amount:', error);
@@ -96,8 +101,14 @@ const TripDetails = () => {
         ...prev,
         ...resData.trip
       }));
+      toast({
+        description : 'Trip Status Updated'
+      })
     } catch (error) {
-      alert(error)
+      toast({
+        description : 'Failed to update Status',
+        variant : 'destructive'
+      })
       console.log('Error settling amount:', error);
     }
 
@@ -156,11 +167,12 @@ const TripDetails = () => {
           balance: prev.balance - resData.payment.amount,
           tripAccounts: [resData.payment, ...prev.tripAccounts]
         }))
-
+        
       } catch (error: any) {
         alert('Failed to Add Payment')
       }
     }
+    
   }
 
 

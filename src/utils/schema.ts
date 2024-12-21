@@ -2,11 +2,11 @@ import mongoose, { ConnectOptions } from "mongoose";
 import { Schema } from "mongoose";
 
 const documentSchema = new Schema({
-  filename : String,
-  type : String,
-  validityDate : Date,
+  filename: String,
+  type: String,
+  validityDate: Date,
   uploadedDate: Date,
-  url : String
+  url: String
 })
 
 export const partySchema = new Schema({
@@ -26,7 +26,7 @@ export const partySchema = new Schema({
     type: String,
   },
   contactNumber: {
-    required : true,
+    required: true,
     type: String,
   },
   address: {
@@ -39,40 +39,40 @@ export const partySchema = new Schema({
 
 
 export const PartyPaymentSchema = new Schema({
-  user_id : {
-    type : String,
-    required : true
+  user_id: {
+    type: String,
+    required: true
   },
-  party_id : {
-    type : String,
-    required : true
+  party_id: {
+    type: String,
+    required: true
   },
-  trip_id :{
-    type : String,
+  trip_id: {
+    type: String,
   },
-  accountType : {
-    type : String,
-    enum : ['Payments', 'Advances'],
-    default : ['Payments']
+  accountType: {
+    type: String,
+    enum: ['Payments', 'Advances'],
+    default: ['Payments']
   },
-  amount : {
-    type : Number,
-    required : true
+  amount: {
+    type: Number,
+    required: true
   },
   paymentType: {
     type: String,
     enum: ['Cash', 'Cheque', 'Online Transfer', 'Bank Transfer', 'UPI', 'Fuel', 'Others'],
     required: true
   },
-  driver_id : {
-    type : String
+  driver_id: {
+    type: String
   },
-  date : {
-    type : Date,
-    required : true
+  date: {
+    type: Date,
+    required: true
   },
-  notes : {
-    type : String,
+  notes: {
+    type: String,
   }
 
 })
@@ -131,9 +131,9 @@ export const tripSchema = new Schema({
   driver: {
     type: String,
   },
-  supplier :{
+  supplier: {
     type: String,
-    default : ''
+    default: ''
   },
   route: {
     origin: { type: String, required: true },
@@ -143,6 +143,12 @@ export const tripSchema = new Schema({
     type: String,
     enum: ['Fixed', 'Per Tonne', 'Per Kg', 'Per Trip', 'Per Day', 'Per Hour', 'Per Litre', 'Per Bag'],
     required: true
+  },
+  units: {
+    type: Number,
+  },
+  rate: {
+    type: Number
   },
   amount: {
     type: Number,
@@ -167,13 +173,13 @@ export const tripSchema = new Schema({
   POD: {
     type: String,
   },
-  ewayBill:{
-    type : String,
-    default : ''
+  ewayBill: {
+    type: String,
+    default: ''
   },
-  ewbValidityDate :{
-    type : Date ,
-    default : null
+  ewbValidityDate: {
+    type: Date,
+    default: null
   },
   dates: [
     Date
@@ -187,9 +193,9 @@ export const tripSchema = new Schema({
   accounts: [
     PaymentBookSchema,
   ],
- documents : [
-  documentSchema
- ] 
+  documents: [
+    documentSchema
+  ]
 });
 
 
@@ -236,8 +242,8 @@ export const truckSchema: Schema = new Schema({
     type: String,
     required: true
   },
-  truck_id : {type : String, required : true, unique : true},
-  truckNo: { type: String, required: true},
+  truck_id: { type: String, required: true, unique: true },
+  truckNo: { type: String, required: true },
   truckType: { type: String },
   model: { type: String },
   capacity: { type: String },
@@ -246,8 +252,8 @@ export const truckSchema: Schema = new Schema({
   supplier: { type: String },
   status: { type: String, enum: ['Available', 'On Trip'] },
   trip_id: { type: String, default: '' },
-  driver_id : {type : String, default : ''},
-  documents : [documentSchema],
+  driver_id: { type: String, default: '' },
+  documents: [documentSchema],
   updatedAt: { type: Date, default: Date.now }
 });
 export const supplierSchema: Schema = new Schema({
@@ -275,18 +281,18 @@ export const supplierSchema: Schema = new Schema({
 export const userSchema = new Schema({
   user_id: { type: String, required: true, unique: true },
   phone: { type: String, required: true, unique: true },
-  name : {type : String},
-  role : {
-    name : String,
-    user : String
+  name: { type: String },
+  role: {
+    name: String,
+    user: String
   },
-  gstNumber : String,
-  address : String,
-  company : String,
-  city : String,
-  pincode : String,
-  panNumber : String,
-  email : String,
+  gstNumber: String,
+  address: String,
+  company: String,
+  city: String,
+  pincode: String,
+  panNumber: String,
+  email: String,
   bankDetails: {
     msmeNo: String,
     accountNo: String,
@@ -297,10 +303,10 @@ export const userSchema = new Schema({
   logoUrl: String,
   stampUrl: String,
   signatureUrl: String,
-  documents : [{
-    filename : String,
-    url : String,
-    uploadedDate : String
+  documents: [{
+    filename: String,
+    url: String,
+    uploadedDate: String
   }],
   createdAt: { type: Date, default: Date.now }
 });
@@ -337,124 +343,124 @@ export const tripChargesSchema = new Schema({
   }
 })
 
-export const 
-ExpenseSchema = new Schema({
-  user_id : {
-    type :String,
-    required : true
-  },
-  trip_id : {
-    type : String
-  },
-  truck : {
-    type : String,
-    default : ''
-  },
-  expenseType : {
-    type : String,
-    required : true
-  },
-  paymentMode :{
-    type : String,
-    required : true
-  },
-  transaction_id : String,
-  driver : String,
-  amount : {
-    type : Number,
-    required : true
-  },
-  shop_id : String,
-  date : {
-    type : Date,
-    required : true
-  },
-  notes : String,
-  url : String
-})
+export const
+  ExpenseSchema = new Schema({
+    user_id: {
+      type: String,
+      required: true
+    },
+    trip_id: {
+      type: String
+    },
+    truck: {
+      type: String,
+      default: ''
+    },
+    expenseType: {
+      type: String,
+      required: true
+    },
+    paymentMode: {
+      type: String,
+      required: true
+    },
+    transaction_id: String,
+    driver: String,
+    amount: {
+      type: Number,
+      required: true
+    },
+    shop_id: String,
+    date: {
+      type: Date,
+      required: true
+    },
+    notes: String,
+    url: String
+  })
 
 export const draftExpenseSchema = new Schema({
-  user_id : {
-    type :String,
-    required : true
+  user_id: {
+    type: String,
+    required: true
   },
-  trip_id : {
-    type : String
+  trip_id: {
+    type: String
   },
-  truck : {
-    type : String,
-    default : ''
+  truck: {
+    type: String,
+    default: ''
   },
-  expenseType : {
-    type : String
+  expenseType: {
+    type: String
   },
-  paymentMode :{
-    type : String,
+  paymentMode: {
+    type: String,
   },
-  transaction_id : String,
-  driver : String,
-  amount : {
-    type : Number,
+  transaction_id: String,
+  driver: String,
+  amount: {
+    type: Number,
   },
-  shop_id : String,
-  date : {
-    type : Date,
-    default : ()=>new Date(Date.now()),
-    
+  shop_id: String,
+  date: {
+    type: Date,
+    default: () => new Date(Date.now()),
+
   },
-  notes : String,
-  url : String
+  notes: String,
+  url: String
 })
 
 export const supplierAccountSchema = new Schema({
-  user_id : {
-    type : String,
-    required : true
+  user_id: {
+    type: String,
+    required: true
   },
-  trip_id :{
-    type : String,
+  trip_id: {
+    type: String,
   },
-  supplier_id :{
-    type : String,
-    required : true
+  supplier_id: {
+    type: String,
+    required: true
   },
-  amount : {
-    type : Number,
-    required : true
+  amount: {
+    type: Number,
+    required: true
   },
   paymentMode: {
-    type : String,
-    default : 'Cash'
+    type: String,
+    default: 'Cash'
   },
-  date : {
-    type : Date,
-    required : true
+  date: {
+    type: Date,
+    required: true
   },
-  notes : String,
-  refNo : String
+  notes: String,
+  refNo: String
 })
 
 export const OfficeExpenseSchema = new Schema({
-  user_id : {
-    type : String,
-    required : true
+  user_id: {
+    type: String,
+    required: true
   },
-  expenseType : {
-    type : String,
-    required : true
+  expenseType: {
+    type: String,
+    required: true
   },
-  amount : {
-    type : Number,
-    required : true
+  amount: {
+    type: Number,
+    required: true
   },
-  paymentMode : String,
-  shop_id :  String,
-  date : {
-    type : Date,
-    required : true
+  paymentMode: String,
+  shop_id: String,
+  date: {
+    type: Date,
+    required: true
   },
-  transactionId : String,
-  notes : String
+  transactionId: String,
+  notes: String
 })
 
 export const TokenBlacklistSchema = new Schema({
@@ -463,45 +469,45 @@ export const TokenBlacklistSchema = new Schema({
 });
 
 export const ShopKhataSchema = new Schema({
-  user_id : {type : String, required : true},
-  shop_id : {
-    type : String,
-    required : true,
-    unique : true
+  user_id: { type: String, required: true },
+  shop_id: {
+    type: String,
+    required: true,
+    unique: true
   },
-  name : {
-    type : String,
-    required : true
+  name: {
+    type: String,
+    required: true
   },
-  contactNumber : String,
-  address : String,
-  gstNumber : String,
+  contactNumber: String,
+  address: String,
+  gstNumber: String,
 
 })
 
 export const ShopKhataAccountsSchema = new Schema({
-  user_id : {type : String, required : true},
-  shop_id : {
-    type : String,
-    required : true
+  user_id: { type: String, required: true },
+  shop_id: {
+    type: String,
+    required: true
   },
-  reason : String,
-  payment : Number,
-  credit : Number,
-  date : {type : Date, required : true}
+  reason: String,
+  payment: Number,
+  credit: Number,
+  date: { type: Date, required: true }
 })
 
 export const RecentActivitiesSchema = new Schema({
-  user_id : {type : String, required : true},
-  activities : []
+  user_id: { type: String, required: true },
+  activities: []
 })
 
 export const otherDocumentsSchema = new Schema({
-  user_id : {type : String, required : true},
-  filename : String,
-  url : String,
-  uploadedDate : Date,
-  validityDate : Date
+  user_id: { type: String, required: true },
+  filename: String,
+  url: String,
+  uploadedDate: Date,
+  validityDate: Date
 })
 
 

@@ -15,7 +15,6 @@ import { formatNumber } from '@/utils/utilArray'
 import { createWorker } from 'tesseract.js'
 import { useExpenseCtx } from '@/context/context'
 import { Loader2 } from 'lucide-react'
-import Loading from '@/app/user/loading'
 import { useToast } from '../hooks/use-toast'
 
 type Props = {

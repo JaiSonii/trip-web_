@@ -313,36 +313,17 @@ export default function TripsPage() {
         <div className="flex justify-center items-center h-full text-gray-500">No trips found</div>
       ) : (
         <div className="w-full overflow-x-auto">
-          <AnimatePresence>
-            {edit && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-              >
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.5 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.5 }}
-                  transition={{ duration: 0.3 }}
-                  className="bg-white p-6 rounded-lg shadow-lg relative w-full max-w-3xl max-h-[90vh] overflow-y-auto thin-scrollbar"
-                >
-                  <Button
-                    variant="ghost"
-                    onClick={handleCancelEdit}
-                    className="absolute top-2 right-2 text-gray-600 hover:text-gray-900"
-                  >
-                    <MdClose size={24} />
-                  </Button>
-                  <EditTripForm
-                    trip={selectedTrip as ITrip}
-                    onSubmit={handleEdit}
-                  />
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+
+        {edit && <EditTripForm
+            isOpen={edit}
+            onClose={() => {
+              setEdit(false);
+              setSelectedTrip(null);
+            }}
+            trip={selectedTrip as ITrip}
+            onSubmit={handleEdit}
+          />}
+          
           <Table>
             <TableHeader>
               <TableRow>

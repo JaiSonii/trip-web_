@@ -196,6 +196,15 @@ export async function POST(this: any, req: Request) {
         url: fileUrl || '',
       })
     }
+    if (newTrip.billingType !== 'Fixed'){
+      const units = formData.get('units')
+      const rate = formData.get('rate')
+      if(!units || rate){
+        return NextResponse.json({message : 'Units and Rate must be Specified', status : 400})
+      }
+      newTrip.units= Number(units)
+      newTrip.rate= Number(rate)
+    }
 
     // Save the new trip document
     const [savedTrip,un] = await Promise.all([newTrip.save(),recentActivity('Created New Trip',newTrip, user)]);

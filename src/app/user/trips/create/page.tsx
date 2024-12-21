@@ -8,7 +8,7 @@ import { useExpenseCtx } from '@/context/context';
 import { useSWRConfig } from 'swr';
 
 const CreateTripPage: React.FC = () => {
-  
+
 
   const { trips } = useExpenseCtx();
   const router = useRouter();
@@ -17,16 +17,16 @@ const CreateTripPage: React.FC = () => {
   const [saving, setSaving] = useState(false); // New state for saving overlay
   const [error, setError] = useState<string | null>(null);
   const [latestLR, setLatestLR] = useState<string>(''); // State to hold the latest LR
-  const data  = useSearchParams()
+  const data = useSearchParams()
   const duplicate = data.get('trip')
 
-  const {mutate} = useSWRConfig()
-  useEffect(()=>{
+  const { mutate } = useSWRConfig()
+  useEffect(() => {
     mutate(`/api/trips`)
     mutate(`/api/trucks`)
     mutate(`/api/drivers`)
     mutate(`/api/parties`)
-  },[mutate])
+  }, [mutate])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -80,6 +80,13 @@ const CreateTripPage: React.FC = () => {
       formData.append('LR', trip.LR);
       formData.append('material', trip.material);
       formData.append('notes', trip.notes);
+      if (trip.billingType !== 'Fixed' && !trip.totalUnits && !trip.perUnit) {
+        alert('Units and Rate is Required')
+      }
+      if (trip.billingType !== 'Fixed' && trip.totalUnits && trip.perUnit) {
+        formData.append('units', trip.totalUnits)
+        formData.append('rate', trip.perUnit)
+      }
 
       // Append the file to formData if it exists
       if (trip.file) {
@@ -122,7 +129,7 @@ const CreateTripPage: React.FC = () => {
       console.error('Error saving trip:', error);
       alert(`An error occurred while saving the trip. Please try again.: \n${error}`);
     } finally {
-      
+
       setSaving(false); // Hide loading overlay
     }
   };
@@ -140,7 +147,7 @@ const CreateTripPage: React.FC = () => {
       )}
       <div className="w-full h-full relative">
 
-        <TripForm onSubmit={handleTripSubmit} lr={latestLR} duplicate={duplicate ? JSON.parse(duplicate) : {}}/>
+        <TripForm onSubmit={handleTripSubmit} lr={latestLR} duplicate={duplicate ? JSON.parse(duplicate) : {}} />
       </div>
     </>
 

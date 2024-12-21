@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { MdEdit } from "react-icons/md";
 import Link from 'next/link';
 import { useTrip } from '@/context/tripContext';
@@ -20,7 +20,6 @@ const TripInfo: React.FC<TripInfoProps> = ({ label, value, tripId, startDate, va
   const {trip} = useTrip()
   const [notes, setNotes] = useState<string>('');
   const [isEditingNotes, setIsEditingNotes] = useState<boolean>(false);
-
 
   useEffect(() => {
     if (label === 'Notes') {
@@ -47,19 +46,36 @@ const TripInfo: React.FC<TripInfoProps> = ({ label, value, tripId, startDate, va
   };
 
   return (
-    <div className={`p-4 border border-lightOrange rounded-lg shadow-lg bg-white w-full hover:shadow-lightOrangeButtonColor transition-shadow duration-300 relative ${label === 'Driver' ? 'h-full' : ''}`}>
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className={`p-4 border border-lightOrange rounded-lg shadow-lg bg-white w-full hover:shadow-lightOrangeButtonColor transition-shadow duration-300 relative ${label === 'Driver' ? 'h-full' : ''}`}
+    >
       <div className='flex flex-col space-y-2'>
         <div className='flex items-center justify-between'>
-          <p className="text-sm font-medium text-gray-600 tracking-wide uppercase">{label}</p>
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="text-sm font-medium text-gray-600 tracking-wide uppercase"
+          >
+            {label}
+          </motion.p>
           {(startDate || validityDate) && (
-            <div className="flex flex-col items-end text-xs text-gray-500">
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="flex flex-col items-end text-xs text-gray-500"
+            >
               {startDate && (
                 <span>START DATE :  {formatDate(startDate)}</span>
               )}
               {validityDate && (
                 <span className='flex gap-1'>E-WAY BILL VALIDITY :  {ewbColor(trip)}</span>
               )}
-            </div>
+            </motion.div>
           )}
         </div>
         <div className="flex items-center justify-between">
@@ -72,49 +88,72 @@ const TripInfo: React.FC<TripInfoProps> = ({ label, value, tripId, startDate, va
               />
             </div>
           ) : (
-            <div className="flex flex-col">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4 }}
+              className="flex flex-col"
+            >
               <p className="text-xl font-semibold text-gray-900">{value}</p>
               {supplierId && supplierName && (
                <Link onClick={(e)=>e.stopPropagation()}  href={`/user/suppliers/${supplierId}/trips`} className="text-xs text-gray-800 hover:scale-105 hover:underline transition-all duration-300 ease-in-out">{supplierName}</Link>
               )}
-            </div>
+            </motion.div>
           )}
           {label === 'Notes' && !isEditingNotes && (
-            <Button onClick={() => setIsEditingNotes(true)} size="sm" variant="ghost">
-              <MdEdit />
-            </Button>
+            <motion.div
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+            >
+              <Button onClick={() => setIsEditingNotes(true)} size="sm" variant="ghost">
+                <MdEdit />
+              </Button>
+            </motion.div>
           )}
         </div>
       </div>
 
-      {isEditingNotes && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <AnimatePresence>
+        {isEditingNotes && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{
-              duration: 0.5,
-              ease: [0, 0.71, 0.2, 1.01]
-            }}
-            className="bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-lg"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
           >
-            <h2 className="text-xl font-bold mb-4">Edit Notes</h2>
-            <textarea
-              className="w-full p-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-lightOrange"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Enter notes..."
-              rows={4}
-            />
-            <div className="flex justify-end mt-4 space-x-4">
-              <Button onClick={handleSaveNotes}>Save</Button>
-              <Button variant="outline" onClick={() => setIsEditingNotes(false)}>Cancel</Button>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.5 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.5 }}
+              transition={{
+                duration: 0.3,
+                ease: [0, 0.71, 0.2, 1.01]
+              }}
+              className="bg-white p-6 rounded-lg shadow-lg w-[90%] max-w-lg"
+            >
+              <h2 className="text-xl font-bold mb-4">Edit Notes</h2>
+              <textarea
+                className="w-full p-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-lightOrange"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Enter notes..."
+                rows={4}
+              />
+              <div className="flex justify-end mt-4 space-x-4">
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button onClick={handleSaveNotes}>Save</Button>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button variant="outline" onClick={() => setIsEditingNotes(false)}>Cancel</Button>
+                </motion.div>
+              </div>
+            </motion.div>
           </motion.div>
-        </div>
-      )}
-    </div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   );
 };
 
 export default TripInfo;
+

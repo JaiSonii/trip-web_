@@ -41,7 +41,7 @@ function CompanyHeader({ formData }: { formData: { logo: string; companyName: st
 export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormDataType, color: string, selectedCopy: string }) {
 
   return (
-    <div className={`border border-black  w-full h-full ${color} relative max-w-7xl`}>
+    <div className={`border-2 border-black  w-full h-auto ${color} relative max-w-7xl`}>
       <section className="px-6 py-2 w-full">
         <div className="flex items-center gap-8 justify-center">
           <div className="flex justify-center">
@@ -136,8 +136,8 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
               </div>
               <div className="col-span-3 text-xs text-black p-2 border-2 border-black flex flex-col gap-1 h-auto pb-2">
                 <span className="text-xs">CONSIGNMENT NOTE</span>
-                <span>No. : <span className='text-red-500 font-semibold'>{formData.LR}</span></span>
-                <span>Date : <span className='text-red-500 font-semibold'>{new Date(formData.date).toLocaleDateString('en-IN')}</span></span>
+                <span>No. : <span className='text-red-600 font-semibold'>{formData.LR}</span></span>
+                <span>Date : <span className='text-red-600 font-semibold'>{new Date(formData.date).toLocaleDateString('en-IN')}</span></span>
               </div>
 
 
@@ -146,82 +146,99 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
             </div>
           </section>
 
-          <section className=" mt-4">
+          <section className="mt-4">
             <div className="grid grid-cols-9 gap-2 items-start">
-              <div className="col-span-6 font-semibold text-black border-t-2 border-black border-l-0 h-auto" style={{ fontSize: "small" }}>
-                <div className='border-b-2 border-r-2 border-black p-2'>
-                  <p>Consigner Name and Address :</p>
-                  <p className=" text-red-500">{formData.consigner.name + " " + formData.consigner.address}</p>
-                </div>
-                <div className='border-b-2 border-r-2 border-black p-2'>
-                  <p>Consignee Name and Address :</p>
-                  <p className=" text-red-500">{formData.consignee.name + " " + formData.consignee.address}</p>
-                </div>
 
+              <div className="col-span-6 font-semibold text-black border-t-2 border-black h-auto text-sm">
+                <div className="border-b-2 border-r-2 border-black px-2 pb-6 flex gap-2 items-center">
+                  <p>Consigner Name and Address :</p>
+                  <p className="text-red-600">{formData.consigner.name + " " + formData.consigner.address}</p>
+                </div>
+                <div className="border-b-2 border-r-2 border-black px-2 pb-6 flex gap-2 items-center">
+                  <p>Consignee Name and Address :</p>
+                  <p className="text-red-600">{formData.consignee.name + " " + formData.consignee.address}</p>
+                </div>
               </div>
 
-              <div className="col-span-3 p-2 text-xs text-black h-auto font-semibold">
-                <div className="mb-2">
-                  <p className="border-2 border-black p-2 mt-2 text-red-500 flex items-center"><p className="text-black">From : </p>{formData.consigner.address}</p>
 
-                  <p className="border-2 border-black p-2 mt-2 text-red-500 flex items-center"><p className="text-black">To : </p>{formData.consignee.address}</p>
-
+              <div className="col-span-3 text-xs text-black h-auto">
+                <div className="space-y-1">
+                  <p className="border-2 border-black p-2 text-red-600 flex items-center">
+                    <span className="text-black mr-1">From:</span>{formData.consigner.address}
+                  </p>
+                  <p className="border-2 border-black p-2 text-red-600 flex items-center">
+                    <span className="text-black mr-1">To:</span>{formData.consignee.address}
+                  </p>
                 </div>
               </div>
             </div>
           </section>
+
 
           <section className=" mt-2">
-            <table className="table-auto w-full text-xs border border-black">
+            <table className="table-fixed w-full text-xs border border-black border-collapse">
               <thead className="font-semibold text-center">
                 <tr>
-                  <th className="border p-2 border-black">Packages</th>
-                  <th className="border p-2 border-black">Description (said to contain)</th>
+                  <th className="border border-black p-2" rowSpan={2}>Packages</th>
+                  <th className="border border-black p-2" rowSpan={2}>Description (said to contain)</th>
                   <th className="border border-black p-0" colSpan={2}>
                     <p className="p-2">Weight</p>
                     <div className="grid grid-cols-2 border-t border-black">
-                      <th className="p-2">Actual</th>
-                      <th className="border-l border-black p-2">{formData.weight || "Charged"}</th>
+                      <div className="border-r border-black p-2">Actual</div>
+                      <div className="border-l border-black p-2">Charged</div>
                     </div>
                   </th>
-                  <th className="border p-2 border-black">Rate</th>
-                  <th className="border p-2 border-black">Amount to pay/paid</th>
+                  <th className="border border-black p-2" rowSpan={2}>Rate</th>
+                  <th className="border border-black p-2" rowSpan={2}>Amount to pay/paid</th>
                 </tr>
               </thead>
-              <tbody className="text-center text-red-500 font-semibold">
+
+              <tbody className="text-center text-red-600 font-semibold">
                 {formData.material?.split(',').map((item: string, index: number) => (
                   <tr key={index}>
-                    <td className="border p-2 border-black">{index + 1}</td>
-                    <td className="border p-2 border-black">{item}</td>
-                    <td className="border p-2 border-black">Fixed</td>
-                    <td className="border p-2 border-black">{formData.weight || 'Fixed'}</td>
-                    <td className="border p-2 border-black">
-                      <div className='flex flex-col gap-3 text-black text-left '>
-                        <p>Mazdoor</p>
-                        <p>Hire Charges</p>
-                        <p>Sur. Ch.</p>
-                        <p>St. Ch.</p>
-                        <p>Risk Ch.</p>
-                        <p className='mt-2 text-xs'>TOTAL</p>
-                      </div>
-                    </td>
-                    <td className="border border-black">
-                      <div className='flex flex-col justify-between'>
-                        <div className='flex font-semibold gap-4 flex-col items-center py-3 justify-between'>
-                          <p>TO</p>
-                          <p>BE</p>
-                          <p>BILLED</p>
-                        </div>
-                        <div className='border-t border-black h-1'>
+                    <td className="border border-black p-2">{index + 1}</td>
+                    <td className="border border-black p-2">{item}</td>
 
+                    {index === 0 && <>
+                      <td className="border border-black p-2" rowSpan={formData.material.split(',').length}>
+                        <div className="h-full flex items-center justify-center" >
+                          {formData.weight || 'Fixed'}
                         </div>
-                      </div>
+                      </td>
+                      <td className="border border-black p-2" rowSpan={formData.material.split(',').length}>
+                        <div className="h-full flex items-center justify-center">
+                          {formData.grtdWeight || 'Fixed'}
+                        </div>
+                      </td>
+                      <td className="border border-black p-2" rowSpan={formData.material.split(',').length}>
+                        <div className='flex flex-col gap-3 text-black text-left'>
+                          <p>Mazdoor</p>
+                          <p>Hire Charges</p>
+                          <p>Sur. Ch.</p>
+                          <p>St. Ch.</p>
+                          <p>Risk Ch.</p>
+                          <p className='mt-2 text-xs'>TOTAL</p>
+                        </div>
+                      </td>
+                      <td className="border border-black p-2" rowSpan={formData.material.split(',').length}>
+                        <div className='flex flex-col justify-between h-full'>
+                          <div className='flex font-semibold gap-4 flex-col items-center py-3 justify-between'>
+                            <p>TO</p>
+                            <p>BE</p>
+                            <p>BILLED</p>
+                          </div>
+                          <div className='border-t border-black h-1'></div>
+                        </div>
+                      </td>
+                    </>}
 
-                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+
+
+
           </section>
 
         </div>
@@ -229,9 +246,9 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
           <div className="text-[11px] border-b-2 border-black">
             <div className="border-b-2 p-2 border-black flex flex-col">
               <span>Address of Issuing Office : </span>
-              <span>Name and Address of Agent : <span className='text-red-500 font-semibold'>{formData.companyName}</span></span>
+              <span>Name and Address of Agent : <span className='text-red-600 font-semibold'>{formData.companyName}</span></span>
             </div>
-            <div className="flex items-center justify-center text-center p-16 text-3xl font-semibold text-red-500">{formData.city}</div>
+            <div className="flex items-center justify-center text-center p-16 text-3xl font-semibold text-red-600">{formData.city}</div>
           </div>
           <div className="border-b-2 border-black">
             <div className="border-b-2 border-black p-2">
@@ -253,39 +270,41 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
           <div className="border-b-2 border-black text-xs flex flex-col gap-4 h-auto">
             <h3 className="text-black text-center">Service Tax Reg No.</h3>
             <div>
-            <p className="mt-4 text-black p-1 ">GST No. {formData.gstNumber}</p>
-            <p className=" text-black mb-2 p-1 ">PAN No. {formData.pan}</p>
+              <p className="mt-4 text-black p-1 ">GST No. {formData.gstNumber}</p>
+              <p className=" text-black mb-2 p-1 ">PAN No. {formData.pan}</p>
             </div>
-            
+
           </div>
           <div className=" text-black text-sm font-semibold flex flex-col justify-evenly gap-6 p-2">
             <span className="underline text-black">Private Mark</span>
+            <div className="flex flex-col gap-2">
+              <span>
+                ST No :
+              </span>
+              <span>
+                CST No :
+              </span>
+              <span>
+                DO No. :
+              </span>
+              <span>
+                INV No. : <span className='text-red-600'>{formData.invoiceNo}</span>
+              </span>
+            </div>
             <span>
-              ST No :
+              Date : <span className='text-red-600'>{new Date(formData.date).toLocaleDateString('en-IN')}</span>
             </span>
             <span>
-              CST No :
-            </span>
-            <span>
-              DO No. :
-            </span>
-            <span>
-              INV No. : <span className='text-red-500'>{formData.invoiceNo}</span>
-            </span>
-            <span>
-              Date : <span className='text-red-500'>{new Date(formData.date).toLocaleDateString('en-IN')}</span>
-            </span>
-            <span>
-              Lorry No. : <span className='text-red-500'>{formData.truckNo}</span>
+              Lorry No. : <span className='text-red-600'>{formData.truckNo}</span>
             </span>
           </div>
 
         </div>
-        <div className="text-xs p-2 flex gap-6 justify-between w-full">
+        <div className="text-sm p-2 pt-0 flex gap-6 justify-between w-full">
           <span className="text-black whitespace-nowrap">
-            Value : <span className="text-red-500 font-semibold">{formData.value || "As Per Invoice"}</span>
+            Value : <span className="text-red-600 font-semibold">{formData.value || "As Per Invoice"}</span>
           </span>
-          <span className="text-black text-xs whitespace-nowrap flex gap-4">
+          <span className="text-black text-sm whitespace-nowrap flex gap-4">
             Signature of Transport Operator : {formData.signature ? <Image src={formData.signature} width={40} height={40} alt='user signature' /> : null}
           </span>
 

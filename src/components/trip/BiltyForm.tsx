@@ -109,7 +109,8 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
     value : '',
     truckNo: trip.truck || '',
     logo: '',
-    signature: ''
+    signature: '',
+    grtdWeight : ''
   })
   const billRef = useRef<HTMLDivElement>(null)
 
@@ -460,7 +461,19 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
                         />
                       </div>
                     </div>
-                    <div className="mb-4">
+                    <div>
+                        <Label htmlFor="grtdWeight">Guaranteed Weight</Label>
+                        <Input
+                          id="grtdWeight"
+                          name="grtdWeight"
+                          type="number"
+                          value={formData.grtdWeight}
+                          onChange={handleInputChange}
+                          className="mt-1"
+                          placeholder='Guaranteed Weight'
+                        />
+                      </div>
+                    <div className="my-4">
                       <Label>Freight Amount paid by</Label>
                       <RadioGroup
                         value={formData.paidBy}

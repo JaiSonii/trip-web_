@@ -78,6 +78,8 @@ export interface ITrip extends Document {
   }]
   partyName : string;
   balance : number
+  units? : number;
+  rate?: number
 }
 
 export interface Idoc{
@@ -86,6 +88,7 @@ export interface Idoc{
   validityDate : Date,
   uploadedDate : Date,
   url : string
+
 }
 
 
@@ -199,6 +202,7 @@ export type EWBFormDataType = {
   logo: string
   signature: string
   value : string | number
+  grtdWeight : string | number
 }
 
 export interface FMDataType {

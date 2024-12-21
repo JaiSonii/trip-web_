@@ -194,13 +194,14 @@ export async function PATCH(req: Request, { params }: { params: { tripId: string
   try {
     const { tripId } = params;
     const { data } = await req.json();
-    const { amount, podImage, status, dates, account, notes } = data;
-    console.log(status)
-    console.log(dates)
+    const {  podImage, status, dates, notes } = data;
+    // console.log(status)
+    // console.log(dates)
     await connectToDatabase();
 
 
     const trip = await Trip.findOne({ user_id: user, trip_id: tripId });
+    // console.log(trip)
 
     if (!trip) {
       return NextResponse.json({ message: 'No Trip Found' }, { status: 404 });
@@ -208,24 +209,6 @@ export async function PATCH(req: Request, { params }: { params: { tripId: string
 
     if (notes) {
       trip.notes = notes
-    }
-
-    if (account) {
-      if (account.paymentBook_id) {
-        trip.accounts = trip.accounts.filter((acc: PaymentBook) => acc.paymentBook_id = account.paymentBook_id)
-        trip.accounts.push(account)
-      }
-      else {
-        account.paymentBook_id = 'payment' + uuidv4()
-        trip.accounts.push(account);
-      }
-      const TripExpense = models.TripExpense || model('TripExpense', tripChargesSchema)
-      const charges = await TripExpense.find({ user_id: user, trip_id: trip.trip_id })
-      const pending = await fetchBalanceBack(trip, charges)
-      if (pending < 0) {
-        return NextResponse.json({ message: "Balance going negative", status: 400 })
-      }
-
     }
 
     if (status !== undefined && dates) {
@@ -286,58 +269,81 @@ export async function PUT(req: Request, { params }: { params: { tripId: string }
     const Truck = models.Truck || model('Truck', truckSchema);
     const Driver = models.Driver || model('Driver', driverSchema);
     const Trip = models.Trip || model('Trip', tripSchema);
-    const TripExpense = models.TripCharges || model('TripCharges', tripChargesSchema);
 
-    // Fetch old trip and associated charges
+    // Fetch old trip details
     const oldTrip = await Trip.findOne({ user_id: user, trip_id: tripId });
     if (!oldTrip) {
       return NextResponse.json({ message: 'Trip not found' }, { status: 404 });
     }
 
-    const charges = await TripExpense.find({ user_id: user, trip_id: oldTrip.trip_id });
-    const pending = await fetchBalanceBack(oldTrip, charges);
-    if (pending < 0) {
-      return NextResponse.json({ message: "Balance going negative" }, { status: 400 });
-    }
-
     // Update trip data
-    const updatedTrip: ITrip | null = await Trip.findOneAndUpdate({ user_id: user, trip_id: tripId }, data, { new: true });
+    const updatedTrip = await Trip.findOneAndUpdate(
+      { user_id: user, trip_id: tripId },
+      data,
+      { new: true }
+    );
     if (!updatedTrip) {
       return NextResponse.json({ message: 'Trip update failed' }, { status: 404 });
     }
 
-    // Handle E-Way Bill document validity date
+    // Handle E-Way Bill validity date
     if (data.ewbValidity) {
-      const eWayBillDoc = updatedTrip.documents.find(doc => doc.type === 'E-Way Bill');
+      const eWayBillDoc = updatedTrip.documents.find((doc : any) => doc.type === 'E-Way Bill');
       if (eWayBillDoc) {
         eWayBillDoc.validityDate = new Date(data.ewbValidity);
       } else {
-        updatedTrip.documents.push({ type: 'E-Way Bill', validityDate: new Date(data.ewbValidity), filename: '', uploadedDate: new Date(), url: '' });
+        updatedTrip.documents.push({
+          type: 'E-Way Bill',
+          validityDate: new Date(data.ewbValidity),
+          filename: '',
+          uploadedDate: new Date(),
+          url: '',
+        });
       }
     }
 
-    // Update trip start date if provided
+    // Update trip start date
     if (data.startDate) {
       updatedTrip.dates[0] = data.startDate;
     }
 
-    await updatedTrip.save();
+    // Update statuses for driver and truck
+    const isTripCompleted = updatedTrip?.status > 0;
 
-    // Update driver and truck status if they are part of this trip
+    // Handle previous driver and truck
+    if (oldTrip.driver !== updatedTrip.driver && oldTrip.driver) {
+      await Driver.findOneAndUpdate({ driver_id: oldTrip.driver }, { status: 'Available' });
+    }
+    if (oldTrip.truck !== updatedTrip.truck && oldTrip.truck) {
+      await Truck.findOneAndUpdate({ truckNo: oldTrip.truck }, { status: 'Available' });
+    }
+
+    // Handle new driver and truck
     if (updatedTrip.driver) {
-      await Driver.findOneAndUpdate({ driver_id: updatedTrip.driver }, { status: 'On Trip' });
+      await Driver.findOneAndUpdate(
+        { driver_id: updatedTrip.driver },
+        { status: isTripCompleted ? 'Available' : 'On Trip' }
+      );
     }
     if (updatedTrip.truck) {
-      await Truck.findOneAndUpdate({ truckNo: updatedTrip.truck }, { status: 'On Trip' });
+      await Truck.findOneAndUpdate(
+        { truckNo: updatedTrip.truck },
+        { status: isTripCompleted ? 'Available' : 'On Trip' }
+      );
     }
 
-    await recentActivity('Updated Trip Details', updatedTrip,user)
+    await updatedTrip.save();
+
+    // Log recent activity
+    await recentActivity('Updated Trip Details', updatedTrip, user);
+
     return NextResponse.json({ trip: updatedTrip, status: 200 });
   } catch (err: any) {
     console.error(err);
     return NextResponse.json({ message: 'Internal Server Error', error: err.message, status: 500 });
   }
 }
+
 
 
 export async function DELETE(req: Request, { params }: { params: { tripId: string } }) {
