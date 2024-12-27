@@ -13,9 +13,9 @@ import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { formatNumber } from '@/utils/utilArray'
 import { createWorker } from 'tesseract.js'
-import { useExpenseCtx } from '@/context/context'
 import { Loader2 } from 'lucide-react'
 import { useToast } from '../hooks/use-toast'
+import { useExpenseData } from '../hooks/useExpenseData'
 
 type Props = {
   lr: string
@@ -24,7 +24,7 @@ type Props = {
 }
 
 export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', duplicate: null, onSubmit: () => {} }) {
-  const { trucks, parties, drivers, isLoading } = useExpenseCtx()
+  const { trucks, parties, drivers, isLoading } = useExpenseData()
 
   const [formData, setFormData] = useState({
     party: duplicate?.party || JSON.parse(localStorage.getItem('tripData') as any)?.party || '',
@@ -217,6 +217,8 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
 
     const sanitizedAmount = sanitizeInput(formData.amount.toString())
     const sanitizedTruckHireCost = sanitizeInput(formData.truckHireCost.toString())
+    const sanitizedPerUnit = sanitizeInput(formData.perUnit.toString())
+    const sanitizedTotalUnits = sanitizeInput(formData.totalUnits.toString())
 
     if (sanitizedAmount === null || sanitizedTruckHireCost === null) {
       toast({
@@ -246,6 +248,8 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
       ...formData,
       amount: sanitizedAmount,
       truckHireCost: sanitizedTruckHireCost,
+      perUnit : sanitizedPerUnit,
+      totalUnits : sanitizedTotalUnits
     })
 
     localStorage.removeItem('tripData')

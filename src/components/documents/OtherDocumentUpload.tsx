@@ -9,6 +9,7 @@ import FileUploader from '../FileUploader';
 import { Input } from '../ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { v4 as uuidV4 } from 'uuid'
+import { useSWRConfig } from 'swr';
 
 interface FileData {
   id: string;
@@ -36,6 +37,7 @@ const OtherDocumentUpload: React.FC<Props> = ({ open, setOpen, setUser }) => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const { toast } = useToast();
+  const {mutate} = useSWRConfig()
 
   const handleFilesChange = (files: File[]) => {
     const newFiles = files.map(file => ({
@@ -109,6 +111,7 @@ const OtherDocumentUpload: React.FC<Props> = ({ open, setOpen, setUser }) => {
           ...responseData.documents,
           ...prev
         ]);
+        mutate('/api/documents/recent')
       } else {
         const errorData = await response.json();
         setError(errorData.message || 'Something went wrong.');

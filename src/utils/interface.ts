@@ -3,6 +3,58 @@
 import { Document } from 'mongoose';
 
 
+export interface InvoiceFormData {
+  logoUrl: string;
+  billNo: string;
+  date: string;
+  to: string;
+  from: string;
+  branch: string;
+  address: string;
+  particulars: string;
+  party: string;
+  companyName: string;
+  phone: string
+  email: string;
+  freightCharges: {
+    _id: string;
+    lrNo: string;
+    lorryNo: string;
+    expenseType: string;
+    date : string
+    weight: string;
+    charges: string;
+    rate: string;
+    amount: string;
+    edited : boolean
+  }[];
+  additionalCharges: {
+    id : string
+    date : string
+    lorryNo: string;
+    expenseType: string;
+    remarks: string;
+    amount: string;
+  }[];
+  partyDetails: {
+    msmeNo: string;
+    gstin: string;
+    pan: string;
+    accNo: string;
+    ifscCode: string;
+    bankName: string;
+    bankBranch: string;
+  };
+  paymentDetails: {
+    _id: string
+    date: string;
+    paymentMode: string;
+    notes: string;
+    amount: string;
+    edited: boolean
+  }[];
+}
+
 // Define the interface for the driver account schema
 export interface IDriverAccount {
   account_id: string

@@ -14,6 +14,7 @@ import { Select, SelectTrigger, SelectContent, SelectItem, SelectLabel, SelectVa
 import { Button } from '@/components/ui/button';
 import DriverSelect from '@/components/trip/DriverSelect';
 import { mutate } from 'swr';
+import { useExpenseData } from '@/components/hooks/useExpenseData';
 
 // Define the types
 type FormData = {
@@ -45,33 +46,12 @@ const CreateTruck: React.FC = () => {
 
     const [showDetails, setShowDetails] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    const [suppliers, setSuppliers] = useState<ISupplier[]>([]);
     const [loading, setLoading] = useState(true);
-    const [drivers, setDrivers] = useState<IDriver[]>([])
     const params = useSearchParams()
     const nextpath = params.get('nextpath')
+    const {drivers, suppliers, isLoading} = useExpenseData()
 
-    useEffect(() => {
-        setSaving(true)
-        const fetchSuppliersAndDriver = async () => {
-            try {
-                const [supplierRes, truckRes] = await Promise.all([fetch('/api/suppliers'), fetch(`/api/drivers`)])
 
-                const [supplierData, driverData]: any = await Promise.all([supplierRes.ok ? supplierRes.json() : alert('Failed to fetch Suppliers'), truckRes.ok ? truckRes.json() : alert('Failed to fetch Trucks')]) // Parse the response body as JSON
-                console.log(driverData)
-                setSuppliers(supplierData.suppliers);
-                setDrivers(driverData.drivers)
-            } catch (err) {
-                setError((err as Error).message);
-            } finally {
-                
-                setSaving(false);
-                setLoading(false);
-            }
-        };
-
-        fetchSuppliersAndDriver();
-    }, []);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;

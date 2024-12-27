@@ -1,16 +1,12 @@
 'use client'
 import React, { useEffect, useState } from 'react';
 import TripForm from '@/components/trip/TripForm';
-import { IDriver, TruckModel, IParty, ITrip } from '@/utils/interface';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Loading from '../loading'; // Ensure the Loading component shows a GIF
-import { useExpenseCtx } from '@/context/context';
-import { useSWRConfig } from 'swr';
+import { useToast } from '@/components/hooks/use-toast';
+import { useExpenseData } from '@/components/hooks/useExpenseData';
 
 const CreateTripPage: React.FC = () => {
-
-
-  const { trips } = useExpenseCtx();
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
@@ -19,14 +15,26 @@ const CreateTripPage: React.FC = () => {
   const [latestLR, setLatestLR] = useState<string>(''); // State to hold the latest LR
   const data = useSearchParams()
   const duplicate = data.get('trip')
+  const { toast } = useToast()
+  const { trips,refetchTrucks, refetchParties, refetchDrivers } = useExpenseData()
 
-  const { mutate } = useSWRConfig()
   useEffect(() => {
-    mutate(`/api/trips`)
-    mutate(`/api/trucks`)
-    mutate(`/api/drivers`)
-    mutate(`/api/parties`)
-  }, [mutate])
+    const fetchData = async () => {
+      await Promise.allSettled([
+        refetchTrucks(),
+        refetchParties(),
+        refetchDrivers(),
+      ]).then(results => {
+        results.forEach((result, index) => {
+          if (result.status === 'rejected') {
+            console.error(`Error in refetch ${index + 1}:`, result.reason);
+          }
+        });
+      });
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -72,8 +80,6 @@ const CreateTripPage: React.FC = () => {
       formData.append('origin', trip.route.origin);
       formData.append('destination', trip.route.destination);
       formData.append('billingType', trip.billingType);
-      formData.append('perUnit', trip.perUnit.toString());
-      formData.append('totalUnits', trip.totalUnits.toString());
       formData.append('amount', trip.amount.toString());
       formData.append('startDate', trip.startDate);
       formData.append('truckHireCost', trip.truckHireCost.toString());
@@ -124,10 +130,17 @@ const CreateTripPage: React.FC = () => {
       }
 
       const data = await tripRes.json();
-      router.push('/user/trips');
-    } catch (error) {
-      console.error('Error saving trip:', error);
-      alert(`An error occurred while saving the trip. Please try again.: \n${error}`);
+      toast({
+        description: 'Trip saved successfully',
+      })
+      setTimeout(() => {
+        router.push('/user/trips');
+      }, 500);
+    } catch (error: any) {
+      toast({
+        description: error.message,
+        variant: 'destructive'
+      })
     } finally {
 
       setSaving(false); // Hide loading overlay

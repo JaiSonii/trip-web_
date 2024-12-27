@@ -3,7 +3,7 @@ import { useRouter } from 'next/navigation';
 import React from 'react';
 import { FaUserTie, FaPhone, FaAddressBook } from 'react-icons/fa';
 import { GoOrganization } from 'react-icons/go';
-import PartyBalance from '../party/PartyBalance';
+// import PartyBalance from '../party/PartyBalance';
 import { motion } from 'framer-motion';
 
 interface PartyProps {
@@ -49,7 +49,7 @@ const Party: React.FC<PartyProps> = ({ parties }) => {
                             GST: {party.gstNumber || 'N/A'}
                         </div>
                         <div className='mt-4 text-xl font-semibold'>
-                            <PartyBalance partyId={party.party_id} />
+                            {/* <PartyBalance partyId={party.party_id} /> */}
                         </div>
                         </div>
                     </motion.div>

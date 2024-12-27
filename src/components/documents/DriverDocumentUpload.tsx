@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '../ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { motion } from 'framer-motion'
@@ -7,10 +7,10 @@ import { getDocType } from '@/helpers/ImageOperation';
 import { createWorker } from 'tesseract.js';
 import { extractLatestDate } from '@/helpers/ImageOperation';
 import { mutate } from 'swr';
-import { useExpenseCtx } from '@/context/context';
 import { Loader2 } from 'lucide-react';
 import SingleFileUploader from '../SingleFileUploader';
 import { useToast } from '../hooks/use-toast';
+import { useExpenseData } from '../hooks/useExpenseData';
 
 interface DocumentForm {
     filename: string;
@@ -31,7 +31,7 @@ type Props = {
 };
 
 const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId, documentId, setDocuments, setDriver }) => {
-    const { drivers } = useExpenseCtx()
+    const { drivers } = useExpenseData()
     const [formData, setFormData] = useState<DocumentForm>({
         filename: '',
         validityDate: '',

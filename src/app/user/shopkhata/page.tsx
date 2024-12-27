@@ -10,21 +10,20 @@ import { FaAddressBook, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
 import { formatNumber } from '@/utils/utilArray';
 import debounce from 'lodash.debounce';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useExpenseCtx } from '@/context/context';
-import { useSWRConfig } from 'swr';
+import { useExpenseData } from '@/components/hooks/useExpenseData';
 
 const ShopKhataPage = () => {
-  const {shops, isLoading} = useExpenseCtx()
+  const {shops, isLoading, refetchShops} = useExpenseData()
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' });
   const [searchQuery, setSearchQuery] = useState(''); // Track the search query
 
-  const {mutate} = useSWRConfig()
 
-  useEffect(()=>{
-    mutate('/api/shopkhata')
-  },[mutate])
+
+  useEffect(() => {
+    refetchShops()
+  }, [refetchShops])
 
   const requestSort = (key: any) => {
     let direction: 'asc' | 'desc' = 'asc';

@@ -510,6 +510,18 @@ export const otherDocumentsSchema = new Schema({
   validityDate: Date
 })
 
+export const userExpenseTypesSchema = new Schema({
+  user_id : {
+    type : String,
+    required : true,
+    unique : true,
+  },
+  expenseTypes : {
+    type : [String],
+    default : []
+  }
+})
+
 
 const connectString: any = process.env.NEXT_PUBLIC_MONGO_URL
 

@@ -9,12 +9,14 @@ import { usePathname } from 'next/navigation';
 import { statuses } from '@/utils/schema';
 import DriverSelect from './trip/DriverSelect';
 import ShopSelect from './shopkhata/ShopSelect';
-import { useExpenseCtx } from '@/context/context';
 import Image from 'next/image';
 import PreviewDocument from './documents/PreviewDocument';
 import { useToast } from './hooks/use-toast';
 import { loadingIndicator } from './ui/LoadingIndicator';
 import { X, FileText, ImageIcon } from 'lucide-react';
+import { useExpenseData } from './hooks/useExpenseData';
+import TruckExpenseWrapper from '@/app/user/expenses/page';
+import AdExpenseTypeModal from './AdExpenseTypeModal';
 
 interface ChargeModalProps {
     isOpen: boolean;
@@ -47,7 +49,7 @@ interface TripExpense {
 
 const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClose, onSave, driverId, selected, tripId, truckNo, setDrafts }) => {
 
-    const { trips: ctxTrips, drivers, shops, trucks, isLoading, error } = useExpenseCtx();
+    const { trips: ctxTrips, drivers, shops, trucks, isLoading, error } = useExpenseData();
 
     const [formData, setFormData] = useState<TripExpense>({
         id: selected?._id || undefined,
@@ -80,6 +82,26 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
     const [fileUrl, setFileUrl] = useState<string | null>(selected?.url || null);
     const [modalOpen, setModalOpen] = useState(false)
     const [loading, setLoading] = useState(false)
+    const [expenseTypeModal, setExpenseTypeModal] = useState(false)
+    const [userExpenseTypes, setUserExpenseTypes] = useState<string[] | []>([])
+
+    const fetchUserExpenseTypes = async () => {
+        try {
+            const res = await fetch('/api/expenses/expenseType')
+            const data = await res.json()
+            setUserExpenseTypes(data.expenseTypes)
+
+        } catch (error) {
+            toast({
+                description: "Failed to fetch some expense types",
+                variant: "destructive"
+            })
+        }
+    }
+
+    useEffect(() => {
+        fetchUserExpenseTypes()
+    }, [])
 
     const trips = useMemo(() => {
         let initialTrips = [...ctxTrips]
@@ -434,9 +456,23 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
                                     <SelectValue>{formData.expenseType || 'Select Expense Type'}</SelectValue>
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {expenseTypes.map((type) => (
-                                        <SelectItem key={type} value={type}>{type}</SelectItem>
-                                    ))}
+
+
+                                    {selectedCategory && <>
+                                        <Button className=' w-full my-2' onClick={() => {
+                                            setExpenseTypeModal(true)
+                                        }
+                                        }>Add Your Own</Button>
+                                        <p className='p-1 text-gray-500 text-xs border-b border-gray-300 mb-1'>Added by you</p>
+                                        {userExpenseTypes?.map(type => (
+                                            <SelectItem key={type} value={type}>{type}</SelectItem>
+                                        ))}
+                                        <p className='p-1 text-gray-500 text-xs border-b border-gray-300 mb-1'>By Awajahi</p>
+                                        {expenseTypes.map((type) => (
+                                            <SelectItem key={type} value={type}>{type}</SelectItem>
+                                        ))}
+                                    </>}
+
                                 </SelectContent>
                             </Select>
                         </div>
@@ -623,6 +659,7 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
                     </div>
 
                 </motion.div>
+                <AdExpenseTypeModal open={expenseTypeModal} setOpen={setExpenseTypeModal} setExpenses={setUserExpenseTypes} />
             </div>
         </div>
     );

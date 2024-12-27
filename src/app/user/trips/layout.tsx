@@ -17,7 +17,8 @@ const TripsLayout = ({ children }: { children: React.ReactNode }) => {
     '/user/trips': 'Trips',
     '/user/trips/create': 'Create New Trip',
     [`/user/trips/${tripId}`] : 'Trip Details',
-    [`/user/trips/${tripId}/documents`] : 'Trip Documents'
+    [`/user/trips/${tripId}/documents`] : 'Trip Documents',
+    '/user/trips/invoice' : 'Invoice Generation'
   }
 
   return (

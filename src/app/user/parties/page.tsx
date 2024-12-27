@@ -2,34 +2,31 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { IParty } from '@/utils/interface';
 import { useRouter } from 'next/navigation';
 import Loading from './loading';
-import PartyBalance from '@/components/party/PartyBalance'; //need to be removed
 import { FaPhone, FaSort, FaSortDown, FaSortUp, FaUserTie } from 'react-icons/fa6';
 import { GoOrganization } from "react-icons/go";
 import { FaAddressBook, FaObjectGroup } from 'react-icons/fa';
 import { formatNumber } from '@/utils/utilArray';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useExpenseCtx } from '@/context/context';
-import { useSWRConfig } from 'swr';
+
+import { useExpenseData } from '@/components/hooks/useExpenseData';
 
 const PartiesPage = () => {
 
   // mutate('/api/parties')
   const router = useRouter();
 
-  const {parties, isLoading} = useExpenseCtx()
+  const {parties, isLoading, refetchParties} = useExpenseData()
 
   // const [parties, setParties] = useState<IParty[] | null>(null);
   // const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const {mutate} = useSWRConfig()
   const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' })
 
-  useEffect(()=>{
-    mutate('/api/parties')
-  },[mutate])
+  useEffect(() => {
+    refetchParties()
+  }, [refetchParties])
 
   const sortedParties = useMemo(() => {
     if (!parties || parties.length === 0) return []; // This line ensures that trips is not null or empty

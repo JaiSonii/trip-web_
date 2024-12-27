@@ -7,11 +7,10 @@ import { FaUser, FaPhone, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
 
 import { IDriver } from '@/utils/interface';
 import { formatNumber } from '@/utils/utilArray';
-import { useExpenseCtx } from '@/context/context';
 import Loading from './loading';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
-import { useSWRConfig } from 'swr';
+import { useExpenseData } from '@/components/hooks/useExpenseData';
 
 type SortConfig = {
   key: keyof IDriver | null;
@@ -21,15 +20,15 @@ type SortConfig = {
 export default function DriversPage() {
 
   const router = useRouter();
-  const { drivers, isLoading } = useExpenseCtx();
+  const { drivers, isLoading , refetchDrivers} = useExpenseData();
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: 'asc' });
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { mutate } = useSWRConfig()
+
 
   useEffect(() => {
-    mutate('/api/drivers')
-  }, [mutate])
+    refetchDrivers()
+  }, [refetchDrivers])
 
   const debouncedSearch = useMemo(
     () => debounce((query: string) => setSearchQuery(query), 300),

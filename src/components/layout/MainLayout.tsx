@@ -14,6 +14,7 @@ import { TbUsersGroup } from "react-icons/tb";
 import { HiOutlineUser } from "react-icons/hi";
 import { ExpenseProvider } from '@/context/context';
 import { useToast } from '../hooks/use-toast';
+import { ExpenseProvider as RedExpense } from '../ExpenseProvider';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -149,9 +150,9 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       <div className={`w-full min-h-screen overflow-y-auto pb-4 rounded-3xl bg-white shadow-black shadow-xl my-2 ${pathname.startsWith('/user/trips/trip') ? 'thin-scrollbar' : 'no-scrollbar'} `}>
 
         {/* Render dynamic content here */}
-        <ExpenseProvider>
+        <RedExpense>
           {children}
-        </ExpenseProvider>
+        </RedExpense>
       </div>
     </div>
   );

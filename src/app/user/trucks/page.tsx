@@ -9,14 +9,13 @@ import debounce from 'lodash.debounce';
 import Loading from './loading';
 import { truckTypesIcons } from '@/utils/utilArray';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useExpenseCtx } from '@/context/context';
 import { statuses } from '@/utils/schema';
 import { Button } from '@/components/ui/button';
 import TripCard from '@/components/TripCard';
 import { Input } from '@/components/ui/input';
 
 import type { TruckModel as ITruck } from '@/utils/interface';
-import { useSWRConfig } from 'swr';
+import { useExpenseData } from '@/components/hooks/useExpenseData';
 
 type SortConfig = {
   key: keyof ITruck | any;
@@ -26,15 +25,14 @@ type SortConfig = {
 export default function TrucksPage() {
  
   const router = useRouter();
-  const { trucks, isLoading } = useExpenseCtx();
+  const { trucks, isLoading, refetchTrucks } = useExpenseData();
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: 'asc' });
   const [searchQuery, setSearchQuery] = useState('');
 
-  const {mutate} = useSWRConfig()
 
-  useEffect(()=>{
-    mutate('/api/trucks')
-  },[mutate])
+  useEffect(() => {
+    refetchTrucks()
+  }, [refetchTrucks])
 
   const debouncedSearch = useMemo(
     () => debounce((query: string) => setSearchQuery(query), 300),

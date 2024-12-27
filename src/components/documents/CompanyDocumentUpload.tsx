@@ -7,6 +7,7 @@ import { createWorker } from 'tesseract.js';
 import { Loader2, X } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
 import FileUploader from '../FileUploader';
+import { useSWRConfig } from 'swr';
 
 interface DocumentForm {
     files: File[];
@@ -24,7 +25,7 @@ const CompanyDocumentUpload: React.FC<Props> = ({ open, setOpen, setDocs }) => {
         files: [],
         filenames: [],
     });
-
+    const {mutate} = useSWRConfig()
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
@@ -114,6 +115,7 @@ const CompanyDocumentUpload: React.FC<Props> = ({ open, setOpen, setDocs }) => {
             setFormData({ files: [], filenames: [] });
             setOpen(false);
             setDocs(responseData.user.documents);
+            mutate('/api/documents/recent')
         } catch (err: any) {
             setError(err.message);
             toast({

@@ -43,7 +43,7 @@ const PartySelect: React.FC<PartySelectProps> = ({ parties, formData, handleChan
             <SelectValue placeholder="Select Customer" />
           </SelectTrigger>
           <SelectContent className="max-h-[300px]">
-            <div className="p-2 flex items-center justify-between gap-2">
+            <div className="sticky p-2 flex items-center justify-between gap-2">
               <input
                 type="text"
                 placeholder="Search..."
@@ -51,15 +51,15 @@ const PartySelect: React.FC<PartySelectProps> = ({ parties, formData, handleChan
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md"
               />
-              <Button  className="rounded-full w-8 h-8 p-0" onClick={() => {
-                localStorage.setItem('tripData', JSON.stringify(formData))
-              }}>
+              
                 <Link href={{
                   pathname: `/user/parties/create`, query: {
                     nextpath: `/user/trips/create`
                   }
-                }}><PiPlusBold /></Link>
-              </Button>
+                }}>
+                  <Button  className="rounded-full w-8 h-8 p-0" onClick={() => {
+                localStorage.setItem('tripData', JSON.stringify(formData))
+              }}><PiPlusBold /></Button></Link>
             </div>
             {filteredParties.length > 0 ? (
               filteredParties.map((party) => (

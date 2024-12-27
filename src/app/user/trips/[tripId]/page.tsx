@@ -13,7 +13,6 @@ import TripDetails from '@/components/trip/tripDetail/TripDetail';
 
 // Dynamically import components
 const EditTripForm = dynamic(() => import('@/components/trip/EditTripForm'), {
-  loading: () => <div className='flex items-center justify-center'> <Loader2 className='animate-spin text-bottomNavBarColor' /></div>,
   ssr: false,
 });
 

@@ -8,10 +8,10 @@ import { getDocType } from '@/helpers/ImageOperation';
 import { extractLatestDate } from '@/helpers/ImageOperation';
 import { mutate } from 'swr';
 import { statuses } from '@/utils/schema';
-import { useExpenseCtx } from '@/context/context';
 import { Loader2 } from 'lucide-react';
 import SingleFileUploader from '../SingleFileUploader';
 import { useToast } from '../hooks/use-toast';
+import { useExpenseData } from '../hooks/useExpenseData';
 
 interface DocumentForm {
     filename: string;
@@ -32,7 +32,7 @@ type Props = {
 };
 
 const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip, documentId, setDocuments }) => {
-    const { trips } = useExpenseCtx()
+    const { trips } = useExpenseData()
     const { toast } = useToast()
     const [formData, setFormData] = useState<DocumentForm>({
         filename: '',

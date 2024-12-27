@@ -7,11 +7,10 @@ import { usePathname, useRouter } from 'next/navigation';
 import { createWorker } from 'tesseract.js';
 import { getDocType } from '@/helpers/ImageOperation';
 import { extractLatestDate } from '@/helpers/ImageOperation';
-import { mutate } from 'swr';
-import { useExpenseCtx } from '@/context/context';
 import { Loader2 } from 'lucide-react';
 import SingleFileUploader from '../SingleFileUploader';
 import { useToast } from '../hooks/use-toast';
+import { useExpenseData } from '../hooks/useExpenseData';
 
 interface DocumentForm {
     filename: string;
@@ -31,7 +30,7 @@ type Props = {
 };
 
 const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo, documentId, setDocuments, setTruck }) => {
-    const { trucks } = useExpenseCtx()
+    const { trucks, refetchRecentDocuments } = useExpenseData()
     const [formData, setFormData] = useState<DocumentForm>({
         filename: '',
         validityDate: '',
@@ -199,7 +198,7 @@ const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo, document
                     truckNo: ''
                 });
                 setOpen(false)
-                mutate('/api/documents/recent')
+                refetchRecentDocuments()
                 const data = await response.json()
                 if (setDocuments) {
                     setDocuments((prev: any) => [data.document, ...prev])

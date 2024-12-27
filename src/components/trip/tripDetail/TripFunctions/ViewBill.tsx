@@ -80,7 +80,7 @@ const ViewBillButton: React.FC<Props> = () => {
       </Button>
       {show && (
         <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black bg-opacity-50">
-          <InvoiceForm setShow={setShow}/>
+          {/* <InvoiceForm setShow={setShow}/> */}
         </div>
       )}
     </div>

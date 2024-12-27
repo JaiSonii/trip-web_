@@ -8,11 +8,11 @@ import RouteInputs from './RouteInputs';
 import { IDriver, IParty, ITrip, TruckModel } from '@/utils/interface';
 import { DateInputs } from './DateInputs';
 import { Button } from '../ui/button';
-import { useExpenseCtx } from '@/context/context';
-import { Loader2 } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { BillingInfo } from './BillingInfo';
 import { useToast } from '../hooks/use-toast';
+import { useExpenseData } from '../hooks/useExpenseData';
 
 type Props = {
     trip: ITrip;
@@ -22,7 +22,7 @@ type Props = {
 };
 
 const EditTripForm: React.FC<Props> = ({ onSubmit, trip, onClose, isOpen }) => {
-    const { parties, trucks, drivers, isLoading } = useExpenseCtx();
+    const { parties, trucks, drivers, isLoading } = useExpenseData();
     const { toast } = useToast()
 
     const [formData, setFormData] = useState(() => ({
@@ -128,112 +128,113 @@ const EditTripForm: React.FC<Props> = ({ onSubmit, trip, onClose, isOpen }) => {
 
     return (
         <div className="modal-class">
-            <div className="fixed inset-0 flex items-center justify-center z-50">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{
-                        duration: 0.5,
-                        ease: [0, 0.71, 0.2, 1.01]
-                    }}
-                    className="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl max-h-[700px] overflow-y-auto thin-scrollbar"
-                >
+            <motion.div
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{
+                    duration: 0.5,
+                    ease: [0, 0.71, 0.2, 1.01]
+                }}
+                className="relative bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl max-h-[700px] overflow-y-auto thin-scrollbar"
+            >
+                <Button variant={'outline'} onClick={() => onClose()} className='absolute right-0 top-0 border-0 rounded-none'>
+                    <X size={15} />
+                </Button>
 
-                    <form className="space-y-4" onSubmit={handleSubmit}>
-                        <BillingInfo formData={formData} handleChange={handleChange} setFormData={setFormData} />
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {memoizedPartySelect}
-                            {memoizedTruckSelect}
-                        </div>
+                <form className="space-y-4" onSubmit={handleSubmit}>
+                    <BillingInfo formData={formData} handleChange={handleChange} setFormData={setFormData} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {memoizedPartySelect}
+                        {memoizedTruckSelect}
+                    </div>
 
-                        {memoizedDriverSelect}
+                    {memoizedDriverSelect}
 
-                        <RouteInputs formData={formData} handleChange={handleChange} />
+                    <RouteInputs formData={formData} handleChange={handleChange} />
 
-                        <div className='grid grid-cols-2 gap-2'>
-
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">EWB Validity</label>
-                                <input
-                                    type="date"
-                                    name="ewbValidity"
-                                    value={formData.ewbValidity ? new Date(formData.ewbValidity).toISOString().split('T')[0] : ''}
-                                    onChange={handleChange}
-                                    className="w-full p-2 border border-gray-300 rounded-md"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">LR No</label>
-                                <input
-                                    type="text"
-                                    className="w-full p-2 border border-gray-300 rounded-md"
-                                    name="LR"
-                                    value={formData.LR}
-                                    onChange={handleChange}
-                                    placeholder="LR No"
-                                />
-                            </div>
-                        </div>
-
-
-
-                        <DateInputs formData={formData} handleChange={handleChange} />
+                    <div className='grid grid-cols-2 gap-2'>
 
                         <div>
-                            <label className="flex items-center text-sm font-medium text-gray-700">
-                                <input
-                                    type="checkbox"
-                                    className="mr-2"
-                                    checked={showDetails}
-                                    onChange={() => setShowDetails(!showDetails)}
-                                />
-                                Edit More Details
-                            </label>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">EWB Validity</label>
+                            <input
+                                type="date"
+                                name="ewbValidity"
+                                value={formData.ewbValidity ? new Date(formData.ewbValidity).toISOString().split('T')[0] : ''}
+                                onChange={handleChange}
+                                className="w-full p-2 border border-gray-300 rounded-md"
+                            />
                         </div>
-
-                        {showDetails && (
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Material Name</label>
-                                <input
-                                    type="text"
-                                    className="w-full p-2 border border-gray-300 rounded-md"
-                                    name="material"
-                                    value={formData.material}
-                                    placeholder="Material Name"
-                                    onChange={handleChange}
-                                />
-                            </div>
-                        )}
-
-                        {hasSupplier && (
-                            <div>
-                                <label className="block text-xs font-medium text-gray-700 mb-1">Truck Hire Cost</label>
-                                <input
-                                    type="number"
-                                    className="w-full p-2 border border-gray-300 rounded-md"
-                                    name="truckHireCost"
-                                    value={formData.truckHireCost}
-                                    placeholder="Truck Hire Cost"
-                                    onChange={handleChange}
-                                    onFocus={handleFocus}
-                                />
-                            </div>
-                        )}
-                    </form>
-                    <div className="p-4 bg-white border-t flex items-center justify-end gap-2">
-                        <Button onClick={() => onClose()} variant={'outline'}>
-                            Cancel
-                        </Button>
-                        <Button
-                            className=''
-                            type="submit"
-                            onClick={handleSubmit}
-                        >
-                            Submit
-                        </Button>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">LR No</label>
+                            <input
+                                type="text"
+                                className="w-full p-2 border border-gray-300 rounded-md"
+                                name="LR"
+                                value={formData.LR}
+                                onChange={handleChange}
+                                placeholder="LR No"
+                            />
+                        </div>
                     </div>
-                </motion.div>
-            </div>
+
+
+
+                    <DateInputs formData={formData} handleChange={handleChange} />
+
+                    <div>
+                        <label className="flex items-center text-sm font-medium text-gray-700">
+                            <input
+                                type="checkbox"
+                                className="mr-2"
+                                checked={showDetails}
+                                onChange={() => setShowDetails(!showDetails)}
+                            />
+                            Edit More Details
+                        </label>
+                    </div>
+
+                    {showDetails && (
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Material Name</label>
+                            <input
+                                type="text"
+                                className="w-full p-2 border border-gray-300 rounded-md"
+                                name="material"
+                                value={formData.material}
+                                placeholder="Material Name"
+                                onChange={handleChange}
+                            />
+                        </div>
+                    )}
+
+                    {hasSupplier && (
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">Truck Hire Cost</label>
+                            <input
+                                type="number"
+                                className="w-full p-2 border border-gray-300 rounded-md"
+                                name="truckHireCost"
+                                value={formData.truckHireCost}
+                                placeholder="Truck Hire Cost"
+                                onChange={handleChange}
+                                onFocus={handleFocus}
+                            />
+                        </div>
+                    )}
+                </form>
+                <div className="p-4 bg-white border-t flex items-center justify-end gap-2">
+                    <Button onClick={() => onClose()} variant={'outline'}>
+                        Cancel
+                    </Button>
+                    <Button
+                        className=''
+                        type="submit"
+                        onClick={handleSubmit}
+                    >
+                        Submit
+                    </Button>
+                </div>
+            </motion.div>
         </div>
     );
 };

@@ -8,12 +8,9 @@ import { ChartConfig, ChartContainer, ChartLegend, ChartLegendContent, ChartTool
 import { Bar, BarChart, CartesianGrid, Cell, Label, Legend, Pie, PieChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
 import { useToast } from '@/components/hooks/use-toast';
 import Loading from '../loading';
-import { useExpenseCtx } from '@/context/context';
 import { useAnimatedNumber } from '@/components/hooks/useAnimatedNumber';
-import { RxActivityLog } from "react-icons/rx";
-import { useSWRConfig } from 'swr';
-import { recentIcons } from '@/utils/icons';
 import RecentActivities from '@/components/RecentActivites';
+import { useExpenseData } from '@/components/hooks/useExpenseData';
 
 
 const piechartConfig: ChartConfig = {
@@ -44,8 +41,7 @@ const chartConfig: ChartConfig = {
 
 const Page = () => {
   const { toast } = useToast()
-  const {dashboardData : data, trips, isLoading} = useExpenseCtx()
-  const {mutate} = useSWRConfig()
+  const {dashboardData : data, trips, isLoading, refetchDashboard} = useExpenseData()
 
 
   const totalCost = useMemo(() => {
@@ -66,8 +62,8 @@ const Page = () => {
   const animatedProfit = useAnimatedNumber(data?.profit || 0);
 
   useEffect(()=>{
-    mutate('/api/dashboard')
-  },[mutate])
+    refetchDashboard()
+  },[refetchDashboard])
 
   if (isLoading) {
     return <Loading />

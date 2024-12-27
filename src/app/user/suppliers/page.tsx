@@ -9,23 +9,21 @@ import { FaUserTie, FaPhone, FaTruck, FaWallet, FaSort, FaSortDown, FaSortUp } f
 import { formatNumber } from '@/utils/utilArray';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import debounce from 'lodash.debounce';
-import { useExpenseCtx } from '@/context/context';
-import { mutate, useSWRConfig } from 'swr';
+import { useExpenseData } from '@/components/hooks/useExpenseData';
 
 const SuppliersPage = () => {
 
   const router = useRouter();
-  const {suppliers, isLoading} = useExpenseCtx()
+  const {suppliers, isLoading, refetchSuppliers} = useExpenseData()
   // const [suppliers, setSuppliers] = useState<ISupplier[] | any>([]);
   // const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [sortConfig, setSortConfig] = useState<any>({ key: null, direction: 'asc' });
   const [searchQuery, setSearchQuery] = useState(''); // Track the search query
-  const {mutate} = useSWRConfig()
 
-  useEffect(()=>{
-    mutate('/api/suppliers')
-  },[mutate])
+  useEffect(() => {
+    refetchSuppliers()
+  }, [refetchSuppliers])
 
   // Fetch suppliers data
   // useEffect(() => {

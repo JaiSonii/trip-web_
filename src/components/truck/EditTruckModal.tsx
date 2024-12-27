@@ -12,6 +12,7 @@ import { Button } from '../ui/button';
 import DriverSelect from '../trip/DriverSelect';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useExpenseCtx } from '@/context/context';
+import { useExpenseData } from '../hooks/useExpenseData';
 
 type FormData = {
     truckNo: string;
@@ -32,7 +33,7 @@ interface EditTruckModalProps {
 }
 
 const EditTruckModal: React.FC<EditTruckModalProps> = ({ truck, isOpen, onClose, onSave }) => {
-    const drivers = useExpenseCtx().drivers
+    const {drivers, suppliers} = useExpenseData()
     const [saving, setSaving] = useState(false);
     const [formdata, setFormdata] = useState<FormData>({
         truckNo: truck?.truckNo || '',
@@ -47,30 +48,29 @@ const EditTruckModal: React.FC<EditTruckModalProps> = ({ truck, isOpen, onClose,
 
     const [showDetails, setShowDetails] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    const [suppliers, setSuppliers] = useState<ISupplier[]>([]);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchSuppliers = async () => {
-            try {
-                const [supplierRes] = await Promise.all([fetch('/api/suppliers')]);
+    // useEffect(() => {
+    //     const fetchSuppliers = async () => {
+    //         try {
+    //             const [supplierRes] = await Promise.all([fetch('/api/suppliers')]);
 
-                // Correct the condition to check if either request failed
-                if (!supplierRes.ok) {
-                    throw new Error('Failed to fetch data');
-                }
+    //             // Correct the condition to check if either request failed
+    //             if (!supplierRes.ok) {
+    //                 throw new Error('Failed to fetch data');
+    //             }
 
-                const [supplierData] = await Promise.all([supplierRes.json()]);
-                setSuppliers(supplierData.suppliers);
-            } catch (err) {
-                setError((err as Error).message);
-            } finally {
-                setLoading(false);
-            }
-        };
+    //             const [supplierData] = await Promise.all([supplierRes.json()]);
+    //             setSuppliers(supplierData.suppliers);
+    //         } catch (err) {
+    //             setError((err as Error).message);
+    //         } finally {
+    //             setLoading(false);
+    //         }
+    //     };
 
-        fetchSuppliers();
-    }, []);
+    //     fetchSuppliers();
+    // }, []);
 
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {

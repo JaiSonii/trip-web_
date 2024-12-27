@@ -194,6 +194,7 @@ export async function PATCH(req: Request, { params }: { params: { tripId: string
   try {
     const { tripId } = params;
     const { data } = await req.json();
+    console.log(data)
     const {  podImage, status, dates, notes } = data;
     // console.log(status)
     // console.log(dates)

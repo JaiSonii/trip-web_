@@ -1,20 +1,18 @@
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import debounce from 'lodash.debounce';
 import { FaTruck, FaCalendarAlt, FaSort, FaSortDown, FaSortUp } from 'react-icons/fa';
 import { SlOptionsVertical } from 'react-icons/sl';
-import { MdClose, MdDelete, MdEdit } from 'react-icons/md';
+import { MdDelete, MdEdit } from 'react-icons/md';
 import { IoDuplicateOutline } from 'react-icons/io5';
 import { IoMdUndo } from 'react-icons/io';
 import { Loader2 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 import { ITrip } from '@/utils/interface';
 import { statuses } from '@/utils/schema';
 import { formatNumber } from '@/utils/utilArray';
-import { useExpenseCtx } from '@/context/context';
 import Loading from './loading';
 import {
   Select,
@@ -26,14 +24,21 @@ import {
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import useSWR from 'swr';
 import dynamic from 'next/dynamic';
 import { useToast } from '@/components/hooks/use-toast';
 import { ewbColor } from '@/utils/EwayBillColor';
+import {
+  useGetTripsQuery,
+  useDeleteTripMutation,
+  useUpdateTripStatusMutation,
+  useEditTripMutation,
+} from '@/store/api';
+import { useExpenseData } from '@/components/hooks/useExpenseData';
+import InvoiceForm from '@/components/trip/tripDetail/TripFunctions/InvoiceForm';
 
 const EditTripForm = dynamic(() => import('@/components/trip/EditTripForm'), {
   ssr: false,
-  loading: () => <div className='flex items-center justify-center'><Loader2 className='animate-spin text-bottomNavBarColor' /></div>
+  loading: () => <div className='modal-class'><div className='flex items-center justify-center'><Loader2 className='animate-spin text-bottomNavBarColor' /></div></div>
 });
 
 const columnOptions = [
@@ -47,66 +52,67 @@ const columnOptions = [
   { label: 'Truck Hire Cost', value: 'truckHireCost' }
 ];
 
-const fetcher = (url: string) => fetch(url).then((res) => res.json())
-
 export default function TripsPage() {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<number | undefined>();
   const [visibleColumns, setVisibleColumns] = useState<string[]>(columnOptions.map(col => col.label));
   const [sortConfig, setSortConfig] = useState<{ key: keyof ITrip | null; direction: 'asc' | 'desc' }>({ key: null, direction: 'asc' });
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState<number | undefined>();
   const [openOptionsId, setOpenOptionsId] = useState<string | null>(null);
   const [edit, setEdit] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<ITrip | null>(null);
-  const { toast } = useToast()
+  const [invoiceOpen, setInvoiceOpen] = useState(false)
+  const { toast } = useToast();
 
+  const { data: trips, isLoading, error } = useGetTripsQuery(selectedStatus);
+  const [deleteTrip] = useDeleteTripMutation();
+  const [updateTripStatus] = useUpdateTripStatusMutation();
+  const [editTrip] = useEditTripMutation();
+  const { refetchTrips } = useExpenseData()
 
-  const { trips: ctxTrips, isLoading } = useExpenseCtx()
-
-  const { data, error, mutate } = useSWR<{ trips: ITrip[] }>(
-    `/api/trips${selectedStatus !== undefined ? `?status=${selectedStatus}` : ''}`,
-    fetcher
-  )
-
-  const trips = data?.trips || ctxTrips
+  useEffect(() => {
+    refetchTrips()
+  }, [refetchTrips])
 
   const handleStatusChange = useCallback((value: string) => {
-    const status = value === 'all' ? undefined : parseInt(value)
-    setSelectedStatus(status)
-  }, [])
+    setSelectedStatus(value === 'all' ? undefined : parseInt(value));
+  }, []);
 
   const handleDelete = useCallback(async (tripId: string) => {
     try {
-      const res = await fetch(`/api/trips/${tripId}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error('Failed to delete trip')
-      mutate() // Revalidate the data after deletion
+      await deleteTrip(tripId).unwrap();
+      toast({
+        description: "Trip deleted successfully",
+      });
     } catch (error) {
-      console.error('Error deleting trip:', error)
+      console.error('Error deleting trip:', error);
+      toast({
+        description: "Error deleting trip",
+        variant: 'destructive'
+      });
     }
-  }, [mutate])
+  }, [deleteTrip, toast]);
 
   const handleUndoStatus = useCallback(async (trip: ITrip) => {
     if (trip.status === 0) {
-      alert('Cannot Undo the Status')
-      return
+      alert('Cannot Undo the Status');
+      return;
     }
-    const data = {
-      status: trip.status as number - 1,
-      dates: trip.dates.map((date, index, array) => index === array.length - 1 ? null : date)
-    }
+    const newStatus = trip.status as number - 1;
+    const newDates = trip.dates.map((date, index, array) => index === array.length - 1 ? null : date);
     try {
-      const res = await fetch(`/api/trips/${trip.trip_id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data }),
-      })
-      if (!res.ok) throw new Error('Failed to update status')
-      mutate() // Revalidate the data after status update
+      await updateTripStatus({ tripId: trip.trip_id, status: newStatus, dates: newDates as (string | null)[] }).unwrap();
+      toast({
+        description: "Status updated successfully",
+      });
     } catch (error) {
-      console.error('Error updating status:', error)
+      console.error('Error updating status:', error);
+      toast({
+        description: "Error updating status",
+        variant: 'destructive'
+      });
     }
-  }, [mutate])
+  }, [updateTripStatus, toast]);
 
   const handleDuplicate = useCallback((e: React.MouseEvent, trip: ITrip) => {
     e.stopPropagation();
@@ -121,51 +127,59 @@ export default function TripsPage() {
   }, [debouncedSearch]);
 
   const toggleColumn = useCallback((column: string) => {
-    setVisibleColumns(prev => prev.includes(column) ? prev.filter(col => col !== column) : [...prev, column]);
+    setVisibleColumns(prev =>
+      prev.includes(column) ? prev.filter(col => col !== column) : [...prev, column]
+    );
   }, []);
 
   const sortedTrips = useMemo(() => {
     if (!trips) return [];
-    let filteredTrips = [...trips];
+    let filteredTrips = [...trips.trips];
 
     if (searchQuery) {
       const lowercaseQuery = searchQuery.toLowerCase();
 
-      // Split the query into potential origin and destination keywords
+      // Attempt to parse the search query as a number
+      const numericQuery = Number(searchQuery);
+      const isNumericQuery = !isNaN(numericQuery);
+
+      // Split the query for route matching
       const routeParts = lowercaseQuery.split(/\s*->\s*|\s+/).filter(Boolean);
       const queryOrigin = routeParts[0] || '';
       const queryDestination = routeParts[1] || '';
 
-      // Filter trips matching origin and destination
+      // Route-based matching
       const routeMatches = filteredTrips.filter((trip) => {
         const origin = trip.route?.origin?.toLowerCase() || '';
         const destination = trip.route?.destination?.toLowerCase() || '';
 
-        // Match if both origin and destination are provided
         if (queryOrigin && queryDestination) {
           return (
             (origin.includes(queryOrigin) && destination.includes(queryDestination)) ||
-            (origin.includes(queryDestination) && destination.includes(queryOrigin)) // Handle reverse route
+            (origin.includes(queryDestination) && destination.includes(queryOrigin))
           );
         }
 
-        // Match if only one of them is provided
         return origin.includes(queryOrigin) || destination.includes(queryOrigin);
       });
 
-      // Filter trips matching other string fields
+      // Match other fields (strings and numbers)
       const otherFieldMatches = filteredTrips.filter((trip) =>
-        Object.values(trip).some(value =>
-          typeof value === 'string' && value.toLowerCase().includes(lowercaseQuery)
-        )
+        Object.values(trip).some(value => {
+          if (typeof value === 'string') {
+            return value.toLowerCase().includes(lowercaseQuery);
+          } else if (typeof value === 'number' && isNumericQuery) {
+            return value === numericQuery || value.toString().includes(searchQuery);
+          }
+          return false;
+        })
       );
 
-      // Combine the results, avoiding duplicates
+      // Combine results
       const combinedResults = [...new Set([...routeMatches, ...otherFieldMatches])];
 
       filteredTrips = combinedResults;
     }
-
 
     if (sortConfig.key) {
       filteredTrips.sort((a, b) => {
@@ -177,6 +191,7 @@ export default function TripsPage() {
 
     return filteredTrips;
   }, [trips, sortConfig, searchQuery]);
+
 
   const requestSort = useCallback((key: keyof ITrip) => {
     setSortConfig(prevConfig => ({
@@ -192,72 +207,34 @@ export default function TripsPage() {
     return <FaSort />;
   }, [sortConfig]);
 
-  const handleCancelEdit = useCallback(() => {
-    setEdit(false);
-    setSelectedTrip(null);
-  }, []);
-
   const handleEdit = useCallback(async (data: Partial<ITrip>) => {
-    if (!selectedTrip) return
-    setLoading(true)
+    if (!selectedTrip) return;
     try {
-      const res = await fetch(`/api/trips/${selectedTrip.trip_id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data })
-      })
-
-      if (!res.ok) throw new Error('Failed to edit trip')
-
-      const newData = await res.json()
-      if (newData.status === 400) {
-        toast({
-          description: newData.message,
-          variant: 'destructive'
-        })
-        return
-      }
-
-      await Promise.all([
-        fetch(`/api/drivers/${selectedTrip.driver}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'Available' }),
-        }),
-        fetch(`/api/trucks/${selectedTrip.truck}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'Available' }),
-        })
-      ])
-      setLoading(false)
-      mutate() // Revalidate the data after editing
+      await editTrip({ tripId: selectedTrip.trip_id, tripData: data }).unwrap();
       toast({
         description: "Trip Edited Successfully",
-      })
-
+      });
     } catch (error) {
-      console.error('Error editing trip:', error)
+      console.error('Error editing trip:', error);
       toast({
         description: "Error Editing Trip",
         variant: 'destructive'
-      })
+      });
     } finally {
-      setSelectedTrip(null)
-      setEdit(false)
-      setLoading(false)
+      setSelectedTrip(null);
+      setEdit(false);
     }
-  }, [selectedTrip, mutate])
+  }, [selectedTrip, editTrip, toast]);
 
-  if (loading || isLoading) return <Loading />;
-  if (error) return <div className="flex justify-center items-center h-full text-red-500">{error}</div>;
+  if (isLoading) return <Loading />;
+  if (error) return <div className="flex justify-center items-center h-full text-red-500">Error loading trips</div>;
 
   return (
     <div className="w-full p-4 h-full bg-white">
       <div className='flex w-full px-4 md:px-60'>
         <input
           type="text"
-          placeholder={`Search from ${trips.length} trips...`}
+          placeholder={`Search from ${trips?.trips.length || 0} trips...`}
           onChange={handleSearch}
           className="w-full p-2 border rounded"
         />
@@ -267,7 +244,7 @@ export default function TripsPage() {
         <div className="flex items-center bg-orange-100 rounded-sm text-orange-800 p-2 mb-2 md:mb-0">
           <span>Total Balance:</span>
           <span className="ml-2 text-lg font-bold">
-            {trips ? formatNumber(trips.reduce((acc, trip) => acc + trip.balance, 0)) : 'Calculating...'}
+            {trips ? formatNumber(trips.trips.reduce((acc, trip) => acc + trip.balance, 0)) : 'Calculating...'}
           </span>
         </div>
         <div className='flex items-end space-x-2 p-2'>
@@ -306,15 +283,18 @@ export default function TripsPage() {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+          <Button onClick={()=>setInvoiceOpen(true)}>
+          Generate Invoice
+        </Button>
         </div>
+        
       </div>
 
-      {(!trips || trips.length === 0) ? (
+      {(!trips || trips.trips.length === 0) ? (
         <div className="flex justify-center items-center h-full text-gray-500">No trips found</div>
       ) : (
         <div className="w-full overflow-x-auto">
-
-        {edit && <EditTripForm
+          {edit && <EditTripForm
             isOpen={edit}
             onClose={() => {
               setEdit(false);
@@ -323,7 +303,7 @@ export default function TripsPage() {
             trip={selectedTrip as ITrip}
             onSubmit={handleEdit}
           />}
-          
+
           <Table>
             <TableHeader>
               <TableRow>
@@ -346,10 +326,10 @@ export default function TripsPage() {
             <TableBody>
               {sortedTrips.map((trip: ITrip, index: number) => (
                 <TableRow
-                  index={index + 1}
                   key={trip.trip_id}
                   className="hover:bg-orange-50 cursor-pointer transition-colors duration-200"
                   onClick={() => router.push(`/user/trips/${trip.trip_id}`)}
+                  index={index + 1}
                 >
                   {columnOptions.map(col =>
                     visibleColumns.includes(col.label) && (
@@ -397,6 +377,7 @@ export default function TripsPage() {
           </Table>
         </div>
       )}
+      <InvoiceForm open={invoiceOpen} setOpen={setInvoiceOpen}/>
     </div>
   );
 }
@@ -414,12 +395,9 @@ function renderCellContent(columnValue: string, trip: ITrip) {
             <span className='font-medium flex gap-[1px] text-xs text-gray-500 whitespace-nowrap'>
               EWB Validity :
               {ewbColor(trip)}
-
             </span>
-
           </div>
         </div>
-
       );
     case 'LR':
       return trip.LR;
@@ -441,10 +419,10 @@ function renderCellContent(columnValue: string, trip: ITrip) {
           <div className="relative w-full bg-gray-200 h-2 rounded">
             <div
               className={`absolute top-0 left-0 h-2 rounded transition-all duration-500 ${trip.status === 0 ? 'bg-red-500' :
-                trip.status === 1 ? 'bg-yellow-500' :
-                  trip.status === 2 ? 'bg-blue-500' :
-                    trip.status === 3 ? 'bg-green-500' :
-                      'bg-green-800'
+                  trip.status === 1 ? 'bg-yellow-500' :
+                    trip.status === 2 ? 'bg-blue-500' :
+                      trip.status === 3 ? 'bg-green-500' :
+                        'bg-green-800'
                 }`}
               style={{ width: `${(trip.status as number + 1) * 20}%` }}
             />
@@ -463,3 +441,4 @@ function renderCellContent(columnValue: string, trip: ITrip) {
       return null;
   }
 }
+
