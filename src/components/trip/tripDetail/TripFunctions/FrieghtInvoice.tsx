@@ -271,7 +271,7 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
                 </tbody>
             </table>
 
-            <div className="mt-4">For, New Central Cargo Movers</div>
+            <div className="mt-4">For, {formData.companyName}</div>
             <div className="flex justify-around mt-5 mb-5">
                 <div className="text-center text-xs">
                     <img src="signature.png" alt="Signature" className="w-[50px] h-5 mx-auto block" />
