@@ -10,6 +10,9 @@ import { useToast } from "@/components/hooks/use-toast"
 import ChargeModal from "../ChargeModal"
 import { v4 as uuidv4 } from 'uuid'
 import { InvoiceFormData as FormData } from '@/utils/interface'
+import { formatNumber } from "@/utils/utilArray"
+import Modal from "../Modal"
+import InvoicePaymentModal from "./InvoicePaymentModal"
 
 type AdditionalCharge = {
 
@@ -30,19 +33,22 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
     const [user, setUser] = useState<any>(null)
     const { toast } = useToast()
     const [chargeModalOpen, setChargeModalOpen] = useState(false)
+    const [paymentModalOpen, setPaymentModalOpen] = useState(false)
 
 
     const addAddtionalCharge = (data: any) => {
+        
 
         setFormData((prev: any) => ({
             ...prev,
-            additionalCharges: [
+            extraAdditionalCharges: [
                 {
                     ...data,
+                    date : new Date(data.date).toISOString(),
                     id: uuidv4(),
                     truckNo: trips.find(trip => trip.trip_id === data.trip_id).truck,
                 },
-                ...prev.additionalCharges
+                ...prev.extraAdditionalCharges
             ]
 
         }))
@@ -51,7 +57,18 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
     const deleteAddtionalCharge = (id: string) => {
         setFormData(prev => ({
             ...prev,
-            additionalCharges: prev.additionalCharges.filter((item: any) => item.id !== id)
+            extraAdditionalCharges: prev.extraAdditionalCharges.filter((item: any) => item.id !== id)
+        }))
+    }
+
+    const saveAddtionalPayment = (data : any)=>{
+        
+        setFormData(prev=>({
+            ...prev,
+            extraPaymentDetails : [
+                data,
+                ...prev.extraPaymentDetails
+            ]
         }))
     }
 
@@ -79,6 +96,8 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
                 email: user.email,
                 city: user.city,
                 pan: user.panNumber,
+                stampUrl : user.stampUrl,
+                signatureUrl : user.signatureUrl,
                 partyDetails: {
                     ...prev.partyDetails,
                     msmeNo: user.bankDetails?.msmeNo || '',
@@ -91,7 +110,7 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
                 }
             }));
 
-            console.log(formData.paymentDetails)
+           
 
         } catch (error) {
             alert('Failed to fetch User Details')
@@ -112,7 +131,7 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
     }
 
     const handleArrayInputChange = (
-        section: 'freightCharges' | 'additionalCharges' | 'paymentDetails',
+        section: 'freightCharges' | 'additionalCharges' | 'paymentDetails' | 'extraAdditionalCharges' | 'extraPaymentDetails',
         index: number,
         field: string,
         value: string
@@ -139,7 +158,7 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
         }))
     }
 
-    const removeRow = (section: 'freightCharges' | 'additionalCharges' | 'paymentDetails', index: number, id: string) => {
+    const removeRow = (section: 'freightCharges' | 'additionalCharges' | 'paymentDetails' | 'extraPaymentDetails', index: number, id: string) => {
         if (section === 'freightCharges') {
             setDeletedChargeIds((prev) => {
                 return prev.length === 0 ? [id] : [...prev, id]
@@ -286,39 +305,23 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
                                         <th className="p-2">Lorry No.</th>
                                         <th className="p-2">Particulars</th>
                                         <th className="p-2">Weight(MT)</th>
-                                        <th className="p-2">Charges(MT)</th>
+                                        <th className="p-2">Charged(MT)</th>
                                         <th className="p-2">Rate(MT)</th>
-                                        <th className="p-2">Amount(MT)</th>
-                                        <th className="p-2"></th>
+                                        <th className="p-2">Amount</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {formData.freightCharges.map((charge: any, index) => (
+                                    {formData.freightCharges.map((charge, index)=>(
                                         <tr key={index}>
-                                            {Object.keys(charge).map((key) => (
-                                                key !== '_id' && key !== 'edited' && ( // Use `&&` to ensure both conditions are met
-                                                    <td key={key} className="p-2">
-                                                        <input
-                                                            value={charge[key]}
-                                                            onChange={(e) =>
-                                                                handleArrayInputChange('freightCharges', index, key, e.target.value)
-                                                            }
-                                                            className="rounded-lg"
-                                                        />
-                                                    </td>
-                                                )
-                                            ))}
-                                            <td className="p-2">
-                                                <Button
-                                                    type="button"
-                                                    variant="destructive"
-                                                    size="icon"
-                                                    onClick={() => removeRow('freightCharges', index, charge._id)}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </td>
+                                            <td className="p-2"><input disabled value={charge.lrNo}/></td>
+                                            <td className="p-2"><input disabled value={charge.truckNo}/></td>
+                                            <td className="p-2"><input disabled value={charge.material}/></td>
+                                            <td className="p-2"><input disabled value={charge.weight}/></td>
+                                            <td className="p-2"><input disabled value={charge.charged}/></td>
+                                            <td className="p-2"><input disabled value={charge.rate}/></td>
+                                            <td className="p-2"><input disabled value={formatNumber(charge.amount)}/></td>
                                         </tr>
+                                        
                                     ))}
                                 </tbody>
                             </table>
@@ -345,22 +348,40 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
                                     {formData.additionalCharges.length > 0 && formData.additionalCharges?.map((charge, index) => (
                                         <tr key={index}>
                                             <td className="p-2">{index + 1}</td>
-                                            {['date', 'truckNo', 'expenseType', 'notes', 'amount'].map((key) => (
-                                                <td key={key} className="p-2">
-                                                    {key === 'date' ?
-                                                        <input type="date" value={new Date(charge['date']).toISOString().split('T')[0] || ''}
-                                                            onChange={(e) => handleArrayInputChange('additionalCharges', index, key, e.target.value)}
-                                                            className="rounded-lg" />
-                                                        :
-                                                        <input
-                                                            value={charge[key as keyof typeof charge]}
-                                                            onChange={(e) => handleArrayInputChange('additionalCharges', index, key, e.target.value)}
-                                                            className="rounded-lg"
-                                                        />
-                                                    }
-
-                                                </td>
-                                            ))}
+                                            <td className="p-2"><input type="date" value={new Date(charge.date).toISOString().split('T')[0]} onChange={(e)=>handleArrayInputChange('additionalCharges', index,'date',e.target.value)}/></td>
+                                            <td className="p-2"><input type="text" value={charge.truckNo} onChange={(e)=>handleArrayInputChange('additionalCharges', index,'lorryNo',e.target.value)}/></td>
+                                            <td className="p-2"><input type="text" value={charge.expenseType} onChange={(e)=>handleArrayInputChange('additionalCharges', index,'expenseType',e.target.value)}/></td>
+                                            <td className="p-2"><input type="text" value={charge.notes} onChange={(e)=>handleArrayInputChange('additionalCharges', index,'notes',e.target.value)}/></td>
+                                            <td className="p-2"><input type="number" value={charge.amount} onChange={(e)=>handleArrayInputChange('additionalCharges', index,'amount',e.target.value)}/></td>
+                                            <td className="p-2">
+                                                <Button
+                                                    type="button"
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        setDeletedChargeIds((prev)=>([
+                                                            ...prev,
+                                                            charge.id
+                                                        ]))
+                                                        setFormData((prev)=>({
+                                                            ...prev,
+                                                            additionalCharges: prev.additionalCharges.filter((_, i) => i!== index),
+                                                        }))
+                                                    }}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {formData.extraAdditionalCharges.length > 0 && formData.extraAdditionalCharges?.map((charge, index) => (
+                                        <tr key={index}>
+                                            <td className="p-2">{index + 1}</td>
+                                            <td className="p-2"><input type="date" value={new Date(charge.date).toISOString().split('T')[0]} onChange={(e)=>handleArrayInputChange('extraAdditionalCharges', index,'date',e.target.value)}/></td>
+                                            <td className="p-2"><input type="text" value={charge.truckNo} onChange={(e)=>handleArrayInputChange('extraAdditionalCharges', index,'lorryNo',e.target.value)}/></td>
+                                            <td className="p-2"><input type="text" value={charge.expenseType} onChange={(e)=>handleArrayInputChange('extraAdditionalCharges', index,'expenseType',e.target.value)}/></td>
+                                            <td className="p-2"><input type="text" value={charge.notes} onChange={(e)=>handleArrayInputChange('extraAdditionalCharges', index,'notes',e.target.value)}/></td>
+                                            <td className="p-2"><input type="number" value={charge.amount} onChange={(e)=>handleArrayInputChange('extraAdditionalCharges', index,'amount',e.target.value)}/></td>
                                             <td className="p-2">
                                                 <Button
                                                     type="button"
@@ -430,14 +451,14 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
                                             <td className="p-2">
                                                 <input
                                                     type="date"
-                                                    value={payment.date}
+                                                    value={new Date(payment.date).toISOString().split('T')[0]}
                                                     onChange={(e) => handleArrayInputChange('paymentDetails', index, 'date', e.target.value)}
                                                     className="rounded-lg"
                                                 />
                                             </td>
                                             <td className="p-2">
                                                 <input
-                                                    value={payment.paymentMode}
+                                                    value={payment.paymentType}
                                                     onChange={(e) => handleArrayInputChange('paymentDetails', index, 'paymentMode', e.target.value)}
                                                     className="rounded-lg"
                                                 />
@@ -461,7 +482,59 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
                                                     type="button"
                                                     variant="destructive"
                                                     size="icon"
-                                                    onClick={() => removeRow('paymentDetails', index, payment._id)}
+                                                    onClick={() => {
+                                                        removeRow('paymentDetails', index, payment.id)
+                                                        setDeletedPaymentIds((prev)=>[
+                                                            payment.id,
+                                                            ...prev
+                                                        ])
+                                                    }
+                                                        
+                                                    }
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    {formData.extraPaymentDetails.map((payment, index) => (
+                                        <tr key={index}>
+                                            <td className="p-2">{index + 1}</td>
+                                            <td className="p-2">
+                                                <input
+                                                    type="date"
+                                                    value={new Date(payment.date).toISOString().split('T')[0]}
+                                                    onChange={(e) => handleArrayInputChange('extraPaymentDetails', index, 'date', e.target.value)}
+                                                    className="rounded-lg"
+                                                />
+                                            </td>
+                                            <td className="p-2">
+                                                <input
+                                                    value={payment.paymentType}
+                                                    onChange={(e) => handleArrayInputChange('extraPaymentDetails', index, 'paymentMode', e.target.value)}
+                                                    className="rounded-lg"
+                                                />
+                                            </td>
+                                            <td className="p-2">
+                                                <input
+                                                    value={payment.notes}
+                                                    onChange={(e) => handleArrayInputChange('extraPaymentDetails', index, 'notes', e.target.value)}
+                                                    className="rounded-lg"
+                                                />
+                                            </td>
+                                            <td className="p-2">
+                                                <input
+                                                    value={payment.amount}
+                                                    onChange={(e) => handleArrayInputChange('extraPaymentDetails', index, 'amount', e.target.value)}
+                                                    className="rounded-lg"
+                                                />
+                                            </td>
+                                            <td className="p-2">
+                                                <Button
+                                                    type="button"
+                                                    variant="destructive"
+                                                    size="icon"
+                                                    onClick={() => removeRow('extraPaymentDetails', index, payment.id)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -476,7 +549,7 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
                                 type="button"
                                 variant="outline"
                                 size="sm"
-                                onClick={() => setChargeModalOpen(true)}
+                                onClick={() => setPaymentModalOpen(true)}
                                 className="rounded-full"
                             >
                                 <Plus className="h-4 w-4" />
@@ -490,6 +563,7 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
             )}
 
             <ChargeModal trips={trips} isOpen={chargeModalOpen} onClose={() => setChargeModalOpen(false)} onSave={(data: any) => addAddtionalCharge(data)} />
+            <InvoicePaymentModal isOpen={paymentModalOpen} onClose={() => setPaymentModalOpen(false)} onSave={saveAddtionalPayment} trips={trips} />    
         </div>
     )
 }

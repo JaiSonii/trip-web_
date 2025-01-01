@@ -35,7 +35,7 @@ interface TripExpense {
   trip_id: string;
   partyBill: boolean;
   amount: number;
-  date: Date;
+  date: string;
   expenseType: string;
   notes?: string;
 }
@@ -45,7 +45,7 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, trip
     trip_id: '',
     partyBill: false,
     amount: 0,
-    date: new Date(),
+    date: new Date(Date.now()).toISOString(),
     expenseType: '',
     notes: '',
   });
@@ -208,7 +208,7 @@ const ChargeModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, trip
             <input
               type="date"
               name="date"
-              value={formData.date.toISOString().split('T')[0]}
+              value={new Date(formData.date).toISOString().split('T')[0]}
               onChange={handleChange}
               className="w-full p-2 border border-gray-300 rounded-md"
             />

@@ -13,6 +13,7 @@ import { FMemo } from '@/utils/DocGeneration'
 import 'jspdf/dist/polyfills.es.js';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
+import { savePDFToBackend } from '@/utils/saveTripDocs'
 
 
 
@@ -181,6 +182,7 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
 
 
 
+  
 
 
   const downloadAllPDFs = async () => {
@@ -227,6 +229,8 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
       pdf.save(`Challan-${trip.LR}-${formData.truckNo}.pdf`);
 
       console.log('PDF generation complete');
+      const filename = `FM-${trip.LR}-${trip.truck}.pdf`
+      await savePDFToBackend(pdf, filename, 'FM/Challan', trip, formData.date)
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Failed to generate PDF');

@@ -72,9 +72,9 @@ const InvoiceForm: React.FC<Props> = ({ open, setOpen }) => {
     }, [trips, selectedParty, searchTerm]);
 
     const handleTripSelection = (tripId: string) => {
-        setSelectedTripIds(prev => 
-            prev.includes(tripId) 
-                ? prev.filter(id => id !== tripId) 
+        setSelectedTripIds(prev =>
+            prev.includes(tripId)
+                ? prev.filter(id => id !== tripId)
                 : [...prev, tripId]
         );
     };
@@ -200,18 +200,20 @@ const InvoiceForm: React.FC<Props> = ({ open, setOpen }) => {
                     </div>
                 )}
 
-                {selectedParty && selectedRoute && selectedTripIds.length > 0 &&
-                    <div className='flex items-center gap-2 justify-end'>
-                        <Button onClick={()=>setOpen(false)} variant={'outline'}>
+
+                <div className='flex items-center gap-2 justify-end'>
+                    <Button onClick={() => setOpen(false)} variant={'outline'}>
                         Cancel
-                        </Button>
+                    </Button>
+                    {selectedParty && selectedRoute && selectedTripIds.length > 0 &&
                         <Link href={`/user/trips/invoice?party=${encodeURIComponent(selectedParty)}&route=${encodeURIComponent(JSON.stringify(selectedRoute))}&trips=${encodeURIComponent(JSON.stringify(selectedTripIds))}`}>
                             <Button className='my-2'>
                                 <ArrowRightIcon />
                             </Button>
                         </Link>
-                    </div>
-                }
+                    }
+                </div>
+
             </motion.div>
         </div>
     )

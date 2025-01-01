@@ -16,26 +16,37 @@ export interface InvoiceFormData {
   companyName: string;
   phone: string
   email: string;
+  signatureUrl : string;
+  stampUrl : string
   freightCharges: {
-    _id: string;
     lrNo: string;
-    lorryNo: string;
-    expenseType: string;
+    truckNo: string;
+    material: string;
     date : string
     weight: string;
-    charges: string;
+    charged: string;
     rate: string;
-    amount: string;
-    edited : boolean
-  }[];
+    amount: number;
+  }[] | [];
   additionalCharges: {
     id : string
     date : string
-    lorryNo: string;
+    truckNo: string;
     expenseType: string;
-    remarks: string;
-    amount: string;
-  }[];
+    notes: string;
+    amount: number;
+    edited : boolean
+  }[] | [];
+  extraAdditionalCharges: {
+    id : string
+    date : string
+    partyBill : boolean
+    truckNo: string;
+    expenseType: string;
+    notes: string;
+    amount: number;
+    trip_id : string;
+  }[] | [];
   partyDetails: {
     msmeNo: string;
     gstin: string;
@@ -46,13 +57,24 @@ export interface InvoiceFormData {
     bankBranch: string;
   };
   paymentDetails: {
-    _id: string
+    id: string
     date: string;
-    paymentMode: string;
+    paymentType: string;
     notes: string;
-    amount: string;
+    amount: number;
     edited: boolean
-  }[];
+  }[] | [];
+  extraPaymentDetails: {
+    id: string
+    date: string;
+    party_id : string;
+    paymentType: string;
+    accountType : string;
+    notes: string;
+    amount: number;
+    driver_id? : string;
+
+  }[] | [];
 }
 
 // Define the interface for the driver account schema
@@ -131,7 +153,8 @@ export interface ITrip extends Document {
   partyName : string;
   balance : number
   units? : number;
-  rate?: number
+  rate?: number;
+  weight? : number
 }
 
 export interface Idoc{

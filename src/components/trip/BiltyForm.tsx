@@ -13,6 +13,7 @@ import 'jspdf/dist/polyfills.es.js';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { useToast } from '../hooks/use-toast'
+import { savePDFToBackend } from '@/utils/saveTripDocs'
 
 
 type Props = {
@@ -211,7 +212,8 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
       }
   
       // Save the PDF file to the backend
-      await savePDFToBackend(pdf);
+      const filename = `Bilty-${trip.LR}-${trip.truck}.pdf`
+      await savePDFToBackend(pdf, filename, 'Bilty', trip, formData.date);
   
       toast({
         description: 'Bilty saved successfully to documents'
@@ -250,34 +252,6 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
     if (!response.ok) {
       throw new Error('Failed to update user details');
     }
-  };
-  
-  const savePDFToBackend = async (pdf: jsPDF) => {
-    const pdfBlob = pdf.output('blob');
-    const file = new File([pdfBlob], `Bilty-${trip.LR}-${trip.truck}.pdf`, {
-      type: 'application/pdf',
-    });
-  
-    const formdata = new FormData();
-    formdata.append('file', file);
-    formdata.append('docType', 'Bilty');
-    formdata.append('validityDate', new Date(formData.date)?.toISOString());
-    formdata.append('filename', `Bilty-${trip.LR}-${trip.truck}.pdf`);
-  
-    const response = await fetch(`/api/trips/${trip.trip_id}/documents`, {
-      method: 'PUT',
-      body: formdata,
-    });
-  
-    if (!response.ok) {
-      throw new Error('Failed to save bilty to documents');
-    }
-  
-    const data = await response.json();
-    setTrip((prev: ITrip | any) => ({
-      ...prev,
-      documents: data.documents,
-    }));
   };
   
 

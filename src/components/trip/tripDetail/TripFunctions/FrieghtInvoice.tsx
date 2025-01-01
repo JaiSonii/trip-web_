@@ -1,6 +1,8 @@
 import { useTrip } from "@/context/tripContext";
 import Image from "next/image";
 import { InvoiceFormData as FormData } from "@/utils/interface";
+import { formatNumber } from "@/utils/utilArray";
+import { useMemo } from "react";
 
 
 const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
@@ -14,6 +16,33 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
             maximumFractionDigits: 2
         }).format(amount);
     }
+
+    const totalAmount = formData.freightCharges.reduce(
+        (total, charge) => {
+            const amount = parseFloat(charge.amount as any); // Safely convert to a number
+            return total + (isNaN(amount) ? 0 : amount); // Add only valid numbers
+        },
+        0
+    );
+    
+    const totalBalance = useMemo(() => {
+        // Combine paymentDetails and extraPaymentDetails into a single array
+        const allPayments = [
+            ...(formData.paymentDetails || []),
+            ...(formData.extraPaymentDetails || []),
+        ];
+    
+        // Calculate the total payment amount
+        const paymentTotal = allPayments.reduce((total, charge) => {
+            const amount = parseFloat(charge.amount as any); // Safely convert to a number
+            return total + (isNaN(amount) ? 0 : amount); // Add only valid numbers
+        }, 0);
+    
+        // Return the total balance
+        return totalAmount - paymentTotal;
+    }, [formData, totalAmount]);
+    
+    
 
     function numberToWordsIndian(num: number): string {
         if (num === 0) return "zero";
@@ -63,27 +92,8 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
     }
 
 
-    const totalFreightCharges = formData.freightCharges.reduce(
-        (total, charge) => total + parseFloat(charge.amount),
-        0
-    );
-
-    const totalAdditionalCharges = formData.additionalCharges.reduce(
-        (total, charge) => total + parseFloat(charge.amount),
-        0
-    );
-
-    const totalAmount = totalFreightCharges + totalAdditionalCharges;
-
-    const totalPayments = formData.paymentDetails.reduce(
-        (total, payment) => total + parseFloat(payment.amount),
-        0
-    );
-
-    const balanceAmount = totalAmount - totalPayments;
-
     return (
-        <div className="w-full mx-auto my-2 border border-black relative font-sans text-[8px]">
+        <div className="w-full mx-auto my-2 border border-black relative font-sans text-[8px] pb-4">
             <div className="text-center mb-2">FREIGHT INVOICE</div>
             <div className="flex items-center justify-center mb-2">
                 <Image src={formData.logoUrl} alt="Company Logo" width={30} height={30} />
@@ -93,75 +103,40 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
                 </div>
             </div>
             <div className="text-center mb-1">{formData.address}</div>
-            <div className="text-center mb-1">
-                <span>{formData.email}</span>
-            </div>
             <div className="absolute right-1 top-1">
                 <div>{formData.phone}</div>
             </div>
-
             <table className="w-full border-collapse text-[6px]">
                 <tbody>
                     <tr>
                         <td colSpan={3} className="text-center font-bold border border-l-0 border-black p-1">Bill No. {formData.billNo}</td>
                         <td className="border border-black p-1">Branch: {formData.branch}</td>
-                        <td className="border border-r-0 border-black p-1">Date: {formData.date}</td>
+                        <td className="border border-r-0 border-black p-1">Date: {new Date(formData.date).toLocaleDateString('en-IN')}</td>
                     </tr>
                     <tr>
-                        <td colSpan={1} className="font-bold border border-l-0 border-black p-1">
-                            CONSIGNMENT<br />
-                            No.
-                        </td>
+                        <td colSpan={1} className="font-bold border border-l-0 border-black p-1">CONSIGNMENT<br />No.</td>
                         <td colSpan={1} className="font-bold border border-black p-1">Date</td>
                         <td className="font-bold border border-black p-1">PARTICULARS</td>
                         <td colSpan={1} className="border border-black p-1">From: {formData.from}</td>
                         <td colSpan={1} className="border border-r-0 border-black p-1">To: {formData.to}</td>
                     </tr>
                     <tr>
-                        <td className="border border-l-0 border-black p-1">{formData.freightCharges[0]?.lrNo || ''}</td>
-                        <td className="border border-black p-1">{formData.date}</td>
+                        <td className="border border-l-0 border-black p-1">Consignment</td>
+                        <td className="border border-black p-1">{new Date(formData.date).toLocaleDateString('en-IN')}</td>
                         <td className="border border-black p-1">{formData.particulars}</td>
                         <td colSpan={2} className="border border-r-0 border-black p-1">
                             <div>Party: {formData.party}</div>
-                            <div>GSTIN: {formData.partyDetails.gstin}</div>
+                            <div>GSTIN: {}</div>
                             <div>{formData.address}</div>
                         </td>
                     </tr>
                 </tbody>
             </table>
 
-            {/* <h2 className="bg-gray-300 text-center text-[7px] font-bold p-0.5 mt-2 mb-1">Freight Charges</h2>
+            <h2 className="bg-gray-300 text-center text-xs font-bold p-2 mt-2 mb-1">Freight Charges</h2>
             <table className="w-full border-collapse text-[6px]">
                 <thead>
-                    <tr className="border-b border-black">
-                        <td className="font-bold text-center border border-black p-0.5">S.N</td>
-                        <td className="font-bold text-center border border-black p-0.5">Lorry No.</td>
-                        <td className="font-bold text-center border border-black p-0.5" colSpan={2}>Particulars</td>
-                        <td className="font-bold text-center border border-black p-0.5">Weight (MT)</td>
-                        <td className="font-bold text-center border border-black p-0.5">Charged (MT)</td>
-                        <td className="font-bold text-center border border-black p-0.5">Rate (PMT)</td>
-                        <td className="font-bold text-center border border-black p-0.5">Amount</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    {formData.freightCharges.map((charge, index) => (
-                        <tr key={index}>
-                            <td className="border border-black p-0.5">{index + 1}</td>
-                            <td className="border border-black p-0.5">{charge.lorryNo}</td>
-                            <td colSpan={2} className="border border-black p-0.5">{charge.particulars}</td>
-                            <td className="border border-black p-0.5">{charge.weight}</td>
-                            <td className="border border-black p-0.5">{charge.charges}</td>
-                            <td className="border border-black p-0.5">{charge.rate}</td>
-                            <td className="border border-black p-0.5">{formatCurrency(parseFloat(charge.amount))}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table> */}
-
-            <h2 className="bg-gray-300 text-center text-sm font-bold p-1 mt-4 mb-2">Freight Charges</h2>
-            <table className="w-full border-collapse">
-                <thead>
-                    <tr className="border-b border-black">
+                    <tr className="">
                         <td className="font-bold text-center border border-black p-2">S.N</td>
                         <td className="font-bold text-center border border-black p-2">Lorry No.</td>
                         <td className="font-bold text-center border border-black p-2" colSpan={2}>Particulars</td>
@@ -175,23 +150,25 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
                     {formData.freightCharges.map((charge, index) => (
                         <tr key={index}>
                             <td className="border border-black p-2">{index + 1}</td>
-                            <td className="border border-black p-2">{charge.lorryNo}</td>
-                            <td colSpan={2} className="border border-black p-2">{charge.expenseType}</td>
+                            <td className="border border-black p-2">{charge.truckNo}</td>
+                            <td colSpan={2} className="border border-black p-2">{charge.material}</td>
                             <td className="border border-black p-2">{charge.weight}</td>
-                            <td className="border border-black p-2">{charge.charges}</td>
+                            <td className="border border-black p-2">{charge.charged}</td>
                             <td className="border border-black p-2">{charge.rate}</td>
-                            <td className="border border-black p-2">{formatCurrency(parseFloat(charge.amount))}</td>
+                            <td className="border border-black p-2">{formatNumber(charge.amount)}</td>
                         </tr>
                     ))}
                 </tbody>
             </table>
 
-            <h2 className="bg-gray-300 text-center text-sm font-bold p-1 mt-4 mb-2">Additional Charges</h2>
-            <table className="w-full border-collapse">
+            {(formData.additionalCharges.length !== 0 || formData.extraAdditionalCharges.length !==0) &&
+            <>
+            <h2 className="bg-gray-300 text-center text-xs font-bold p-2 mt-4 mb-2">Additional Charges</h2>
+            
+            <table className="w-full ">
                 <thead>
-                    <tr className="border-b border-black">
+                    <tr className="">
                         <td className="font-bold text-center border border-black p-2">S.N</td>
-                        <td className="font-bold text-center border border-black p-2">Date</td>
                         <td className="font-bold text-center border border-black p-2">Lorry No.</td>
                         <td className="font-bold text-center border border-black p-2">Particulars</td>
                         <td className="font-bold text-center border border-black p-2">Remarks</td>
@@ -202,15 +179,23 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
                     {formData.additionalCharges.map((charge, index) => (
                         <tr key={index}>
                             <td className="border border-black p-2">{index + 1}</td>
-                            <td className="border border-black p-2">{new Date(charge.date).toLocaleDateString('en-IN')}</td>
-                            <td className="border border-black p-2">{charge.lorryNo}</td>
-                            <td className="border border-black p-2">{charge.expenseType || 'NA'}</td>
-                            <td className="border border-black p-2">{charge.remarks || 'NA'}</td>
-                            <td className="border border-black p-2">{formatCurrency(parseFloat(charge.amount))}</td>
+                            <td className="border border-black p-2">{charge.truckNo}</td>
+                            <td className="border border-black p-2">{charge.expenseType}</td>
+                            <td className="border border-black p-2">{charge.notes}</td>
+                            <td className="border border-black p-2">{formatNumber(charge.amount)}</td>
+                        </tr>
+                    ))}
+                    {formData.extraAdditionalCharges.map((charge, index) => (
+                        <tr key={index}>
+                            <td className="border border-black p-2">{index + 1}</td>
+                            <td className="border border-black p-2">{charge.truckNo}</td>
+                            <td className="border border-black p-2">{charge.expenseType}</td>
+                            <td className="border border-black p-2">{charge.notes}</td>
+                            <td className="border border-black p-2">{formatNumber(charge.amount)}</td>
                         </tr>
                     ))}
                 </tbody>
-            </table>
+            </table></>}
 
             <table className="w-full border-collapse border-t border-black">
                 <tbody>
@@ -220,7 +205,7 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
                             <div>GSTIN {formData.partyDetails.gstin}</div>
                         </td>
                         <td className="font-bold text-center p-2">TOTAL</td>
-                        <td className="font-bold text-right p-2 pr-2.5">₹amount</td>
+                        <td className="font-bold text-right p-2 pr-2.5">{formatNumber(totalAmount)}</td>
                     </tr>
                     <tr className="p-0">
                         <td className="border-r border-black p-2">
@@ -228,7 +213,7 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
                             <div>Bank Acc No {formData.partyDetails.accNo}</div>
                         </td>
                         <td className="font-bold text-center p-2">ADVANCE</td>
-                        <td className="font-bold text-right p-2 pr-2.5">{formatCurrency(totalPayments)}</td>
+                        <td className="font-bold text-right p-2 pr-2.5">{formatNumber(totalAmount - totalBalance)}</td>
                     </tr>
                     <tr className="p-0">
                         <td className="border-r border-black p-2">
@@ -237,17 +222,19 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
                             <div>Branch Name {formData.partyDetails.bankBranch}</div>
                         </td>
                         <td className="font-bold text-center p-2">BALANCE</td>
-                        <td className="font-bold text-right p-2 pr-2.5">balance</td>
+                        <td className="font-bold text-right p-2 pr-2.5">{formatNumber(totalBalance)}</td>
                     </tr>
                     <tr>
                         <td colSpan={3} className="text-center font-bold text-xs p-2.5 border-t border-b border-black">
-                            Total amount in words :-  {numberToWordsIndian(20000)}{/* You may want to add a utility function to convert number to words */}
+                            Total amount in words :- {numberToWordsIndian(totalAmount)}
                         </td>
                     </tr>
                 </tbody>
             </table>
 
+            {(formData.paymentDetails.length !== 0 || formData.extraPaymentDetails.length !== 0) && <>
             <h2 className="bg-gray-300 text-center text-sm font-bold p-1 mt-4 mb-2">Received Payment Details</h2>
+            
             <table className="w-full border-collapse">
                 <thead>
                     <tr className="border-b border-black">
@@ -261,34 +248,43 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
                 <tbody>
                     {formData.paymentDetails.map((payment, index) => (
                         <tr key={index}>
-                            <td className="border border-black p-2">{index + 1}</td>
+                            <td className="border border-black p-2">{index +1}</td>
                             <td className="border border-black p-2">{payment.date}</td>
-                            <td className="border border-black p-2">{payment.paymentMode}</td>
+                            <td className="border border-black p-2">{payment.paymentType}</td>
                             <td className="border border-black p-2">{payment.notes}</td>
-                            <td className="border border-black p-2">{formatCurrency(parseFloat(payment.amount))}</td>
+                            <td className="border border-black p-2">{formatNumber(payment.amount)}</td>
+                        </tr>
+                    ))}
+                    {formData.extraPaymentDetails.map((payment, index) => (
+                        <tr key={index}>
+                            <td className="border border-black p-2">{index +1}</td>
+                            <td className="border border-black p-2">{payment.date}</td>
+                            <td className="border border-black p-2">{payment.paymentType}</td>
+                            <td className="border border-black p-2">{payment.notes}</td>
+                            <td className="border border-black p-2">{formatNumber(payment.amount)}</td>
                         </tr>
                     ))}
                 </tbody>
-            </table>
+            </table></>}
 
             <div className="mt-4">For, {formData.companyName}</div>
             <div className="flex justify-around mt-5 mb-5">
                 <div className="text-center text-xs">
-                    <img src="signature.png" alt="Signature" className="w-[50px] h-5 mx-auto block" />
+                    {formData.signatureUrl && <Image src={formData.logoUrl} alt="Signature" width={50} height={5} className="mx-auto block" />}
                     Checked by
                 </div>
                 <div className="text-center text-xs">
-                    <img src="signature.png" alt="Signature" className="w-[50px] h-5 mx-auto block" />
+                    {formData.signatureUrl && <Image src={formData.signatureUrl} alt="Signature" width={50} height={5} className="mx-auto block" />}
                     Bill Incharge
                 </div>
                 <div className="w-[50px] h-[50px]">
-                    <img src="verified_stamp.png" alt="Verified Stamp" className="w-full h-full" />
+                    {formData.stampUrl && <Image src={formData.stampUrl} alt="Verified Stamp" width={50} height={50} />}
                 </div>
             </div>
 
             <div className="text-xs font-bold">
                 NOTE:
-                <span className="font-normal">
+                <span className="font-normal text-xs">
                     We are not liable to accept or pay GST as Goods Transport Agency
                     (GTA) fall under Reverse Charge Mechanism (RCM).
                 </span>

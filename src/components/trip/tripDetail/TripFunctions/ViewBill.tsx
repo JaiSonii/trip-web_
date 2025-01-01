@@ -1,12 +1,10 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { ITrip } from '@/utils/interface'
 import React, { useState } from 'react'
-import InvoiceForm from './InoiveForm'
+import { useTrip } from '@/context/tripContext'
+import Link from 'next/link'
 
 type Props = {
   trips: ITrip[] | any[]
@@ -55,7 +53,7 @@ type FormDataType = {
 }
 
 const ViewBillButton: React.FC<Props> = () => {
-  const [show, setShow] = useState(false)
+  const {trip} = useTrip()
   const [formData, setFormData] = useState<FormDataType>({
     logourl: '',
     billNo: '',
@@ -75,14 +73,12 @@ const ViewBillButton: React.FC<Props> = () => {
 
   return (
     <div>
-      <Button variant="outline" onClick={() => setShow(!show)}>
-        <span className="truncate">{show ? 'Hide Bill' : 'View Bill'}</span>
+       <Link href={`/user/trips/invoice?party=${encodeURIComponent(trip.party)}&route=${encodeURIComponent(JSON.stringify(trip.route))}&trips=${encodeURIComponent(JSON.stringify([trip.trip_id]))}`}>
+      <Button variant="outline" >
+        <span className="truncate">'View Bill</span>
       </Button>
-      {show && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-auto bg-black bg-opacity-50">
-          {/* <InvoiceForm setShow={setShow}/> */}
-        </div>
-      )}
+      </Link>
+      
     </div>
   )
 }

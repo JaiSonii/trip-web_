@@ -53,7 +53,7 @@ export const PartyPaymentSchema = new Schema({
   accountType: {
     type: String,
     enum: ['Payments', 'Advances'],
-    default: ['Payments']
+    default: 'Payments'
   },
   amount: {
     type: Number,
