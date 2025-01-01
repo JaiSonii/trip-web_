@@ -75,7 +75,7 @@ const ViewBillButton: React.FC<Props> = () => {
     <div>
        <Link href={`/user/trips/invoice?party=${encodeURIComponent(trip.party)}&route=${encodeURIComponent(JSON.stringify(trip.route))}&trips=${encodeURIComponent(JSON.stringify([trip.trip_id]))}`}>
       <Button variant="outline" >
-        <span className="truncate">'View Bill</span>
+        <span className="truncate">View Bill</span>
       </Button>
       </Link>
       
