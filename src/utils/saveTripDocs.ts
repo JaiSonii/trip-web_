@@ -9,9 +9,9 @@ export const savePDFToBackend = async (pdf: jsPDF, filename : string, docType : 
   
     const formdata = new FormData();
     formdata.append('file', file);
-    formdata.append('docType', 'FM/Challan');
+    formdata.append('docType', docType);
     formdata.append('validityDate', new Date(date)?.toISOString().split('T')[0]);
-    formdata.append('filename', `Bilty-${trip.LR}-${trip.truck}.pdf`);
+    formdata.append('filename', filename);
   
     const response = await fetch(`/api/trips/${trip.trip_id}/documents`, {
       method: 'PUT',
