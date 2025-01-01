@@ -14,13 +14,13 @@ import 'jspdf/dist/polyfills.es.js';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { savePDFToBackend } from '@/utils/saveTripDocs'
+import { useTrip } from '@/context/tripContext'
 
 
 
 type Props = {
   isOpen: boolean
   onClose: () => void
-  trip: ITrip | any
 }
 
 const placeholders: { [key: string]: string } = {
@@ -78,13 +78,14 @@ const steps = [
 
 
 
-export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
+export default function FrieghtMemo({ isOpen, onClose}: Props) {
 
   const [currentStep, setCurrentStep] = useState(0)
   const [showBill, setShowBill] = useState(false)
   const [pdfDownloading, setPDFDownloading] = useState(false)
   const [user, setUser] = useState<any>()
   const [payments, setPayments] = useState<any[]>([])
+  const {trip, setTrip} = useTrip()
   const [formData, setFormData] = useState<FMDataType>({
     gstNumber: '',
     pan: '',
@@ -230,7 +231,11 @@ export default function FrieghtMemo({ isOpen, onClose, trip }: Props) {
 
       console.log('PDF generation complete');
       const filename = `FM-${trip.LR}-${trip.truck}.pdf`
-      await savePDFToBackend(pdf, filename, 'FM/Challan', trip, formData.date)
+      const docData = await savePDFToBackend(pdf, filename, 'FM/Challan', trip, formData.date)
+      setTrip((prev: ITrip | any) => ({
+              ...prev,
+              documents: docData.documents,
+            }));
     } catch (error) {
       console.error('Error generating PDF:', error);
       alert('Failed to generate PDF');

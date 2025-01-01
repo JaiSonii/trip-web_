@@ -23,5 +23,6 @@ export const savePDFToBackend = async (pdf: jsPDF, filename : string, docType : 
     }
   
     const data = await response.json();
+    return data
   
   };

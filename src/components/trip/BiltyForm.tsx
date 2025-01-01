@@ -20,7 +20,7 @@ type Props = {
   isOpen: boolean
   onClose: () => void
   trip: ITrip | any
-  setTrip : React.Dispatch<React.SetStateAction<any>>
+  setTrip: React.Dispatch<React.SetStateAction<any>>
 }
 
 const placeholders: { [key: string]: string } = {
@@ -43,7 +43,7 @@ const placeholders: { [key: string]: string } = {
   ewayBillNo: 'Enter E-Way Bill Number',
   invoiceNo: 'Enter Invoice Number',
   name: 'Enter Name',
-  value : 'Value'
+  value: 'Value'
 };
 
 const steps = [
@@ -69,7 +69,7 @@ const tabs = ['Consigner', 'Consignee', 'Office', 'Driver']
 
 export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
 
-  const {toast} = useToast()
+  const { toast } = useToast()
   const [currentStep, setCurrentStep] = useState(0)
   const [showBill, setShowBill] = useState(false)
   const [user, setUser] = useState<any>()
@@ -107,11 +107,11 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
     paidBy: 'consigner',
     ewayBillNo: '',
     invoiceNo: '',
-    value : '',
+    value: '',
     truckNo: trip.truck || '',
     logo: '',
     signature: '',
-    grtdWeight : ''
+    grtdWeight: ''
   })
   const billRef = useRef<HTMLDivElement>(null)
 
@@ -171,33 +171,33 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
       unit: 'mm',
       format: 'a4',
     });
-  
+
     setPDFDownloading(true);
-  
+
     try {
       // Remove the initial blank page
       pdf.deletePage(1);
-  
+
       // Generate PDF pages for all tabs
       for (const tab of tabs) {
         const element = document.getElementById(`bilty-${tab}`);
         if (element) {
           const canvas = await html2canvas(element, { scale: 2 });
           const imgData = canvas.toDataURL('image/jpeg');
-  
+
           const padding = 10; // 10mm padding on each side
           const imgWidth = canvas.width / 2; // Divide by 2 because of scale: 2
           const imgHeight = canvas.height / 2;
-  
+
           // Set the PDF page size to match the image size plus padding
           pdf.addPage([imgWidth + padding * 2, imgHeight + padding * 2], 'landscape');
           pdf.addImage(imgData, 'JPEG', padding, padding, imgWidth, imgHeight);
         }
       }
-  
+
       // Save the generated PDF to the user's local device
       pdf.save(`Bilty-${trip.LR}-${formData.truckNo}.pdf`);
-  
+
       // Update user details if necessary
       if (
         (!user.companyName && formData.companyName) ||
@@ -210,11 +210,16 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
       ) {
         await updateUserDetails();
       }
-  
+
       // Save the PDF file to the backend
       const filename = `Bilty-${trip.LR}-${trip.truck}.pdf`
-      await savePDFToBackend(pdf, filename, 'Bilty', trip, formData.date);
-  
+      const docData = await savePDFToBackend(pdf, filename, 'Bilty', trip, formData.date);
+
+      setTrip((prev: ITrip | any) => ({
+        ...prev,
+        documents: docData.documents,
+      }));
+
       toast({
         description: 'Bilty saved successfully to documents'
       });
@@ -228,7 +233,7 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
       setPDFDownloading(false);
     }
   };
-  
+
   const updateUserDetails = async () => {
     const formdata = new FormData();
     formdata.append(
@@ -243,17 +248,17 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
         email: user.email || formData.email,
       })
     );
-  
+
     const response = await fetch('/api/users', {
       method: 'PUT',
       body: formdata,
     });
-  
+
     if (!response.ok) {
       throw new Error('Failed to update user details');
     }
   };
-  
+
 
   if (!isOpen) return null
 
@@ -436,17 +441,17 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
                       </div>
                     </div>
                     <div>
-                        <Label htmlFor="grtdWeight">Guaranteed Weight</Label>
-                        <Input
-                          id="grtdWeight"
-                          name="grtdWeight"
-                          type="number"
-                          value={formData.grtdWeight}
-                          onChange={handleInputChange}
-                          className="mt-1"
-                          placeholder='Guaranteed Weight'
-                        />
-                      </div>
+                      <Label htmlFor="grtdWeight">Guaranteed Weight</Label>
+                      <Input
+                        id="grtdWeight"
+                        name="grtdWeight"
+                        type="number"
+                        value={formData.grtdWeight}
+                        onChange={handleInputChange}
+                        className="mt-1"
+                        placeholder='Guaranteed Weight'
+                      />
+                    </div>
                     <div className="my-4">
                       <Label>Freight Amount paid by</Label>
                       <RadioGroup
@@ -497,7 +502,7 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
                     </div>
                     <div className="mb-4">
                       <label htmlFor='value'>Value</label>
-                      <Input id='value' name='value' value={formData.value} placeholder='As Per Invoice' className="mt-1" onChange={handleInputChange}/>
+                      <Input id='value' name='value' value={formData.value} placeholder='As Per Invoice' className="mt-1" onChange={handleInputChange} />
                     </div>
                   </>
                 )}
@@ -523,7 +528,7 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
                   <Button variant="outline" onClick={() => setShowBill(false)}>
                     Edit Form
                   </Button>
-                  <Button disabled={pdfDownloading} onClick={() => downloadAllPDFs()}>{pdfDownloading ?  <Loader2 className='text-white animate-spin' /> : 'Download as PDF'}</Button>
+                  <Button disabled={pdfDownloading} onClick={() => downloadAllPDFs()}>{pdfDownloading ? <Loader2 className='text-white animate-spin' /> : 'Download as PDF'}</Button>
                 </div>
               </div>
             )}

@@ -243,7 +243,7 @@ const TripDetails = () => {
 
       </div>
       <BiltyForm isOpen={biltyModalOpen} onClose={() => setBiltyModalOpen(false)} trip={trip} setTrip={setTrip}/>
-      <FrieghtMemo isOpen={fmModalOpen} onClose={()=>setFmModalOpen(false)} trip={trip} />
+      <FrieghtMemo isOpen={fmModalOpen} onClose={()=>setFmModalOpen(false)}/>
     </div>
   );
 };
