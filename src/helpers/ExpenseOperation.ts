@@ -40,21 +40,15 @@ export const handleEditExpense = async (expense: IExpense, id: string, file?: Fi
       body: formdata
     })
     if (!res.ok) {
-      toast && toast({
-        description: `error editing expense`,
-        variant: 'destructive'
-      });
+      throw new Error("Failed to add Expense")
     }
     const data = await res.json()
-    toast({
-      description : "Expense edited successfully"
-    })
+    // toast({
+    //   description : "Expense edited successfully"
+    // })
     return data.expense
   } catch (error: any) {
-    toast && toast({
-      description: `Failed to edit Expense`,
-      variant: 'destructive'
-    });
+    return error
   }
 }
 

@@ -36,7 +36,6 @@ const ProfitItem: React.FC<ProfitItemProps> = ({ data, index, setOpen, setSelect
               onClick={() => {
                 setSelectedExpense(data);
                 setOpen(true);
-                setSelectedExpense(null)
               }}
               className='p-2 transition-opacity duration-200 ease-in-out opacity-100 rounded-full'
             >

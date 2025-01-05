@@ -5,7 +5,6 @@ import React, { useState, useEffect } from 'react';
 import { minitruck, openBody, closedContainer, trailer, truckTypes } from '@/utils/utilArray';
 import { validateTruckNo } from '@/utils/validate';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { IDriver, ISupplier, TruckModel } from '@/utils/interface';
 import SupplierSelect from '@/components/truck/SupplierSelect';
 import AdditionalDetails from '@/components/truck/AdditionalDetails';
 import Loading from '../loading';
@@ -46,7 +45,6 @@ const CreateTruck: React.FC = () => {
 
     const [showDetails, setShowDetails] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
-    const [loading, setLoading] = useState(true);
     const params = useSearchParams()
     const nextpath = params.get('nextpath')
     const {drivers, suppliers, isLoading} = useExpenseData()
@@ -94,6 +92,7 @@ const CreateTruck: React.FC = () => {
         }
 
         try {
+            setSaving(true)
             // Attempt to fetch POST request to backend
             const response = await fetch('/api/trucks', {
                 method: 'POST',
@@ -136,6 +135,8 @@ const CreateTruck: React.FC = () => {
             // Handle fetch errors
             console.error('Error creating lorry:', error);
             alert('Failed to add lorry. Please try again later.');
+        }finally{
+            setSaving(false)
         }
     };
 
@@ -154,7 +155,7 @@ const CreateTruck: React.FC = () => {
         }
     }
 
-    if (loading) return <Loading />;
+    if (isLoading) return <Loading />;
     if (error) return <div>Error: {error}</div>;
 
     return (

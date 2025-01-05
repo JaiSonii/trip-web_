@@ -1,5 +1,5 @@
 'use client'
-import React, { Dispatch, useEffect, useMemo, useState } from 'react';
+import React, { Dispatch, useEffect, useMemo, useRef, useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { fuelAndDriverChargeTypes, maintenanceChargeTypes, officeExpenseTypes } from '@/utils/utilArray';
@@ -84,6 +84,24 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
     const [loading, setLoading] = useState(false)
     const [expenseTypeModal, setExpenseTypeModal] = useState(false)
     const [userExpenseTypes, setUserExpenseTypes] = useState<string[] | []>([])
+    const modalRef = useRef<HTMLDivElement | null>(null)
+
+    // useEffect(() => {
+    //     const handleClickOutside = (event: MouseEvent) => {
+    //       if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+    //         onClose(); // Close modal if clicked outside
+    //       }
+    //     };
+    
+    //     if (isOpen) {
+    //       document.addEventListener('mousedown', handleClickOutside);
+    //     }
+    
+    //     return () => {
+    //       document.removeEventListener('mousedown', handleClickOutside);
+    //     };
+    //   }, [isOpen, onClose]);
+    
 
     const fetchUserExpenseTypes = async () => {
         try {
@@ -350,7 +368,6 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
         <div
             className="modal-class"
         >
-            <div className="fixed inset-0 flex items-center justify-center z-50">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.5 }}
                     animate={{ opacity: 1, scale: 1 }}
@@ -358,6 +375,7 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
                         duration: 0.5,
                         ease: [0, 0.71, 0.2, 1.01]
                     }}
+                    ref={modalRef}
                     className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl max-h-[700px] overflow-y-auto thin-scrollbar"
                 >
                     <h2 className="text-xl font-semibold mb-4">Add Expense</h2>
@@ -661,7 +679,6 @@ const AddExpenseModal: React.FC<ChargeModalProps> = ({ categories, isOpen, onClo
                 </motion.div>
                 <AdExpenseTypeModal open={expenseTypeModal} setOpen={setExpenseTypeModal} setExpenses={setUserExpenseTypes} />
             </div>
-        </div>
     );
 };
 

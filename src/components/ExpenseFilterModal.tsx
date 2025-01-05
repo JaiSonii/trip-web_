@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react'
 import { usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { useExpenseCtx } from '@/context/context'
 import { fuelAndDriverChargeTypes, maintenanceChargeTypes, officeExpenseTypes } from '@/utils/utilArray'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './ui/tooltip'
+import { useToast } from './hooks/use-toast'
 
 type Props = {
     monthYearOptions: string[]
@@ -21,6 +22,43 @@ type Props = {
 const ExpenseFilterModal: React.FC<Props> = ({ onClose, isOpen, monthYearOptions, paymentModes, handleFilter }) => {
     const { trips, drivers, shops, trucks } = useExpenseCtx()
     const pathname = usePathname()
+    const modalRef = useRef<HTMLDivElement | null>(null)
+    const [userExpenseTypes, setUserExpenseTypes] = useState<string[]>([])
+    const {toast} = useToast()
+
+        const fetchUserExpenseTypes = async () => {
+            try {
+                const res = await fetch('/api/expenses/expenseType')
+                const data = await res.json()
+                setUserExpenseTypes(data.expenseTypes)
+    
+            } catch (error) {
+                toast({
+                    description: "Failed to fetch some expense types",
+                    variant: "destructive"
+                })
+            }
+        }
+    
+        useEffect(() => {
+            fetchUserExpenseTypes()
+        }, [])
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+                onClose(); // Close modal if clicked outside
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isOpen, onClose]);
 
     const [selectedFilters, setSelectedFilters] = useState({
         trucks: [] as string[],
@@ -54,7 +92,7 @@ const ExpenseFilterModal: React.FC<Props> = ({ onClose, isOpen, monthYearOptions
         } else if (pathname === '/user/expenses/officeExpense') {
             return Array.from(officeExpenseTypes)
         } else {
-            return [...fuelAndDriverChargeTypes, ...maintenanceChargeTypes, ...officeExpenseTypes]
+            return [...fuelAndDriverChargeTypes, ...maintenanceChargeTypes, ...officeExpenseTypes,]
         }
     }, [pathname])
 
@@ -87,12 +125,13 @@ const ExpenseFilterModal: React.FC<Props> = ({ onClose, isOpen, monthYearOptions
     if (!isOpen) return null
 
     return (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 flex items-center justify-center">
+        <div className="modal-class">
             <motion.div
                 initial={{ opacity: 0, scale: 0.5 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3, ease: [0, 0.71, 0.2, 1.01] }}
                 className="bg-white rounded-lg shadow-lg p-6 w-full max-w-3xl max-h-[80vh] flex flex-col"
+                ref={modalRef}
             >
                 <div className="flex justify-between items-center border-b pb-2 mb-4">
                     <h2 className="text-lg font-semibold">Expense Filter</h2>
@@ -308,6 +347,16 @@ const ExpenseFilterModal: React.FC<Props> = ({ onClose, isOpen, monthYearOptions
                                     />
                                     <label htmlFor="select-all-expense-types">Select All</label>
                                 </div>
+                                {userExpenseTypes.filter(type => type.toLowerCase().includes(searchQuery.toLowerCase())).map((expense, index) => (
+                                    <div key={index} className="flex items-center space-x-2 py-2">
+                                        <Checkbox
+                                            id={`expense-type-${index}`}
+                                            checked={selectedFilters.expenseTypes.includes(expense)}
+                                            onCheckedChange={() => handleCheckboxChange('expenseTypes', expense)}
+                                        />
+                                        <label htmlFor={`expense-type-${index}`} className="whitespace-nowrap">{expense}</label>
+                                    </div>
+                                ))}
                                 {expenseTypes.filter(type => type.toLowerCase().includes(searchQuery.toLowerCase())).map((expense, index) => (
                                     <div key={index} className="flex items-center space-x-2 py-2">
                                         <Checkbox

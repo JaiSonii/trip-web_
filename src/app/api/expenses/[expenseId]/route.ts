@@ -11,6 +11,7 @@ export async function PUT(req: Request, { params }: { params: { expenseId: strin
   // Connect to the database
   await connectToDatabase();
   const { expenseId } = params
+  console.log('id',expenseId)
 
   // Extract the tripId from the request params
 
@@ -25,20 +26,21 @@ export async function PUT(req: Request, { params }: { params: { expenseId: strin
     await connectToDatabase()
 
     // Create a new instance of TripExpense with the parsed data and tripId
-    const charge = await Expense.findByIdAndUpdate(expenseId, expenseData, { new: true })
+    const expense = await Expense.findByIdAndUpdate(expenseId, expenseData, { new: true })
     if (file) {
+      console.log('File', file)
       const fileBuffer = Buffer.from(await file.arrayBuffer());
-      const fileName = `expenses/${charge._id}`;
+      const fileName = `expenses/${expense._id}`;
       const contentType = file.type;
 
       // Upload file to S3
       const s3FileName = await uploadFileToS3(fileBuffer, fileName, contentType);
       const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3FileName}${contentType === 'application/pdf' ? '.pdf' : ''}`;
-      charge.url = fileUrl;
+      expense.url = fileUrl;
     }
-    await Promise.all([charge.save(), recentActivity('Edited Expense', charge, user)])
+    await Promise.all([expense.save(), recentActivity('Edited Expense', expense, user)])
     // Return a success response with the new charge
-    return NextResponse.json({ status: 200, expense: charge });
+    return NextResponse.json({ status: 200, expense });
 
   } catch (error) {
     // Handle any errors that occur during the process

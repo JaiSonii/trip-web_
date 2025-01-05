@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import { IExpense, TripExpense } from '@/utils/interface';
+import { IExpense, ITrip, TripExpense } from '@/utils/interface';
 import ProfitItem from './Profit/ProfitItem';
 import { DeleteExpense, handleAddExpense, handleEditExpense } from '@/helpers/ExpenseOperation';
 import { Button } from '@/components/ui/button';
@@ -7,6 +7,8 @@ import { FaChevronUp, FaChevronDown } from 'react-icons/fa';
 import { formatNumber } from '@/utils/utilArray';
 import dynamic from 'next/dynamic';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator';
+import { useTrip } from '@/context/tripContext';
+import { useToast } from '@/components/hooks/use-toast';
 
 interface ProfitProps {
   charges: TripExpense[];
@@ -22,29 +24,30 @@ interface ProfitProps {
 const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), { ssr: false, loading : ()=><div className='flex items-center justify-center'>{loadingIndicator}</div> });
 
 const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, driverId, truckNo, truckCost = 0, tripExpense }) => {
+  const {trip, setTrip} = useTrip()
   const [showTotalCharges, setShowTotalCharges] = useState(false);
   const [showTotalDeductions, setShowTotalDeductions] = useState(false);
   const [showTruckExpenses, setShowTruckExpenses] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [truckExpenses, setTruckExpenses] = useState<IExpense[]>(tripExpense);
   const [selectedExpense, setSelectedExpense] = useState<IExpense | null>(null);
+  const {toast} = useToast()
 
 
 
   // Memoize calculations to avoid unnecessary recalculations
   const totalChargesAmount = useMemo(
-    () => charges.filter(charge => charge.partyBill).reduce((total, charge) => total + Number(charge.amount || 0), 0),
+    () => trip.tripCharges.filter((charge : any) => charge.partyBill).reduce((total : number, charge : any) => total + Number(charge.amount || 0), 0),
     [charges]
   );
 
   const totalDeductionsAmount = useMemo(
-    () => charges.filter(charge => !charge.partyBill).reduce((total, charge) => total + Number(charge.amount || 0), 0),
+    () => trip.tripCharges.filter((charge : any) => !charge.partyBill).reduce((total : number, charge : any) => total + Number(charge.amount || 0), 0),
     [charges]
   );
 
   const truckExpensesAmount = useMemo(
-    () => truckExpenses.reduce((total, expense) => total + Number(expense.amount || 0), 0),
-    [truckExpenses]
+    () => trip.tripExpenses.reduce((total : number, expense : IExpense) => total + Number(expense.amount || 0), 0),
+    [trip]
   );
 
   const netProfit = useMemo(() => {
@@ -53,18 +56,33 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
 
   // Handlers
   const handleExpense = useCallback(
-    async (editedExpense: IExpense) => {
+    async (editedExpense: IExpense,id: string, file : File | null) => {
       try {
         if (selectedExpense) {
-          const expense = await handleEditExpense(editedExpense, selectedExpense.id);
-          setTruckExpenses(prev => prev.map(item => (item.id === expense.id ? expense : item)));
+          const expense = await handleEditExpense(editedExpense, id as string, file);
+          // console.log(expense)
+          setTrip((prev: ITrip | any)=>({
+            ...prev,
+            tripExpenses: prev.tripExpenses.map((item : IExpense) => (item._id === id? {...expense} : item)),
+          }))
+          toast({
+            description : 'Expense edited successfully'
+          })
         } else {
           const expense = await handleAddExpense(editedExpense);
-          setTruckExpenses(prev => [expense, ...prev]);
+          setTrip((prev: ITrip | any)=>({
+            ...prev,
+            tripExpenses : [{...expense},...prev.tripExpenses]
+          }))
+          toast({
+            description : 'Expense added successfully'
+          })
         }
       } catch (error) {
-        alert('Failed to perform expense operation');
-        console.error(error);
+        toast({
+          description : `Failed to ${selectedExpense ? 'edit' : 'add'} expense`
+        })
+        // console.error(error);
       }
     },
     [selectedExpense]
@@ -74,7 +92,10 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
     try {
       const deletedExpense = await DeleteExpense(id);
       if (deletedExpense) {
-        setTruckExpenses(prev => prev.filter(item => item.id !== deletedExpense.id));
+        setTrip((prev: ITrip | any)=>({
+         ...prev,
+          tripExpenses: prev.tripExpenses.filter((item : IExpense) => item._id!== deletedExpense._id),
+        }));
       }
     } catch (error) {
       alert('Failed to delete expense');
@@ -120,8 +141,8 @@ const Profit: React.FC<ProfitProps> = ({ charges, amount, setCharges, tripId, dr
           {showTruckExpenses ? <FaChevronUp className="ml-2 transition-transform" /> : <FaChevronDown className="ml-2 transition-transform" />}
         </span>
       </div>
-      {showTruckExpenses && truckExpenses.map((expense, index) => (
-        <ProfitItem data={expense} handleDelete={handleDeleteExpense} index={index} key={expense.id as string} setOpen={setIsModalOpen} setSelectedExpense={setSelectedExpense} sign="-" />
+      {showTruckExpenses && trip.tripExpenses.map((expense : IExpense, index : number) => (
+        <ProfitItem  data={expense} handleDelete={handleDeleteExpense} index={index} key={expense._id as string} setOpen={setIsModalOpen} setSelectedExpense={setSelectedExpense} sign="-" />
       ))}
 
       {truckCost > 0 && (

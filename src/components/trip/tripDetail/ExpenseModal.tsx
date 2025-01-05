@@ -61,6 +61,24 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
   const [trips, setTrips] = useState<ITrip[]>([])
   const [trip, setTrip] = useState<ITrip>()
   const [shops, setShops] = useState<any[]>([])
+  const modalRef = React.useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+        onClose(); // Close modal if clicked outside
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen, onClose]);
+
 
   useEffect(() => {
     if (!selected) return;
@@ -205,6 +223,7 @@ const ExpenseModal: React.FC<ChargeModalProps> = ({ isOpen, onClose, onSave, dri
             ease: [0, 0.71, 0.2, 1.01]
           }}
           className="bg-white p-6 rounded-lg shadow-lg w-full max-w-2xl"
+          ref={modalRef}
         >
           <h2 className="text-xl font-semibold mb-4">Add New Charge</h2>
 

@@ -8,13 +8,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import dynamic from 'next/dynamic';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator';
-import { useExpenseCtx } from '@/context/context';
 import { FaShieldAlt, FaThLarge } from 'react-icons/fa';
 import folderIcon from '@/assets/folder-icon.png'
 import Image from 'next/image';
 import { TbReceiptTax } from 'react-icons/tb';
 import TruckDocumentUpload from '@/components/documents/TruckDocumentUpload';
 import { CloudUpload } from 'lucide-react';
+import { useExpenseData } from '@/components/hooks/useExpenseData';
+import { motion } from 'framer-motion';
 
 const TruckDocArray = [
   {
@@ -56,13 +57,13 @@ const TruckDocArray = [
 ];
 
 const TruckDocuments = () => {
-  const { isLoading, trucks } = useExpenseCtx()
+  const { isLoading, trucks } = useExpenseData()
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [modalOpen, setModalOpen] = useState(false)
   const [documents, setDocuments] = useState<any[]>([])
   const [message, setMessage] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [type, setType] = useState('')
 
   const RecentDocuments = dynamic(() => import('@/components/documents/RecentDocuments'))
@@ -157,11 +158,15 @@ const TruckDocuments = () => {
 
       <div className="my-4">
         <h1 className="text-lg font-semibold text-black my-4">Select Document Type</h1>
-        <div className="grid grid-cols-7 gap-2">
+        <div className="grid grid-cols-7 gap-6">
           {TruckDocArray.map((item: any, index: number) => (
-            <div
+            <motion.div
               key={index}
-              onClick={() => setType((prev) => prev === item.title ? '' : item.title)}
+              onClick={() => setType((prev) => (prev === item.title ? '' : item.title))}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ scale: 1.1, boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)' }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
               className="col-span-1 max-h-[200px]"
             >
               <div
@@ -172,7 +177,7 @@ const TruckDocuments = () => {
                   {item.title}
                 </h2>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -190,7 +195,10 @@ const TruckDocuments = () => {
                   }}
                   key={truck.truckNo}
                 >
-                  <div
+                  <motion.div
+                    initial={{ opacity: 0 }} // Initial state: fully transparent
+                    animate={{ opacity: 1 }} // Final state: fully visible
+                    transition={{ duration: 1 }} // Optional: transition duration in seconds
                     className={`bg-white p-6 rounded-xl hover:shadow-md border border-gray-300 transition-all duration-300 ease-in-out hover:bg-gray-50 cursor-pointer ${viewMode === 'grid' ? 'h-full flex justify-between items-center' : 'flex items-center space-x-4'}`}
                   >
                     <div className="flex-shrink-0">
@@ -209,7 +217,7 @@ const TruckDocuments = () => {
                       <span className="text-gray-500">{truck.truckType}</span>
                       <span className="text-gray-500">{truck.supplierName}</span>
                     </div>
-                  </div>
+                  </motion.div>
 
                 </Link>
               ))
@@ -230,8 +238,8 @@ const TruckDocuments = () => {
       )}
 
 
-          <TruckDocumentUpload open={modalOpen} setOpen={setModalOpen} />
-        
+      <TruckDocumentUpload open={modalOpen} setOpen={setModalOpen} />
+
     </div>
   );
 };

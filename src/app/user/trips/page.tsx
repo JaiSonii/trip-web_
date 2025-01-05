@@ -35,6 +35,7 @@ import {
 } from '@/store/api';
 import { useExpenseData } from '@/components/hooks/useExpenseData';
 import InvoiceForm from '@/components/trip/tripDetail/TripFunctions/InvoiceForm';
+import Link from 'next/link';
 
 const EditTripForm = dynamic(() => import('@/components/trip/EditTripForm'), {
   ssr: false,
@@ -73,6 +74,17 @@ export default function TripsPage() {
   useEffect(() => {
     refetchTrips()
   }, [refetchTrips])
+
+  useEffect(() => {
+    const storedColumns = localStorage.getItem('visibleColumns');
+    console.log(storedColumns)
+    if (!storedColumns || storedColumns.length === 0){
+      setVisibleColumns(columnOptions.map(col => col.label));
+    }
+    if (storedColumns) {
+      setVisibleColumns(JSON.parse(storedColumns));
+    }
+  }, []);
 
   const handleStatusChange = useCallback((value: string) => {
     setSelectedStatus(value === 'all' ? undefined : parseInt(value));
@@ -127,9 +139,15 @@ export default function TripsPage() {
   }, [debouncedSearch]);
 
   const toggleColumn = useCallback((column: string) => {
-    setVisibleColumns(prev =>
-      prev.includes(column) ? prev.filter(col => col !== column) : [...prev, column]
-    );
+    setVisibleColumns(prev => {
+      const updatedColumns = prev.includes(column)
+        ? prev.filter(col => col !== column)
+        : [...prev, column];
+
+      // Save to localStorage
+      localStorage.setItem('visibleColumns', JSON.stringify(updatedColumns));
+      return updatedColumns;
+    });
   }, []);
 
   const sortedTrips = useMemo(() => {
@@ -382,7 +400,7 @@ export default function TripsPage() {
   );
 }
 
-function renderCellContent(columnValue: string, trip: ITrip) {
+function renderCellContent(columnValue: string, trip: ITrip | any) {
   switch (columnValue) {
     case 'startDate':
       return (
@@ -403,10 +421,13 @@ function renderCellContent(columnValue: string, trip: ITrip) {
       return trip.LR;
     case 'truck':
       return (
+        <>
         <div className="flex items-center space-x-2">
           <FaTruck className="text-orange-600" />
           <span>{trip.truck}</span>
         </div>
+        <Link onClick={(e)=>e.stopPropagation()} href={`/user/drivers/${trip.driver}`}><Button variant={'link'} className="text-xs">{trip.driverName}</Button></Link>
+        </>
       );
     case 'party':
       return trip.partyName;

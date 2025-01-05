@@ -48,6 +48,15 @@ export async function GET(req: Request) {
       { $unwind: '$partyDetails' },  // Unwind partyDetails array
       {
         $lookup: {
+          from: 'drivers',  // Join with the Party collection
+          localField: 'driver',
+          foreignField: 'driver_id',
+          as: 'driverDetails'
+        }
+      },
+      { $unwind: '$partyDetails' },  // Unwind partyDetails array
+      {
+        $lookup: {
           from: 'tripcharges',  // Join with the TripExpense collection
           localField: 'trip_id',
           foreignField: 'trip_id',
@@ -117,7 +126,8 @@ export async function GET(req: Request) {
             }
           },
           // Include the party name from the joined partyDetails
-          partyName: '$partyDetails.name'
+          partyName: '$partyDetails.name',
+          driverName : '$driverDetails.name'
         }
       }, // Sort by startDate in descending order
       // Exclude unnecessary fields including accountBalance, chargeToBill, and chargeNotToBill

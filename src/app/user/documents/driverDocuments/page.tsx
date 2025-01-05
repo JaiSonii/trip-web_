@@ -1,6 +1,5 @@
 'use client';
 
-import { IDriver } from '@/utils/interface';
 import Link from 'next/link';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FaChevronRight, FaFolder, FaFolderOpen, FaList, FaPassport, FaRegIdCard } from 'react-icons/fa6';
@@ -11,18 +10,19 @@ import folderIcon from '@/assets/folder-icon.png'
 import dynamic from 'next/dynamic';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 import { FaIdCardAlt, FaRegCheckCircle, FaThLarge } from 'react-icons/fa';
-import { useExpenseCtx } from '@/context/context';
 import Image from 'next/image'
 import { CloudUpload } from 'lucide-react';
+import { useExpenseData } from '@/components/hooks/useExpenseData';
+import { motion } from 'framer-motion';
 
 const DriverDocuments = () => {
-  const { drivers, isLoading } = useExpenseCtx()
+  const { drivers, isLoading } = useExpenseData()
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [modalOpen, setModalOpen] = useState(false)
   const [docuemnts, setDocuments] = useState<any[]>([])
   const [message, setMessage] = useState('')
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
   const [type, setType] = useState('')
 
   const RecentDocuments = dynamic(() => import('@/components/documents/RecentDocuments'), { ssr: false })
@@ -127,12 +127,19 @@ const DriverDocuments = () => {
         <h1 className="text-lg font-semibold text-black my-4">Select Document Type</h1>
         <div className="grid grid-cols-5 gap-4">
           {DriverDocArray.map((item: any, index: number) => (
-            <div key={index} onClick={() => setType((prev) => prev === item.title ? '' : item.title)}>
+            <motion.div
+              key={index}
+              onClick={() => setType((prev) => (prev === item.title ? '' : item.title))}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ scale: 1.1, boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)' }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="col-span-1 max-h-[200px]">
               <div className={`flex flex-col items-center justify-center border border-gray-300 gap-4 bg-[#FBFBFB] rounded-lg p-6 transition-all hover:shadow-md transform hover:scale-105 cursor-pointer ${type === item.title ? 'bg-lightOrange' : ''}`}>
                 {item.icon}
                 <h2 className="text-xl font-semibold text-black text-center">{item.title}</h2>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -149,7 +156,10 @@ const DriverDocuments = () => {
                   }}
                   key={driver.driver_id}
                 >
-                  <div
+                  <motion.div
+                    initial={{ opacity: 0 }} // Initial state: fully transparent
+                    animate={{ opacity: 1 }} // Final state: fully visible
+                    transition={{ duration: 1 }} // Optional: transition duration in seconds
                     className={`bg-white p-6 rounded-xl hover:shadow-lg border border-gray-300 transition-all duration-300 ease-in-out hover:bg-gray-50 cursor-pointer ${viewMode === 'grid' ? 'h-full flex justify-between items-center space-x-4' : 'flex items-center space-x-6 w-full px-8 py-6'}`}
                   >
                     {/* Folder Icon */}
@@ -169,7 +179,7 @@ const DriverDocuments = () => {
                       <span className="font-semibold text-black">{driver.name}</span>
                       <span className="text-gray-500">{driver.contactNumber || 'No Contact Number'}</span>
                     </div>
-                  </div>
+                  </motion.div>
                 </Link>
               ))
             ) : (
@@ -189,8 +199,8 @@ const DriverDocuments = () => {
         </div>
       )}
 
-          <DriverDocumentUpload open={modalOpen} setOpen={setModalOpen} />
-        
+      <DriverDocumentUpload open={modalOpen} setOpen={setModalOpen} />
+
     </div>
   );
 };

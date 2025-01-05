@@ -1,6 +1,6 @@
 'use client';
 
-import { ITrip } from '@/utils/interface';
+
 import Link from 'next/link';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FaChevronRight, FaFolder, FaList } from 'react-icons/fa6';
@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import dynamic from 'next/dynamic';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator';
-import { useExpenseCtx } from '@/context/context';
 import ewbIcon from '@/assets/ewb-icon.png';
 import podIcon from '@/assets/pod-icon.png';
 import otherIcon from '@/assets/others.png';
@@ -18,6 +17,8 @@ import folderIcon from '@/assets/folder-icon.png'
 import { FaThLarge } from 'react-icons/fa';
 import TripDocumentUpload from '@/components/documents/TripDocumentUpload';
 import { CloudUpload } from 'lucide-react';
+import { useExpenseData } from '@/components/hooks/useExpenseData';
+import { motion } from 'framer-motion';
 
 const TripDocumentsLanding = () => {
   const TripDocArray = [
@@ -34,17 +35,21 @@ const TripDocumentsLanding = () => {
       icon: biltyIcon, // Icon representing a truck loading document (Bilty)
     },
     {
+      title: 'FM/Challan',
+      icon: biltyIcon
+    },
+    {
       title: 'Other',
       icon: otherIcon, // Folder icon for "Other" category
     },
   ];
 
-  const { trips, isLoading } = useExpenseCtx();
+  const { trips, isLoading } = useExpenseData();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [modalOpen, setModalOpen] = useState(false);
   const [message, setMessage] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [documents, setDocuments] = useState<any[]>([]);
   const [type, setType] = useState('');
 
@@ -132,14 +137,24 @@ const TripDocumentsLanding = () => {
 
       <div className="my-4">
         <h1 className="text-lg font-semibold text-black my-4">Select Document Type</h1>
-        <div className="grid grid-cols-4 gap-6">
+        <div className="grid grid-cols-5 gap-4">
           {TripDocArray.map((item: any, index: number) => (
-            <div key={index} onClick={() => setType((prev) => prev === item.title ? '' : item.title)}>
-              <div className={`flex flex-col items-center justify-center border border-gray-300 gap-4 bg-[#FBFBFB] rounded-lg p-6 transition-all hover:shadow-md transform hover:scale-105 cursor-pointer ${type === item.title ? 'bg-lightOrange' : ''}`}>
+            <motion.div
+              key={index}
+              onClick={() => setType((prev) => (prev === item.title ? '' : item.title))}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ scale: 1.1, boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)' }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+            >
+              <div
+                className={`flex flex-col items-center justify-center border border-gray-300 gap-4 bg-[#FBFBFB] rounded-lg p-6 transition-all cursor-pointer ${type === item.title ? 'bg-lightOrange' : ''
+                  }`}
+              >
                 <Image src={item.icon} alt={item.title} width={100} height={100} priority />
                 <h2 className="text-xl font-semibold text-black text-center">{item.title}</h2>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -156,7 +171,10 @@ const TripDocumentsLanding = () => {
                   }}
                   key={trip.trip_id}
                 >
-                  <div
+                  <motion.div
+                    initial={{ opacity: 0 }} // Initial state: fully transparent
+                    animate={{ opacity: 1 }} // Final state: fully visible
+                    transition={{ duration: 1 }} // Optional: transition duration in seconds
                     className={`bg-white p-6 rounded-xl hover:shadow-lg border border-gray-300 transition-all duration-300 ease-in-out hover:bg-gray-50 cursor-pointer ${viewMode === 'grid' ? 'h-full' : 'flex justify-between items-center w-full px-8 py-6'
                       }`}
                   >
@@ -174,7 +192,7 @@ const TripDocumentsLanding = () => {
                         <span className="text-gray-700">Truck: {trip.truck}</span>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 </Link>
               ))
             ) : (
@@ -194,8 +212,8 @@ const TripDocumentsLanding = () => {
         </div>
       )}
 
-          <TripDocumentUpload open={modalOpen} setOpen={setModalOpen} />
-        
+      <TripDocumentUpload open={modalOpen} setOpen={setModalOpen} />
+
     </div>
   );
 };

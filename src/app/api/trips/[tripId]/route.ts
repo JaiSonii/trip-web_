@@ -77,12 +77,17 @@ export async function GET(req: Request, { params }: { params: { tripId: string }
           let: { driver_id: '$driver' },
           pipeline: [
             { $match: { $expr: { $eq: ['$driver_id', '$$driver_id'] } } },
-            { $project: { name: 1 } }
+            { $project: { name: 1 } },
           ],
-          as: 'driverDetails'
-        }
+          as: 'driverDetails',
+        },
       },
-      { $unwind: '$driverDetails' },  // Unwind after filtered `$lookup`
+      {
+        $unwind: {
+          path: '$driverDetails',
+          preserveNullAndEmptyArrays: true, // Include documents where `driverDetails` is null or empty
+        },
+      },
       {
         $lookup: {
           from: 'expenses',
