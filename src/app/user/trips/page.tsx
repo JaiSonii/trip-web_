@@ -77,14 +77,23 @@ export default function TripsPage() {
 
   useEffect(() => {
     const storedColumns = localStorage.getItem('visibleColumns');
-    console.log(storedColumns)
-    if (!storedColumns || storedColumns.length === 0){
-      setVisibleColumns(columnOptions.map(col => col.label));
-    }
+  
     if (storedColumns) {
-      setVisibleColumns(JSON.parse(storedColumns));
+      try {
+        const parsedColumns = JSON.parse(storedColumns);
+        if (Array.isArray(parsedColumns) && parsedColumns.length > 0) {
+          setVisibleColumns(parsedColumns);
+          return; // Exit early if valid stored columns are found
+        }
+      } catch (error) {
+        console.error('Error parsing visibleColumns from localStorage:', error);
+      }
     }
+  
+    // If no valid stored columns, set default visible columns
+    setVisibleColumns(columnOptions.map(col => col.label));
   }, []);
+  
 
   const handleStatusChange = useCallback((value: string) => {
     setSelectedStatus(value === 'all' ? undefined : parseInt(value));
