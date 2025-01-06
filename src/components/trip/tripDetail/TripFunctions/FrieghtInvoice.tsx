@@ -24,25 +24,25 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
         },
         0
     );
-    
+
     const totalBalance = useMemo(() => {
         // Combine paymentDetails and extraPaymentDetails into a single array
         const allPayments = [
             ...(formData.paymentDetails || []),
             ...(formData.extraPaymentDetails || []),
         ];
-    
+
         // Calculate the total payment amount
         const paymentTotal = allPayments.reduce((total, charge) => {
             const amount = parseFloat(charge.amount as any); // Safely convert to a number
             return total + (isNaN(amount) ? 0 : amount); // Add only valid numbers
         }, 0);
-    
+
         // Return the total balance
         return totalAmount - paymentTotal;
     }, [formData, totalAmount]);
-    
-    
+
+
 
     function numberToWordsIndian(num: number): string {
         if (num === 0) return "zero";
@@ -126,7 +126,7 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
                         <td className="border border-black p-1">{formData.particulars}</td>
                         <td colSpan={2} className="border border-r-0 border-black p-1">
                             <div>Party: {formData.party}</div>
-                            <div>GSTIN: {}</div>
+                            <div>GSTIN: { }</div>
                             <div>{formData.address}</div>
                         </td>
                     </tr>
@@ -161,41 +161,41 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
                 </tbody>
             </table>
 
-            {(formData.additionalCharges.length !== 0 || formData.extraAdditionalCharges.length !==0) &&
-            <>
-            <h2 className="bg-gray-300 text-center text-xs font-bold p-2 mt-4 mb-2">Additional Charges</h2>
-            
-            <table className="w-full ">
-                <thead>
-                    <tr className="">
-                        <td className="font-bold text-center border border-black p-2">S.N</td>
-                        <td className="font-bold text-center border border-black p-2">Lorry No.</td>
-                        <td className="font-bold text-center border border-black p-2">Particulars</td>
-                        <td className="font-bold text-center border border-black p-2">Remarks</td>
-                        <td className="font-bold text-center border border-black p-2">Amount</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    {formData.additionalCharges.map((charge, index) => (
-                        <tr key={index}>
-                            <td className="border border-black p-2">{index + 1}</td>
-                            <td className="border border-black p-2">{charge.truckNo}</td>
-                            <td className="border border-black p-2">{charge.expenseType}</td>
-                            <td className="border border-black p-2">{charge.notes}</td>
-                            <td className="border border-black p-2">{formatNumber(charge.amount)}</td>
-                        </tr>
-                    ))}
-                    {formData.extraAdditionalCharges.map((charge, index) => (
-                        <tr key={index}>
-                            <td className="border border-black p-2">{index + 1}</td>
-                            <td className="border border-black p-2">{charge.truckNo}</td>
-                            <td className="border border-black p-2">{charge.expenseType}</td>
-                            <td className="border border-black p-2">{charge.notes}</td>
-                            <td className="border border-black p-2">{formatNumber(charge.amount)}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table></>}
+            {(formData.additionalCharges.length !== 0 || formData.extraAdditionalCharges.length !== 0) &&
+                <>
+                    <h2 className="bg-gray-300 text-center text-xs font-bold p-2 mt-4 mb-2">Additional Charges</h2>
+
+                    <table className="w-full ">
+                        <thead>
+                            <tr className="">
+                                <td className="font-bold text-center border border-black p-2">S.N</td>
+                                <td className="font-bold text-center border border-black p-2">Lorry No.</td>
+                                <td className="font-bold text-center border border-black p-2">Particulars</td>
+                                <td className="font-bold text-center border border-black p-2">Remarks</td>
+                                <td className="font-bold text-center border border-black p-2">Amount</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {formData.additionalCharges.map((charge, index) => (
+                                <tr key={index}>
+                                    <td className="border border-black p-2">{index + 1}</td>
+                                    <td className="border border-black p-2">{charge.truckNo}</td>
+                                    <td className="border border-black p-2">{charge.expenseType}</td>
+                                    <td className="border border-black p-2">{charge.notes}</td>
+                                    <td className="border border-black p-2">{formatNumber(charge.amount)}</td>
+                                </tr>
+                            ))}
+                            {formData.extraAdditionalCharges.map((charge, index) => (
+                                <tr key={index}>
+                                    <td className="border border-black p-2">{index + 1}</td>
+                                    <td className="border border-black p-2">{charge.truckNo}</td>
+                                    <td className="border border-black p-2">{charge.expenseType}</td>
+                                    <td className="border border-black p-2">{charge.notes}</td>
+                                    <td className="border border-black p-2">{formatNumber(charge.amount)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table></>}
 
             <table className="w-full border-collapse border-t border-black">
                 <tbody>
@@ -233,56 +233,95 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
             </table>
 
             {(formData.paymentDetails.length !== 0 || formData.extraPaymentDetails.length !== 0) && <>
-            <h2 className="bg-gray-300 text-center text-sm font-bold p-1 mt-4 mb-2">Received Payment Details</h2>
-            
-            <table className="w-full border-collapse">
-                <thead>
-                    <tr className="border-b border-black">
-                        <td className="font-bold text-center border border-black p-2">S.N</td>
-                        <td className="font-bold text-center border border-black p-2">Date</td>
-                        <td className="font-bold text-center border border-black p-2">Payment Mode</td>
-                        <td className="font-bold text-center border border-black p-2">Notes</td>
-                        <td className="font-bold text-center border border-black p-2">Amount (-)</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    {formData.paymentDetails.map((payment, index) => (
-                        <tr key={index}>
-                            <td className="border border-black p-2">{index +1}</td>
-                            <td className="border border-black p-2">{payment.date}</td>
-                            <td className="border border-black p-2">{payment.paymentType}</td>
-                            <td className="border border-black p-2">{payment.notes}</td>
-                            <td className="border border-black p-2">{formatNumber(payment.amount)}</td>
+                <h2 className="bg-gray-300 text-center text-sm font-bold p-1 mt-4 mb-2">Received Payment Details</h2>
+
+                <table className="w-full border-collapse">
+                    <thead>
+                        <tr className="border-b border-black">
+                            <td className="font-bold text-center border border-black p-2">S.N</td>
+                            <td className="font-bold text-center border border-black p-2">Date</td>
+                            <td className="font-bold text-center border border-black p-2">Payment Mode</td>
+                            <td className="font-bold text-center border border-black p-2">Notes</td>
+                            <td className="font-bold text-center border border-black p-2">Amount (-)</td>
                         </tr>
-                    ))}
-                    {formData.extraPaymentDetails.map((payment, index) => (
-                        <tr key={index}>
-                            <td className="border border-black p-2">{index +1}</td>
-                            <td className="border border-black p-2">{payment.date}</td>
-                            <td className="border border-black p-2">{payment.paymentType}</td>
-                            <td className="border border-black p-2">{payment.notes}</td>
-                            <td className="border border-black p-2">{formatNumber(payment.amount)}</td>
-                        </tr>
-                    ))}
-                </tbody>
-            </table></>}
+                    </thead>
+                    <tbody>
+                        {formData.paymentDetails.map((payment, index) => (
+                            <tr key={index}>
+                                <td className="border border-black p-2">{index + 1}</td>
+                                <td className="border border-black p-2">{payment.date}</td>
+                                <td className="border border-black p-2">{payment.paymentType}</td>
+                                <td className="border border-black p-2">{payment.notes}</td>
+                                <td className="border border-black p-2">{formatNumber(payment.amount)}</td>
+                            </tr>
+                        ))}
+                        {formData.extraPaymentDetails.map((payment, index) => (
+                            <tr key={index}>
+                                <td className="border border-black p-2">{index + 1}</td>
+                                <td className="border border-black p-2">{payment.date}</td>
+                                <td className="border border-black p-2">{payment.paymentType}</td>
+                                <td className="border border-black p-2">{payment.notes}</td>
+                                <td className="border border-black p-2">{formatNumber(payment.amount)}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table></>}
 
             <div className="mt-4">For, {formData.companyName}</div>
-            <div className="flex justify-around mt-5 mb-5">
-                <div className="text-center text-xs">
-                    {formData.signatureUrl && <Image src={formData.logoUrl} alt="Signature" width={50} height={5} className="mx-auto block" />}
-                    Checked by
+            <div className="flex items-center justify-evenly space-x-4 text-xs">
+                <div className="text-center flex flex-col items-center">
+                    <div className="w-[50px] h-[50px]">
+                        {formData.logoUrl ? (
+                            <Image
+                                src={formData.logoUrl}
+                                alt="Logo"
+                                width={50}
+                                height={50}
+                                className="object-contain"
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-gray-200"></div> // Placeholder
+                        )}
+                    </div>
+                    <p className="mt-1">Checked by</p>
                 </div>
-                <div className="text-center text-xs">
-                    {formData.signatureUrl && <Image src={formData.signatureUrl} alt="Signature" width={50} height={5} className="mx-auto block" />}
-                    Bill Incharge
+                <div className="text-center flex flex-col items-center">
+                    <div className="w-[50px] h-[50px]">
+                        {formData.signatureUrl ? (
+                            <Image
+                                src={formData.signatureUrl}
+                                alt="Signature"
+                                width={50}
+                                height={50}
+                                className="object-contain"
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-gray-200"></div> // Placeholder
+                        )}
+                    </div>
+                    <p className="mt-1">Bill Incharge</p>
                 </div>
-                <div className="w-[50px] h-[50px]">
-                    {formData.stampUrl && <Image src={formData.stampUrl} alt="Verified Stamp" width={50} height={50} />}
+                <div className="text-center flex flex-col items-center">
+                    <div className="w-[50px] h-[50px]">
+                        {formData.stampUrl ? (
+                            <Image
+                                src={formData.stampUrl}
+                                alt="Verified Stamp"
+                                width={50}
+                                height={50}
+                                className="object-contain"
+                            />
+                        ) : (
+                            <div className="w-full h-full bg-gray-200"></div> // Placeholder
+                        )}
+                    </div>
+                    <p className="mt-1">Verified Stamp</p>
                 </div>
             </div>
 
-            <div className="text-xs font-bold">
+
+
+            <div className="text-xs font-bold mt-2">
                 NOTE:
                 <span className="font-normal text-xs">
                     We are not liable to accept or pay GST as Goods Transport Agency

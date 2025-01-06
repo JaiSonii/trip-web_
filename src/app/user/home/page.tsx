@@ -43,7 +43,6 @@ const Page = () => {
   const { toast } = useToast()
   const {dashboardData : data, trips, isLoading, refetchDashboard} = useExpenseData()
 
-
   const totalCost = useMemo(() => {
     return data?.expenses?.reduce((acc, curr) => acc + curr.totalAmount, 0) || 0
   }, [data])
@@ -110,7 +109,7 @@ const Page = () => {
                   <BarChart data={data.trips} margin={{ top: 20, right: 30, left: 10, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                     <XAxis
-                      dataKey="month"
+                      dataKey="monthYear"
                       tickLine={false}
                       tickMargin={10}
                       axisLine={false}

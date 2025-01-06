@@ -25,22 +25,22 @@ const EditTripForm: React.FC<Props> = ({ onSubmit, trip, onClose, isOpen }) => {
     const { parties, trucks, drivers, isLoading } = useExpenseData();
     const { toast } = useToast()
     const modalRef = useRef<HTMLDivElement | null>(null)
-    
-        useEffect(() => {
-            const handleClickOutside = (event: MouseEvent) => {
-              if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
                 onClose(); // Close modal if clicked outside
-              }
-            };
-        
-            if (isOpen) {
-              document.addEventListener('mousedown', handleClickOutside);
             }
-        
-            return () => {
-              document.removeEventListener('mousedown', handleClickOutside);
-            };
-          }, [isOpen, onClose]);
+        };
+
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isOpen, onClose]);
 
     const [formData, setFormData] = useState(() => ({
         party: trip?.party || '',
@@ -212,30 +212,42 @@ const EditTripForm: React.FC<Props> = ({ onSubmit, trip, onClose, isOpen }) => {
                     </div>
 
                     {showDetails && (
-                        <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Material Name</label>
-                            <input
-                                type="text"
-                                className="w-full p-2 border border-gray-300 rounded-md"
-                                name="material"
-                                value={formData.material}
-                                placeholder="Material Name"
-                                onChange={handleChange}
-                            />
-                        </div>
+                        <>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Material Name</label>
+                                <input
+                                    type="text"
+                                    className="w-full p-2 border border-gray-300 rounded-md"
+                                    name="material"
+                                    value={formData.material}
+                                    placeholder="Material Name"
+                                    onChange={handleChange}
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
+                                <input
+                                    type="text"
+                                    className="w-full p-2 border border-gray-300 rounded-md"
+                                    name="notes"
+                                    value={formData.notes}
+                                    placeholder="Notes"
+                                    onChange={handleChange}
+                                />
+                            </div>
+                        </>
                     )}
 
                     {hasSupplier && (
                         <div>
                             <label className="block text-xs font-medium text-gray-700 mb-1">Truck Hire Cost</label>
-                            <input
-                                type="number"
-                                className="w-full p-2 border border-gray-300 rounded-md"
-                                name="truckHireCost"
-                                value={formData.truckHireCost}
-                                placeholder="Truck Hire Cost"
+                            <textarea
+                                className="w-full p-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-lightOrange transition-all duration-300"
+                                value={formData.notes}
+                                name="notes"
                                 onChange={handleChange}
-                                onFocus={handleFocus}
+                                placeholder="Enter notes..."
+                                rows={4}
                             />
                         </div>
                     )}

@@ -11,7 +11,6 @@ export async function PUT(req: Request, { params }: { params: { expenseId: strin
   // Connect to the database
   await connectToDatabase();
   const { expenseId } = params
-  console.log('id',expenseId)
 
   // Extract the tripId from the request params
 
@@ -28,7 +27,6 @@ export async function PUT(req: Request, { params }: { params: { expenseId: strin
     // Create a new instance of TripExpense with the parsed data and tripId
     const expense = await Expense.findByIdAndUpdate(expenseId, expenseData, { new: true })
     if (file) {
-      console.log('File', file)
       const fileBuffer = Buffer.from(await file.arrayBuffer());
       const fileName = `expenses/${expense._id}`;
       const contentType = file.type;
