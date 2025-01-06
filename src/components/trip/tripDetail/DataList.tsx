@@ -57,6 +57,9 @@ const DataList: React.FC<DataListProps> = ({ label, modalTitle }) => {
         balance: prev.balance - newItem.amount,
         tripAccounts : [resData.payment, ...prev.tripAccounts]
       }))
+      toast({
+        description : 'Payment Added Successfully'
+      })
       setIsModalOpen(false);
       // setTrip();
       // router.refresh();
@@ -98,6 +101,9 @@ const DataList: React.FC<DataListProps> = ({ label, modalTitle }) => {
         balance: editData ? prev.balance + editData?.amount as number - editedItem.amount : prev.balance,
         tripAccounts : prev.tripAccounts.map((acc: any) => acc._id === resData.payment._id? resData.payment : acc),
       }))
+      toast({
+        description : 'Edited Sucessfully'
+      })
       setEditData(null);
       setIsModalOpen(false);
     } catch (error) {
@@ -127,6 +133,9 @@ const DataList: React.FC<DataListProps> = ({ label, modalTitle }) => {
         balance: prev.balance + item.amount,
         tripAccounts : prev.tripAccounts.filter((acc: any) => acc._id!== item._id),
       }))
+      toast({
+        description : 'Deleted Successfully'
+      })
       // router.refresh();
     } catch (error) {
       toast({

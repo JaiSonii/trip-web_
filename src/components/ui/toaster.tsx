@@ -18,27 +18,27 @@ import { MdError } from "react-icons/md"
 
 export function Toaster() {
   const { toasts } = useToast()
-  const variantIcons: Record<string, ReactElement>= {
-    warning : <IoWarning />,
-    destructive : <MdError />,
-    default : <HiThumbUp />
+  const variantIcons: Record<string, ReactElement> = {
+    warning: <IoWarning size={20}/>,
+    destructive: <MdError size={20}/>,
+    default: <HiThumbUp size={20}/>
   }
 
   return (
     <ToastProvider>
       {toasts.map(function ({ id, title, description, action, ...props }) {
         return (
-          <Toast key={id} {...props}>
+          <Toast key={id} {...props} className="rounded-3xl p-5">
             <div className="flex gap-2 items-center">
-              {props.variant ? variantIcons[props.variant] : variantIcons['default']}
-            <div className="grid gap-1">
-              {title && <ToastTitle>{title}</ToastTitle>}
-              {description && (
-                <ToastDescription>{description}</ToastDescription>
-              )}
+              
+              <div className="grid gap-1">
+                {title && <ToastTitle>{title}</ToastTitle>}
+                {description && (
+                  <ToastDescription className="flex items-center gap-2">{props.variant ? variantIcons[props.variant] : variantIcons['default']}{description}</ToastDescription>
+                )}
+              </div>
             </div>
-            </div>
-            
+
             {action}
             <ToastClose />
           </Toast>

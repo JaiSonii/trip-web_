@@ -68,6 +68,10 @@ const Modal: React.FC<ModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    let pending = trip.balance
+    if (editData){
+      pending = pending + editData.amount
+    }
     if (!formState.amount || formState.amount <=0) {
       toast({
         description : 'Enter Valid Amount',
@@ -75,7 +79,14 @@ const Modal: React.FC<ModalProps> = ({
       })
       return;
     }
-    if(formState.amount > trip.balance){
+    if(editData && (pending - formState.amount < 0)){
+      toast({
+        description : 'Payment amount exceeds pending balance',
+        variant : 'warning'
+      })
+      return;
+    }
+    if(!editData && (formState.amount > trip.balance)){
       toast({
         description : 'Payment amount exceeds pending balance',
         variant : 'warning'
