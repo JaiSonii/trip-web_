@@ -24,23 +24,6 @@ type Props = {
 const EditTripForm: React.FC<Props> = ({ onSubmit, trip, onClose, isOpen }) => {
     const { parties, trucks, drivers, isLoading } = useExpenseData();
     const { toast } = useToast()
-    const modalRef = useRef<HTMLDivElement | null>(null)
-
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-                onClose(); // Close modal if clicked outside
-            }
-        };
-
-        if (isOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
-        }
-
-        return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
-        };
-    }, [isOpen, onClose]);
 
     const [formData, setFormData] = useState(() => ({
         party: trip?.party || '',
@@ -152,7 +135,6 @@ const EditTripForm: React.FC<Props> = ({ onSubmit, trip, onClose, isOpen }) => {
                     duration: 0.5,
                     ease: [0, 0.71, 0.2, 1.01]
                 }}
-                ref={modalRef}
                 className="relative bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl max-h-[700px] overflow-y-auto thin-scrollbar"
             >
                 <Button variant={'outline'} onClick={() => onClose()} className='absolute right-0 top-0 border-0 rounded-none'>

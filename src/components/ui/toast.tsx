@@ -31,6 +31,7 @@ const toastVariants = cva(
       variant: {
         default: "border border-green-500 bg-green-500 text-red-50", // Green success styling
         warning: "border border-yellow-400 bg-yellow-400 text-yellow-900", // Yellow warning styling
+        reminder : "border border-yellow-400 bg-yellow-400 text-yellow-900",
         destructive: "border border-red-500 bg-red-500 text-red-50", // Red destructive styling
         featureUpdate:
           "border-[#FE8631] bg-[#FE8631] text-white", // Custom feature update styling

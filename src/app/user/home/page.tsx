@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { FaRegCircleUser } from 'react-icons/fa6';
 import { IoNotificationsOutline } from "react-icons/io5";
 import Link from 'next/link';
@@ -11,7 +11,7 @@ import Loading from '../loading';
 import { useAnimatedNumber } from '@/components/hooks/useAnimatedNumber';
 import RecentActivities from '@/components/RecentActivites';
 import { useExpenseData } from '@/components/hooks/useExpenseData';
-
+import dynamic from 'next/dynamic';
 
 const piechartConfig: ChartConfig = {
   totalAmount: {
@@ -39,9 +39,32 @@ const chartConfig: ChartConfig = {
   },
 }
 
+const Notification = dynamic(() => import('@/components/Notification'), { ssr: false })
+
 const Page = () => {
   const { toast } = useToast()
-  const {dashboardData : data, trips, isLoading, refetchDashboard} = useExpenseData()
+  const { dashboardData: data, trips, isLoading, refetchDashboard } = useExpenseData()
+  const [reminders, setReminders] = useState<any>()
+  const [notificationCount, setNotificationCount] = useState(0)
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false)
+  const notificationIconRef = useRef<HTMLDivElement>(null);
+
+  const fetchReminders = async () => {
+    const res = await fetch('/api/documents/reminders')
+    const data = await res.json()
+    setReminders(data)
+    if (data) {
+      setNotificationCount(data?.tripReminders?.length + data?.truckReminders?.length + data?.driverReminders?.length)
+      toast({
+        description: 'You have new reminders',
+        variant: 'reminder'
+      })
+    }
+  }
+
+  useEffect(() => {
+    fetchReminders()
+  }, [])
 
   const totalCost = useMemo(() => {
     return data?.expenses?.reduce((acc, curr) => acc + curr.totalAmount, 0) || 0
@@ -51,18 +74,18 @@ const Page = () => {
     return data?.trips?.reduce((acc, curr) => acc + curr.count, 0) || 0
   }, [data])
 
-  const totalRecievable = useMemo(()=>{
-    return trips?.reduce((acc,curr)=>acc + curr.balance, 0)
-  },[trips])
+  const totalRecievable = useMemo(() => {
+    return trips?.reduce((acc, curr) => acc + curr.balance, 0)
+  }, [trips])
 
   const animatedTotalTrip = useAnimatedNumber(totalTrip);
   const animatedTotalCost = useAnimatedNumber(totalCost);
   const animatedTotalReceivable = useAnimatedNumber(totalRecievable);
   const animatedProfit = useAnimatedNumber(data?.profit || 0);
 
-  useEffect(()=>{
+  useEffect(() => {
     refetchDashboard()
-  },[refetchDashboard])
+  }, [refetchDashboard])
 
   if (isLoading) {
     return <Loading />
@@ -79,8 +102,31 @@ const Page = () => {
           Hey!
         </h1>
         <div className='flex items-center gap-4'>
-          <IoNotificationsOutline size={30} />
-          <Link href={'/user/profile/details'}><FaRegCircleUser size={30} className='font-normal' /></Link>
+          <div ref={notificationIconRef} className="relative">
+            <button
+              onClick={() => setIsNotificationOpen(!isNotificationOpen)}
+              className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-200 transition-colors duration-200"
+            >
+              <IoNotificationsOutline size={24} />
+              {notificationCount > 0 && (
+                <span className="absolute top-0 right-0 flex items-center justify-center w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full">
+                  {notificationCount}
+                </span>
+              )}
+            </button>
+            <Notification
+              tripReminders={reminders?.tripReminders || []}
+              truckReminders={reminders?.truckReminders || []}
+              driverReminders={reminders?.driverReminders || []}
+              isOpen={isNotificationOpen}
+              onClose={() => setIsNotificationOpen(false)}
+            />
+          </div>
+          <Link href={'/user/profile/details'}>
+            <div className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-200 transition-colors duration-200">
+              <FaRegCircleUser size={24} className='font-normal' />
+            </div>
+          </Link>
         </div>
       </div>
 
@@ -183,7 +229,7 @@ const Page = () => {
               </ChartContainer>
             </div>
           </div>
-          
+
         </div>
         <div className='w-1/4 min-w-[300px] p-4 overflow-y-auto'>
           <h2 className="text-2xl font-semibold mb-4">Summary</h2>
@@ -205,6 +251,7 @@ const Page = () => {
           </div>
         </div>
       </div>
+
     </div>
   );
 };
