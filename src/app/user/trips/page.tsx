@@ -116,7 +116,10 @@ export default function TripsPage() {
 
   const handleUndoStatus = useCallback(async (trip: ITrip) => {
     if (trip.status === 0) {
-      alert('Cannot Undo the Status');
+      toast({
+        description: "Cannot undo status change for this trip. It's already in the initial status",
+        variant : 'warning'
+      })
       return;
     }
     const newStatus = trip.status as number - 1;

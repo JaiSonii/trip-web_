@@ -12,6 +12,7 @@ import { useAnimatedNumber } from '@/components/hooks/useAnimatedNumber';
 import RecentActivities from '@/components/RecentActivites';
 import { useExpenseData } from '@/components/hooks/useExpenseData';
 import dynamic from 'next/dynamic';
+import { useReminder } from '@/context/reminderContext';
 
 const piechartConfig: ChartConfig = {
   totalAmount: {
@@ -44,27 +45,10 @@ const Notification = dynamic(() => import('@/components/Notification'), { ssr: f
 const Page = () => {
   const { toast } = useToast()
   const { dashboardData: data, trips, isLoading, refetchDashboard } = useExpenseData()
-  const [reminders, setReminders] = useState<any>()
   const [notificationCount, setNotificationCount] = useState(0)
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
   const notificationIconRef = useRef<HTMLDivElement>(null);
-
-  const fetchReminders = async () => {
-    const res = await fetch('/api/documents/reminders')
-    const data = await res.json()
-    setReminders(data)
-    if (data) {
-      setNotificationCount(data?.tripReminders?.length + data?.truckReminders?.length + data?.driverReminders?.length)
-      toast({
-        description: 'You have new reminders',
-        variant: 'reminder'
-      })
-    }
-  }
-
-  useEffect(() => {
-    fetchReminders()
-  }, [])
+  const {reminders} = useReminder()
 
   const totalCost = useMemo(() => {
     return data?.expenses?.reduce((acc, curr) => acc + curr.totalAmount, 0) || 0
@@ -108,9 +92,9 @@ const Page = () => {
               className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-200 transition-colors duration-200"
             >
               <IoNotificationsOutline size={24} />
-              {notificationCount > 0 && (
+              {reminders?.tripReminders?.length + reminders?.truckReminders?.length + reminders?.driverReminders?.length > 0 && (
                 <span className="absolute top-0 right-0 flex items-center justify-center w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full">
-                  {notificationCount}
+                  {reminders?.tripReminders?.length + reminders?.truckReminders?.length + reminders?.driverReminders?.length}
                 </span>
               )}
             </button>

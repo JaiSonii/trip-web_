@@ -208,30 +208,32 @@ const EditTripForm: React.FC<Props> = ({ onSubmit, trip, onClose, isOpen }) => {
                             </div>
                             <div>
                                 <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
-                                <input
-                                    type="text"
+                                <textarea
                                     className="w-full p-2 border border-gray-300 rounded-md"
                                     name="notes"
                                     value={formData.notes}
                                     placeholder="Notes"
                                     onChange={handleChange}
+                                    rows={4}
                                 />
                             </div>
                         </>
                     )}
 
                     {hasSupplier && (
+                        <>
                         <div>
                             <label className="block text-xs font-medium text-gray-700 mb-1">Truck Hire Cost</label>
-                            <textarea
+                            <input type='text'
                                 className="w-full p-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-lightOrange transition-all duration-300"
-                                value={formData.notes}
-                                name="notes"
+                                value={formData.truckHireCost}
+                                name="truckHireCost"
                                 onChange={handleChange}
-                                placeholder="Enter notes..."
-                                rows={4}
+                                placeholder="Truck Hire Cost"
                             />
                         </div>
+                        
+                    </>
                     )}
                 </form>
                 <div className="p-4 bg-white border-t flex items-center justify-end gap-2">

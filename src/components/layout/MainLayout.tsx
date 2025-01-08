@@ -15,6 +15,7 @@ import { HiOutlineUser } from "react-icons/hi";
 import { ExpenseProvider } from '@/context/context';
 import { useToast } from '../hooks/use-toast';
 import { ExpenseProvider as RedExpense } from '../ExpenseProvider';
+import { ReminderProvider } from '@/context/reminderContext';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -151,7 +152,9 @@ const MainLayout = ({ children }: MainLayoutProps) => {
 
         {/* Render dynamic content here */}
         <RedExpense>
+          <ReminderProvider>
           {children}
+          </ReminderProvider>
         </RedExpense>
       </div>
     </div>
