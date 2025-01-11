@@ -17,8 +17,8 @@ import dynamic from 'next/dynamic';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 import { useToast } from '@/components/hooks/use-toast';
 
-const BiltyForm = dynamic(()=>import('../BiltyForm'), {ssr : false, loading : ()=>loadingIndicator})
-const FrieghtMemo = dynamic(()=>import('../FrieghtMemo'), {ssr : false, loading : ()=>loadingIndicator})
+const BiltyForm = dynamic(() => import('../BiltyForm'), { ssr: false, loading: () => loadingIndicator })
+const FrieghtMemo = dynamic(() => import('../FrieghtMemo'), { ssr: false, loading: () => loadingIndicator })
 
 
 const TripDetails = () => {
@@ -26,7 +26,7 @@ const TripDetails = () => {
   const [charges, setCharges] = useState<TripExpense[]>([])
   const [biltyModalOpen, setBiltyModalOpen] = useState(false)
   const [fmModalOpen, setFmModalOpen] = useState(false)
-  const {toast} = useToast()
+  const { toast } = useToast()
 
 
 
@@ -75,7 +75,7 @@ const TripDetails = () => {
         ...resData.trip
       }));
       toast({
-        description : 'Trip Status Updated'
+        description: 'Trip Status Updated'
       })
     } catch (error) {
       alert(error)
@@ -102,12 +102,12 @@ const TripDetails = () => {
         ...resData.trip
       }));
       toast({
-        description : 'Trip Status Updated'
+        description: 'Trip Status Updated'
       })
     } catch (error) {
       toast({
-        description : 'Failed to update Status',
-        variant : 'destructive'
+        description: 'Failed to update Status',
+        variant: 'destructive'
       })
       console.log('Error settling amount:', error);
     }
@@ -167,12 +167,12 @@ const TripDetails = () => {
           balance: prev.balance - resData.payment.amount,
           tripAccounts: [resData.payment, ...prev.tripAccounts]
         }))
-        
+
       } catch (error: any) {
         alert('Failed to Add Payment')
       }
     }
-    
+
   }
 
   return (
@@ -188,7 +188,7 @@ const TripDetails = () => {
             </Link>
 
             <Link href={`/user/drivers/${trip.driver}`}>
-                <TripInfo label="Driver" value={trip.driverName || '----'} />
+              <TripInfo label="Driver" value={trip.driverName || '----'} />
             </Link>
             <TripInfo label="Pending" value={`₹${formatNumber(trip.balance)}`} />
           </div>
@@ -205,19 +205,22 @@ const TripDetails = () => {
           <div className=" w-full">
             <TripStatus status={trip.status as number} dates={trip.dates} />
           </div>
-          <div className="col-span-3 flex justify-center space-x-4">
-            <div className="flex items-center space-x-4">
+          <div className="col-span-3 flex flex-col items-center justify-center space-x-4 ">
+            <div className='grid grid-cols-2 gap-4'>
               <StatusButton status={trip.status as number} statusUpdate={handleStatusUpdate} dates={trip.dates} amount={trip.balance} />
-              <Button variant={'destructive'} onClick={handleUndoStatus}>
-                <div className='flex items-center space-x-2'>
+              <Button variant={'destructive'} onClick={handleUndoStatus} className='h-full'>
+                <div className='flex items-center space-x-2 py-2'>
                   <UndoIcon />
                   <span>Undo Status</span>
                 </div>
               </Button>
+            </div>
+            <div className="grid grid-cols-3 gap-4 mt-4">
+
               <ViewBillButton trips={[]} />
-              <Button variant={'outline'} onClick={()=>setFmModalOpen(true)}>Generate FM/Challan</Button>
+              <Button variant={'outline'} onClick={() => setFmModalOpen(true)}>Generate FM/Challan</Button>
               <Button onClick={() => setBiltyModalOpen(true)}>Generate Bilty</Button>
-              
+
               {/* Add more buttons as needed */}
             </div>
           </div>
@@ -239,8 +242,8 @@ const TripDetails = () => {
 
 
       </div>
-      <BiltyForm isOpen={biltyModalOpen} onClose={() => setBiltyModalOpen(false)} trip={trip} setTrip={setTrip}/>
-      <FrieghtMemo isOpen={fmModalOpen} onClose={()=>setFmModalOpen(false)}/>
+      <BiltyForm isOpen={biltyModalOpen} onClose={() => setBiltyModalOpen(false)} trip={trip} setTrip={setTrip} />
+      <FrieghtMemo isOpen={fmModalOpen} onClose={() => setFmModalOpen(false)} />
     </div>
   );
 };

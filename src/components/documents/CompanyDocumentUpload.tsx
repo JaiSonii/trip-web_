@@ -114,7 +114,8 @@ const CompanyDocumentUpload: React.FC<Props> = ({ open, setOpen, setDocs }) => {
             setSuccessMessage(responseData.message);
             setFormData({ files: [], filenames: [] });
             setOpen(false);
-            setDocs(responseData.user.documents);
+            if (setDocs)
+                setDocs(responseData.user.documents);
             mutate('/api/documents/recent')
         } catch (err: any) {
             setError(err.message);

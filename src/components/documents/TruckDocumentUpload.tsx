@@ -33,7 +33,7 @@ const TruckDocumentUpload: React.FC<Props> = ({ open, setOpen, truckNo, document
     const { trucks, refetchRecentDocuments } = useExpenseData()
     const [formData, setFormData] = useState<DocumentForm>({
         filename: '',
-        validityDate: '',
+        validityDate: new Date().toISOString().split('T')[0],
         docType: '',
         file: null,
         truckNo: truckNo || ''

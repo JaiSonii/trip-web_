@@ -175,7 +175,7 @@ body {
 
 .custom-table th,
 .custom-table td {
-  padding: 16px 24px; /* Improved padding */
+  padding: 16px 16px; /* Improved padding */
   text-align: left;
   border: 1px solid #00000040; /* Added border */
   text-align: left; /* Add border */
@@ -285,3 +285,26 @@ select {
   focus:shadow-md
   outline-none
 }
+
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* WebKit */
+}
+
+.hide-scrollbar:hover,
+.hide-scrollbar:focus,
+.hide-scrollbar:focus-within {
+  scrollbar-width: auto;
+  -ms-overflow-style: auto;
+}
+
+.hide-scrollbar:hover::-webkit-scrollbar,
+.hide-scrollbar:focus::-webkit-scrollbar,
+.hide-scrollbar:focus-within::-webkit-scrollbar {
+  display: block;
+}
+

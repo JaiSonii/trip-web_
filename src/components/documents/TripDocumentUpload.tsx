@@ -36,7 +36,7 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip, d
     const { toast } = useToast()
     const [formData, setFormData] = useState<DocumentForm>({
         filename: '',
-        validityDate: '',
+        validityDate: new Date().toISOString().split('T')[0],
         docType: '',
         file: null,
         tripId: tripId || ''
@@ -102,6 +102,7 @@ const TripDocumentUpload: React.FC<Props> = ({ open, setOpen, tripId, setTrip, d
             setFormData({
                 ...formData,
                 file: file,
+                filename : file.name
             });
 
             fileData.append('file', file as File);

@@ -37,7 +37,7 @@ const OtherDocumentUpload: React.FC<Props> = ({ open, setOpen, setUser }) => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const { toast } = useToast();
-  const {mutate} = useSWRConfig()
+  const { mutate } = useSWRConfig()
 
   const handleFilesChange = (files: File[]) => {
     const newFiles = files.map(file => ({
@@ -107,10 +107,11 @@ const OtherDocumentUpload: React.FC<Props> = ({ open, setOpen, setUser }) => {
         setError('');
         setFormData({ files: [] });
         setOpen(false);
-        setUser((prev: any[]) => [
-          ...responseData.documents,
-          ...prev
-        ]);
+        if (setUser)
+          setUser((prev: any[]) => [
+            ...responseData.documents,
+            ...prev
+          ]);
         mutate('/api/documents/recent')
       } else {
         const errorData = await response.json();

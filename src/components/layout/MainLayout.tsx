@@ -16,6 +16,11 @@ import { ExpenseProvider } from '@/context/context';
 import { useToast } from '../hooks/use-toast';
 import { ExpenseProvider as RedExpense } from '../ExpenseProvider';
 import { ReminderProvider } from '@/context/reminderContext';
+import { Button } from '../ui/button';
+import { AnimatePresence, motion } from 'framer-motion';
+import { X } from 'lucide-react';
+import Loading from '@/app/user/loading';
+import { loadingIndicator } from '../ui/LoadingIndicator';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -26,9 +31,9 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   const pathname = usePathname();
   const router = useRouter();
   const [selected, setSelected] = useState<string | null>(null);
-  const [phone, setPhone] = useState<string | null>('');
-  const [user, setUser] = useState<any>(null);
-  const {toast } = useToast()
+  const [logoutModal, setLogoutModal] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
+  const { toast } = useToast()
 
   // useEffect(() => {
   //   const fetchPhone = async () => {
@@ -42,16 +47,16 @@ const MainLayout = ({ children }: MainLayoutProps) => {
 
 
 
-  useEffect(()=>{
+  useEffect(() => {
     const updateVisit = Cookies.get('updateVisit') as string;
-    if(updateVisit == '1'){
+    if (updateVisit == '1') {
       toast({
-        title : 'Welcome Back!',
-        description : 'New Feature to generate Frieght Memo has been added',
-        variant : 'featureUpdate'
+        title: 'Welcome Back!',
+        description: 'New Feature to generate Frieght Memo has been added',
+        variant: 'featureUpdate'
       })
     }
-  },[])
+  }, [])
 
   useEffect(() => {
     const initialSelected = primaryMenuItems.find(item => pathname.startsWith(item.href));
@@ -80,6 +85,8 @@ const MainLayout = ({ children }: MainLayoutProps) => {
 
   const handleSignOut = async () => {
     try {
+      setLogoutModal(false)
+      setLoggingOut(true);
       await fetch(`/api/logout`);
       Cookies.remove('auth_token');
       router.push('/login');
@@ -90,6 +97,16 @@ const MainLayout = ({ children }: MainLayoutProps) => {
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#FFFCF9]">
+      {
+        loggingOut &&
+        <div className='modal-class'>
+          <div>
+            {loadingIndicator}
+            <p className='text-center text-white'>Logging Out...</p>
+          </div>
+
+        </div>
+      }
       {/* Primary Sidebar - fixed width, fixed position */}
       <div className="w-20 bg-bottomNavBarColor text-white h-full flex flex-col justify-between shadow-md shadow-black rounded-r-xl fixed">
         <div>
@@ -113,11 +130,47 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         </div>
 
         {/* Sign Out */}
-        <div className="py-4 cursor-pointer flex flex-col space-y-2 items-center justify-center hover:bg-lightOrange" onClick={handleSignOut}>
+        <button className="py-4 cursor-pointer flex flex-col space-y-2 items-center justify-center hover:bg-lightOrange" onClick={() => setLogoutModal(true)}>
           <IoLogOutOutline size={28} />
           <span className='text-sm text-white text-center font-normal'>Log Out</span>
-        </div>
+        </button>
       </div>
+
+      {logoutModal &&
+        <AnimatePresence>
+          <motion.div
+            className="modal-class"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-white rounded-lg shadow-xl p-4 w-full max-w-sm mx-4"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: 'spring', damping: 15, stiffness: 300 }}
+            >
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-lg font-semibold">Confirm Logout</h3>
+                <Button variant="ghost" size="sm" onClick={() => setLogoutModal(false)} className='px-2 py-0'>
+                  <X className="h-4 w-4" />
+                  <span className="sr-only">Close</span>
+                </Button>
+              </div>
+              <p className="text-gray-600 mb-6">Are you sure you want to logout?</p>
+              <div className="flex justify-end space-x-4">
+                <Button variant="outline" onClick={() => setLogoutModal(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={() => handleSignOut()}>
+                  Logout
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+      }
 
       {/* Secondary Sidebar */}
       <div className="ml-20 w-60 bg-[#FFFCF9] text-black h-screen overflow-y-auto flex flex-col justify-between"> {/* Adjusted width and overflow */}
@@ -153,11 +206,11 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         {/* Render dynamic content here */}
         <RedExpense>
           <ReminderProvider>
-          {children}
+            {children}
           </ReminderProvider>
         </RedExpense>
       </div>
-    </div>
+    </div >
   );
 };
 

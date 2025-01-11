@@ -34,7 +34,7 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId, docume
     const { drivers } = useExpenseData()
     const [formData, setFormData] = useState<DocumentForm>({
         filename: '',
-        validityDate: '',
+        validityDate: new Date().toISOString().split('T')[0],
         docType: '',
         file: null,
         driverId: driverId || ''
@@ -44,7 +44,6 @@ const DriverDocumentUpload: React.FC<Props> = ({ open, setOpen, driverId, docume
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
-    const router = useRouter()
     const { toast } = useToast()
     const isOtherPage = usePathname() === '/user/documents/otherDocuments'
 

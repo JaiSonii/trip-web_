@@ -20,7 +20,7 @@ export const ReminderProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const data = await response.json();
 
         // Check if the new data is different from the current data
-        if (JSON.stringify(data) !== JSON.stringify(reminders)) {
+        if ((JSON.stringify(data) !== JSON.stringify(reminders) && data?.tripReminders?.length + data?.truckReminders?.length + data?.driverReminders?.length > 0)) {
           setReminders(data);
 
           // Show toast notification for new reminders

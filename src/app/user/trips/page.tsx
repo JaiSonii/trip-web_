@@ -71,6 +71,36 @@ export default function TripsPage() {
   const [editTrip] = useEditTripMutation();
   const { refetchTrips } = useExpenseData()
 
+  const responsiveTableStyles = `
+  @media (max-width: 1023px) {
+    .responsive-table thead {
+      display: none;
+    }
+    .responsive-table tr {
+      display: block;
+      margin-bottom: 1rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 0.5rem;
+      padding: 1rem;
+    }
+    .responsive-table td {
+      display: flex;
+      justify-content: space-between;
+      text-align: right;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .responsive-table td:before {
+      content: attr(data-label);
+      font-weight: bold;
+      text-align: left;
+    }
+    .responsive-table td:last-child {
+      border-bottom: none;
+    }
+  }
+`;
+
   useEffect(() => {
     refetchTrips()
   }, [refetchTrips])
@@ -373,16 +403,15 @@ export default function TripsPage() {
                       <p className="text-green-600 font-semibold">₹{formatNumber(trip.balance)}</p>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button
-                            className="rounded-full"
-                            variant="ghost"
+                          <button
+                            className="rounded-full p-1 bg-transparent hover:bg-lightOrangeButtonColor hover:text-white transition-all duration-300 ease-in-out border-none"
                             onClick={(e) => {
                               e.stopPropagation();
                               setOpenOptionsId(openOptionsId === trip.trip_id ? null : trip.trip_id);
                             }}
                           >
-                            <SlOptionsVertical size={20} />
-                          </Button>
+                            <SlOptionsVertical  />
+                          </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
                           <DropdownMenuItem onClick={(e) => handleDuplicate(e, trip)} className='cursor-pointer hover:bg-orange-100 transition-colors duration-200'>

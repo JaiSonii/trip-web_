@@ -47,7 +47,12 @@ const CreateTruck: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const params = useSearchParams()
     const nextpath = params.get('nextpath')
-    const {drivers, suppliers, isLoading} = useExpenseData()
+    const {drivers, suppliers, refetchDrivers, refetchSuppliers, isLoading} = useExpenseData()
+
+    useEffect(()=>{
+        refetchDrivers(),
+        refetchSuppliers()
+    },[])
 
 
 
