@@ -9,6 +9,70 @@ const documentSchema = new Schema({
   url: String
 })
 
+const truckDataSchema = new Schema({
+  regNo: { type: String, default: null },
+  chassis: { type: String, default: null },
+  engine: { type: String, default: null },
+  vehicleManufacturerName: { type: String, default: null },
+  model: { type: String, default: null },
+  vehicleColour: { type: String, default: null },
+  type: { type: String, default: null },
+  normsType: { type: String, default: null },
+  bodyType: { type: String, default: null },
+  ownerCount: { type: String, default: null },
+  owner: { type: String, default: null },
+  ownerFatherName: { type: String, default: null },
+  mobileNumber: { type: String, default: null },
+  status: { type: String, default: null },
+  statusAsOn: { type: String, default: null },
+  regAuthority: { type: String, default: null },
+  regDate: { type: String, default: null },
+  vehicleManufacturingMonthYear: { type: String, default: null },
+  rcExpiryDate: { type: String, default: null },
+  vehicleTaxUpto: { type: String, default: null },
+  vehicleInsuranceCompanyName: { type: String, default: null },
+  vehicleInsuranceUpto: { type: String, default: null },
+  vehicleInsurancePolicyNumber: { type: String, default: null },
+  rcFinancer: { type: String, default: null },
+  presentAddress: { type: String, default: null },
+  permanentAddress: { type: String, default: null },
+  vehicleCubicCapacity: { type: String, default: null },
+  grossVehicleWeight: { type: String, default: null },
+  unladenWeight: { type: String, default: null },
+  vehicleCategory: { type: String, default: null },
+  rcStandardCap: { type: String, default: null },
+  vehicleCylindersNo: { type: String, default: null },
+  vehicleSeatCapacity: { type: String, default: null },
+  vehicleSleeperCapacity: { type: String, default: null },
+  vehicleStandingCapacity: { type: String, default: null },
+  wheelbase: { type: String, default: null },
+  vehicleNumber: { type: String, default: null },
+  puccNumber: { type: String, default: null },
+  puccUpto: { type: String, default: null },
+  blacklistStatus: { type: String, default: null },
+  blacklistDetails: { type: [String], default: [] },
+  permitIssueDate: { type: String, default: null },
+  permitNumber: { type: String, default: null },
+  permitType: { type: String, default: null },
+  permitValidFrom: { type: String, default: null },
+  permitValidUpto: { type: String, default: null },
+  nonUseStatus: { type: String, default: null },
+  nonUseFrom: { type: String, default: null },
+  nonUseTo: { type: String, default: null },
+  nationalPermitNumber: { type: String, default: null },
+  nationalPermitUpto: { type: String, default: null },
+  nationalPermitIssuedBy: { type: String, default: null },
+  isCommercial: { type: Boolean, default: false },
+  nocDetails: { type: String, default: null },
+  dbResult: { type: Boolean, default: null },
+  partialData: { type: Boolean, default: null },
+  mmvResponse: { type: String, default: null },
+  financed: { type: String, default: null },
+  class: { type: String, default: null },
+}, {
+  timestamps: true // Automatically adds createdAt and updatedAt timestamps
+})
+
 export const partySchema = new Schema({
   user_id: {
     type: String,
@@ -254,6 +318,7 @@ export const truckSchema: Schema = new Schema({
   trip_id: { type: String, default: '' },
   driver_id: { type: String, default: '' },
   documents: [documentSchema],
+  data : {type : truckDataSchema, default : {}},
   updatedAt: { type: Date, default: Date.now }
 });
 export const supplierSchema: Schema = new Schema({
@@ -511,14 +576,14 @@ export const otherDocumentsSchema = new Schema({
 })
 
 export const userExpenseTypesSchema = new Schema({
-  user_id : {
-    type : String,
-    required : true,
-    unique : true,
+  user_id: {
+    type: String,
+    required: true,
+    unique: true,
   },
-  expenseTypes : {
-    type : [String],
-    default : []
+  expenseTypes: {
+    type: [String],
+    default: []
   }
 })
 

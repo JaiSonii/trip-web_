@@ -123,8 +123,8 @@ export async function GET(req: Request) {
         $sort: { 'latestTrip.startDate': -1 }, // Sort trucks by latest trip date
       },
       {
-        $project : {
-          trips : 0
+        $project: {
+          trips: 0
         }
       }
     ]);
@@ -143,7 +143,7 @@ export async function POST(req: Request) {
   const { user, error } = await verifyToken(req); // Authenticate the user
 
   if (error) {
-    return NextResponse.json({ error }, { status: 401 });
+    return NextResponse.json({ status: "error", message: error }, { status: 401 });
   }
 
   try {
@@ -151,60 +151,72 @@ export async function POST(req: Request) {
 
     const data = await req.json(); // Parse request body
 
-    // Validate truck number format
+    // Validation
     if (!validateTruckNo(data.truckNo)) {
-      return NextResponse.json({ error: 'Enter a valid Truck No' }, { status: 400 });
+      return NextResponse.json({ status: "error", message: "Enter a valid Truck No" }, { status: 400 });
+    }
+    if (!data.truckNo || !data.ownership) {
+      return NextResponse.json({
+        status: "error",
+        message: data.truckNo ? "Ownership type is required" : "Truck Number is required"
+      }, { status: 400 });
+    }
+    if (data.ownership === "Market" && !data.supplier) {
+      return NextResponse.json({ status: "error", message: "Supplier is required for Market ownership" }, { status: 400 });
     }
 
-    // Validate required fields
-    if (!data.truckNo) {
-      return NextResponse.json({ error: 'Truck Number is required' }, { status: 400 });
-    }
-    if (!data.ownership) {
-      return NextResponse.json({ error: 'Ownership type is required' }, { status: 400 });
-    }
-    if (data.ownership === 'Market' && !data.supplier) {
-      return NextResponse.json({ error: 'Supplier is required for Market ownership' }, { status: 400 });
-    }
-
-    // Check if truck with the same `truckNo` exists for the same user
+    // Check for existing truck
     const existingTruck = await Truck.findOne({ user_id: user, truckNo: data.truckNo.toUpperCase() });
-    console.log(existingTruck)
-
     if (existingTruck) {
-      return NextResponse.json({ error: 'Lorry Already Exists', status: 400 });
+      return NextResponse.json({ status: "error", message: "Lorry Already Exists" }, { status: 400 });
     }
 
-    // Create a new truck entry
+    // External API request
+    let truckData = {};
+    try {
+      const res = await fetch("https://api.invincibleocean.com/invincible/vehicleRcV6", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          secretKey: process.env.INVINCIBLE_SECRET_KEY as string,
+          clientId: process.env.INVINCIBLE_CLIENT_ID as string,
+        },
+        body: JSON.stringify({ vehicleNumber: data.truckNo.toUpperCase() }),
+      });
+      const resData = await res.json();
+      truckData = resData.result?.data || {};
+    } catch (apiError) {
+      console.error("External API error:", apiError);
+    }
+
+    // Create a new truck
     const newTruck = new Truck({
       user_id: user,
-      truck_id: 'truck_id' + uuidv4(),
+      truck_id: "truck_id" + uuidv4(),
       truckNo: data.truckNo.toUpperCase(),
-      truckType: data.truckType || '',
-      model: data.model || '',
-      capacity: data.capacity || '',
+      truckType: data.truckType || "",
+      model: data.model || "",
+      capacity: data.capacity || "",
       bodyLength: data.bodyLength || null,
       ownership: data.ownership,
-      supplier: data.supplier || '',
-      status: 'Available',
-      trip_id: '',
+      supplier: data.supplier || "",
+      status: "Available",
+      trip_id: "",
       createdAt: new Date(),
       updatedAt: new Date(),
-      driver_id: data.driver || '',
+      driver_id: data.driver || "",
+      data : truckData,
     });
 
-    // Save to the database
-    const [truck, un] = await Promise.all([newTruck.save(), recentActivity('Added New Lorry',newTruck,user)]);
-    
+    await Promise.all([
+      newTruck.save(),
+      recentActivity("Added New Lorry", newTruck, user),
+    ]);
 
-    return NextResponse.json({ truck, status: 200 });
-  } catch (error: any) {
-    console.error('Error creating truck:', error);
 
-    if (error.code === 11000) {
-      return NextResponse.json({ error: 'Lorry Already Exists', status: 400 });
-    }
-
-    return NextResponse.json({ error: error.message || 'Failed to add lorry' }, { status: 500 });
+    return NextResponse.json({ status: "success", data: newTruck });
+  } catch (err: any) {
+    console.error("Error creating truck:", err);
+    return NextResponse.json({ status: "error", message: err.message || "Failed to add lorry" }, { status: 500 });
   }
 }
