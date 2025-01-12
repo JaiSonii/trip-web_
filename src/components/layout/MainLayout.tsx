@@ -108,7 +108,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
         </div>
       }
       {/* Primary Sidebar - fixed width, fixed position */}
-      <div className="w-20 bg-bottomNavBarColor text-white h-full flex flex-col justify-between shadow-md shadow-black rounded-r-xl fixed">
+      <div className="w-16 xl:w-20 bg-bottomNavBarColor text-white h-full flex flex-col justify-between shadow-md shadow-black rounded-r-xl fixed">
         <div>
           {/* Primary Menu */}
           <ul className="list-none p-0 m-0 flex flex-col gap-4 py-6">
@@ -173,7 +173,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
       }
 
       {/* Secondary Sidebar */}
-      <div className="ml-20 w-60 bg-[#FFFCF9] text-black h-screen overflow-y-auto flex flex-col justify-between"> {/* Adjusted width and overflow */}
+      <div className="ml-16 xl:ml-20 w-56 xl:w-60 bg-[#FFFCF9] text-black h-screen overflow-y-auto flex flex-col justify-between"> {/* Adjusted width and overflow */}
         <div className="flex items-center justify-center py-6">
           <Image src={logo} alt="logo" width={51} height={60} priority />
           <span className="ml-2 text-lg hidden font-semibold md:block text-black">Awajahi</span>
@@ -186,7 +186,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
               >
                 <Link href={item.href}>
                   <div
-                    className={`flex items-center p-3 text-lg font-semibold transition duration-300 ease-in-out rounded-xl
+                    className={`flex items-center p-3 text-sm xl:text-lg font-semibold transition duration-300 ease-in-out rounded-xl
                     ${pathname === (item.href) ? 'bg-[#FF6A00] text-white' : 'hover:bg-[#FFC49980]'}`}
                     onClick={() => setSelected(item.label)}
                   >

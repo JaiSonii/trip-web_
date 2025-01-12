@@ -179,7 +179,7 @@ const Page = () => {
 
   return (
     <div className='w-full h-screen bg-gray-50 overflow-hidden flex flex-col'>
-      <div className='text-black border-b-2 border-gray-400 flex justify-between p-4 lg:px-8 lg:py-2'>
+      <div className='text-black border-b-2 border-gray-400 flex justify-between p-4 xl:px-8 xl:py-2'>
         <h1 className='text-2xl font-semibold'>
           Hey!
         </h1>
@@ -212,29 +212,30 @@ const Page = () => {
         </div>
       </div>
 
-      <div className='flex flex-col lg:flex-row h-[calc(100vh-64px)] overflow-hidden'>
-        <div className='flex-grow overflow-y-auto border-r border-gray-300 p-4 lg:p-10 lg:py-2 no-scrollbar'>
-          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 mb-8'>
-            <div className='py-3 text-white bg-bottomNavBarColor text-center rounded-xl shadow-lg flex flex-col gap-2'>
+      <div className='flex h-[calc(100vh-64px)] overflow-hidden'>
+        <div className='flex-grow overflow-y-auto border-r border-gray-300 p-4 xl:p-10 xl:py-2 no-scrollbar'>
+          <div className='grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 xl:gap-10 mb-8'>
+            <div className='py-3 text-white bg-bottomNavBarColor text-center rounded-xl shadow-xl flex flex-col gap-2'>
               <p className="text-sm">Total Trips</p>
-              <p className='text-2xl font-semibold'>{animatedTotalTrip}</p>
+              <p className='text-xl xl:text-2xl font-semibold'>{animatedTotalTrip}</p>
             </div>
-            <div className='py-3 text-white bg-bottomNavBarColor text-center rounded-xl shadow-lg flex flex-col gap-2'>
+            <div className='py-3 text-white bg-bottomNavBarColor text-center rounded-xl shadow-xl flex flex-col gap-2'>
               <p className="text-sm">Total Expenses</p>
-              <p className='text-2xl font-semibold'>₹{animatedTotalCost}</p>
+              <p className='text-xl xl:text-2xl font-semibold'>₹{animatedTotalCost}</p>
             </div>
-            <div className='py-3 text-white bg-bottomNavBarColor text-center rounded-xl shadow-lg flex flex-col gap-2'>
+            <div className='py-3 text-white bg-bottomNavBarColor text-center rounded-xl shadow-xl flex flex-col gap-2'>
               <p className="text-sm">Accounts Receivable</p>
-              <p className='text-2xl font-semibold'>₹{animatedTotalReceivable}</p>
+              <p className='text-xl xl:text-2xl font-semibold'>₹{animatedTotalReceivable}</p>
             </div>
           </div>
 
-          <div className="grid gap-8 lg:grid-cols-2">
-            <div className='bg-white rounded-xl border shadow-md p-4'>
-              <h2 className="text-lg font-semibold mb-4">Trips</h2>
-              <ChartContainer config={chartConfig} className="h-[200px] w-full" title='Trips per month'>
+          <div className="grid gap-8 xl:grid-cols-2 grid-cols-1">
+            {/* Trips Section */}
+            <div className="bg-white rounded-xl border shadow-md p-4">
+              <h2 className="text-xl font-semibold mb-4">Trips</h2>
+              <ChartContainer config={chartConfig} className="h-[200px] w-full" title="Trips per month">
                 <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={data.trips} barSize={15} margin={{left : -20,right : 10}}>
+                  <BarChart data={data.trips} barSize={15} margin={{ left: -20, right: 10 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} />
                     <XAxis
                       dataKey="monthYear"
@@ -244,26 +245,31 @@ const Page = () => {
                       tickFormatter={(value) => value.slice(0, 3)}
                       fontSize={10}
                     />
-                    <YAxis axisLine={false} tickLine={false} tick={false}/>
+                    <YAxis axisLine={false} tickLine={false} tick={false} />
                     <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="count" fill={chartConfig.count.color} radius={[8, 8, 8, 8]} width={5}/>
+                    <Bar dataKey="count" fill={chartConfig.count.color} radius={[8, 8, 8, 8]} width={5} />
                   </BarChart>
                 </ResponsiveContainer>
               </ChartContainer>
             </div>
-            <div className='bg-white rounded-xl border shadow-md p-4'>
-              <h2 className="text-lg font-semibold mb-4">Expenses</h2>
+
+            {/* Expenses Section */}
+            <div className="bg-white rounded-xl border shadow-md p-4">
+              <h2 className="text-xl font-semibold mb-4">Expenses</h2>
               <ChartContainer
                 config={piechartConfig}
-                className="mx-auto aspect-square h-[200px] w-full "
+                className="mx-auto aspect-square h-[200px] w-full"
               >
                 <ResponsiveContainer width="100%" height={250}>
                   <PieChart>
-                    <ChartTooltip
-                      cursor={false}
-                      content={<ChartTooltipContent hideLabel />}
+                    <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+                    <ChartLegend
+                      content={<ChartLegendContent className="flex flex-col items-start xl:items-end" />}
+                      iconSize={25}
+                      layout="vertical"
+                      align="right"
+                      verticalAlign="middle"
                     />
-                    <ChartLegend content={<ChartLegendContent className='flex flex-col items-start lg:items-end' />} iconSize={25} layout='vertical' align='right' verticalAlign='middle' />
                     <Pie
                       data={data.expenses}
                       dataKey="totalAmount"
@@ -272,10 +278,13 @@ const Page = () => {
                       outerRadius="100%"
                       paddingAngle={2}
                     >
-                      {data?.expenses?.map((entry, index) => (
+                      {data.expenses.map((entry, index) => (
                         <Cell
                           key={`cell-${index}`}
-                          fill={piechartConfig[entry._id as keyof typeof piechartConfig]?.color || piechartConfig.totalAmount.color}
+                          fill={
+                            piechartConfig[entry._id as keyof typeof piechartConfig]?.color ||
+                            piechartConfig.totalAmount.color
+                          }
                         />
                       ))}
                       <Label
@@ -293,7 +302,7 @@ const Page = () => {
                                   y={viewBox.cy}
                                   className="fill-foreground text-xl font-semibold"
                                 >
-                                  ₹{totalCost.toLocaleString('en-IN')}
+                                  ₹{totalCost.toLocaleString("en-IN")}
                                 </tspan>
                                 <tspan
                                   x={viewBox.cx}
@@ -303,7 +312,7 @@ const Page = () => {
                                   Total Expense
                                 </tspan>
                               </text>
-                            )
+                            );
                           }
                         }}
                       />
@@ -312,16 +321,16 @@ const Page = () => {
                 </ResponsiveContainer>
               </ChartContainer>
             </div>
-
           </div>
-          <div className='grid gap-8 lg:grid-cols-4 mt-8 py-4 border-b-2 border-gray-200'>
+
+          <div className='grid gap-8 grid-cols-2 xl:grid-cols-4 mt-8 py-4 border-b-2 border-gray-200'>
             <Button onClick={() => router.replace('/user/trips/create')}>
               Add Trip
             </Button>
             <Button onClick={() => setOpen(true)}>
               Add Document
             </Button>
-            <Button onClick={()=>setExpenseOpen(true)}>
+            <Button onClick={() => setExpenseOpen(true)}>
               Add Expense
             </Button>
             <Button onClick={() => setInvoiceOpen(true)}>
@@ -329,7 +338,7 @@ const Page = () => {
             </Button>
           </div>
         </div>
-        <div className='w-full lg:w-1/4 lg:min-w-[300px] p-4 lg:p-8 overflow-y-auto'>
+        <div className='w-1/3 xl:w-1/4 xl:min-w-[300px] p-4 xl:p-8 overflow-y-auto'>
           <h2 className="text-2xl font-semibold mb-4">Summary</h2>
           <div className='border-2 border-gray-300 rounded-xl p-4 bg-white shadow-md'>
             <div className='flex items-center justify-between text-sm text-gray-500 mb-2'>
@@ -342,7 +351,7 @@ const Page = () => {
             <p className='text-3xl font-semibold'>₹{animatedProfit}</p>
           </div>
           <div className='mt-8'>
-            <h3 className='font-semibold text-lg mb-2'>
+            <h3 className='font-semibold text-xl mb-2'>
               Recent Activities
             </h3>
             <RecentActivities data={data} />

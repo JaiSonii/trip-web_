@@ -168,9 +168,16 @@ body {
   width: 100%;
   border-collapse: separate; /* Allows for rounded corners */
   border-spacing: 0;
-  font-size: 16px;
+  font-size: 16px; /* Default font size */
   table-layout: auto;
   border-radius: 12px;
+  overflow-x: auto; /* Enable horizontal scrolling for smaller screens */
+}
+
+/* Add a wrapper around the table for horizontal scrolling */
+.custom-table-wrapper {
+  overflow-x: auto; /* Ensures responsiveness */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on touch devices */
 }
 
 .custom-table th,
@@ -178,7 +185,6 @@ body {
   padding: 16px 16px; /* Improved padding */
   text-align: left;
   border: 1px solid #00000040; /* Added border */
-  text-align: left; /* Add border */
   transition: background-color 0.3s ease; /* Smooth transition */
 }
 
@@ -187,7 +193,7 @@ body {
   color: #ffffff;
   font-weight: 600;
   text-transform: uppercase;
-  font-size: 14px;
+  font-size: 14px; /* Adjust font size */
 }
 
 .custom-table tbody tr:nth-child(even) {
@@ -195,20 +201,18 @@ body {
 }
 
 .custom-table tbody tr:hover {
-  @apply hover:bg-orange-100 cursor-pointer /* Pointer cursor on hover */
+  background-color: #ffe4c4; /* Feedback color on hover */
+  cursor: pointer; /* Pointer cursor on hover */
 }
 
 .custom-table tbody td {
   color: #2d3748;
-  vertical-align: top;
-  @apply border p-4 text-left
-  /* Align the text to the top */
+  vertical-align: top; /* Align the text to the top */
 }
 
 .custom-table tbody tr:active {
   background-color: #e2e8f0; /* Feedback color on click */
 }
-
 
 .custom-table tbody tr.selected {
   background-color: #4a5568; /* Highlight selected row */
@@ -249,6 +253,45 @@ body {
 .custom-table caption a:hover {
   text-decoration: underline;
 }
+
+/* Responsive Design */
+
+/* For smaller laptops (1024px or less) */
+@media (max-width: 1260px) {
+  .custom-table th,
+  .custom-table td {
+    font-size: 14px; /* Reduce font size */
+    padding: 12px; /* Reduce padding */
+  }
+
+  .custom-table th {
+    font-size: 13px; /* Smaller header font size */
+  }
+}
+
+/* For very small laptops (768px or less) */
+@media (max-width: 768px) {
+  .custom-table {
+    font-size: 12px; /* Smaller font size for the table */
+    table-layout: fixed; /* Fix table layout for smaller screens */
+  }
+
+  .custom-table th,
+  .custom-table td {
+    padding: 8px; /* Compact padding */
+  }
+
+  .custom-table caption {
+    font-size: 12px; /* Smaller caption text */
+  }
+}
+
+/* Ensure scrollability on smaller screens */
+.custom-table-wrapper {
+  overflow-x: auto; /* Horizontal scrolling */
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on touch devices */
+}
+
 
 .modal-class{
   @apply fixed inset-0 bg-black/40 backdrop-blur-sm z-40 flex items-center justify-center

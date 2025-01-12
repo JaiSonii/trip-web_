@@ -8,6 +8,9 @@ const config: Config = {
     './app/**/*.{ts,tsx}',
     './src/**/*.{ts,tsx}',
   ],
+  screens : {
+    lg : '1026px'
+  },
   theme: {
     container: {
       center: true,
