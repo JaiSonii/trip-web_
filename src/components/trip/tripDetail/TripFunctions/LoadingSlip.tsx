@@ -136,8 +136,8 @@ const LoadingSlip = () => {
     return (
         <Dialog>
             <DialogTrigger><Button className='w-full'>Loading Slip</Button></DialogTrigger>
-            <DialogContent className='max-w-4xl h-[95vh] overflow-y-auto thin-scrollbar'>
-                <div ref={slipRef} className="max-w-4xl mx-auto p-4 border-2 border-black">
+            <DialogContent className='max-w-4xl p-8 h-[95vh] overflow-y-auto thin-scrollbar'>
+                <div ref={slipRef} className="max-3-4xl w-full mx-auto p-4 border-2 border-black">
                     <div className="text-center spacing-large ">
                         <h2 className="text-blue-500">Loading Slip</h2>
                         <div className="flex items-center spacing-large relative">
