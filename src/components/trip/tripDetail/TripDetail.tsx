@@ -16,6 +16,7 @@ import { useTrip } from '@/context/tripContext';
 import dynamic from 'next/dynamic';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 import { useToast } from '@/components/hooks/use-toast';
+import LoadingSlip from './TripFunctions/LoadingSlip';
 
 const BiltyForm = dynamic(() => import('../BiltyForm'), { ssr: false, loading: () => loadingIndicator })
 const FrieghtMemo = dynamic(() => import('../FrieghtMemo'), { ssr: false, loading: () => loadingIndicator })
@@ -215,11 +216,12 @@ const TripDetails = () => {
                 </div>
               </Button>
             </div>
-            <div className="grid grid-cols-3 gap-4 mt-4">
+            <div className="grid grid-cols-4 gap-4 mt-4">
 
               <ViewBillButton trips={[]} />
               <Button variant={'outline'} onClick={() => setFmModalOpen(true)}>Generate FM/Challan</Button>
               <Button onClick={() => setBiltyModalOpen(true)}>Generate Bilty</Button>
+              <LoadingSlip />
 
               {/* Add more buttons as needed */}
             </div>
