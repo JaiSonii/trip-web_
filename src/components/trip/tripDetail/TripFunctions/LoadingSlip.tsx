@@ -30,54 +30,54 @@ const LoadingSlip = () => {
         }
     }
 
-    const downloadPdf = async()=>{
+    const downloadPdf = async () => {
         const element = slipRef.current;
         if (!element) {
-          console.error('Element with id "fmemo" not found');
-          return;
+            console.error('Element with id "fmemo" not found');
+            return;
         }
-    
+
         setPDFDownloading(true);
         try {
-          console.log('Capturing element as image...');
-          const canvas = await html2canvas(element, {
-            scale: 2,
-            logging: true,
-            useCORS: true
-          });
-    
-          console.log('Canvas generated. Dimensions:', canvas.width, 'x', canvas.height);
-          const imgData = canvas.toDataURL('image/jpeg');
-          console.log('Image data URL length:', imgData.length);
-    
-          const padding = 10; // 10mm padding on all sides
-          const imgWidth = canvas.width / 2;
-          const imgHeight = canvas.height / 2;
-          const pdfWidth = (imgWidth * 25.4) / 96 + (padding * 2);
-          const pdfHeight = (imgHeight * 25.4) / 96 + (padding * 2);
-    
-          console.log('Calculated PDF dimensions:', pdfWidth, 'x', pdfHeight, 'mm');
-    
-          const pdf = new jsPDF({
-            orientation: pdfWidth > pdfHeight ? 'landscape' : 'portrait',
-            unit: 'mm',
-            format: [pdfWidth, pdfHeight]
-          });
-    
-          const imgX = padding;
-          const imgY = padding;
-    
-          console.log('Adding image to PDF...');
-          pdf.addImage(imgData, 'JPEG', imgX, imgY, pdfWidth - (padding * 2), pdfHeight - (padding * 2));
-    
-          console.log('Saving PDF...');
-          pdf.save(`Loading Slip-${trip.LR}-${trip.truck}.pdf`);
-        }catch(error){
+            console.log('Capturing element as image...');
+            const canvas = await html2canvas(element, {
+                scale: 2,
+                logging: true,
+                useCORS: true
+            });
+
+            console.log('Canvas generated. Dimensions:', canvas.width, 'x', canvas.height);
+            const imgData = canvas.toDataURL('image/jpeg');
+            console.log('Image data URL length:', imgData.length);
+
+            const padding = 10; // 10mm padding on all sides
+            const imgWidth = canvas.width / 2;
+            const imgHeight = canvas.height / 2;
+            const pdfWidth = (imgWidth * 25.4) / 96 + (padding * 2);
+            const pdfHeight = (imgHeight * 25.4) / 96 + (padding * 2);
+
+            console.log('Calculated PDF dimensions:', pdfWidth, 'x', pdfHeight, 'mm');
+
+            const pdf = new jsPDF({
+                orientation: pdfWidth > pdfHeight ? 'landscape' : 'portrait',
+                unit: 'mm',
+                format: [pdfWidth, pdfHeight]
+            });
+
+            const imgX = padding;
+            const imgY = padding;
+
+            console.log('Adding image to PDF...');
+            pdf.addImage(imgData, 'JPEG', imgX, imgY, pdfWidth - (padding * 2), pdfHeight - (padding * 2));
+
+            console.log('Saving PDF...');
+            pdf.save(`Loading Slip-${trip.LR}-${trip.truck}.pdf`);
+        } catch (error) {
             toast({
                 description: "Failed to generate PDF",
                 variant: "destructive"
             })
-        }finally{
+        } finally {
             setPDFDownloading(false)
         }
     }
@@ -99,7 +99,7 @@ const LoadingSlip = () => {
                 str += units[Math.floor(n / 100)] + " hundred ";
                 n %= 100;
             }
-            if (n > 10 && n < 20) {
+            if (n >= 11 && n <= 19) {
                 str += teens[n - 11] + " ";
             } else {
                 if (n >= 10) {
@@ -117,17 +117,21 @@ const LoadingSlip = () => {
         let scaleIndex = 0;
 
         while (num > 0) {
-            const part = num % 1000;
+            const divisor = scaleIndex === 0 ? 1000 : 100;
+            const part = num % divisor;
+
             if (part > 0) {
                 const scale = scales[scaleIndex];
                 parts.unshift(getBelowThousand(part) + (scale ? " " + scale : ""));
             }
-            num = Math.floor(num / (scaleIndex === 0 ? 1000 : 100)); // Indian system uses 100 after thousand.
+
+            num = Math.floor(num / divisor);
             scaleIndex++;
         }
 
         return parts.join(" ").trim();
     }
+
 
     useEffect(() => {
         fetchUser()
@@ -268,7 +272,7 @@ const LoadingSlip = () => {
                     </div>
                     <div className="spacing-large mt-2">
                         <div className="border border-black p-2 h-16">
-                            <p><strong>Amount in Words:</strong> {numberToWordsIndian(trip?.amount)}</p>
+                            <p><strong>Amount in Words:</strong> {numberToWordsIndian(trip?.amount)} rupees only</p>
                         </div>
                     </div>
                     <div className="mt-16 flex justify-between items-start">
@@ -312,7 +316,7 @@ const LoadingSlip = () => {
                     </div>
                 </div>
                 <div className='flex justify-end'>
-                    <Button onClick={()=>downloadPdf()} disabled={pdfDownloading}>{pdfDownloading ? <Loader2 className='text-white animate-spin' /> : 'Download PDF'}</Button>
+                    <Button onClick={() => downloadPdf()} disabled={pdfDownloading}>{pdfDownloading ? <Loader2 className='text-white animate-spin' /> : 'Download PDF'}</Button>
                 </div>
             </DialogContent>
         </Dialog>

@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { FaRegCircleUser, FaRoute, FaTruck } from 'react-icons/fa6';
+import { FaArrowRightLong, FaRegCircleUser, FaRoute, FaTruck } from 'react-icons/fa6';
 import { IoNotificationsOutline } from "react-icons/io5";
 import Link from 'next/link';
 import { ChartConfig, ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
@@ -28,6 +28,14 @@ import { useRouter } from 'next/navigation';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 import { handleAddExpense } from '@/helpers/ExpenseOperation';
 import { IExpense } from '@/utils/interface';
+import Image from 'next/image';
+import biltyImg from '@/assets/bilty-home-icon.png'
+import fmImg from '@/assets/fm-home-icon.png'
+import loadingSlipImg from '@/assets/loading-slip-home-icon.png'
+import quotationImg from '@/assets/quotation-home-icon.png'
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { statuses } from '@/utils/schema';
 
 const piechartConfig: ChartConfig = {
   totalAmount: {
@@ -82,13 +90,108 @@ const documentTypes = [
     icon: <BiCloudUpload className='text-bottomNavBarColor' size={40} />
   }
 ];
-
 const Notification = dynamic(() => import('@/components/Notification'), { ssr: false })
 const InvoiceForm = dynamic(() => import('@/components/trip/tripDetail/TripFunctions/InvoiceForm'), { ssr: false, loading: () => <div>{loadingIndicator}</div> })
 const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), {
   ssr: false,
   loading: () => <div>{loadingIndicator}</div>
 })
+
+const TripSelect = ({ tripId, setTripId, trips }: { tripId: string, setTripId: React.Dispatch<React.SetStateAction<string>>, trips: any[] }) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const filteredTrips = useMemo(() => {
+    if (!trips || trips.length === 0) return []
+    let filtered = [...trips]
+    if (searchTerm) {
+      const lowercaseQuery = searchTerm.toLowerCase()
+      filtered = trips.filter((trip) =>
+        trip.LR.toLowerCase().includes(lowercaseQuery) ||
+        trip.partyName.toLowerCase().includes(lowercaseQuery) ||
+        trip.route.origin.toLowerCase().includes(lowercaseQuery) ||
+        trip.route.destination.toLowerCase().includes(lowercaseQuery) ||
+        new Date(trip.startDate).toLocaleDateString().includes(lowercaseQuery) ||
+        trip.amount.toString().includes(lowercaseQuery) ||
+        trip.truckHireCost.toString().includes(lowercaseQuery) ||
+        trip.balance.toString().includes(lowercaseQuery) ||
+        trip.truck.toLowerCase().includes(lowercaseQuery)
+      )
+    }
+    return filtered
+  }, [trips, searchTerm])
+  return (
+    <div className="mb-4">
+      <label className="block text-sm text-gray-700">Trip*</label>
+      <Select name="tripId" defaultValue={tripId} onValueChange={(value) => setTripId(value)} >
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder="Select Trip" />
+        </SelectTrigger>
+        <SelectContent className='max-h-[300px]'>
+          <div className="p-2">
+            <input
+              type="text"
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          {filteredTrips && filteredTrips.length > 0 ? (
+            filteredTrips.map((trip) => (
+              <SelectItem key={trip.trip_id} value={trip.trip_id}>
+                <div className="flex items-center justify-between w-full p-2 space-x-4">
+
+                  {/* Display route origin to destination */}
+                  <span className="font-semibold text-gray-700 whitespace-nowrap">
+                    {trip.route.origin.split(',')[0]} &rarr; {trip.route.destination.split(',')[0]}
+                  </span>
+
+                  {/* Status indicator with progress bar */}
+                  <div className="flex flex-col w-1/2 space-y-1">
+                    {/* Status label */}
+                    <span className="text-sm text-gray-600">
+                      {statuses[trip.status as number]}
+                    </span>
+
+                    {/* Progress bar for status */}
+                    <div className="relative w-full h-1 bg-gray-200 rounded">
+                      <div
+                        className={`absolute top-0 left-0 h-1 rounded transition-width duration-500 ${trip.status === 0
+                          ? 'bg-red-500'
+                          : trip.status === 1
+                            ? 'bg-yellow-500'
+                            : trip.status === 2
+                              ? 'bg-blue-500'
+                              : trip.status === 3
+                                ? 'bg-green-500'
+                                : 'bg-green-800'
+                          }`}
+                        style={{ width: `${(trip.status as number / 4) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* LR number */}
+                  <span className="text-sm text-gray-600 whitespace-nowrap">
+                    {trip.LR}
+                  </span>
+
+                  {/* Start date */}
+                  <span className="text-sm text-gray-600 whitespace-nowrap">
+                    {new Date(trip.startDate).toISOString().split('T')[0]}
+                  </span>
+
+                </div>
+              </SelectItem>
+
+            ))
+          ) : (
+            <div className="p-2 text-gray-500">No Trips found</div>
+          )}
+        </SelectContent>
+      </Select>
+    </div>
+
+  )
+}
 
 const Page = () => {
   const router = useRouter()
@@ -105,6 +208,7 @@ const Page = () => {
   const [otherOpen, setOtherOpen] = useState(false);
   const [InvoiceOpen, setInvoiceOpen] = useState(false);
   const [expenseOpen, setExpenseOpen] = useState(false)
+  const [tripId, setTripId] = useState<string>('')
 
   const totalCost = useMemo(() => {
     return data?.expenses?.reduce((acc, curr) => acc + curr.totalAmount, 0) || 0
@@ -178,7 +282,7 @@ const Page = () => {
   }
 
   return (
-    <div className='w-full h-screen bg-gray-50 overflow-hidden flex flex-col'>
+    <div className='w-full h-screen bg-white overflow-hidden flex flex-col'>
       <div className='text-black border-b-2 border-gray-400 flex justify-between p-4 xl:px-8 xl:py-2'>
         <h1 className='text-2xl font-semibold'>
           Hey!
@@ -322,7 +426,80 @@ const Page = () => {
               </ChartContainer>
             </div>
           </div>
+          <div className='p-2 bg-gray-100 rounded-xl shadow-sm mt-8'>
+            <h2 className='font-semibold text-lg xl:text-xl text-black p-4'>Generate Documents</h2>
+            <div className='grid gap-4 grid-cols-2 xl:grid-cols-4 py-4 px-4'>
+              <Button variant='ghost' className='w-full h-full' onClick={() => toast({
+                description: 'Functionality under development',
+                variant: 'warning'
+              })}>
+                <div className='flex flex-col items-center justify-center h-full'>
+                  <Image src={quotationImg} alt='Quotation' width={80} height={80} />
+                  <p className='text-center text-sm mt-2'>Quotation</p>
+                </div>
+              </Button>
+              <Button variant='ghost' className='w-full h-full' onClick={() => toast({
+                description: 'Functionality under development',
+                variant: 'warning'
+              })}>
+                <div className='flex flex-col items-center justify-center h-full'>
+                  <Image src={loadingSlipImg} alt='Quotation' width={80} height={80} />
+                  <p className='text-center text-sm mt-2'>Loading Slip</p>
+                </div>
+              </Button>
+              <Dialog>
+                <DialogTrigger>
+                  <Button variant='ghost' className='w-full h-full'>
+                    <div className='flex flex-col items-center justify-center h-full'>
+                      <Image src={biltyImg} alt='Quotation' width={80} height={80} />
+                      <p className='text-center text-sm mt-2'>Bilty</p>
+                    </div>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <h2>Select Trip</h2>
+                  <TripSelect trips={trips} tripId={tripId} setTripId={setTripId} />
+                  {tripId && <div className='flex justify-end'>
+                    <Link href={{
+                      pathname: `/user/trips/${tripId}`,
+                      query: { open: 'bilty' },
+                    }}>
+                      <Button>
+                        <FaArrowRightLong />
+                      </Button>
+                    </Link>
+                  </div>}
 
+                </DialogContent>
+              </Dialog>
+
+              <Dialog>
+                <DialogTrigger>
+                  <Button variant='ghost' className='w-full h-full'>
+                    <div className='flex flex-col items-center justify-center h-full'>
+                      <Image src={fmImg} alt='Frieght Memo' width={80} height={80} />
+                      <p className='text-center text-sm mt-2'>Frieght Memo</p>
+                    </div>
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <h2>Select Trip</h2>
+                  <TripSelect trips={trips} tripId={tripId} setTripId={setTripId} />
+                  {tripId && <div className='flex justify-end'>
+                    <Link href={{
+                      pathname: `/user/trips/${tripId}`,
+                      query: { open: 'fm' },
+                    }}>
+                      <Button>
+                        <FaArrowRightLong />
+                      </Button>
+                    </Link>
+                  </div>}
+
+                </DialogContent>
+              </Dialog>
+            </div>
+          </div>
           <div className='grid gap-8 grid-cols-2 xl:grid-cols-4 mt-8 py-4 border-b-2 border-gray-200'>
             <Button onClick={() => router.replace('/user/trips/create')}>
               Add Trip
@@ -358,6 +535,9 @@ const Page = () => {
           </div>
         </div>
       </div>
+
+
+
       {
         open &&
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 flex items-center justify-center">

@@ -61,7 +61,7 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
                 str += units[Math.floor(n / 100)] + " hundred ";
                 n %= 100;
             }
-            if (n > 10 && n < 20) {
+            if (n >= 11 && n <= 19) {
                 str += teens[n - 11] + " ";
             } else {
                 if (n >= 10) {
@@ -79,12 +79,15 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
         let scaleIndex = 0;
 
         while (num > 0) {
-            const part = num % 1000;
+            const divisor = scaleIndex === 0 ? 1000 : 100;
+            const part = num % divisor;
+
             if (part > 0) {
                 const scale = scales[scaleIndex];
                 parts.unshift(getBelowThousand(part) + (scale ? " " + scale : ""));
             }
-            num = Math.floor(num / (scaleIndex === 0 ? 1000 : 100)); // Indian system uses 100 after thousand.
+
+            num = Math.floor(num / divisor);
             scaleIndex++;
         }
 
@@ -114,14 +117,14 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
                         <td className="border border-r-0 border-black p-1">Date: {new Date(formData.date).toLocaleDateString('en-IN')}</td>
                     </tr>
                     <tr>
-                        <td colSpan={1} className="font-bold border border-l-0 border-black p-1">CONSIGNMENT<br />No.</td>
+                        <td colSpan={1} className="font-bold border border-l-0 border-black p-1">CONSIGNMENT<br />No. </td>
                         <td colSpan={1} className="font-bold border border-black p-1">Date</td>
                         <td className="font-bold border border-black p-1">PARTICULARS</td>
                         <td colSpan={1} className="border border-black p-1">From: {formData.from}</td>
                         <td colSpan={1} className="border border-r-0 border-black p-1">To: {formData.to}</td>
                     </tr>
                     <tr>
-                        <td className="border border-l-0 border-black p-1">Consignment</td>
+                        <td className="border border-l-0 border-black p-1">{formData.freightCharges.map((charge, index)=><span key={index}>{charge.lrNo}{index === formData.freightCharges.length -1 ? '' : ', '}</span>)}</td>
                         <td className="border border-black p-1">{new Date(formData.date).toLocaleDateString('en-IN')}</td>
                         <td className="border border-black p-1">{formData.particulars}</td>
                         <td colSpan={2} className="border border-r-0 border-black p-1">
@@ -226,7 +229,7 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
                     </tr>
                     <tr>
                         <td colSpan={3} className="text-center font-bold text-xs p-2.5 border-t border-b border-black">
-                            Total amount in words :- {numberToWordsIndian(totalAmount)}
+                            Total amount in words :- {numberToWordsIndian(totalAmount)} rupees only
                         </td>
                     </tr>
                 </tbody>

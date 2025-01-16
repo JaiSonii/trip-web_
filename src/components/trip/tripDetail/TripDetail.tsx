@@ -17,16 +17,19 @@ import dynamic from 'next/dynamic';
 import { loadingIndicator } from '@/components/ui/LoadingIndicator';
 import { useToast } from '@/components/hooks/use-toast';
 import LoadingSlip from './TripFunctions/LoadingSlip';
+import { useSearchParams } from 'next/navigation';
 
 const BiltyForm = dynamic(() => import('../BiltyForm'), { ssr: false, loading: () => loadingIndicator })
 const FrieghtMemo = dynamic(() => import('../FrieghtMemo'), { ssr: false, loading: () => loadingIndicator })
 
 
 const TripDetails = () => {
+  const params = useSearchParams()
+  const actionFromhome = params.get('open')
   const { trip, setTrip } = useTrip()
   const [charges, setCharges] = useState<TripExpense[]>([])
-  const [biltyModalOpen, setBiltyModalOpen] = useState(false)
-  const [fmModalOpen, setFmModalOpen] = useState(false)
+  const [biltyModalOpen, setBiltyModalOpen] = useState(actionFromhome === 'bilty' ? true : false)
+  const [fmModalOpen, setFmModalOpen] = useState(actionFromhome === 'fm' ? true : false)
   const { toast } = useToast()
 
 
