@@ -25,6 +25,7 @@ const Loading = dynamic(() => import('./loading'), {
 
 const TruckPage = () => {
   const { truck, setTruck, loading } = useTruck()
+  console.log(truck)
   const { truckNo } = useParams();
   const [revenue, setRevenue] = useState(0);
   const [totalExpense, setTotalExpense] = useState(0);

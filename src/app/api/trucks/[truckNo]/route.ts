@@ -116,19 +116,42 @@ export async function GET(req: Request, { params }: { params: { truckNo: string 
       {
         $lookup: {
           from: 'trips',
-          localField: 'truckNo',
-          foreignField: 'truck',
+          let: { truckNo: '$truckNo', userId: user },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$truck', '$$truckNo'] },
+                    { $eq: ['$user_id', '$$userId'] }
+                  ]
+                }
+              }
+            }
+          ],
           as: 'trips'
         }
       },
       {
         $lookup: {
           from: 'expenses',
-          localField: 'truckNo',
-          foreignField: 'truck',
+          let: { truckNo: '$truckNo', userId: user},
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$truck', '$$truckNo'] },
+                    { $eq: ['$user_id', '$$userId'] }
+                  ]
+                }
+              }
+            }
+          ],
           as: 'expenses'
         }
       },
+      
       // Perform lookup to add partyName from 'parties' collection to each trip
       {
         $lookup: {

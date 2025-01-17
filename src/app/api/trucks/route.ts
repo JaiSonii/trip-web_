@@ -45,17 +45,26 @@ export async function GET(req: Request) {
         },
       },
       {
-        // Optimize trips lookup to only return relevant trip fields
         $lookup: {
-          from: 'trips',
-          localField: 'truckNo',
-          foreignField: 'truck',
+          from: 'expenses',
+          let: { truckNo: '$truckNo', userId: user },
           pipeline: [
-            { $project: { trip_id: 1, party: 1, route: 1, startDate: 1, status: 1 } },
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$truck', '$$truckNo'] }, // Match truckNo
+                    { $eq: ['$user_id', '$$userId'] } // Match user_id
+                  ]
+                }
+              }
+            },
+            { $project: { expense_id: 1, amount: 1, date: 1, type: 1, notes: 1 } }, // Return relevant fields
           ],
-          as: 'trips',
+          as: 'expenses',
         },
       },
+      
       {
         $unwind: {
           path: '$trips',
