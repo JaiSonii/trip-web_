@@ -46,7 +46,7 @@ export async function GET(req: Request) {
       },
       {
         $lookup: {
-          from: 'expenses',
+          from: 'trips',
           let: { truckNo: '$truckNo', userId: user },
           pipeline: [
             {
@@ -58,10 +58,9 @@ export async function GET(req: Request) {
                   ]
                 }
               }
-            },
-            { $project: { expense_id: 1, amount: 1, date: 1, type: 1, notes: 1 } }, // Return relevant fields
+            }, // Return relevant fields
           ],
-          as: 'expenses',
+          as: 'trips',
         },
       },
       
