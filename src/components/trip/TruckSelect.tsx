@@ -86,7 +86,7 @@ const TruckSelect: React.FC<Props> = ({ trucks, formData, handleChange, setFormD
             </div>
             {filteredTrucks.length > 0 ? (
               filteredTrucks.map((truck: any) => (
-                <SelectItem key={truck.truckNo} value={truck.truck_id} className="py-2">
+                <SelectItem key={truck.truckNo} value={truck.truckNo} className="py-2">
                   <div className="grid grid-cols-[1fr,auto,1fr] gap-2 items-center w-full">
                     <span className="truncate text-sm">{truck.truckNo}</span>
                     <span
