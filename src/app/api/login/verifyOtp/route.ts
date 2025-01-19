@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, userAgent } from "next/server";
 import jwt from 'jsonwebtoken';
 
 import { model, models } from "mongoose";
@@ -80,9 +80,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Invalid OTP' }, { status: 400 });
     }
 
+    const {device} = userAgent(req)
+
     const formattedPhone = phone.includes('+91') ? phone.split('+91')[1] : phone;
     const uid = generateUserId(formattedPhone);
     let user = await User.findOne({ user_id: uid });
+
+    if(!user.deviceType){
+      user.deviceType = device.type
+    }
 
     if (!user) {
       user = new User({ user_id: uid, phone: formattedPhone });

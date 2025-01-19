@@ -368,6 +368,7 @@ export const userSchema = new Schema({
   logoUrl: String,
   stampUrl: String,
   signatureUrl: String,
+  deviceType : {type : String, default : ''},
   documents: [{
     filename: String,
     url: String,

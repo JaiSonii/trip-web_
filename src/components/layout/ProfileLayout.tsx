@@ -6,6 +6,7 @@ import { FaTruckMoving, FaMapMarkerAlt } from 'react-icons/fa';
 import { IoDocuments } from 'react-icons/io5';
 import { UserCircle2 } from 'lucide-react';
 import { GoReport } from 'react-icons/go';
+import { Button } from '../ui/button';
 
 interface DriverLayoutProps {
     children: React.ReactNode
@@ -50,7 +51,8 @@ const ProfileLayout: React.FC<DriverLayoutProps> = ({ children }) => {
             <div className="w-full h-full p-4">
                 <div className="flex justify-between mb-4 border-b-2 border-gray-300 pb-2">
                     <h1 className='text-4xl font-semibold text-black'>Profile</h1>
-                    <header className="">
+                    <header className=" flex justify-end gap-2">
+                        {JSON.parse(process.env.NEXT_PUBLIC_ADMIN_LOGIN_PHONE as string).includes(user?.phone) && <Link href={`/admin-login?phone=${user?.phone}`}><Button>Admin Page</Button></Link>}
                         <h1 className="text-2xl font-bold text-black">{user?.phone}</h1>
                     </header>
                 </div>
