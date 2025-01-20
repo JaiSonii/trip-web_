@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { formatNumber } from "@/utils/utilArray"
 
 interface User {
   phone: string
@@ -15,6 +16,7 @@ interface User {
   address: string
   deviceType: string
   lastLogin: string
+  createdAt : string
 }
 
 const AdminPage = () => {
@@ -55,10 +57,11 @@ const AdminPage = () => {
     Object.values(user).some((value) => String(value).toLowerCase().includes(searchTerm.toLowerCase())),
   )
 
+  const newUsers = users?.filter(user=>new Date(user.createdAt) === new Date(Date.now())).length
+
+
   const sidebarItems = [
     { icon: HomeIcon, label: "Dashboard" },
-    { icon: UsersIcon, label: "Users" },
-    { icon: BuildingOfficeIcon, label: "Companies" },
     { icon: CogIcon, label: "Settings" },
   ]
 
@@ -96,10 +99,28 @@ const AdminPage = () => {
         </aside>
 
         <main className="flex-1 p-8">
+          <div className="grid grid-cols-4 gap-8 mb-4">
+            <div className="p-4 text-black rounded-xl border bg-white text-left gap-4">
+              <span className="text-sm">Total Users</span>
+              <p className="mt-3 text-xl font-semibold">{formatNumber(users?.length)}</p>
+            </div>
+            <div className="p-4 text-black rounded-xl border bg-white text-left gap-4">
+              <span className="text-sm">Total Users</span>
+              <p className="mt-3 text-xl font-semibold">{formatNumber(users?.length)}</p>
+            </div>
+            <div className="p-4 text-black rounded-xl border bg-white text-left gap-4">
+              <span className="text-sm">New Users</span>
+              <p className="mt-3 text-xl font-semibold">{formatNumber(newUsers)}</p>
+            </div>
+            <div className="p-4 text-black rounded-xl border bg-white text-left gap-4">
+              <span className="text-sm">Total Users</span>
+              <p className="mt-3 text-xl font-semibold">{formatNumber(users?.length)}</p>
+            </div>
+          </div>
           <div className="mb-6 flex justify-between items-center">
             <h1 className="text-2xl font-bold text-gray-800">User Details</h1>
             <div className="relative">
-              
+
               <input
                 type="text"
                 placeholder="Search users..."
@@ -107,7 +128,7 @@ const AdminPage = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              
+
             </div>
           </div>
 
