@@ -1,107 +1,154 @@
-'use client'
+"use client"
 
-import React, { useEffect, useState } from 'react'
-import { HomeIcon, UsersIcon, BuildingIcon as BuildingOfficeIcon, CogIcon } from 'lucide-react'
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
+import React, { useEffect, useState } from "react"
+import { HomeIcon, UsersIcon, BuildingIcon as BuildingOfficeIcon, CogIcon, SearchIcon } from "lucide-react"
+import { useRouter } from "next/navigation"
+import Image from "next/image"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
+
+interface User {
+  phone: string
+  name: string
+  role: { name: string }
+  companyName: string
+  address: string
+  deviceType: string
+  lastLogin: string
+}
 
 const AdminPage = () => {
   const router = useRouter()
+  const [users, setUsers] = useState<User[]>([])
+  const [searchTerm, setSearchTerm] = useState("")
+  const [activeTab, setActiveTab] = useState("Dashboard")
 
-
-  const [users, setUsers] = useState<any>()
-
-  const fetchUsers = async()=>{
+  const fetchUsers = async () => {
     try {
-      const res = await fetch('/api/admin/users',{
-        method: 'GET',
+      const res = await fetch("/api/admin/users", {
+        method: "GET",
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('adminToken')}`,
-        }
+          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
+        },
       })
-      if (res.status === 401){
-        localStorage.removeItem('adminToken')
-        router.push('/user/profile/details')
+      if (res.status === 401) {
+        localStorage.removeItem("adminToken")
+        router.push("/user/profile/details")
       }
-      if (res.ok){
+      if (res.ok) {
         const data = await res.json()
         setUsers(data.users)
-      }else{
-        throw new Error('Error fetching Users')
+      } else {
+        throw new Error("Error fetching Users")
       }
     } catch (error) {
-      console.log(error)
-      alert('Failed to fetch users')
+      console.error(error)
+      alert("Failed to fetch users")
     }
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchUsers()
-  },[])
+  }, [])
+
+  const filteredUsers = users.filter((user) =>
+    Object.values(user).some((value) => String(value).toLowerCase().includes(searchTerm.toLowerCase())),
+  )
+
+  const sidebarItems = [
+    { icon: HomeIcon, label: "Dashboard" },
+    { icon: UsersIcon, label: "Users" },
+    { icon: BuildingOfficeIcon, label: "Companies" },
+    { icon: CogIcon, label: "Settings" },
+  ]
 
   return (
-    <div className="min-h-screen bg-white">
-      <div className='p-4 flex items-center justify-start gap-3'>
-      <Image src={'/awajahi logo.png'} height={50} width={50} alt='Awajahi Logo' />
-      <h1 className='text-black text-lg font-semibold'>Awajahi</h1>
-      </div>
-      
-        
-        <div className="grid grid-cols-5 gap-4 p-4">
-          <div className="col-span-1 bg-white ">
-            <ul className="flex flex-col gap-4 p-4 text-lg">
-              <li className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer">
-                <HomeIcon size={20} />
-                <span>Dashboard</span>
-              </li>
-              <li className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer">
-                <UsersIcon size={20} />
-                <span>Users</span>
-              </li>
-              <li className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer">
-                <BuildingOfficeIcon size={20} />
-                <span>Companies</span>
-              </li>
-              <li className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer">
-                <CogIcon size={20} />
-                <span>Settings</span>
-              </li>
-            </ul>
+    <div className="min-h-screen bg-gray-100">
+      <nav className="bg-white shadow-md">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center">
+              <Image src="/awajahi logo.png" height={40} width={40} alt="Awajahi Logo" className="mr-3" />
+              <h1 className="text-xl font-semibold text-gray-800">Awajahi</h1>
+            </div>
+            <Link href="/user/home">
+              <Button variant="outline">Back to User Home</Button>
+            </Link>
           </div>
-          <div className="col-span-4 bg-white">
-            <h1 className="text-2xl font-bold mb-4">User Details</h1>
-            <div className="py-2 px-1 rounded-lg shadow-sm border-2 border-gray-300">
-              <table className="min-w-full table-auto border-collapse border border-gray-200 rounded-xl">
-                <thead className='rounded-lg'>
-                  <tr className="bg-gray-200 rounded-lg">
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">Phone</th>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">Name</th>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">Role</th>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">Company Name</th>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">Address</th>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">Device Type</th>
-                    <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600">Last Login</th>
+        </div>
+      </nav>
+
+      <div className="flex">
+        <aside className="w-64 bg-white shadow-md h-[calc(100vh-4rem)]">
+          <ul className="py-4">
+            {sidebarItems.map((item) => (
+              <li
+                key={item.label}
+                className={`flex items-center px-6 py-3 cursor-pointer transition-colors duration-200 ${activeTab === item.label ? "bg-blue-100 text-blue-600" : "hover:bg-gray-100"
+                  }`}
+                onClick={() => setActiveTab(item.label)}
+              >
+                <item.icon className="mr-3 h-5 w-5" />
+                <span>{item.label}</span>
+              </li>
+            ))}
+          </ul>
+        </aside>
+
+        <main className="flex-1 p-8">
+          <div className="mb-6 flex justify-between items-center">
+            <h1 className="text-2xl font-bold text-gray-800">User Details</h1>
+            <div className="relative">
+              
+              <input
+                type="text"
+                placeholder="Search users..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              
+            </div>
+          </div>
+
+          <div className="bg-white shadow-md rounded-lg overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    {["Phone", "Name", "Role", "Company Name", "Address", "Device Type", "Last Login"].map((header) => (
+                      <th
+                        key={header}
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                      >
+                        {header}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
-                <tbody>
-                  {users?.map((user : any, index : number) => (
-                    <tr key={index} className={'hover:bg-gray-50'}>
-                      <td className="py-2 px-3 border-b border-gray-200 text-sm">{user?.phone || ''}</td>
-                      <td className="py-2 px-3 border-b border-gray-200 text-sm">{user?.name || ''}</td>
-                      <td className="py-2 px-3 border-b border-gray-200 text-sm">{user?.role?.name || ''}</td>
-                      <td className="py-2 px-3 border-b border-gray-200 text-sm">{user?.companyName || ''}</td>
-                      <td className="py-2 px-3 border-b border-gray-200 text-sm">{user?.address || ''}</td>
-                      <td className="py-2 px-3 border-b border-gray-200 text-sm">{user?.deviceType || ''}</td>
-                      <td className="py-2 px-3 border-b border-gray-200 text-sm">{user?.lastLogin || ''}</td>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredUsers.map((user, index) => (
+                    <tr key={index} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.phone}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{user.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.role?.name}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.companyName}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.address}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{user.deviceType}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {new Date(user.lastLogin).toLocaleDateString("en-IN")}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
           </div>
-        </div>
+        </main>
+      </div>
     </div>
   )
 }
 
 export default AdminPage
+

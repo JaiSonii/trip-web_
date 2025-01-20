@@ -374,6 +374,7 @@ export const userSchema = new Schema({
     url: String,
     uploadedDate: String
   }],
+  lastLogin : {type : Date, default : Date.now()},
   createdAt: { type: Date, default: Date.now }
 });
 
