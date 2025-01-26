@@ -589,6 +589,27 @@ export const userExpenseTypesSchema = new Schema({
   }
 })
 
+export const InvoiceSchema = new Schema({
+  user_id : {
+    type : String,
+    required : true
+  },
+  invoiceNo : {
+    type : Number,
+    required : true,
+    unique : true
+  },
+  url : {type : String, required : true},
+  date : {type : Date, required : true},
+  dueDate : {type : Date, required : true},
+  balance : {type : Number, required : true},
+  total : {type : Number, required : true},
+  party_id : {type : String, required : true},
+  advance : {type : Number, required : true},
+  trips : {type : [String]},
+  invoiceStatus : {type : String, required : true, enum : ['Paid', 'Due'], default : 'Due'},
+})
+
 
 const connectString: any = process.env.NEXT_PUBLIC_MONGO_URL
 

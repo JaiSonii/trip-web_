@@ -19,12 +19,17 @@ import {
 } from "@/components/ui/resizable"
 import { cn } from "@/lib/utils"
 import { loadingIndicator } from '@/components/ui/LoadingIndicator'
+import { saveInvoice } from '@/utils/saveTripDocs'
+import { useExpenseData } from '@/components/hooks/useExpenseData'
 
 const InvoiceGenerationPage: React.FC = () => {
   const params = useSearchParams()
   const paramtrips = JSON.parse(params.get('trips') as string)
+  const party = params.get('party') as string
   const router = useRouter()
   const { toast } = useToast()
+
+  const {invoices} = useExpenseData()
 
   const [trips, setTrips] = useState<ITrip[] | any[]>([])
   const [loading, setLoading] = useState(true)
@@ -42,6 +47,7 @@ const InvoiceGenerationPage: React.FC = () => {
     email: '',
     phone: '',
     date: new Date().toISOString().split('T')[0],
+    dueDate: new Date().toISOString().split('T')[0],
     to: '',
     from: '',
     branch: '',
@@ -155,12 +161,13 @@ const InvoiceGenerationPage: React.FC = () => {
         body: JSON.stringify(reqData),
       })
 
+
       if (!res.ok) {
         throw new Error(`Failed to process data: ${res.statusText}`)
       }
       const data = await res.json()
       console.log("Server Response:", data)
-
+// 
       if (invoiceRef.current) {
         const scale = 2
         const canvas = await html2canvas(invoiceRef.current, { scale })
@@ -197,6 +204,41 @@ const InvoiceGenerationPage: React.FC = () => {
         toast({
           description: 'Invoice downloaded successfully.',
         })
+
+        const totalAmount = formData.freightCharges.reduce((totalAmount, charge) => totalAmount + charge.amount,0)
+        const charge = formData.additionalCharges.reduce((totalAmount, charge) => totalAmount + charge.amount,0)
+        const extraCharge = formData.extraAdditionalCharges.reduce((totalAmount, charge) => totalAmount + charge.amount,0)
+        const payment = formData.paymentDetails.reduce((totalAmount, charge) => totalAmount + charge.amount,0)
+        const extraPayment = formData.extraPaymentDetails.reduce((totalAmount, charge) => totalAmount + charge.amount,0)
+  
+        const totalCharge = charge + extraCharge
+        const totalPayment = payment + extraPayment
+        const balance = totalAmount - totalPayment + totalCharge
+  
+        const invData = {
+          balance : balance,
+          dueDate : new Date(formData.dueDate),
+          date : new Date(formData.date),
+          invoiceNo : invoices?.length || 1,
+          party_id : party,
+          invoiceStatus : balance === 0 ? 'Paid' : 'Due',
+          trips : paramtrips,
+          advance : totalPayment,
+          total : totalAmount
+        }
+
+        try {
+          await saveInvoice(pdf, invData)
+          toast({
+            description: 'Invoice saved successfully.',
+          })
+        } catch (error) {
+          toast({
+            description: 'Failed to save invoice.',
+            variant: 'destructive'
+          })
+        }
+
         setTimeout(() => {
           router.push('/user/trips')
         }, 500)
@@ -287,7 +329,7 @@ const InvoiceGenerationPage: React.FC = () => {
                 className="w-full"
               >
                 <Download className="mr-2 h-4 w-4" />
-                {downloading ? 'Downloading...' : 'Download Invoice'}
+                {downloading ? 'Downloading...' : 'Save Invoice'}
               </Button>
             </div>
 

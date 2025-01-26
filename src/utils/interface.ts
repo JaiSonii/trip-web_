@@ -18,6 +18,7 @@ export interface InvoiceFormData {
   email: string;
   signatureUrl : string;
   stampUrl : string
+  dueDate : string
   freightCharges: {
     lrNo: string;
     truckNo: string;
@@ -85,6 +86,21 @@ export interface IDriverAccount {
   gave: number;
   got: number;
 }
+
+export interface invData extends Document{
+  user_id : string
+  url : string
+  invoiceNo : number
+  advance : number
+  party_id : string
+  date : Date
+  dueDate : Date
+  balance : number
+  invoiceStatus : string
+  total : number
+  trips : [string]
+}
+
 
 // Define the interface for the driver schema
 export interface IDriver extends Document {

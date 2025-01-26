@@ -1,10 +1,15 @@
 
+import { uploadFileToS3 } from "@/helpers/fileOperation";
+import { recentActivity } from "@/helpers/recentActivity";
 import { verifyToken } from "@/utils/auth";
-import { connectToDatabase, tripSchema } from "@/utils/schema";
+import { invData } from "@/utils/interface";
+import { connectToDatabase, InvoiceSchema, tripSchema } from "@/utils/schema";
 import { model, models } from "mongoose";
 import { NextResponse } from "next/server";
 
 const Trip = models.Trip || model('Trip', tripSchema)
+const Invoice = models.Invoice || model('Invoice', InvoiceSchema)
+
 
 export async function GET(req: Request) {
   const { user, error } = await verifyToken(req);
@@ -23,7 +28,7 @@ export async function GET(req: Request) {
       {
         $match: {
           user_id: user,
-          trip_id: {$in : reqTrips}
+          trip_id: { $in: reqTrips }
         }
       },
       {
@@ -176,5 +181,64 @@ export async function GET(req: Request) {
   } catch (err: any) {
     console.error(err);
     return NextResponse.json({ message: 'Internal Server Error', error: err.message }, { status: 500 });
+  }
+}
+
+export async function POST(req: Request) {
+  try {
+    // Verify user token
+    const { user, error } = await verifyToken(req);
+    if (!user || error) {
+      return NextResponse.json({ error: 'Unauthorized User', status: 401 });
+    }
+
+    // Connect to the database
+    await connectToDatabase();
+
+    // Get form data
+    const formdata = await req.formData();
+    const file = formdata.get('file') as File;
+    const data = JSON.parse(formdata.get('data') as string) as invData
+
+
+
+    // Prepare file for upload to S3
+    const fileBuffer = Buffer.from(await file.arrayBuffer());
+    const fileName = `invoices/${user}-${data?.invoiceNo}`;
+    const contentType = file.type;
+
+    // Upload file to S3
+    const s3FileName = await uploadFileToS3(fileBuffer, fileName, contentType);
+    const fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3FileName}${contentType === 'application/pdf' ? '.pdf' : ''}`;
+
+    // Check if the document type already exists in the documents array
+
+    const invoices = await Invoice.find({user_id : user})
+
+    const newInvoice = new Invoice({
+      user_id : user,
+      url : fileUrl,
+      invoiceNo : invoices.length + 1,
+      date : new Date(data?.date),
+      dueDate : new Date(data?.dueDate),
+      party_id : data.party_id,
+      trips : data?.trips,
+      balance : data.balance,
+      invoiceStatus : data?.invoiceStatus,
+      total : data?.total,
+      advance : data?.advance
+    })
+  
+
+    // Save the updated trip document
+    await Promise.all([newInvoice.save(), recentActivity('Generated Invoice',newInvoice, user)]);
+
+    // Return success response
+    return NextResponse.json({ message: 'Document uploaded successfully', status: 200 });
+
+  } catch (error) {
+    // Log the error and return server error response
+    console.error("Error in uploading document:", error);
+    return NextResponse.json({ error: 'Failed to upload document', status: 500 });
   }
 }

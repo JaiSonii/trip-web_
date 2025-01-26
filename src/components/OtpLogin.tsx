@@ -65,7 +65,7 @@ function OtpLogin() {
 
         if (result.status === 200) {
           Cookies.set("selectedRole", "carrier");
-          router.replace(`/user/home`);
+          router.push(`/user/home`);
         } else {
           setError("Failed to verify OTP. Please check the OTP.");
         }

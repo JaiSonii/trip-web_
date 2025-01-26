@@ -21,6 +21,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import Loading from '@/app/user/loading';
 import { loadingIndicator } from '../ui/LoadingIndicator';
+import { TbFileInvoice } from 'react-icons/tb';
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -73,6 +74,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
     { href: '/user/trips', label: 'Trips', icon: TfiWorld },
     { href: `/user/expenses`, label: 'Expenses', icon: IoWalletOutline },
     { href: '/user/documents', label: 'Docs', icon: IoDocumentsOutline },
+    { href: '/user/invoice', label: 'Invoices', icon: TbFileInvoice },
   ];
 
   const secondaryMenuItems = [

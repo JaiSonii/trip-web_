@@ -292,6 +292,16 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
                                 className="rounded-lg text-xs"
                             />
                         </div>
+                        <div className="space-y-2">
+                            <label htmlFor="party">Due Date</label>
+                            <input
+                                type='date'
+                                id="dueDate"
+                                value={new Date(formData.dueDate).toISOString().split('T')[0]}
+                                onChange={(e) => handleInputChange('dueDate', 'dueDate', e.target.value)}
+                                className="rounded-lg text-xs"
+                            />
+                        </div>
                     </div>
 
                     {/* Freight Charges */}

@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { ITrip, IDriver, TruckModel, IParty, ISupplier, IExpense } from "@/utils/interface"
+import { ITrip, IDriver, TruckModel, IParty, ISupplier, IExpense, invData } from "@/utils/interface"
 
 export interface DashboardData {
     expenses: ExpenseData[]
@@ -30,6 +30,9 @@ export const api = createApi({
         }),
         getDrivers: builder.query<{ drivers: IDriver[] | any[] }, void>({
             query: () => 'drivers',
+        }),
+        getInvoice: builder.query<{ invoices: invData[] | any[] }, void>({
+            query: () => 'invoices',
         }),
         getTrucks: builder.query<{ trucks: TruckModel[] | any[] }, void>({
             query: () => 'trucks',
@@ -102,6 +105,7 @@ export const {
     useUpdateTripMutation,
     useDeleteTripMutation,
     useEditTripMutation,
-    useGetRecentDocumentsQuery
+    useGetRecentDocumentsQuery,
+    useGetInvoiceQuery
 } = api
 
