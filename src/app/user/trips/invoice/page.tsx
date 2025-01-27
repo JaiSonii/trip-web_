@@ -170,7 +170,7 @@ const InvoiceGenerationPage: React.FC = () => {
       // Generate PDF if invoiceRef is available
       if (!invoiceRef.current) throw new Error("Invoice reference not found");
 
-      const scale = 2;
+      const scale = 1;
       const canvas = await html2canvas(invoiceRef.current, { scale });
       const imgData = canvas.toDataURL('image/png');
 
@@ -191,7 +191,7 @@ const InvoiceGenerationPage: React.FC = () => {
       const imgX = (pdfWidth - imgWidth * ratio) / 2;
       const imgY = (pdfHeight - imgHeight * ratio) / 2;
 
-      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio,undefined,'FAST');
       pdf.save(`${formData.party}-${new Date().toLocaleDateString('en-IN')}-invoice.pdf`);
 
       toast({ description: 'Invoice downloaded successfully.' });
