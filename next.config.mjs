@@ -4,6 +4,11 @@ const nextConfig = {
     config.resolve.alias.canvas = false;
     return config;
   },
+  experimental : {
+    serverActions : {
+      bodySizeLimit : '10mb'
+    }
+  },
   images: {
     remotePatterns: [
       {
