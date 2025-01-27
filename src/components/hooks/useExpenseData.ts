@@ -34,8 +34,6 @@ import {
       refetchDashboard()
       refetchRecentDocuments()
     }
-
-    console.log('data', invoiceData)
   
     return {
       trips: tripsData?.trips || [],

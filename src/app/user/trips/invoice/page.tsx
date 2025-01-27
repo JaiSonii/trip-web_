@@ -29,7 +29,7 @@ const InvoiceGenerationPage: React.FC = () => {
   const router = useRouter()
   const { toast } = useToast()
 
-  const {invoices} = useExpenseData()
+  const { invoices } = useExpenseData()
 
   const [trips, setTrips] = useState<ITrip[] | any[]>([])
   const [loading, setLoading] = useState(true)
@@ -141,118 +141,102 @@ const InvoiceGenerationPage: React.FC = () => {
 
   const handleDownload = async () => {
     try {
-      setDownloading(true)
+      setDownloading(true);
 
-      const editedCharges = formData.additionalCharges.filter((charge) => charge.edited)
-      const editedPayments = formData.paymentDetails.filter((payment) => payment.edited)
-
+      // Prepare request data
       const reqData = {
         newCharges: formData.extraAdditionalCharges,
-        editedCharges,
-        editedPayments,
+        editedCharges: formData.additionalCharges.filter((charge) => charge.edited),
+        editedPayments: formData.paymentDetails.filter((payment) => payment.edited),
         deletedChargeIds,
         deletedPaymentIds,
-        newPayments: formData.extraPaymentDetails
-      }
+        newPayments: formData.extraPaymentDetails,
+      };
 
+      // Send POST request to process data
       const res = await fetch(`/api/trips/invoice/download`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(reqData),
-      })
-
+      });
 
       if (!res.ok) {
-        throw new Error(`Failed to process data: ${res.statusText}`)
+        throw new Error(`Failed to process data: ${res.statusText}`);
       }
-      const data = await res.json()
-      console.log("Server Response:", data)
-// 
-      if (invoiceRef.current) {
-        const scale = 2
-        const canvas = await html2canvas(invoiceRef.current, { scale })
-        const imgData = canvas.toDataURL('image/png')
 
-        // A4 size in mm
-        const pdfWidth = 210
-        const pdfHeight = 297
+      const data = await res.json();
+      console.log("Server Response:", data);
 
-        const pdf = new jsPDF({
-          orientation: 'portrait',
-          unit: 'mm',
-          format: 'a4'
-        })
+      // Generate PDF if invoiceRef is available
+      if (!invoiceRef.current) throw new Error("Invoice reference not found");
 
-        // Calculate scaling to fit content to A4
-        const imgWidth = canvas.width / scale
-        const imgHeight = canvas.height / scale
-        const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight)
+      const scale = 2;
+      const canvas = await html2canvas(invoiceRef.current, { scale });
+      const imgData = canvas.toDataURL('image/png');
 
-        const imgX = (pdfWidth - imgWidth * ratio) / 2
-        const imgY = (pdfHeight - imgHeight * ratio) / 2
+      // Configure PDF settings
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+      });
 
-        pdf.addImage(
-          imgData,
-          'PNG',
-          imgX,
-          imgY,
-          imgWidth * ratio,
-          imgHeight * ratio
-        )
+      // Fit content to A4 size
+      const pdfWidth = 210;
+      const pdfHeight = 297;
+      const imgWidth = canvas.width / scale;
+      const imgHeight = canvas.height / scale;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
 
-        pdf.save(`${formData.party}-${new Date(Date.now()).toLocaleDateString('en-IN')}-invoice.pdf`)
-        toast({
-          description: 'Invoice downloaded successfully.',
-        })
+      const imgX = (pdfWidth - imgWidth * ratio) / 2;
+      const imgY = (pdfHeight - imgHeight * ratio) / 2;
 
-        const totalAmount = formData.freightCharges.reduce((totalAmount, charge) => totalAmount + charge.amount,0)
-        const charge = formData.additionalCharges.reduce((totalAmount, charge) => totalAmount + charge.amount,0)
-        const extraCharge = formData.extraAdditionalCharges.reduce((totalAmount, charge) => totalAmount + charge.amount,0)
-        const payment = formData.paymentDetails.reduce((totalAmount, charge) => totalAmount + charge.amount,0)
-        const extraPayment = formData.extraPaymentDetails.reduce((totalAmount, charge) => totalAmount + charge.amount,0)
-  
-        const totalCharge = charge + extraCharge
-        const totalPayment = payment + extraPayment
-        const balance = totalAmount - totalPayment + totalCharge
-  
-        const invData = {
-          balance : balance,
-          dueDate : new Date(formData.dueDate),
-          date : new Date(formData.date),
-          invoiceNo : invoices?.length || 1,
-          party_id : party,
-          invoiceStatus : balance === 0 ? 'Paid' : 'Due',
-          trips : paramtrips,
-          advance : totalPayment,
-          total : totalAmount
-        }
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      pdf.save(`${formData.party}-${new Date().toLocaleDateString('en-IN')}-invoice.pdf`);
 
-        try {
-          await saveInvoice(pdf, invData)
-          toast({
-            description: 'Invoice saved successfully.',
-          })
-        } catch (error) {
-          toast({
-            description: 'Failed to save invoice.',
-            variant: 'destructive'
-          })
-        }
+      toast({ description: 'Invoice downloaded successfully.' });
 
-        setTimeout(() => {
-          router.push('/user/trips')
-        }, 500)
-      }
+      // Calculate totals
+      const calculateTotal = (items: any[]) =>
+        items.reduce((sum, item) => sum + (item.amount || 0), 0);
+
+      const totalFreight = calculateTotal(formData.freightCharges);
+      const totalAdditionalCharges = calculateTotal(formData.additionalCharges) + calculateTotal(formData.extraAdditionalCharges);
+      const totalPayments = calculateTotal(formData.paymentDetails) + calculateTotal(formData.extraPaymentDetails);
+
+      const balance = totalFreight + totalAdditionalCharges - totalPayments;
+
+      // Prepare invoice data
+      const invData = {
+        balance,
+        dueDate: new Date(formData.dueDate),
+        date: new Date(formData.date),
+        invoiceNo: invoices?.length || 1,
+        party_id: party,
+        invoiceStatus: balance === 0 ? 'Paid' : 'Due',
+        trips: paramtrips,
+        advance: totalPayments,
+        total: totalFreight,
+      };
+
+      // Save invoice
+      await saveInvoice(pdf, invData);
+      toast({ description: 'Invoice saved successfully.' });
+
+      // Navigate after success
+      setTimeout(() => router.push('/user/trips'), 500);
+
     } catch (error) {
-      console.error("Error in handleDownload:", error)
+      console.error("Error in handleDownload:", error);
       toast({
         description: 'Failed to download invoice.',
-        variant: 'destructive'
-      })
+        variant: 'destructive',
+      });
     } finally {
-      setDownloading(false)
+      setDownloading(false);
     }
-  }
+  };
+
 
   if (loading) {
     return <Loading />
@@ -295,17 +279,17 @@ const InvoiceGenerationPage: React.FC = () => {
         <ResizablePanel
           defaultSize={40}
           minSize={20}
-        maxSize={60}
-        collapsible={true}
-        collapsedSize={0}
-        onCollapse={() => setIsCollapsed(true)}
-        onExpand={() => setIsCollapsed(false)}
+          maxSize={60}
+          collapsible={true}
+          collapsedSize={0}
+          onCollapse={() => setIsCollapsed(true)}
+          onExpand={() => setIsCollapsed(false)}
         //className={cn(
         //  "transition-all duration-300 ease-in-out",
         //  isCollapsed ? "min-w-[50px] md:min-w-[70px]" : ""
         //)}
         >
-          
+
           <div className="h-full flex flex-col">
             {/* <div className="flex justify-end items-center p-4 bg-secondary">
                 <Button
@@ -337,20 +321,20 @@ const InvoiceGenerationPage: React.FC = () => {
           {/* )} */}
         </ResizablePanel>
       </ResizablePanelGroup>
-      
-        <div  className={` ${!downloading ? 'hidden' : 'modal-class'}`}>
-          {
-            <div className='z-50 fixed flex items-center justify-center modal-class text-white'>
-              {loadingIndicator}
-              <p>downloading pdf...</p>
-            </div>
-          }
-          <div className='bg-white max-w-lg' ref={invoiceRef}>
-            <FreightInvoice formData={formData} />
-          </div>
 
+      <div className={` ${!downloading ? 'hidden' : 'modal-class'}`}>
+        {
+          <div className='z-50 fixed flex items-center justify-center modal-class text-white'>
+            {loadingIndicator}
+            <p>downloading pdf...</p>
+          </div>
+        }
+        <div className='bg-white max-w-lg' ref={invoiceRef}>
+          <FreightInvoice formData={formData} />
         </div>
-      
+
+      </div>
+
 
     </div>
   )
