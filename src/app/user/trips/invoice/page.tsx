@@ -170,12 +170,11 @@ const InvoiceGenerationPage: React.FC = () => {
       // Generate PDF if invoiceRef is available
       if (!invoiceRef.current) throw new Error("Invoice reference not found");
 
-      const scale = 1;
+      const scale = 1.5; // Adjust scale to control resolution
       const canvas = await html2canvas(invoiceRef.current, { scale });
       const imgData = canvas.toDataURL('image/png');
 
-      // Configure PDF settings
-      const pdf = new jsPDF({
+      let pdf = new jsPDF({
         orientation: 'portrait',
         unit: 'mm',
         format: 'a4',
@@ -191,9 +190,36 @@ const InvoiceGenerationPage: React.FC = () => {
       const imgX = (pdfWidth - imgWidth * ratio) / 2;
       const imgY = (pdfHeight - imgHeight * ratio) / 2;
 
-      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio,undefined,'FAST');
-      pdf.save(`${formData.party}-${new Date().toLocaleDateString('en-IN')}-invoice.pdf`);
+      // Add image with compression
+      pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio,);
 
+      // Check file size
+      let pdfBlob = pdf.output('blob');
+      let pdfSizeMB = pdfBlob.size / (1024 * 1024);
+
+      console.log(`Initial PDF size: ${pdfSizeMB.toFixed(2)} MB`);
+
+      // Retry with adjustments if size is out of range
+      if (pdfSizeMB > 5) {
+        // Reduce scale for smaller file
+        const lowerScale = scale - 0.5;
+        const lowerCanvas = await html2canvas(invoiceRef.current, { scale: lowerScale });
+        const lowerImgData = lowerCanvas.toDataURL('image/png');
+        pdf = new jsPDF({
+          orientation: 'portrait',
+          unit: 'mm',
+          format: 'a4',
+        });
+        pdf.addImage(lowerImgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio, undefined, 'FAST');
+        pdfBlob = pdf.output('blob');
+        pdfSizeMB = pdfBlob.size / (1024 * 1024);
+      }
+
+      if (pdfSizeMB < 2) {
+        throw new Error("PDF size is too small. Please review content or scale.");
+      }
+
+      pdf.save(`${formData.party}-${new Date().toLocaleDateString('en-IN')}-invoice.pdf`);
       toast({ description: 'Invoice downloaded successfully.' });
 
       // Calculate totals
@@ -236,6 +262,7 @@ const InvoiceGenerationPage: React.FC = () => {
       setDownloading(false);
     }
   };
+
 
 
   if (loading) {
