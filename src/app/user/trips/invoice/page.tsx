@@ -27,6 +27,8 @@ const InvoiceGenerationPage: React.FC = () => {
   const party = params.get('party') as string
   const invoiceId = params.get('invoiceId') as string
   const route = JSON.parse(params.get('route') as string)
+
+
   const router = useRouter()
   const { toast } = useToast()
 
@@ -171,7 +173,7 @@ const InvoiceGenerationPage: React.FC = () => {
       // Generate PDF if invoiceRef is available
       if (!invoiceRef.current) throw new Error("Invoice reference not found");
 
-      const scale = 1.5; // Adjust scale to control resolution
+      const scale = 2; // Adjust scale to control resolution
       const canvas = await html2canvas(invoiceRef.current, { scale });
       const imgData = canvas.toDataURL('image/png');
 
@@ -195,30 +197,30 @@ const InvoiceGenerationPage: React.FC = () => {
       pdf.addImage(imgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio,);
 
       // Check file size
-      let pdfBlob = pdf.output('blob');
-      let pdfSizeMB = pdfBlob.size / (1024 * 1024);
+      // let pdfBlob = pdf.output('blob');
+      // let pdfSizeMB = pdfBlob.size / (1024 * 1024);
 
-      console.log(`Initial PDF size: ${pdfSizeMB.toFixed(2)} MB`);
+      // console.log(`Initial PDF size: ${pdfSizeMB.toFixed(2)} MB`);
 
-      // Retry with adjustments if size is out of range
-      if (pdfSizeMB > 5) {
-        // Reduce scale for smaller file
-        const lowerScale = scale - 0.5;
-        const lowerCanvas = await html2canvas(invoiceRef.current, { scale: lowerScale });
-        const lowerImgData = lowerCanvas.toDataURL('image/png');
-        pdf = new jsPDF({
-          orientation: 'portrait',
-          unit: 'mm',
-          format: 'a4',
-        });
-        pdf.addImage(lowerImgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio, undefined, 'FAST');
-        pdfBlob = pdf.output('blob');
-        pdfSizeMB = pdfBlob.size / (1024 * 1024);
-      }
+      // // Retry with adjustments if size is out of range
+      // if (pdfSizeMB > 5) {
+      //   // Reduce scale for smaller file
+      //   const lowerScale = scale - 0.5;
+      //   const lowerCanvas = await html2canvas(invoiceRef.current, { scale: lowerScale });
+      //   const lowerImgData = lowerCanvas.toDataURL('image/png');
+      //   pdf = new jsPDF({
+      //     orientation: 'portrait',
+      //     unit: 'mm',
+      //     format: 'a4',
+      //   });
+      //   pdf.addImage(lowerImgData, 'PNG', imgX, imgY, imgWidth * ratio, imgHeight * ratio, undefined, 'FAST');
+      //   pdfBlob = pdf.output('blob');
+      //   pdfSizeMB = pdfBlob.size / (1024 * 1024);
+      // }
 
-      if (pdfSizeMB < 2) {
-        throw new Error("PDF size is too small. Please review content or scale.");
-      }
+      // if (pdfSizeMB < 2) {
+      //   throw new Error("PDF size is too small. Please review content or scale.");
+      // }
 
       pdf.save(`${formData.party}-${new Date().toLocaleDateString('en-IN')}-invoice.pdf`);
       toast({ description: 'Invoice downloaded successfully.' });
