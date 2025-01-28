@@ -186,11 +186,13 @@ const TripDetails = () => {
         <div className="col-span-2 pr-4 flex flex-col gap-2">
           {/* <TruckHeader truck={trip.truck} driver={trip.driver} /> */}
 
-          <div className='grid grid-cols-3 gap-2'>
+          <div className='grid grid-cols-4 gap-2'>
             <Link href={`/user/trucks/${trip.truck}`}>
               <TripInfo label="Lorry" value={trip.truck || '----'} supplierId={trip.supplier || ''} supplierName={trip.supplierName || ''} />
             </Link>
-
+            <Link href={`/user/parties/${trip.party}/trips`}>
+              <TripInfo label="Party Name" value={trip.partyName || '----'} />
+            </Link>
             <Link href={`/user/drivers/${trip.driver}`}>
               <TripInfo label="Driver" value={trip.driverName || '----'} />
             </Link>
@@ -198,13 +200,12 @@ const TripDetails = () => {
           </div>
 
           <div className='grid grid-cols-4 gap-2'>
-            <Link href={`/user/parties/${trip.party}/trips`}>
-              <TripInfo label="Party Name" value={trip.partyName || '----'} />
-            </Link>
+            <TripInfo label="FM No" value={trip.fmNo || '----'} />
             <TripInfo label="LR Number" value={trip.LR || '----'} />
             <TripInfo label="Material" value={trip.material || '----'} />
             <TripInfo label="Billing Type" value={trip.billingType || '----'} />
           </div>
+
           <TripInfo label="Route" value={`${trip.route.origin} → ${trip.route.destination}`} startDate={trip.startDate} validityDate={trip?.documents?.find((doc: any) => doc.type === 'E-Way Bill')?.validityDate || null} />
           <div className=" w-full">
             <TripStatus status={trip.status as number} dates={trip.dates} />

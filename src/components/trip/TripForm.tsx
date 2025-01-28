@@ -23,7 +23,7 @@ type Props = {
   onSubmit: (trip: any) => void
 }
 
-export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', duplicate: null, onSubmit: () => {} }) {
+export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', duplicate: null, onSubmit: () => { } }) {
   const { trucks, parties, drivers, isLoading } = useExpenseData()
 
   const [formData, setFormData] = useState({
@@ -42,6 +42,7 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
     startDate: duplicate?.startDate || new Date(),
     truckHireCost: duplicate?.truckHireCost || 0,
     LR: lr,
+    fmNo: lr.replace('LRN', 'FM'),
     material: duplicate?.material || '',
     notes: duplicate?.notes || '',
     file: null,
@@ -54,7 +55,7 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
   const [hasSupplier, setHasSupplier] = useState(false)
   const [fileLoading, setFileLoading] = useState(false)
   const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB in bytes
-  const {toast} = useToast()
+  const { toast } = useToast()
 
   const worker = useRef<null | any>(null)
 
@@ -85,7 +86,7 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
     setFormData((prev) => ({
       ...prev,
       driver: updatedTruck?.driver_id ? updatedTruck?.driver_id : '',
-      supplierId : updatedTruck?.supplier ? updatedTruck?.supplier : ''
+      supplierId: updatedTruck?.supplier ? updatedTruck?.supplier : ''
     }))
     setHasSupplier(!!updatedTruck?.supplier)
   }, [formData.truck, trucks])
@@ -106,14 +107,14 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
 
     if (uploadedFile.size > MAX_FILE_SIZE) {
       toast({
-        description : `File size exceeds the maximum limit of ${MAX_FILE_SIZE / (1024 * 1024)} MB.`,
-        variant :'warning'
+        description: `File size exceeds the maximum limit of ${MAX_FILE_SIZE / (1024 * 1024)} MB.`,
+        variant: 'warning'
       })
       return
     }
 
     setFile(uploadedFile)
-    setFormData((prev : any) => ({
+    setFormData((prev: any) => ({
       ...prev,
       file: uploadedFile,
     }))
@@ -129,8 +130,8 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
       processTripData(resData.ewbValidityDate)
     } catch (error: any) {
       toast({
-        description : `Failed to extract details from E-Way Bill`,
-        variant :'warning'
+        description: `Failed to extract details from E-Way Bill`,
+        variant: 'warning'
       })
       console.error("Error processing e-way bill:", error)
     } finally {
@@ -222,24 +223,24 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
 
     if (sanitizedAmount === null || sanitizedTruckHireCost === null) {
       toast({
-        description : 'Please enter valid numeric values for Amount and Truck Hire Cost.',
-        variant :'warning'
+        description: 'Please enter valid numeric values for Amount and Truck Hire Cost.',
+        variant: 'warning'
       })
       return
     }
 
     if (!formData.supplierId && !formData.driver) {
       toast({
-        description : 'Driver Needs to be assigned!',
-        variant :'warning'
+        description: 'Driver Needs to be assigned!',
+        variant: 'warning'
       })
       return
     }
 
-    if(!formData.party || !formData.truck || !formData.amount || !formData.route.origin || !formData.route.destination || !formData.LR){
+    if (!formData.party || !formData.truck || !formData.amount || !formData.route.origin || !formData.route.destination || !formData.LR) {
       toast({
-        description : 'Please fill in the required fields',
-        variant :'warning'
+        description: 'Please fill in the required fields',
+        variant: 'warning'
       })
       return
     }
@@ -248,8 +249,8 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
       ...formData,
       amount: sanitizedAmount,
       truckHireCost: sanitizedTruckHireCost,
-      perUnit : sanitizedPerUnit,
-      totalUnits : sanitizedTotalUnits
+      perUnit: sanitizedPerUnit,
+      totalUnits: sanitizedTotalUnits
     })
 
     localStorage.removeItem('tripData')
@@ -261,7 +262,7 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
     <div className="bg-white text-black p-4 max-w-3xl mx-auto shadow-md rounded-md">
       <div className="mb-4 flex items-center space-x-4">
         <div className="flex-grow">
-        <label className="block text-xs font-medium text-gray-700 mb-1">E-Way Bill</label>
+          <label className="block text-xs font-medium text-gray-700 mb-1">E-Way Bill</label>
           <input
             type="file"
             accept=".pdf,image/*"
@@ -321,15 +322,28 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
           />
         </div>
 
-        <div className="mb-4">
-          <label className="block text-xs font-medium text-gray-700 mb-1">LR No*</label>
-          <Input
-            type="text"
-            name="LR"
-            value={formData.LR}
-            placeholder="LR No"
-            onChange={handleChange}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">LR No*</label>
+            <Input
+              type="text"
+              name="LR"
+              value={formData.LR}
+              placeholder="LR No"
+              onChange={handleChange}
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-700 mb-1">FM No</label>
+            <Input
+              type="text"
+              name="fmNo"
+              value={formData.fmNo}
+              placeholder="FM No"
+              onChange={handleChange}
+            />
+          </div>
+
         </div>
 
         <div className="flex items-center space-x-2">

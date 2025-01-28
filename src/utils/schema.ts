@@ -230,6 +230,9 @@ export const tripSchema = new Schema({
     type: String,
     required: true
   },
+  fmNo: {
+    type : String,
+  },
   status: {
     type: Number,
     enum: [0, 1, 2, 3, 4]
@@ -253,6 +256,10 @@ export const tripSchema = new Schema({
   },
   notes: {
     type: String
+  },
+  invoice : {
+    type : Boolean,
+    default: false
   },
   accounts: [
     PaymentBookSchema,
@@ -599,7 +606,10 @@ export const InvoiceSchema = new Schema({
     required : true,
     unique : true
   },
-  url : {type : String, required : true},
+  route : {
+    origin : String,
+    destination : String
+  },
   date : {type : Date, required : true},
   dueDate : {type : Date, required : true},
   balance : {type : Number, required : true},

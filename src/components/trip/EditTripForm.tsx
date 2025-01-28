@@ -35,6 +35,7 @@ const EditTripForm: React.FC<Props> = ({ onSubmit, trip, onClose, isOpen }) => {
         startDate: new Date(trip?.startDate),
         truckHireCost: trip?.truckHireCost || 0,
         LR: trip?.LR || '',
+        fmNo: trip?.fmNo,
         material: trip?.material || '',
         notes: trip?.notes || '',
         ewbValidity: trip?.documents?.find((doc) => doc.type === 'E-Way Bill')?.validityDate || null,
@@ -164,6 +165,11 @@ const EditTripForm: React.FC<Props> = ({ onSubmit, trip, onClose, isOpen }) => {
                                 className="w-full p-2 border border-gray-300 rounded-md"
                             />
                         </div>
+
+                    </div>
+                    <DateInputs formData={formData} handleChange={handleChange} />
+
+                    <div className='grid grid-cols-2 gap-2'>
                         <div>
                             <label className="block text-xs font-medium text-gray-700 mb-1">LR No</label>
                             <input
@@ -175,11 +181,20 @@ const EditTripForm: React.FC<Props> = ({ onSubmit, trip, onClose, isOpen }) => {
                                 placeholder="LR No"
                             />
                         </div>
+                        <div>
+                            <label className="block text-xs font-medium text-gray-700 mb-1">FM No</label>
+                            <input
+                                type="text"
+                                className="w-full p-2 border border-gray-300 rounded-md"
+                                name="fmNo"
+                                value={formData.fmNo}
+                                onChange={handleChange}
+                                placeholder="FM No"
+                            />
+                        </div>
                     </div>
 
 
-
-                    <DateInputs formData={formData} handleChange={handleChange} />
 
                     <div>
                         <label className="flex items-center text-sm font-medium text-gray-700">
@@ -222,18 +237,18 @@ const EditTripForm: React.FC<Props> = ({ onSubmit, trip, onClose, isOpen }) => {
 
                     {hasSupplier && (
                         <>
-                        <div>
-                            <label className="block text-xs font-medium text-gray-700 mb-1">Truck Hire Cost</label>
-                            <input type='text'
-                                className="w-full p-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-lightOrange transition-all duration-300"
-                                value={formData.truckHireCost}
-                                name="truckHireCost"
-                                onChange={handleChange}
-                                placeholder="Truck Hire Cost"
-                            />
-                        </div>
-                        
-                    </>
+                            <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Truck Hire Cost</label>
+                                <input type='text'
+                                    className="w-full p-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-lightOrange transition-all duration-300"
+                                    value={formData.truckHireCost}
+                                    name="truckHireCost"
+                                    onChange={handleChange}
+                                    placeholder="Truck Hire Cost"
+                                />
+                            </div>
+
+                        </>
                     )}
                 </form>
                 <div className="p-4 bg-white border-t flex items-center justify-end gap-2">

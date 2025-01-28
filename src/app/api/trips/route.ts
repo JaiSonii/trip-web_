@@ -10,8 +10,6 @@ import { uploadFileToS3 } from '@/helpers/fileOperation';
 import { recentActivity } from '@/helpers/recentActivity';
 
 const Trip = models.Trip || model('Trip', tripSchema);
-const Party = models.Party || model('Party', partySchema)
-const Supplier = models.Supplier || model('Supplier', supplierSchema)
 const Driver = models.Driver || model('Driver', driverSchema)
 const Truck = models.Truck || model('Truck', truckSchema)
 // Assuming you have this schema defined
@@ -188,6 +186,7 @@ export async function POST(this: any, req: Request) {
       balance: parseFloat(formData.get('amount') as string),
       dates: [new Date(formData.get('startDate') as string), null, null, null, null],
       truckHireCost: parseFloat(formData.get('truckHireCost') as string) || 0,
+      fmNo : formData.get('fmNo'),
       LR: formData.get('LR'),
       status: 0,
       material: formData.get('material') || '',

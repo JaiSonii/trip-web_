@@ -1,6 +1,6 @@
 'use client'
 
-import { toast, useToast } from '@/components/hooks/use-toast'
+import { useToast } from '@/components/hooks/use-toast'
 import { ITrip } from '@/utils/interface'
 import { useRouter, useSearchParams } from 'next/navigation'
 import React, { useEffect, useRef, useState } from 'react'
@@ -8,7 +8,7 @@ import Loading from '../loading'
 import InvoiceForm from '@/components/trip/tripDetail/TripFunctions/InoiveForm'
 import FreightInvoice from '@/components/trip/tripDetail/TripFunctions/FrieghtInvoice'
 import { Button } from '@/components/ui/button'
-import { Download, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Download } from 'lucide-react'
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
 import { InvoiceFormData as FormData } from '@/utils/interface'
@@ -17,7 +17,6 @@ import {
   ResizablePanel,
   ResizablePanelGroup,
 } from "@/components/ui/resizable"
-import { cn } from "@/lib/utils"
 import { loadingIndicator } from '@/components/ui/LoadingIndicator'
 import { saveInvoice } from '@/utils/saveTripDocs'
 import { useExpenseData } from '@/components/hooks/useExpenseData'
@@ -26,6 +25,8 @@ const InvoiceGenerationPage: React.FC = () => {
   const params = useSearchParams()
   const paramtrips = JSON.parse(params.get('trips') as string)
   const party = params.get('party') as string
+  const invoiceId = params.get('invoiceId') as string
+  const route = JSON.parse(params.get('route') as string)
   const router = useRouter()
   const { toast } = useToast()
 
@@ -227,10 +228,10 @@ const InvoiceGenerationPage: React.FC = () => {
         items.reduce((sum, item) => sum + (item.amount || 0), 0);
 
       const totalFreight = calculateTotal(formData.freightCharges);
-      const totalAdditionalCharges = calculateTotal(formData.additionalCharges) + calculateTotal(formData.extraAdditionalCharges);
-      const totalPayments = calculateTotal(formData.paymentDetails) + calculateTotal(formData.extraPaymentDetails);
+      const totalAdditionalCharges = Number(calculateTotal(formData.additionalCharges)) + Number(calculateTotal(formData.extraAdditionalCharges));
+      const totalPayments = Number(calculateTotal(formData.paymentDetails)) + Number(calculateTotal(formData.extraPaymentDetails));
 
-      const balance = totalFreight + totalAdditionalCharges - totalPayments;
+      const balance = Number(totalFreight) + Number(totalAdditionalCharges) - Number(totalPayments);
 
       // Prepare invoice data
       const invData = {
@@ -238,15 +239,17 @@ const InvoiceGenerationPage: React.FC = () => {
         dueDate: new Date(formData.dueDate),
         date: new Date(formData.date),
         invoiceNo: invoices?.length || 1,
+        route : {
+          origin : route.origin,
+          destination : route.destination
+        },
         party_id: party,
         invoiceStatus: balance === 0 ? 'Paid' : 'Due',
         trips: paramtrips,
         advance: totalPayments,
-        total: totalFreight,
+        total: totalFreight + totalAdditionalCharges,
       };
-
-      // Save invoice
-      await saveInvoice(pdf, invData);
+      await saveInvoice(invData, invoiceId);
       toast({ description: 'Invoice saved successfully.' });
 
       // Navigate after success

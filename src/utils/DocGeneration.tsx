@@ -381,8 +381,7 @@ export function FMemo({ formData, payments }: { formData: FMDataType, payments: 
                 </div>
               ))}</div>
             </td>
-            <td className="border border-black p-2">Truck Hire Cost</td>
-            <td className="border border-black p-2"><strong>{formatNumber(formData.truckHireCost)}</strong></td>
+           
           </tr>
           <tr>
             <td className="border border-black p-2">Weight</td>

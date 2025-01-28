@@ -89,12 +89,15 @@ export interface IDriverAccount {
 
 export interface invData extends Document{
   user_id : string
-  url : string
   invoiceNo : number
   advance : number
   party_id : string
   date : Date
   dueDate : Date
+  route : {
+    origin : string,
+    destination : string
+  },
   balance : number
   invoiceStatus : string
   total : number
@@ -151,6 +154,7 @@ export interface ITrip extends Document {
   startDate: Date;
   truckHireCost: number;
   LR: string;
+  fmNo? : string
   status?: 0 | 1 | 2 | 3 | 4;
   POD?: string;
   dates: Date[];
@@ -167,6 +171,7 @@ export interface ITrip extends Document {
     url : string
   }]
   partyName : string;
+  invoice : boolean
   balance : number
   units? : number;
   rate?: number;

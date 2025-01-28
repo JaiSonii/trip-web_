@@ -182,7 +182,7 @@ const InvoiceForm: React.FC<Props> = ({ open, setOpen }) => {
                             const trip = trips.find(t => t.trip_id === tripId);
                             if (!trip) return null;
                             return (
-                                <div key={tripId} className="flex items-center space-x-2 mb-2">
+                                trip.invoice === false && <div key={tripId} className="flex items-center space-x-2 mb-2">
                                     <Checkbox
                                         id={tripId}
                                         checked={selectedTripIds.includes(tripId)}

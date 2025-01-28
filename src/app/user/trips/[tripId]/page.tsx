@@ -2,9 +2,9 @@
 
 import React, { useState, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import {  ITrip } from '@/utils/interface';
+import { ITrip } from '@/utils/interface';
 import { useParams, useRouter } from 'next/navigation';
-import { MdEdit, MdDelete} from 'react-icons/md';
+import { MdEdit, MdDelete } from 'react-icons/md';
 import { Button } from '@/components/ui/button';
 import Loading from '../loading';
 import { useTrip } from '@/context/tripContext';
@@ -49,7 +49,7 @@ const TripPage: React.FC = () => {
       setTrip((prev: ITrip | any) => ({
         ...prev,
         ...newData.trip,
-        balance : newData.trip.amount - (prev.amount-prev.balance)
+        balance: newData.trip.amount - (prev.amount - prev.balance)
       }));
       setIsEditing(false); // Close editing mode after successful edit
 
@@ -80,7 +80,7 @@ const TripPage: React.FC = () => {
     }
   }, [tripId, router]);
 
-  if (loading || isSubmitting) {
+  if (loading) {
     return <Loading />;
   }
 
@@ -94,7 +94,13 @@ const TripPage: React.FC = () => {
 
   return (
     <div className="mx-auto p-4">
-      
+
+      {
+        isSubmitting &&
+        <div className=''>
+          <Loading /> {/* Ensure Loading component shows the GIF */}
+        </div>
+      }
 
       <div className='flex items-center justify-between'>
         <Button onClick={() => setDocModalOpen(true)}>

@@ -28,22 +28,30 @@ export const savePDFToBackend = async (pdf: jsPDF, filename: string, docType: st
 };
 
 
-export const saveInvoice = async (pdf: jsPDF, invData: Partial<invData>) => {
+export const saveInvoice = async (invData: Partial<invData>, invoiceId?: string) => {
   try {
-    // Convert PDF to a Blob and create a File instance
-    const pdfBlob = pdf.output('blob');
-    const file = new File([pdfBlob], 'invoice.pdf', { type: 'application/pdf' });
 
-    // Prepare form data with the PDF file and additional invoice data
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('data', JSON.stringify(invData));
+    let response
+    if (invoiceId) {
+      delete invData['invoiceNo']
+      response = await fetch(`/api/invoices/${invoiceId.toString()}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(invData)
+      })
+    } else {
+      response = await fetch(`/api/invoices`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(invData)
+      });
+    }
 
-    // Make API request to save the invoice
-    const response = await fetch(`/api/trips/invoice`, {
-      method: 'POST',
-      body: formData,
-    });
+
 
     if (!response.ok) {
       const errorText = await response.text();
