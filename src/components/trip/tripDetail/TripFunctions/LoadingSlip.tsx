@@ -191,7 +191,7 @@ const LoadingSlip = () => {
                             <tbody>
                                 <tr>
                                     <td className="p-2 text-center border">{trip?.truck}</td>
-                                    <td className="p-2 text-center border">{trip?.material}</td>
+                                    <td className="p-2 text-center border">{trip?.material?.map((item : {name : string, weight : string})=>item.name + ',')}</td>
                                     <td className="p-2 text-center border">{trip?.route?.origin}</td>
                                     <td className="p-2 text-center border">{trip?.route?.destination}</td>
                                 </tr>
