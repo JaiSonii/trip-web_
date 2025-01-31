@@ -22,7 +22,7 @@ export interface InvoiceFormData {
   freightCharges: {
     lrNo: string;
     truckNo: string;
-    material: string;
+    material: string[];
     date : string
     weight: string;
     charged: string;
@@ -158,7 +158,6 @@ export interface ITrip extends Document {
   status?: 0 | 1 | 2 | 3 | 4;
   POD?: string;
   dates: Date[];
-  material?: string;
   notes?: string;
   accounts : PaymentBook[]
   ewayBill : string
@@ -175,7 +174,8 @@ export interface ITrip extends Document {
   balance : number
   units? : number;
   rate?: number;
-  weight? : number
+  material? : { name: string; weight: string }[]
+  guaranteedWeight? : string;
 }
 
 export interface Idoc{
@@ -288,7 +288,7 @@ export type EWBFormDataType = {
   LR: string
   consigner: ConsignerConsigneeType
   consignee: ConsignerConsigneeType
-  material: string
+  materials: {name : string, weight : string}[]
   weight: string
   unit: string
   paidBy: 'consigner' | 'consignee' | 'agent'
@@ -317,7 +317,7 @@ export interface FMDataType {
   truckHireCost: string;
   commision: string;
   weight: string;
-  material: string;
+  material: {name : string, weight : string}[];
   unit: string;
   noOfBags: string;
   vehicleOwner: string;

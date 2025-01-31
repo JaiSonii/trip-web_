@@ -50,8 +50,7 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
                 <Image src={formData.logo} alt='logo' width={70} height={70} className='' />
               </div>
               :
-              <div className=" bg-gray-300 text-white text-center flex items-center justify-center rounded-full"
-                style={{ width: "70px", height: "70px" }}></div>
+              null
             }
           </div>
           <div className="text-center py-2 border-b border-black">
@@ -152,11 +151,11 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
               <div className="col-span-6 font-semibold text-black border-t-2 border-black h-auto text-sm">
                 <div className="border-b-2 border-r-2 border-black px-2 pb-6 flex gap-2 items-center">
                   <p>Consigner Name and Address :</p>
-                  <p className="text-red-600">{formData.consigner.name + " " + formData.consigner.address}</p>
+                  <p className="text-red-600">{formData.consigner.name + " " + formData.consigner.address + ', ' + formData.consigner.city}</p>
                 </div>
                 <div className="border-b-2 border-r-2 border-black px-2 pb-6 flex gap-2 items-center">
                   <p>Consignee Name and Address :</p>
-                  <p className="text-red-600">{formData.consignee.name + " " + formData.consignee.address}</p>
+                  <p className="text-red-600">{formData.consignee.name + " " + formData.consignee.address + ', ' + formData.consignee.city}</p>
                 </div>
               </div>
 
@@ -164,10 +163,10 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
               <div className="col-span-3 text-xs text-black h-auto">
                 <div className="space-y-1">
                   <p className="border-2 border-black p-2 text-red-600 flex items-center">
-                    <span className="text-black mr-1">From:</span>{formData.consigner.address}
+                    <span className="text-black mr-1">From:</span>{formData.consigner.city}
                   </p>
                   <p className="border-2 border-black p-2 text-red-600 flex items-center">
-                    <span className="text-black mr-1">To:</span>{formData.consignee.address}
+                    <span className="text-black mr-1">To:</span>{formData.consignee.city}
                   </p>
                 </div>
               </div>
@@ -182,7 +181,7 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
                   <th className="border border-black p-2" rowSpan={2}>Packages</th>
                   <th className="border border-black p-2" rowSpan={2}>Description (said to contain)</th>
                   <th className="border border-black p-0" colSpan={2}>
-                    <p className="p-2">Weight</p>
+                    <p className="p-2">Weight (MT)</p>
                     <div className="grid grid-cols-2 border-t border-black">
                       <div className="border-r border-black p-2">Actual</div>
                       <div className="border-l border-black p-2">Charged</div>
@@ -194,23 +193,19 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
               </thead>
 
               <tbody className="text-center text-red-600 font-semibold">
-                {formData.material?.split(',').map((item: string, index: number) => (
+                {formData.materials.map((item, index: number) => (
                   <tr key={index}>
                     <td className="border border-black p-2">{index + 1}</td>
-                    <td className="border border-black p-2">{item}</td>
+                    <td className="border border-black p-2">{item.name}</td>
+                    <td className="border border-black p-2">{item.weight}</td>
 
                     {index === 0 && <>
-                      <td className="border border-black p-2" rowSpan={formData.material.split(',').length}>
-                        <div className="h-full flex items-center justify-center" >
-                          {formData.weight || 'Fixed'}
-                        </div>
-                      </td>
-                      <td className="border border-black p-2" rowSpan={formData.material.split(',').length}>
+                      <td className="border border-black p-2" rowSpan={formData.materials.length}>
                         <div className="h-full flex items-center justify-center">
                           {formData.grtdWeight || 'Fixed'}
                         </div>
                       </td>
-                      <td className="border border-black p-2" rowSpan={formData.material.split(',').length}>
+                      <td className="border border-black p-2" rowSpan={formData.materials.length}>
                         <div className='flex flex-col gap-3 text-black text-left'>
                           <p>Mazdoor</p>
                           <p>Hire Charges</p>
@@ -220,7 +215,7 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
                           <p className='mt-2 text-xs'>TOTAL</p>
                         </div>
                       </td>
-                      <td className="border border-black p-2" rowSpan={formData.material.split(',').length}>
+                      <td className="border border-black p-2" rowSpan={formData.materials.length}>
                         <div className='flex flex-col justify-between h-full'>
                           <div className='flex font-semibold gap-4 flex-col items-center py-3 justify-between'>
                             <p>TO</p>
@@ -332,7 +327,7 @@ export function FMemo({ formData, payments }: { formData: FMDataType, payments: 
 
         <div className="text-center mb-5">
           <div className="flex items-center justify-center">
-            <Image src={formData.logo} alt="Company Logo" width={80} height={80} />
+            {formData.logo ? <Image src={formData.logo} alt="Company Logo" width={80} height={80} /> : null }
             <div className="ml-4">
               <h2 className="text-3xl font-semibold text-gray-800"><CompanyHeader formData={formData} /></h2>
               <p className="text-lg font-normal uppercase text-gray-700">Fleet Owners and Transport Contractors</p>
@@ -356,7 +351,7 @@ export function FMemo({ formData, payments }: { formData: FMDataType, payments: 
             <td className="border border-black p-2">Date: <strong>{new Date(formData.date).toLocaleDateString('en-IN')}</strong></td>
           </tr>
           <tr>
-            <td className="border border-black p-2">Material: <strong>{formData.material}</strong></td>
+            <td className="border border-black p-2">Material: <strong>{formData.material.map((item,i)=>item.name + (i=== formData.material.length - 1 ? "" : ','))}</strong></td>
             <td className="border border-black p-2">From: <strong>{formData.from}</strong></td>
             <td className="border border-black p-2">To: <strong>{formData.to}</strong></td>
           </tr>

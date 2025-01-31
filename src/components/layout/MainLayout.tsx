@@ -193,7 +193,7 @@ const MainLayout = ({ children }: MainLayoutProps) => {
                     onClick={() => setSelected(item.label)}
                   >
                     <item.icon className="mr-3" size={25} />
-                    <span className=' font-semibold text-lg'>{item.label}</span>
+                    <span className=' text-lg'>{item.label}</span>
                   </div>
                 </Link>
               </div>

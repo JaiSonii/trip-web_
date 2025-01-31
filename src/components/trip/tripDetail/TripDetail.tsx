@@ -202,7 +202,7 @@ const TripDetails = () => {
           <div className='grid grid-cols-4 gap-2'>
             <TripInfo label="FM No" value={trip.fmNo || '----'} />
             <TripInfo label="LR Number" value={trip.LR || '----'} />
-            <TripInfo label="Material" value={trip.material || '----'} />
+            <TripInfo label="Material" value={trip.material || '----'} guaranteedWeight={trip.guaranteedWeight}/>
             <TripInfo label="Billing Type" value={trip.billingType || '----'} />
           </div>
 

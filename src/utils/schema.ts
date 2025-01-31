@@ -251,9 +251,13 @@ export const tripSchema = new Schema({
   dates: [
     Date
   ],
-  material: {
-    type: String,
-  },
+  guaranteedWeight : String,
+  material : [
+    {
+      name : String,
+      weight : String
+    }
+  ],
   notes: {
     type: String
   },

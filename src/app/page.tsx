@@ -1,4 +1,4 @@
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import Navigation from '@/components/Navigation';
 import HeroSection from '@/components/HeroSection';
 import FeatureSection from '@/components/FeatureSection';
@@ -6,7 +6,11 @@ import WhyChooseUs from '@/components/WhyChooseUs';
 import Footer from '@/components/Footer';
 import AppDownload from '@/components/AppDownload';
 
+
+
+
 export default function Home() {
+
   return (
     <div className="w-full overflow-x-hidden text-black">
       {/* First background split */}

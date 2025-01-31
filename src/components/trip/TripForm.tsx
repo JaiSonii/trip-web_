@@ -1,21 +1,23 @@
-'use client'
+"use client"
 
-import React, { useState, useEffect, useRef } from 'react'
-import { PartySelect } from './PartySelect'
-import TruckSelect from './TruckSelect'
-import DriverSelect from './DriverSelect'
-import RouteInputs from './RouteInputs'
-import { BillingInfo } from './BillingInfo'
-import { DateInputs } from './DateInputs'
-import { IDriver, IParty, TruckModel } from '@/utils/interface'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
-import { formatNumber } from '@/utils/utilArray'
-import { createWorker } from 'tesseract.js'
-import { Loader2 } from 'lucide-react'
-import { useToast } from '../hooks/use-toast'
-import { useExpenseData } from '../hooks/useExpenseData'
+import type React from "react"
+import { useState, useEffect, useRef } from "react"
+import { PartySelect } from "./PartySelect"
+import TruckSelect from "./TruckSelect"
+import DriverSelect from "./DriverSelect"
+import RouteInputs from "./RouteInputs"
+import { BillingInfo } from "./BillingInfo"
+import { DateInputs } from "./DateInputs"
+import type { TruckModel } from "@/utils/interface"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Checkbox } from "@/components/ui/checkbox"
+import { formatNumber } from "@/utils/utilArray"
+import { createWorker } from "tesseract.js"
+import { Loader2 } from "lucide-react"
+import { useToast } from "../hooks/use-toast"
+import { useExpenseData } from "../hooks/useExpenseData"
+import { MaterialInput } from "./MaterialInput"
 
 type Props = {
   lr: string
@@ -23,30 +25,31 @@ type Props = {
   onSubmit: (trip: any) => void
 }
 
-export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', duplicate: null, onSubmit: () => { } }) {
+export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: "", duplicate: null, onSubmit: () => {} }) {
   const { trucks, parties, drivers, isLoading } = useExpenseData()
 
   const [formData, setFormData] = useState({
-    party: duplicate?.party || JSON.parse(localStorage.getItem('tripData') as any)?.party || '',
-    truck: duplicate?.truck || JSON.parse(localStorage.getItem('tripData') as any)?.truck || '',
-    driver: duplicate?.driver || JSON.parse(localStorage.getItem('tripData') as any)?.driver || '',
-    supplierId: duplicate?.supplier || JSON.parse(localStorage.getItem('tripData') as any)?.supplierId || '',
+    party: duplicate?.party || JSON.parse(localStorage.getItem("tripData") as any)?.party || "",
+    truck: duplicate?.truck || JSON.parse(localStorage.getItem("tripData") as any)?.truck || "",
+    driver: duplicate?.driver || JSON.parse(localStorage.getItem("tripData") as any)?.driver || "",
+    supplierId: duplicate?.supplier || JSON.parse(localStorage.getItem("tripData") as any)?.supplierId || "",
     route: {
-      origin: duplicate?.route?.origin || '',
-      destination: duplicate?.route?.destination || '',
+      origin: duplicate?.route?.origin || "",
+      destination: duplicate?.route?.destination || "",
     },
-    billingType: duplicate?.billingTpe || 'Fixed',
+    billingType: duplicate?.billingTpe || "Fixed",
     perUnit: 0,
     totalUnits: 0,
     amount: duplicate?.amount || 0,
     startDate: duplicate?.startDate || new Date(),
     truckHireCost: duplicate?.truckHireCost || 0,
     LR: lr,
-    fmNo: lr.replace('LRN', 'FM'),
-    material: duplicate?.material || '',
-    notes: duplicate?.notes || '',
+    fmNo: lr.replace("LRN", "FM"),
+    material: duplicate?.material || [],
+    notes: duplicate?.notes || "",
     file: null,
     ewbValidity: duplicate?.ewbValidity || null,
+    guaranteedWeight: duplicate?.guaranteedWeight || '',
   })
 
   const [file, setFile] = useState<File | null>(null)
@@ -61,7 +64,7 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
 
   useEffect(() => {
     const initWorker = async () => {
-      worker.current = await createWorker('eng')
+      worker.current = await createWorker("eng")
     }
     initWorker()
     return () => {
@@ -70,7 +73,7 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
   }, [])
 
   useEffect(() => {
-    const tripData = localStorage.getItem('tripData')
+    const tripData = localStorage.getItem("tripData")
     if (tripData) {
       const savedItem = JSON.parse(tripData)
       setFormData((prev) => ({
@@ -85,15 +88,15 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
     setSelectedTruck(updatedTruck)
     setFormData((prev) => ({
       ...prev,
-      driver: updatedTruck?.driver_id ? updatedTruck?.driver_id : '',
-      supplierId: updatedTruck?.supplier ? updatedTruck?.supplier : ''
+      driver: updatedTruck?.driver_id ? updatedTruck?.driver_id : "",
+      supplierId: updatedTruck?.supplier ? updatedTruck?.supplier : "",
     }))
     setHasSupplier(!!updatedTruck?.supplier)
   }, [formData.truck, trucks])
 
   useEffect(() => {
-    if (formData.billingType !== 'Fixed') {
-      const newAmount = parseFloat(formData.perUnit as any) * parseFloat(formData.totalUnits as any)
+    if (formData.billingType !== "Fixed") {
+      const newAmount = Number.parseFloat(formData.perUnit as any) * Number.parseFloat(formData.totalUnits as any)
       setFormData((prevFormData) => ({
         ...prevFormData,
         amount: newAmount,
@@ -108,7 +111,7 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
     if (uploadedFile.size > MAX_FILE_SIZE) {
       toast({
         description: `File size exceeds the maximum limit of ${MAX_FILE_SIZE / (1024 * 1024)} MB.`,
-        variant: 'warning'
+        variant: "warning",
       })
       return
     }
@@ -125,13 +128,13 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
   const processFileUpload = async (file: File) => {
     try {
       setFileLoading(true)
-      const isPdf = file.type === 'application/pdf'
+      const isPdf = file.type === "application/pdf"
       const resData = await processFile(file, isPdf)
       processTripData(resData.ewbValidityDate)
     } catch (error: any) {
       toast({
         description: `Failed to extract details from E-Way Bill`,
-        variant: 'warning'
+        variant: "warning",
       })
       console.error("Error processing e-way bill:", error)
     } finally {
@@ -143,10 +146,10 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
     if (!isPdf) {
       const text = await extractTextFromImage(file)
       const res = await fetch(`/api/trips/getEwaybillDetails/text`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'text/plain',
-          'Accept': 'application/json',
+          "Content-Type": "text/plain",
+          Accept: "application/json",
         },
         body: text,
       })
@@ -154,9 +157,9 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
       return await res.json()
     } else {
       const data = new FormData()
-      data.append('file', file)
+      data.append("file", file)
       const res = await fetch(`/api/trips/getEwaybillDetails`, {
-        method: 'POST',
+        method: "POST",
         body: data,
       })
       if (!res.ok) throw new Error("Failed to process file")
@@ -165,8 +168,10 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
   }
 
   const extractTextFromImage = async (file: File): Promise<string> => {
-    if (!worker.current) return ''
-    const { data: { text } } = await worker.current.recognize(file)
+    if (!worker.current) return ""
+    const {
+      data: { text },
+    } = await worker.current.recognize(file)
     return text
   }
 
@@ -179,8 +184,8 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
       ...prev,
       startDate: new Date(tripData.startDate),
       route: {
-        origin: tripData?.origin?.split('\n')[0],
-        destination: tripData?.destination?.split('\n')[0],
+        origin: tripData?.origin?.split("\n")[0],
+        destination: tripData?.destination?.split("\n")[0],
       },
       truck: tripData.truckNo,
       ewbValidity: tripData.validity,
@@ -191,8 +196,8 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
 
-    if (name.includes('route.')) {
-      const routeField = name.split('.')[1]
+    if (name.includes("route.")) {
+      const routeField = name.split(".")[1]
       setFormData((prevState) => ({
         ...prevState,
         route: {
@@ -212,7 +217,7 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
     e.preventDefault()
 
     const sanitizeInput = (value: string) => {
-      const sanitizedValue = parseFloat(value.replace(/,/g, '').trim())
+      const sanitizedValue = Number.parseFloat(value.replace(/,/g, "").trim())
       return !isNaN(Number(sanitizedValue)) ? sanitizedValue : null
     }
 
@@ -223,24 +228,31 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
 
     if (sanitizedAmount === null || sanitizedTruckHireCost === null) {
       toast({
-        description: 'Please enter valid numeric values for Amount and Truck Hire Cost.',
-        variant: 'warning'
+        description: "Please enter valid numeric values for Amount and Truck Hire Cost.",
+        variant: "warning",
       })
       return
     }
 
     if (!formData.supplierId && !formData.driver) {
       toast({
-        description: 'Driver Needs to be assigned!',
-        variant: 'warning'
+        description: "Driver Needs to be assigned!",
+        variant: "warning",
       })
       return
     }
 
-    if (!formData.party || !formData.truck || !formData.amount || !formData.route.origin || !formData.route.destination || !formData.LR) {
+    if (
+      !formData.party ||
+      !formData.truck ||
+      !formData.amount ||
+      !formData.route.origin ||
+      !formData.route.destination ||
+      !formData.LR
+    ) {
       toast({
-        description: 'Please fill in the required fields',
-        variant: 'warning'
+        description: "Please fill in the required fields",
+        variant: "warning",
       })
       return
     }
@@ -250,13 +262,20 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
       amount: sanitizedAmount,
       truckHireCost: sanitizedTruckHireCost,
       perUnit: sanitizedPerUnit,
-      totalUnits: sanitizedTotalUnits
+      totalUnits: sanitizedTotalUnits,
+      material: formData.material,
+      guaranteedWeight: formData.guaranteedWeight,
     })
 
-    localStorage.removeItem('tripData')
+    localStorage.removeItem("tripData")
   }
 
-  if (isLoading) return <div className="flex justify-center items-center h-screen"><Loader2 className='text-bottomNavBarColor animate-spin' /></div>
+  if (isLoading)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className="text-bottomNavBarColor animate-spin" />
+      </div>
+    )
 
   return (
     <div className="bg-white text-black p-4 max-w-3xl mx-auto shadow-md rounded-md">
@@ -277,7 +296,7 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
           <input
             type="date"
             name="ewbValidity"
-            value={formData.ewbValidity ? new Date(formData.ewbValidity).toISOString().split('T')[0] : ''}
+            value={formData.ewbValidity ? new Date(formData.ewbValidity).toISOString().split("T")[0] : ""}
             onChange={handleChange}
             className="w-full"
           />
@@ -285,73 +304,32 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
       </div>
 
       <form className="space-y-3" onSubmit={handleSubmit}>
-        <BillingInfo
-          formData={formData}
-          handleChange={handleChange}
-          setFormData={setFormData}
-        />
+        <BillingInfo formData={formData} handleChange={handleChange} setFormData={setFormData} />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <PartySelect
-            parties={parties}
-            formData={formData}
-            handleChange={handleChange}
-          />
-          <TruckSelect
-            trucks={trucks}
-            formData={formData}
-            handleChange={handleChange}
-            setFormData={setFormData}
-          />
+          <PartySelect parties={parties} formData={formData} handleChange={handleChange} />
+          <TruckSelect trucks={trucks} formData={formData} handleChange={handleChange} setFormData={setFormData} />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <DriverSelect
-            drivers={drivers}
-            formData={formData}
-            handleChange={handleChange}
-            setFormData={setFormData}
-          />
-          <DateInputs
-            formData={formData}
-            handleChange={handleChange}
-          />
+          <DriverSelect drivers={drivers} formData={formData} handleChange={handleChange} setFormData={setFormData} />
+          <DateInputs formData={formData} handleChange={handleChange} />
         </div>
         <div className="z-50">
-          <RouteInputs
-            formData={formData}
-            handleChange={handleChange}
-          />
+          <RouteInputs formData={formData} handleChange={handleChange} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">LR No*</label>
-            <Input
-              type="text"
-              name="LR"
-              value={formData.LR}
-              placeholder="LR No"
-              onChange={handleChange}
-            />
+            <Input type="text" name="LR" value={formData.LR} placeholder="LR No" onChange={handleChange} />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-700 mb-1">FM No</label>
-            <Input
-              type="text"
-              name="fmNo"
-              value={formData.fmNo}
-              placeholder="FM No"
-              onChange={handleChange}
-            />
+            <Input type="text" name="fmNo" value={formData.fmNo} placeholder="FM No" onChange={handleChange} />
           </div>
-
         </div>
 
         <div className="flex items-center space-x-2">
-          <Checkbox
-            id="showDetails"
-            checked={showDetails}
-            onCheckedChange={() => setShowDetails(!showDetails)}
-          />
+          <Checkbox id="showDetails" checked={showDetails} onCheckedChange={() => setShowDetails(!showDetails)} />
           <label
             htmlFor="showDetails"
             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -362,16 +340,12 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
 
         {showDetails && (
           <>
-            <div className="mb-4">
-              <label className="block text-xs font-medium text-gray-700 mb-1">Material Name</label>
-              <Input
-                type="text"
-                name="material"
-                value={formData.material}
-                placeholder="Material Name"
-                onChange={handleChange}
-              />
-            </div>
+            <MaterialInput
+              materials={formData.material}
+              onChange={(materials) => setFormData((prev) => ({ ...prev, material: materials }))}
+              guaranteedWeight={formData.guaranteedWeight}
+              onGuaranteedWeightChange={(weight) => setFormData((prev) => ({ ...prev, guaranteedWeight: weight }))}
+            />
             <div className="mb-4">
               <label className="block text-xs font-medium text-gray-700 mb-1">Notes</label>
               <textarea
@@ -405,3 +379,4 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: '', 
     </div>
   )
 }
+

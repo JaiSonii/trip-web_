@@ -7,6 +7,7 @@ import { useToast } from '@/components/hooks/use-toast';
 import {v4 as uuidV4} from 'uuid'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { statuses } from '@/utils/schema';
+import { formatNumber } from '@/utils/utilArray';
 
 interface ModalProps {
   isOpen: boolean;
@@ -40,7 +41,6 @@ const InvoicePaymentModal: React.FC<ModalProps> = ({
   });
   const {toast} = useToast()
 
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement | any>) => {
     const { name, value, type, checked } = e.target;
     setFormState(prevState => ({
@@ -56,8 +56,19 @@ const InvoicePaymentModal: React.FC<ModalProps> = ({
         description : 'Enter Valid Amount',
         variant : 'warning'
       })
+
       return;
     }
+
+    if(trips.find(trip=>trip.trip_id === formState.trip_id).balance - formState.amount < 0){
+      
+      toast({
+        description : 'Payment amount exceeds pending balance',
+        variant : 'warning'
+      })
+      return;
+    }
+
     // if(formState.amount > trip.balance){
     //   toast({
     //     description : 'Payment amount exceeds pending balance',
@@ -90,7 +101,7 @@ const InvoicePaymentModal: React.FC<ModalProps> = ({
           duration: 0.5,
           ease: [0, 0.71, 0.2, 1.01]
         }} className="fixed inset-0 z-50 flex items-center justify-center">
-        <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+        <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-xl">
           <h3 className="text-lg font-semibold mb-4">Payment</h3>
           <form onSubmit={handleSubmit}>
           {trips && trips?.length > 0 &&
@@ -150,6 +161,10 @@ const InvoicePaymentModal: React.FC<ModalProps> = ({
                         {/* Start date */}
                         <span className="text-sm text-gray-600 whitespace-nowrap">
                           {new Date(trip.startDate).toISOString().split('T')[0]}
+                        </span>
+
+                        <span className="text-sm text-gray-600 whitespace-nowrap">
+                          Balance : {formatNumber(trip.balance)}
                         </span>
 
                       </div>

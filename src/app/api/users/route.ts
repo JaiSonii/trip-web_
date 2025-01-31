@@ -119,6 +119,7 @@ export async function PUT(req: Request) {
     }
 
     const data = JSON.parse(formData.get('data') as string);
+    console.log(data)
 
     const uploadIfPresent = async (file: File | null, folder: string) => {
       if (!file) return '';
@@ -151,6 +152,11 @@ export async function PUT(req: Request) {
     if (logoUrl) updatedUser.logoUrl = logoUrl;
     if (stampUrl) updatedUser.stampUrl = stampUrl;
     if (signatureUrl) updatedUser.signatureUrl = signatureUrl;
+
+    const {deleteLogo, deleteStamp, deleteSignature} = data
+    if(deleteLogo) updatedUser.logoUrl = ''
+    if(deleteStamp) updatedUser.stampUrl = ''
+    if(deleteSignature) updatedUser.signatureUrl = ''
 
     await updatedUser.save();
 

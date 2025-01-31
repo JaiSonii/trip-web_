@@ -1,20 +1,20 @@
-'use client'
+"use client"
 
-import React, { useEffect, useRef, useState } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
-import { Loader2, X } from 'lucide-react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { ConsignerConsigneeType, EWBFormDataType, ITrip } from '@/utils/interface'
-import { Bilty } from '@/utils/DocGeneration'
-import 'jspdf/dist/polyfills.es.js';
-import { jsPDF } from 'jspdf';
-import html2canvas from 'html2canvas';
-import { useToast } from '../hooks/use-toast'
-import { savePDFToBackend } from '@/utils/saveTripDocs'
-
+import type React from "react"
+import { useEffect, useRef, useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Loader2, X } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
+import type { ConsignerConsigneeType, EWBFormDataType, ITrip } from "@/utils/interface"
+import { Bilty } from "@/utils/DocGeneration"
+import "jspdf/dist/polyfills.es.js"
+import { jsPDF } from "jspdf"
+import html2canvas from "html2canvas"
+import { useToast } from "../hooks/use-toast"
+import { savePDFToBackend } from "@/utils/saveTripDocs"
 
 type Props = {
   isOpen: boolean
@@ -24,102 +24,101 @@ type Props = {
 }
 
 const placeholders: { [key: string]: string } = {
-  gstNumber: 'Enter GST Number',
-  pan: 'Enter PAN',
-  companyName: 'Enter Company Name',
-  address: 'Enter Address',
-  city: 'Enter City',
-  pincode: 'Enter Pincode',
-  contactNumber: 'Enter Contact Number',
-  email: 'Enter Email Address',
-  date: 'Select Date',
-  LR: 'Enter LR Number',
-  consigner: 'Enter Consigner Details',
-  consignee: 'Enter Consignee Details',
-  material: 'Enter Material Name',
-  weight: 'Enter Weight',
-  unit: 'Enter Unit',
-  paidBy: 'Enter Payment Responsible Party',
-  ewayBillNo: 'Enter E-Way Bill Number',
-  invoiceNo: 'Enter Invoice Number',
-  name: 'Enter Name',
-  value: 'Value'
-};
+  gstNumber: "Enter GST Number",
+  pan: "Enter PAN",
+  companyName: "Enter Company Name",
+  address: "Enter Address",
+  city: "Enter City",
+  pincode: "Enter Pincode",
+  contactNumber: "Enter Contact Number",
+  email: "Enter Email Address",
+  date: "Select Date",
+  LR: "Enter LR Number",
+  consigner: "Enter Consigner Details",
+  consignee: "Enter Consignee Details",
+  material: "Enter Material Name",
+  weight: "Enter Weight",
+  unit: "Enter Unit",
+  paidBy: "Enter Payment Responsible Party",
+  ewayBillNo: "Enter E-Way Bill Number",
+  invoiceNo: "Enter Invoice Number",
+  name: "Enter Name",
+  value: "Value",
+}
 
 const steps = [
   {
-    title: 'Company Details',
-    fields: ['gstNumber', 'pan', 'companyName', 'address', 'city', 'pincode', 'contactNumber', 'email']
+    title: "Company Details",
+    fields: ["gstNumber", "pan", "companyName", "address", "city", "pincode", "contactNumber", "email"],
   },
   {
-    title: 'Consigner/Consignee Details',
-    fields: ['date', 'LR', 'consigner', 'consignee']
+    title: "Consigner/Consignee Details",
+    fields: ["date", "LR", "consigner", "consignee"],
   },
   {
-    title: 'Trip Details',
-    fields: ['material', 'weight', 'unit', 'paidBy']
+    title: "Trip Details",
+    fields: ["material", "weight", "unit", "paidBy"],
   },
   {
-    title: 'E-Way Bill Details',
-    fields: ['ewayBillNo', 'invoiceNo']
-  }
+    title: "E-Way Bill Details",
+    fields: ["ewayBillNo", "invoiceNo"],
+  },
 ]
 
-const tabs = ['Consigner', 'Consignee', 'Office', 'Driver']
+const tabs = ["Consigner", "Consignee", "Office", "Driver"]
 
 export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
-
   const { toast } = useToast()
   const [currentStep, setCurrentStep] = useState(0)
   const [showBill, setShowBill] = useState(false)
   const [user, setUser] = useState<any>()
   const [pdfDownloading, setPDFDownloading] = useState(false)
   const [formData, setFormData] = useState<EWBFormDataType>({
-    gstNumber: '',
-    pan: '',
-    companyName: '',
-    address: '',
-    city: '',
-    pincode: '',
-    contactNumber: '',
-    email: '',
+    gstNumber: "",
+    pan: "",
+    companyName: "",
+    address: "",
+    city: "",
+    pincode: "",
+    contactNumber: "",
+    email: "",
     date: new Date(trip.startDate),
-    LR: trip.LR || '',
+    LR: trip.LR || "",
     consigner: {
-      gstNumber: '',
-      name: '',
-      address: trip.route.origin,
+      gstNumber: "",
+      name: "",
+      address: '',
       city: trip.route.origin,
-      pincode: '',
-      contactNumber: ''
+      pincode: "",
+      contactNumber: "",
     },
     consignee: {
-      gstNumber: '',
-      name: '',
-      address: trip.route.destination,
+      gstNumber: "",
+      name: "",
+      address: '',
       city: trip.route.destination,
-      pincode: '',
-      contactNumber: ''
+      pincode: "",
+      contactNumber: "",
     },
-    material: trip.material || '',
-    weight: '',
-    unit: '',
-    paidBy: 'consigner',
-    ewayBillNo: '',
-    invoiceNo: '',
-    value: '',
-    truckNo: trip.truck || '',
-    logo: '',
-    signature: '',
-    grtdWeight: ''
+    weight: "",
+    unit: "",
+    paidBy: "consigner",
+    ewayBillNo: "",
+    invoiceNo: "",
+    value: "",
+    truckNo: trip.truck || "",
+    logo: "",
+    signature: "",
+    materials: trip.material || [],
+    grtdWeight: trip.guaranteedWeight || '',
   })
   const billRef = useRef<HTMLDivElement>(null)
 
   const fetchUser = async () => {
     try {
-      const res = await fetch('/api/users')
+      const res = await fetch("/api/users")
       if (!res.ok) {
-        alert('Failed to fetch details')
+        alert("Failed to fetch details")
         return
       }
       const data = await res.json()
@@ -136,67 +135,65 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
         pincode: user.pincode,
         pan: user.panNumber,
         city: user.city,
-        email: user.email
-
+        email: user.email,
       }))
     } catch (error) {
-      alert('Failed to fetch User Details')
+      alert("Failed to fetch User Details")
     }
   }
 
   useEffect(() => {
-    if (isOpen) fetchUser();
+    if (isOpen) fetchUser()
   }, [isOpen])
 
   const biltyColor = (copy: string) => {
     switch (copy) {
-      case 'Consigner':
-        return 'bg-red-100'
-      case 'Consignee':
-        return 'bg-blue-100'
-      case 'Driver':
-        return 'bg-yellow-100'
-      case 'Office':
-        return 'bg-green-100'
-
+      case "Consigner":
+        return "bg-red-100"
+      case "Consignee":
+        return "bg-blue-100"
+      case "Driver":
+        return "bg-yellow-100"
+      case "Office":
+        return "bg-green-100"
 
       default:
-        break;
+        break
     }
   }
 
   const downloadAllPDFs = async () => {
     const pdf = new jsPDF({
-      orientation: 'landscape',
-      unit: 'mm',
-      format: 'a4',
-    });
+      orientation: "landscape",
+      unit: "mm",
+      format: "a4",
+    })
 
-    setPDFDownloading(true);
+    setPDFDownloading(true)
 
     try {
       // Remove the initial blank page
-      pdf.deletePage(1);
+      pdf.deletePage(1)
 
       // Generate PDF pages for all tabs
       for (const tab of tabs) {
-        const element = document.getElementById(`bilty-${tab}`);
+        const element = document.getElementById(`bilty-${tab}`)
         if (element) {
-          const canvas = await html2canvas(element, { scale: 2 });
-          const imgData = canvas.toDataURL('image/jpeg');
+          const canvas = await html2canvas(element, { scale: 2 })
+          const imgData = canvas.toDataURL("image/jpeg")
 
-          const padding = 10; // 10mm padding on each side
-          const imgWidth = canvas.width / 2; // Divide by 2 because of scale: 2
-          const imgHeight = canvas.height / 2;
+          const padding = 10 // 10mm padding on each side
+          const imgWidth = canvas.width / 2 // Divide by 2 because of scale: 2
+          const imgHeight = canvas.height / 2
 
           // Set the PDF page size to match the image size plus padding
-          pdf.addPage([imgWidth + padding * 2, imgHeight + padding * 2], 'landscape');
-          pdf.addImage(imgData, 'JPEG', padding, padding, imgWidth, imgHeight);
+          pdf.addPage([imgWidth + padding * 2, imgHeight + padding * 2], "landscape")
+          pdf.addImage(imgData, "JPEG", padding, padding, imgWidth, imgHeight)
         }
       }
 
       // Save the generated PDF to the user's local device
-      pdf.save(`Bilty-${trip.LR}-${formData.truckNo}.pdf`);
+      pdf.save(`Bilty-${trip.LR}-${formData.truckNo}.pdf`)
 
       // Update user details if necessary
       if (
@@ -208,36 +205,36 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
         (!user.city && formData.city) ||
         (!user.email && formData.email)
       ) {
-        await updateUserDetails();
+        await updateUserDetails()
       }
 
       // Save the PDF file to the backend
       const filename = `Bilty-${trip.LR}-${trip.truck}.pdf`
-      const docData = await savePDFToBackend(pdf, filename, 'Bilty', trip, formData.date);
+      const docData = await savePDFToBackend(pdf, filename, "Bilty", trip, formData.date)
 
       setTrip((prev: ITrip | any) => ({
         ...prev,
         documents: docData.documents,
-      }));
+      }))
 
       toast({
-        description: 'Bilty saved successfully to documents'
-      });
+        description: "Bilty saved successfully to documents",
+      })
     } catch (error) {
-      console.error('Error processing PDF:', error);
+      console.error("Error processing PDF:", error)
       toast({
-        description: 'An error occurred while saving bilty',
-        variant: 'destructive',
-      });
+        description: "An error occurred while saving bilty",
+        variant: "destructive",
+      })
     } finally {
-      setPDFDownloading(false);
+      setPDFDownloading(false)
     }
-  };
+  }
 
   const updateUserDetails = async () => {
-    const formdata = new FormData();
+    const formdata = new FormData()
     formdata.append(
-      'data',
+      "data",
       JSON.stringify({
         companyName: user.companyName || formData.companyName,
         address: user.address || formData.address,
@@ -246,38 +243,58 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
         pincode: user.pincode || formData.pincode,
         city: user.city || formData.city,
         email: user.email || formData.email,
-      })
-    );
+      }),
+    )
 
-    const response = await fetch('/api/users', {
-      method: 'PUT',
+    const response = await fetch("/api/users", {
+      method: "PUT",
       body: formdata,
-    });
+    })
 
     if (!response.ok) {
-      throw new Error('Failed to update user details');
+      throw new Error("Failed to update user details")
     }
-  };
-
+  }
 
   if (!isOpen) return null
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
     setFormData((prev: any) => {
-      if (name.includes('.')) {
-        const [parent, child] = name.split('.')
+      if (name.includes(".")) {
+        const [parent, child] = name.split(".")
         return { ...prev, [parent]: { ...prev[parent], [child]: value } }
       }
       return { ...prev, [name]: value }
     })
   }
 
-  const handleNext = () => setCurrentStep(prev => Math.min(prev + 1, steps.length - 1))
-  const handleBack = () => setCurrentStep(prev => Math.max(prev - 1, 0))
+  const handleNext = () => setCurrentStep((prev) => Math.min(prev + 1, steps.length - 1))
+  const handleBack = () => setCurrentStep((prev) => Math.max(prev - 1, 0))
 
   const progressPercentage = ((currentStep + 1) / steps.length) * 100
 
+  const handleMaterialChange = (index: number, field: "name" | "weight", value: string | number) => {
+    setFormData((prev) => {
+      const newMaterials = [...prev.materials]
+      newMaterials[index] = { ...newMaterials[index], [field]: value }
+      return { ...prev, materials: newMaterials }
+    })
+  }
+
+  const addMaterial = () => {
+    setFormData((prev) => ({
+      ...prev,
+      materials: [...prev.materials, { name: "", weight: "" }],
+    }))
+  }
+
+  const removeMaterial = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      materials: prev.materials.filter((_, i) => i !== index),
+    }))
+  }
 
   return (
     <motion.div
@@ -286,20 +303,21 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
       exit={{ opacity: 0 }}
       className="fixed inset-0 bg-black bg-opacity-70 z-40 flex items-center justify-center"
     >
-
       <motion.div
         initial={{ scale: 0.9, y: 20 }}
         animate={{ scale: 1, y: 0 }}
         exit={{ scale: 0.9, y: 20 }}
-        transition={{ type: 'spring', damping: 15 }}
-        className={`bg-white p-6 rounded-lg shadow-lg ${!showBill ? 'max-w-5xl' : 'max-w-7xl'} w-full max-h-[700px] overflow-y-auto thin-scrollbar`}
+        transition={{ type: "spring", damping: 15 }}
+        className={`bg-white p-6 rounded-lg shadow-lg ${!showBill ? "max-w-5xl" : "max-w-7xl"} w-full max-h-[700px] overflow-y-auto thin-scrollbar`}
       >
-        <div className='flex justify-between items-center mb-4'>
-          <h1 className='font-semibold text-xl text-black'>Bilty Details</h1>
-          <Button variant='ghost' size='icon' onClick={onClose}><X /></Button>
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="font-semibold text-xl text-black">Bilty Details</h1>
+          <Button variant="ghost" size="icon" onClick={onClose}>
+            <X />
+          </Button>
         </div>
 
-        {!showBill ?
+        {!showBill ? (
           <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
             <motion.div
               className="bg-lightOrange h-2.5 rounded-full"
@@ -307,10 +325,11 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
               animate={{ width: `${progressPercentage}%` }}
               transition={{ duration: 0.3 }}
             />
-          </div> :
-          <div className="flex items-start gap-16 mb-4">
-          </div>}
-        {!showBill ?
+          </div>
+        ) : (
+          <div className="flex items-start gap-16 mb-4"></div>
+        )}
+        {!showBill ? (
           <form onSubmit={(e) => e.preventDefault()}>
             <AnimatePresence mode="wait">
               <motion.div
@@ -318,16 +337,18 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
                 initial={{ x: 300, opacity: 0 }}
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: -300, opacity: 0 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
               >
-                <h2 className='text-lg font-semibold text-black mt-2 mb-4'>{steps[currentStep].title}</h2>
+                <h2 className="text-lg font-semibold text-black mt-2 mb-4">{steps[currentStep].title}</h2>
 
                 {currentStep === 0 && (
                   <>
-                    <div className='grid grid-cols-2 gap-2'>
+                    <div className="grid grid-cols-2 gap-2">
                       {(steps[currentStep].fields as (keyof EWBFormDataType)[]).map((field) => (
                         <div key={field} className="mb-1">
-                          <label htmlFor={field} className='text-xs text-gray-500'>{placeholders[field]}</label>
+                          <label htmlFor={field} className="text-xs text-gray-500">
+                            {placeholders[field]}
+                          </label>
                           <Input
                             id={field}
                             name={field}
@@ -338,7 +359,6 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
                         </div>
                       ))}
                     </div>
-
                   </>
                 )}
 
@@ -350,7 +370,7 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
                         id="date"
                         name="date"
                         type="date"
-                        value={new Date(formData.date).toISOString().split('T')[0]}
+                        value={new Date(formData.date).toISOString().split("T")[0]}
                         onChange={handleInputChange}
                         className="mt-1"
                       />
@@ -363,7 +383,7 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
                         value={formData.LR}
                         onChange={handleInputChange}
                         className="mt-1"
-                        placeholder='LR'
+                        placeholder="LR"
                       />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -371,7 +391,9 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
                         <h3 className="font-semibold mb-2">Consigner Details</h3>
                         {Object.keys(formData.consigner).map((field) => (
                           <div key={field} className="mb-1">
-                            <label htmlFor={`consigner.${field}`} className='text-xs text-gray-500'>{placeholders[field]}</label>
+                            <label htmlFor={`consigner.${field}`} className="text-xs text-gray-500">
+                              {placeholders[field]}
+                            </label>
                             <Input
                               id={`consigner.${field}`}
                               name={`consigner.${field}`}
@@ -386,7 +408,9 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
                         <h3 className="font-semibold mb-2">Consignee Details</h3>
                         {Object.keys(formData.consignee).map((field) => (
                           <div key={field} className="mb-1">
-                            <label htmlFor={`consignee.${field}`} className='text-xs text-gray-500'>{placeholders[field]}</label>
+                            <label htmlFor={`consignee.${field}`} className="text-xs text-gray-500">
+                              {placeholders[field]}
+                            </label>
                             <Input
                               id={`consignee.${field}`}
                               name={`consignee.${field}`}
@@ -404,59 +428,62 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
                 {currentStep === 2 && (
                   <>
                     <div className="mb-4">
-                      <Label htmlFor="material">Material</Label>
-                      <Input
-                        id="material"
-                        name="material"
-                        value={formData.material}
-                        onChange={handleInputChange}
-                        className="mt-1"
-                        placeholder='Material (use comma for multiple materials)'
-                      />
+                      <Label>Materials</Label>
+                      {formData.materials.map((material, index) => (
+                        <div key={index} className="flex items-center space-x-2 mb-2">
+                          <Input
+                            name={`materials[${index}].name`}
+                            value={material.name}
+                            onChange={(e) => handleMaterialChange(index, "name", e.target.value)}
+                            placeholder="Material name"
+                          />
+                          <Input
+                            type="number"
+                            name={`materials[${index}].weight`}
+                            value={material.weight}
+                            onChange={(e) => handleMaterialChange(index, "weight", Number.parseFloat(e.target.value))}
+                            placeholder="Weight"
+                          />
+                          <Button type="button" variant="outline" size="sm" onClick={() => removeMaterial(index)}>
+                            Remove
+                          </Button>
+                        </div>
+                      ))}
+                      <Button type="button" variant="outline" onClick={addMaterial} className="mt-2">
+                        Add Material
+                      </Button>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <Label htmlFor="weight">Weight</Label>
-                        <Input
-                          id="weight"
-                          name="weight"
-                          type="number"
-                          value={formData.weight}
-                          onChange={handleInputChange}
-                          className="mt-1"
-                          placeholder='Weight'
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="unit">Unit</Label>
-                        <Input
-                          id="unit"
-                          name="unit"
-                          type="number"
-                          value={formData.unit}
-                          onChange={handleInputChange}
-                          className="mt-1"
-                          placeholder='Unit'
-                        />
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="grtdWeight">Guaranteed Weight</Label>
+                    <div className="mb-4">
+                      <Label htmlFor="guaranteedWeight">Guaranteed Weight</Label>
                       <Input
-                        id="grtdWeight"
-                        name="grtdWeight"
-                        type="number"
+                        id="guaranteedWeight"
+                        name="guaranteedWeight"
+                        type="text"
                         value={formData.grtdWeight}
                         onChange={handleInputChange}
                         className="mt-1"
-                        placeholder='Guaranteed Weight'
+                        placeholder="Guaranteed Weight"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="unit">Unit</Label>
+                      <Input
+                        id="unit"
+                        name="unit"
+                        type="number"
+                        value={formData.unit}
+                        onChange={handleInputChange}
+                        className="mt-1"
+                        placeholder="Unit"
                       />
                     </div>
                     <div className="my-4">
                       <Label>Freight Amount paid by</Label>
                       <RadioGroup
                         value={formData.paidBy}
-                        onValueChange={(value) => setFormData(prev => ({ ...prev, paidBy: value as 'consigner' | 'consignee' | 'agent' }))}
+                        onValueChange={(value) =>
+                          setFormData((prev) => ({ ...prev, paidBy: value as "consigner" | "consignee" | "agent" }))
+                        }
                         className="flex space-x-4 mt-2"
                       >
                         <div className="flex items-center space-x-2">
@@ -486,7 +513,7 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
                         value={formData.ewayBillNo}
                         onChange={handleInputChange}
                         className="mt-1"
-                        placeholder={placeholders['ewayBillNo']}
+                        placeholder={placeholders["ewayBillNo"]}
                       />
                     </div>
                     <div className="mb-4">
@@ -497,19 +524,28 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
                         value={formData.invoiceNo}
                         onChange={handleInputChange}
                         className="mt-1"
-                        placeholder={placeholders['invoiceNo']}
+                        placeholder={placeholders["invoiceNo"]}
                       />
                     </div>
                     <div className="mb-4">
-                      <label htmlFor='value'>Value</label>
-                      <Input id='value' name='value' value={formData.value} placeholder='As Per Invoice' className="mt-1" onChange={handleInputChange} />
+                      <label htmlFor="value">Value</label>
+                      <Input
+                        id="value"
+                        name="value"
+                        value={formData.value}
+                        placeholder="As Per Invoice"
+                        className="mt-1"
+                        onChange={handleInputChange}
+                      />
                     </div>
                   </>
                 )}
 
-                <div className='flex justify-between mt-6'>
+                <div className="flex justify-between mt-6">
                   {currentStep > 0 && (
-                    <Button variant='outline' onClick={handleBack}>Back</Button>
+                    <Button variant="outline" onClick={handleBack}>
+                      Back
+                    </Button>
                   )}
                   {currentStep < steps.length - 1 ? (
                     <Button onClick={handleNext}>Next</Button>
@@ -520,33 +556,31 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
               </motion.div>
             </AnimatePresence>
           </form>
-          :
-          <div className='w-full'>
+        ) : (
+          <div className="w-full">
             {showBill && (
               <div className="sticky bottom-0 left-0 right-0 bg-white p-4 border-b border-gray-200">
                 <div className="flex justify-between max-w-5xl mx-auto">
                   <Button variant="outline" onClick={() => setShowBill(false)}>
                     Edit Form
                   </Button>
-                  <Button disabled={pdfDownloading} onClick={() => downloadAllPDFs()}>{pdfDownloading ? <Loader2 className='text-white animate-spin' /> : 'Download as PDF'}</Button>
+                  <Button disabled={pdfDownloading} onClick={() => downloadAllPDFs()}>
+                    {pdfDownloading ? <Loader2 className="text-white animate-spin" /> : "Download as PDF"}
+                  </Button>
                 </div>
               </div>
             )}
-            <div ref={billRef} className='pb-4'>
+            <div ref={billRef} className="pb-4">
               {tabs.map((tab) => (
-                <div key={tab} id={`bilty-${tab}`} className='my-10'>
+                <div key={tab} id={`bilty-${tab}`} className="my-10">
                   <Bilty formData={formData} color={biltyColor(tab) as string} selectedCopy={tab} />
                 </div>
               ))}
-
             </div>
           </div>
-        }
-
+        )}
       </motion.div>
-
-
-
     </motion.div>
   )
 }
+
