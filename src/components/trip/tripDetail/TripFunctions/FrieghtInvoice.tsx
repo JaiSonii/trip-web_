@@ -154,7 +154,7 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
                         <tr key={index}>
                             <td className="border border-black p-2">{index + 1}</td>
                             <td className="border border-black p-2">{charge.truckNo}</td>
-                            <td colSpan={2} className="border border-black p-2">{charge.material.map((item,i)=>item + (i === charge.material.length - 1 ? '' : ', '))}</td>
+                            <td colSpan={2} className="border border-black p-2">{charge.material?.map((item,i)=>item + (i === charge.material.length - 1 ? '' : ', ')) || ''}</td>
                             <td className="border border-black p-2">{charge.weight}</td>
                             <td className="border border-black p-2">{charge.charged}</td>
                             <td className="border border-black p-2">{charge.rate}</td>

@@ -89,7 +89,7 @@ const InvoiceGenerationPage: React.FC = () => {
         freightCharges: data.trips?.map((trip: ITrip) => ({
           lrNo: trip.LR,
           truckNo: trip.truck,
-          material: trip.material?.map(item=>item.name),
+          material: trip.material?.map(item=>item.name) || [],
           date: new Date(trip.startDate).toISOString().split('T')[0],
           weight: trip.guaranteedWeight || 'FTL',
           charged: trip.units || '',
