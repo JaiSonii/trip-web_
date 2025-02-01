@@ -467,10 +467,10 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
                             placeholder="Material name"
                           />
                           <Input
-                            type="number"
+                            type="text"
                             name={`materials[${index}].weight`}
                             value={material.weight}
-                            onChange={(e) => handleMaterialChange(index, "weight", Number.parseFloat(e.target.value))}
+                            onChange={(e) => handleMaterialChange(index, "weight", e.target.value)}
                             placeholder="Weight"
                           />
                           <Button type="button" variant="outline" size="sm" onClick={() => removeMaterial(index)}>

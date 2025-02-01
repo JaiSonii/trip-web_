@@ -197,12 +197,12 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
                   <tr key={index}>
                     <td className="border border-black p-2">{index + 1}</td>
                     <td className="border border-black p-2">{item.name}</td>
-                    <td className="border border-black p-2">{item.weight} MT</td>
+                    <td className="border border-black p-2">{item.weight} {['fixed', 'ftl'].includes(item.weight.toLowerCase()) ? "" : "MT"}</td>
 
                     {index === 0 && <>
                       <td className="border border-black p-2" rowSpan={formData.materials.length}>
                         <div className="h-full flex items-center justify-center">
-                          {formData.grtdWeight.toString().toLocaleLowerCase() === 'ftl' ? 'FTL' : formData.grtdWeight + " MT"  || 'Fixed'}
+                          {formData.grtdWeight} {['fixed', 'ftl'].includes(formData.grtdWeight.toString().toLowerCase()) ? "" : "MT"}
                         </div>
                       </td>
                       <td className="border border-black p-2" rowSpan={formData.materials.length}>
@@ -327,7 +327,7 @@ export function FMemo({ formData, payments }: { formData: FMDataType, payments: 
 
         <div className="text-center mb-5">
           <div className="flex items-center justify-center">
-            {formData.logo ? <Image src={formData.logo} alt="Company Logo" width={80} height={80} /> : null }
+            {formData.logo ? <Image src={formData.logo} alt="Company Logo" width={80} height={80} /> : null}
             <div className="ml-4">
               <h2 className="text-3xl font-semibold text-gray-800"><CompanyHeader formData={formData} /></h2>
               <p className="text-lg font-normal uppercase text-gray-700">Fleet Owners and Transport Contractors</p>
@@ -351,7 +351,7 @@ export function FMemo({ formData, payments }: { formData: FMDataType, payments: 
             <td className="border border-black p-2">Date: <strong>{new Date(formData.date).toLocaleDateString('en-IN')}</strong></td>
           </tr>
           <tr>
-            <td className="border border-black p-2">Material: <strong>{formData.material.map((item,i)=>item.name + (i=== formData.material.length - 1 ? "" : ','))}</strong></td>
+            <td className="border border-black p-2">Material: <strong>{formData.material.map((item, i) => item.name + (i === formData.material.length - 1 ? "" : ','))}</strong></td>
             <td className="border border-black p-2">From: <strong>{formData.from}</strong></td>
             <td className="border border-black p-2">To: <strong>{formData.to}</strong></td>
           </tr>
@@ -376,7 +376,7 @@ export function FMemo({ formData, payments }: { formData: FMDataType, payments: 
                 </div>
               ))}</div>
             </td>
-           
+
           </tr>
           <tr>
             <td className="border border-black p-2">Weight</td>

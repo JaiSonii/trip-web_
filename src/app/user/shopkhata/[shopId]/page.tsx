@@ -3,7 +3,7 @@ import { useToast } from '@/components/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { loadingIndicator } from '@/components/ui/LoadingIndicator'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { handleEditExpense } from '@/helpers/ExpenseOperation'
+import { DeleteExpense, handleEditExpense } from '@/helpers/ExpenseOperation'
 import { IExpense } from '@/utils/interface'
 import { formatNumber } from '@/utils/utilArray'
 import dynamic from 'next/dynamic'
@@ -38,6 +38,38 @@ const ShopPage = () => {
     }
   }, [shopId])
 
+  const delelteShopKhata = async (id: string) => {
+    try {
+      const res = await fetch(`/api/shopkhata/${shopId}/accounts/${id}`, {
+        method: 'DELETE'
+      })
+      if (res.ok) {
+        toast({ description: 'Shopkhata deleted successfully' })
+        setAccounts((prev) => prev.filter(acc => acc._id !== id))
+        return
+      } else {
+        throw new Error('Failed to delete Entry')
+      }
+    } catch (error) {
+      toast({
+        description: 'Failed to delete Entry',
+        variant: 'destructive'
+      })
+    }
+  }
+
+  const deleteExpense = async (id: string) => {
+    try {
+      await DeleteExpense(id)
+      toast({ description: 'Expense deleted successfully' })
+    } catch (error) {
+      toast({
+        description: 'Failed to delete Expense',
+        variant: 'destructive'
+      })
+    }
+  }
+
   const handleExpense = async (expense: IExpense | any, id: string, file?: File | null) => {
     console.log(file)
     try {
@@ -64,6 +96,8 @@ const ShopPage = () => {
     }
   };
 
+  
+
   return (
     <div className="w-full">
 
@@ -76,7 +110,7 @@ const ShopPage = () => {
                 <TableHead>Reason</TableHead>
                 <TableHead>Credit</TableHead>
                 <TableHead>Payment</TableHead>
-                {/* <TableHead>Action</TableHead> */}
+                <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -96,7 +130,7 @@ const ShopPage = () => {
                   </TableCell>
                   <TableCell><span className='text-red-600 font-semibold'>₹{formatNumber(account.credit) || formatNumber(account.amount)}</span></TableCell>
                   <TableCell ><span className='text-green-600 font-semibold'>₹{formatNumber(account.payment)}</span></TableCell>
-                  {/* <TableCell>
+                  <TableCell>
                     <div className='flex gap-2'>
                       <Button variant={'outline'} onClick={() => {
                         setSelected(account)
@@ -104,11 +138,13 @@ const ShopPage = () => {
                       }}>
                         <MdEdit />
                       </Button>
-                      <Button variant={'destructive'}>
+                      <Button variant={'destructive'} onClick={() => {
+                        account.expenseType ? deleteExpense(account._id) : delelteShopKhata(account._id)
+                      }}>
                         <MdDelete />
                       </Button>
                     </div>
-                  </TableCell> */}
+                  </TableCell>
 
                 </TableRow>
               ))}
