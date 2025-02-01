@@ -34,6 +34,8 @@ const placeholders: { [key: string]: string } = {
   email: "Enter Email Address",
   date: "Select Date",
   LR: "Enter LR Number",
+  from: 'Enter origin',
+  to: 'Enter destination',
   consigner: "Enter Consigner Details",
   consignee: "Enter Consignee Details",
   material: "Enter Material Name",
@@ -53,7 +55,7 @@ const steps = [
   },
   {
     title: "Consigner/Consignee Details",
-    fields: ["date", "LR", "consigner", "consignee"],
+    fields: ["from", "to", "date", "LR", "consigner", "consignee"],
   },
   {
     title: "Trip Details",
@@ -82,6 +84,8 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
     pincode: "",
     contactNumber: "",
     email: "",
+    from: trip.route.origin || '',
+    to: trip.route.destination || "",
     date: new Date(trip.startDate),
     LR: trip.LR || "",
     consigner: {
@@ -386,6 +390,31 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
                         placeholder="LR"
                       />
                     </div>
+                    {/* Add From and To fields */}
+                    <div className="grid grid-cols-2 gap-4 mb-4">
+                      <div>
+                        <Label htmlFor="from">From</Label>
+                        <Input
+                          id="from"
+                          name="from"
+                          value={formData.from}
+                          onChange={handleInputChange}
+                          className="mt-1"
+                          placeholder={placeholders["from"]}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="to">To</Label>
+                        <Input
+                          id="to"
+                          name="to"
+                          value={formData.to}
+                          onChange={handleInputChange}
+                          className="mt-1"
+                          placeholder={placeholders["to"]}
+                        />
+                      </div>
+                    </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <h3 className="font-semibold mb-2">Consigner Details</h3>
@@ -457,7 +486,7 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
                       <Label htmlFor="guaranteedWeight">Guaranteed Weight</Label>
                       <Input
                         id="guaranteedWeight"
-                        name="guaranteedWeight"
+                        name="grtdWeight"
                         type="text"
                         value={formData.grtdWeight}
                         onChange={handleInputChange}

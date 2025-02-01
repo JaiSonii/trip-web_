@@ -151,11 +151,11 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
               <div className="col-span-6 font-semibold text-black border-t-2 border-black h-auto text-sm">
                 <div className="border-b-2 border-r-2 border-black px-2 pb-6 flex gap-2 items-center">
                   <p>Consigner Name and Address :</p>
-                  <p className="text-red-600">{formData.consigner.name + " " + formData.consigner.address + ', ' + formData.consigner.city}</p>
+                  <p className="text-red-600">{formData.consigner.name + " " + formData.consigner.address + ', ' + formData.consigner.city + ', ' + formData.consigner.pincode}</p>
                 </div>
                 <div className="border-b-2 border-r-2 border-black px-2 pb-6 flex gap-2 items-center">
                   <p>Consignee Name and Address :</p>
-                  <p className="text-red-600">{formData.consignee.name + " " + formData.consignee.address + ', ' + formData.consignee.city}</p>
+                  <p className="text-red-600">{formData.consignee.name + " " + formData.consignee.address + ', ' + formData.consignee.city + ', ' + formData.consigner.pincode}</p>
                 </div>
               </div>
 
@@ -163,10 +163,10 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
               <div className="col-span-3 text-xs text-black h-auto">
                 <div className="space-y-1">
                   <p className="border-2 border-black p-2 text-red-600 flex items-center">
-                    <span className="text-black mr-1">From:</span>{formData.consigner.city}
+                    <span className="text-black mr-1">From:</span>{formData.from}
                   </p>
                   <p className="border-2 border-black p-2 text-red-600 flex items-center">
-                    <span className="text-black mr-1">To:</span>{formData.consignee.city}
+                    <span className="text-black mr-1">To:</span>{formData.to}
                   </p>
                 </div>
               </div>
@@ -197,12 +197,12 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
                   <tr key={index}>
                     <td className="border border-black p-2">{index + 1}</td>
                     <td className="border border-black p-2">{item.name}</td>
-                    <td className="border border-black p-2">{item.weight}</td>
+                    <td className="border border-black p-2">{item.weight} MT</td>
 
                     {index === 0 && <>
                       <td className="border border-black p-2" rowSpan={formData.materials.length}>
                         <div className="h-full flex items-center justify-center">
-                          {formData.grtdWeight || 'Fixed'}
+                          {formData.grtdWeight.toString().toLocaleLowerCase() === 'ftl' ? 'FTL' : formData.grtdWeight + " MT"  || 'Fixed'}
                         </div>
                       </td>
                       <td className="border border-black p-2" rowSpan={formData.materials.length}>

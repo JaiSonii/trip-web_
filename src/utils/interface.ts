@@ -282,6 +282,8 @@ export type EWBFormDataType = {
   address: string
   city: string
   pincode: string
+  from : string,
+  to : string;
   contactNumber: string
   email: string
   date: Date

@@ -1,5 +1,7 @@
 import { useToast } from '@/components/hooks/use-toast';
+import { useRouter } from 'next/navigation';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import Cookies from 'js-cookie';
 
 const ReminderContext = createContext<any>(null);
 
@@ -9,6 +11,7 @@ export const ReminderProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [reminders, setReminders] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const router = useRouter()
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
@@ -18,6 +21,15 @@ export const ReminderProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       try {
         const response = await fetch(`/api/documents/reminders`);
         const data = await response.json();
+
+        if (response.status === 401 || data.status === 401) {
+          toast({
+            description: 'Session Expired, Please log in again.',
+            variant: 'warning',
+          })
+          Cookies.remove('auth_token')
+          router.push('/login')
+        }
 
         // Check if the new data is different from the current data
         if ((JSON.stringify(data) !== JSON.stringify(reminders) && data?.tripReminders?.length + data?.truckReminders?.length + data?.driverReminders?.length > 0)) {
