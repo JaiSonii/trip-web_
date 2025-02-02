@@ -84,7 +84,7 @@ const CreateTripPage: React.FC = () => {
       formData.append('startDate', trip.startDate);
       formData.append('truckHireCost', trip.truckHireCost.toString());
       formData.append('LR', trip.LR);
-      formData.append('material', trip.material);
+      formData.append('material', JSON.stringify(trip.material));
       formData.append('notes', trip.notes);
       formData.append('fmNo',trip.fmNo)
       if (trip.billingType !== 'Fixed' && !trip.totalUnits && !trip.perUnit) {

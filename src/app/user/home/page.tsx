@@ -5,7 +5,7 @@ import { FaArrowRightLong, FaRegCircleUser, FaRoute, FaTruck } from 'react-icons
 import { IoNotificationsOutline } from "react-icons/io5";
 import Link from 'next/link';
 import { ChartConfig, ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { Bar, BarChart, CartesianGrid, Cell, Label, Legend, Pie, PieChart, ResponsiveContainer, XAxis, YAxis } from "recharts"
+import { Bar, CartesianGrid, Cell, Label, Legend, Pie, ResponsiveContainer, XAxis, YAxis } from "recharts"
 import { useToast } from '@/components/hooks/use-toast';
 import Loading from '../loading';
 import { useAnimatedNumber } from '@/components/hooks/useAnimatedNumber';
@@ -192,6 +192,8 @@ const TripSelect = ({ tripId, setTripId, trips }: { tripId: string, setTripId: R
 
   )
 }
+const BarChart = dynamic(() => import('recharts').then((mod) => mod.BarChart), { ssr: false });
+const PieChart = dynamic(() => import('recharts').then((mod) => mod.PieChart), { ssr: false });
 
 const Page = () => {
   const router = useRouter()

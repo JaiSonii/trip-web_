@@ -174,6 +174,7 @@ export interface ITrip extends Document {
   balance : number
   units? : number;
   rate?: number;
+  invoice_id? : string
   material? : { name: string; weight: string }[]
   guaranteedWeight? : string;
 }

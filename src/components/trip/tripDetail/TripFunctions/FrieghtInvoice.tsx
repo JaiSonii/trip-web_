@@ -272,7 +272,7 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
 
             <div className="mt-4">For, {formData.companyName}</div>
             <div className="flex items-center justify-evenly space-x-4 text-xs">
-                <div className="text-center flex flex-col items-center">
+                {/* <div className="text-center flex flex-col items-center">
                     <div className="w-[50px] h-[50px]">
                         {formData.logoUrl ? (
                             <Image
@@ -287,7 +287,7 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
                         )}
                     </div>
                     <p className="mt-1">Checked by</p>
-                </div>
+                </div> */}
                 <div className="text-center flex flex-col items-center">
                     <div className="w-[50px] h-[50px]">
                         {formData.signatureUrl ? (

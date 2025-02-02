@@ -265,6 +265,7 @@ export const tripSchema = new Schema({
     type : Boolean,
     default: false
   },
+  invoice_id : String,
   accounts: [
     PaymentBookSchema,
   ],

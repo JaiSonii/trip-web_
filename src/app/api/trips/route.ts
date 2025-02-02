@@ -189,7 +189,7 @@ export async function POST(this: any, req: Request) {
       fmNo : formData.get('fmNo'),
       LR: formData.get('LR'),
       status: 0,
-      material: formData.get('material') || '',
+      material: JSON.parse(formData.get('material') as string) || [],
       notes: formData.get('notes') || '',
       accounts: [],
       documents: []

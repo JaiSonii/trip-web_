@@ -85,7 +85,7 @@ export async function POST(req: Request) {
 
       await Trip.updateMany(
         { trip_id: { $in: data.trips } },
-        { $set: { invoice: true } }
+        { $set: { invoice: true , invoice_id : newInvoice._id} }
       );
   
       // Save the updated trip document
