@@ -87,6 +87,7 @@ const CreateTripPage: React.FC = () => {
       formData.append('material', JSON.stringify(trip.material));
       formData.append('notes', trip.notes);
       formData.append('fmNo',trip.fmNo)
+      if(trip.loadingSlipDetails) formData.append('loadingSlipDetails', JSON.stringify(trip.loadingSlipDetails));
       if (trip.billingType !== 'Fixed' && !trip.totalUnits && !trip.perUnit) {
         alert('Units and Rate is Required')
       }

@@ -18,6 +18,7 @@ import { Loader2 } from "lucide-react"
 import { useToast } from "../hooks/use-toast"
 import { useExpenseData } from "../hooks/useExpenseData"
 import { MaterialInput } from "./MaterialInput"
+import LoadingSlip from "./tripDetail/TripFunctions/LoadingSlip"
 
 type Props = {
   lr: string
@@ -25,7 +26,7 @@ type Props = {
   onSubmit: (trip: any) => void
 }
 
-export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: "", duplicate: null, onSubmit: () => {} }) {
+export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: "", duplicate: null, onSubmit: () => { } }) {
   const { trucks, parties, drivers, isLoading } = useExpenseData()
 
   const [formData, setFormData] = useState({
@@ -33,6 +34,7 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: "", 
     truck: duplicate?.truck || JSON.parse(localStorage.getItem("tripData") as any)?.truck || "",
     driver: duplicate?.driver || JSON.parse(localStorage.getItem("tripData") as any)?.driver || "",
     supplierId: duplicate?.supplier || JSON.parse(localStorage.getItem("tripData") as any)?.supplierId || "",
+    partyName: '',
     route: {
       origin: duplicate?.route?.origin || "",
       destination: duplicate?.route?.destination || "",
@@ -50,6 +52,12 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: "", 
     file: null,
     ewbValidity: duplicate?.ewbValidity || null,
     guaranteedWeight: duplicate?.guaranteedWeight || '',
+    loadingSlipDetails: {
+      balance: 0,
+      charges: undefined,
+      haltingCharges: undefined,
+      advance: undefined
+    }
   })
 
   const [file, setFile] = useState<File | null>(null)
@@ -58,6 +66,7 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: "", 
   const [hasSupplier, setHasSupplier] = useState(false)
   const [fileLoading, setFileLoading] = useState(false)
   const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5 MB in bytes
+  const [loadingSlip, setLoadingSlip] = useState(false)
   const { toast } = useToast()
 
   const worker = useRef<null | any>(null)
@@ -103,6 +112,25 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: "", 
       }))
     }
   }, [formData.billingType, formData.perUnit, formData.totalUnits])
+
+  useEffect(() => {
+    setFormData((prev) => {
+      const { advance = 0, charges = 0, haltingCharges = 0, balance } = prev.loadingSlipDetails ?? {};
+
+      return {
+        ...prev,
+        loadingSlipDetails: {
+          ...prev.loadingSlipDetails,
+          balance: prev.amount - Number(advance) + Number(charges) + Number(haltingCharges),
+        },
+      };
+    });
+  }, [
+    formData.loadingSlipDetails?.advance,
+    formData.loadingSlipDetails?.charges,
+    formData.loadingSlipDetails?.haltingCharges
+  ]);
+
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const uploadedFile = e.target.files?.[0]
@@ -205,12 +233,30 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: "", 
           [routeField]: value,
         },
       }))
-    } else {
+    } else if (name === 'party') {
+      setFormData((prevState) => ({
+        ...prevState,
+        [name]: value,
+        partyName: parties.find(party => party.party_id === value).name || ''
+      }))
+    }
+    else {
       setFormData((prevState) => ({
         ...prevState,
         [name]: value,
       }))
     }
+  }
+
+  const handleLoadingSlipChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      loadingSlipDetails: {
+        ...prev.loadingSlipDetails,
+        [name]: value,
+      }
+    }))
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -279,6 +325,10 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: "", 
 
   return (
     <div className="bg-white text-black p-4 max-w-3xl mx-auto shadow-md rounded-md">
+      <div className="mb-4">
+        <LoadingSlip trip={formData} charges={formData.loadingSlipDetails.charges} haltingCharges={formData.loadingSlipDetails.haltingCharges} />
+      </div>
+
       <div className="mb-4 flex items-center space-x-4">
         <div className="flex-grow">
           <label className="block text-xs font-medium text-gray-700 mb-1">E-Way Bill</label>
@@ -338,6 +388,8 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: "", 
           </label>
         </div>
 
+
+
         {showDetails && (
           <>
             <MaterialInput
@@ -359,6 +411,64 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: "", 
           </>
         )}
 
+        <div className="flex items-center space-x-2">
+          <Checkbox id="showDetails" checked={loadingSlip} onCheckedChange={() => setLoadingSlip(!loadingSlip)} />
+          <label
+            htmlFor="showDetails"
+            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          >
+            Loading Slip Details
+          </label>
+        </div>
+
+        {
+          loadingSlip && (
+            <div className="grid grid-cols-2 gap-2">
+              <div className="mb-4">
+                <label>Advance to be paid</label>
+                <input
+                  type="number"
+                  name="advance"
+                  value={formData.loadingSlipDetails.advance}
+                  placeholder="Advance"
+                  onChange={handleLoadingSlipChange} />
+              </div>
+              <div className="mb-4">
+                <label>Halting Charges</label>
+                <input
+                  type="number"
+                  name="haltingCharges"
+                  value={formData.loadingSlipDetails.haltingCharges}
+                  placeholder="Halting Charges"
+                  onChange={handleLoadingSlipChange} />
+              </div>
+              <div className="mb-4">
+                <label>Other Charges</label>
+                <input
+                  type="number"
+                  name="charges"
+                  value={formData.loadingSlipDetails.charges}
+                  placeholder="Other Charges"
+                  onChange={handleLoadingSlipChange} />
+              </div>
+              <div className="mb-4">
+                <label>Balance</label>
+                <input
+                  type="number"
+                  name="balance"
+                  value={formData.loadingSlipDetails.balance}
+                  placeholder="Balance"
+                  onChange={handleLoadingSlipChange} />
+              </div>
+
+            </div>
+
+
+          )
+        }
+
+
+
         {hasSupplier && (
           <div className="mb-4">
             <label className="block text-xs font-medium text-gray-700 mb-1">Truck Hire Cost</label>
@@ -372,10 +482,11 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: "", 
           </div>
         )}
 
-        <Button className="w-full hover:scale-100" type="submit" disabled={fileLoading}>
+        <Button className="w-full hover:scale-100 mt-4" type="submit" disabled={fileLoading}>
           Submit
         </Button>
       </form>
+
     </div>
   )
 }

@@ -93,12 +93,17 @@ export async function GET(req: Request) {
       },
       {
         $lookup: {
-          from: 'tripcharges',
-          let: { trip_id: '$trip_id' },
+          from: "tripcharges",
+          let: { trip_id: "$trip_id" },
           pipeline: [
-            { $match: { $expr: { $eq: ['$trip_id', '$$trip_id'] } } },
+            {
+              $match: {
+                $expr: { $eq: ["$trip_id", "$$trip_id"] },
+                partyBill: true
+              }
+            }
           ],
-          as: 'tripCharges'
+          as: "tripCharges"
         }
       },
       {

@@ -1,8 +1,9 @@
 'use client'
 import { useToast } from '@/components/hooks/use-toast'
+import { useExpenseData } from '@/components/hooks/useExpenseData'
 import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { useTrip } from '@/context/tripContext'
+import { ITrip } from '@/utils/interface'
 import { formatNumber } from '@/utils/utilArray'
 import { DialogTrigger } from '@radix-ui/react-dialog'
 import html2canvas from 'html2canvas'
@@ -10,10 +11,16 @@ import jsPDF from 'jspdf'
 import { Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import React, { useEffect, useRef, useState } from 'react'
-const LoadingSlip = () => {
+
+type Props = {
+    trip : ITrip | any,
+    charges : number | undefined,
+    haltingCharges : number | undefined
+}
+const LoadingSlip: React.FC<Props> = ({trip, charges,haltingCharges}) => {
+    const {parties} = useExpenseData()
     const [user, setUser] = useState<any>()
     const { toast } = useToast()
-    const { trip } = useTrip()
     const slipRef = useRef<HTMLDivElement | null>(null)
     const [pdfDownloading, setPDFDownloading] = useState(false)
 
@@ -174,7 +181,7 @@ const LoadingSlip = () => {
                         </div>
                     </div>
                     <div className="spacing-large mt-2">
-                        <p>Party/Customer. {trip?.partyName}</p>
+                        <p>Party/Customer. {parties.length > 0 ? parties?.find(party=>party.party_id === trip.party).name : ''}</p>
                         <p>As per discussion with {trip?.partyName}</p>
                         <p>We are sending</p>
                     </div>
@@ -218,51 +225,30 @@ const LoadingSlip = () => {
                             </div>
                             <div className="flex justify-between">
                                 <p>Halting Charges:</p>
-                                <p>₹{formatNumber(trip?.tripCharges.reduce(
-                                    (total: number, charge: any) => {
-                                        if (charge.expenseType === "Detention/Halting Charges") {
-                                            return total + (charge.amount || 0); // Add charge amount if it matches the expenseType
-                                        }
-                                        return total; // Otherwise, keep the total as is
-                                    },
-                                    0 // Initial value of total
-                                ))}</p>
+                                <p>₹{haltingCharges || 0}</p>
                             </div>
                             <div className="flex justify-between">
                                 <p>Total Freight:</p>
-                                <p>₹{formatNumber(trip?.amount)}</p>
+                                <p>₹{formatNumber(trip?.amount) || 0}</p>
                             </div>
                         </div>
                         <div>
                             <div className="flex justify-between">
                                 <p>Other Charges:</p>
-                                <p>₹{formatNumber(trip?.tripCharges.reduce(
-                                    (total: number, charge: any) => {
-                                        if (charge.expenseType !== "Detention/Halting Charges") {
-                                            return total + (charge.amount || 0); // Add charge amount if it matches the expenseType
-                                        }
-                                        return total; // Otherwise, keep the total as is
-                                    },
-                                    0 // Initial value of total
-                                ))}</p>
+                                <p>₹{charges || 0}</p>
                             </div>
                             <div className="flex justify-between">
                                 <p>Advance:</p>
-                                <p>₹{formatNumber(trip?.tripAccounts.reduce((total: number, account: any) => {
-                                    if (account.accountType === "Advances") {
-                                        return total + (account.amount || 0)
-                                    }
-                                    return total;
-                                }, 0))}</p>
+                                <p>₹{formatNumber(trip?.loadingSlipDetails?.advance) || 0}</p>
                             </div>
                             <div className="flex justify-between">
                                 <p>Balance Amount:</p>
-                                <p>₹{formatNumber(trip?.balance)}</p>
+                                <p>₹{formatNumber(trip.balance || trip?.loadingSlipDetails?.balance || 0)}</p>
                             </div>
 
                             <div className="flex justify-between">
                                 <p>Min Guaranteed Weight(M.T.):</p>
-                                <p></p>
+                                <p>{trip?.guaranteedWeight}</p>
                             </div>
                             <div className="flex justify-between">
                                 <p>Maximum Weight(M.T.):</p>

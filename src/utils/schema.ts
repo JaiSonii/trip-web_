@@ -271,7 +271,13 @@ export const tripSchema = new Schema({
   ],
   documents: [
     documentSchema
-  ]
+  ],
+  loadingSlipDetails : {
+    balance : Number || undefined,
+    advance : Number || undefined,
+    charges : Number || undefined,
+    haltingCharges : Number || undefined
+  }
 });
 
 

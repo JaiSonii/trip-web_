@@ -225,7 +225,7 @@ const TripDetails = () => {
               <ViewBillButton trips={[]} />
               <Button variant={'outline'} onClick={() => setFmModalOpen(true)}>Generate FM/Challan</Button>
               <Button onClick={() => setBiltyModalOpen(true)}>Generate Bilty</Button>
-              <LoadingSlip />
+              <LoadingSlip trip={trip} charges={trip?.loadingSlipDetails?.charges || 0} haltingCharges={trip?.loadingSlipDetails?.haltingCharges || 0}/>
 
               {/* Add more buttons as needed */}
             </div>

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import mongoose, { model, models } from 'mongoose';
-import { driverSchema, supplierSchema, tripSchema, truckSchema } from '@/utils/schema';
+import { driverSchema, tripChargesSchema, tripSchema, truckSchema } from '@/utils/schema';
 import { connectToDatabase } from '@/utils/schema';
 import { ITrip } from '@/utils/interface';
 import { v4 as uuidv4 } from 'uuid'
@@ -12,6 +12,7 @@ import { recentActivity } from '@/helpers/recentActivity';
 const Trip = models.Trip || model('Trip', tripSchema);
 const Driver = models.Driver || model('Driver', driverSchema)
 const Truck = models.Truck || model('Truck', truckSchema)
+const TripCharges = models.TripCharges || model('TripCharges', tripChargesSchema)
 // Assuming you have this schema defined
 
 export async function GET(req: Request) {
@@ -62,11 +63,11 @@ export async function GET(req: Request) {
         }
       },
       {
-        $lookup : {
-          from : 'partypayments',
+        $lookup: {
+          from: 'partypayments',
           localField: 'trip_id',
-          foreignField : 'trip_id',
-          as : 'tripAccounts'
+          foreignField: 'trip_id',
+          as: 'tripAccounts'
         }
       },
       {
@@ -125,11 +126,11 @@ export async function GET(req: Request) {
           },
           // Include the party name from the joined partyDetails
           partyName: '$partyDetails.name',
-          driverName : '$driverDetails.name'
+          driverName: '$driverDetails.name'
         }
       }, // Sort by startDate in descending order
       // Exclude unnecessary fields including accountBalance, chargeToBill, and chargeNotToBill
-      { $project: { partyDetails: 0, tripExpenses: 0, accounts: 0, chargeToBill: 0, chargeNotToBill: 0, accountBalance: 0 , user_id : 0} }
+      { $project: { partyDetails: 0, tripExpenses: 0, accounts: 0, chargeToBill: 0, chargeNotToBill: 0, accountBalance: 0, user_id: 0 } }
     ]);
 
     return NextResponse.json({ trips });
@@ -140,107 +141,127 @@ export async function GET(req: Request) {
 }
 
 
-
-
-
-export async function POST(this: any, req: Request) {
+export async function POST(req: Request) {
   const { user, error } = await verifyToken(req);
-  if (error) {
-    return NextResponse.json({ error });
-  }
+  if (error) return NextResponse.json({ error }, { status: 401 });
 
   try {
-    await connectToDatabase(); // Establish database connection
+    await connectToDatabase();
 
     const formData = await req.formData();
-    const tripId = 'trip' + uuidv4();
+    const tripId = `trip${uuidv4()}`;
 
-    // Handle file upload if a file is provided
-    const file = formData.get('file') as File | null;
-    let fileUrl = '';
-
+    // Handle file upload
+    const file = formData.get("file") as File | null;
+    let fileUrl = "";
     if (file) {
       const fileBuffer = Buffer.from(await file.arrayBuffer());
       const fileName = `trips/ewaybill-${tripId}`;
-      const contentType = file.type;
-      const s3FileName = await uploadFileToS3(fileBuffer, fileName, contentType);
-      fileUrl = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/${s3FileName}${contentType === 'application/pdf' ? '.pdf' : ''}`;
+      fileUrl = await uploadFileToS3(fileBuffer, fileName, file.type);
+      fileUrl += file.type === "application/pdf" ? ".pdf" : "";
     }
 
-    const validity = formData.get('ewbValidity')
-
-    // Prepare trip data
-    const newTrip: ITrip = new Trip({
+    // Create trip object
+    const newTrip = new Trip({
       user_id: user,
       trip_id: tripId,
-      party: formData.get('party'),
-      truck: formData.get('truck'),
-      driver: formData.get('driver'),
-      supplier: formData.get('supplierId'),
+      party: formData.get("party"),
+      truck: formData.get("truck"),
+      driver: formData.get("driver"),
+      supplier: formData.get("supplierId"),
       route: {
-        origin: formData.get('origin'),
-        destination: formData.get('destination'),
+        origin: formData.get("origin"),
+        destination: formData.get("destination"),
       },
-      billingType: formData.get('billingType'),
-      amount: parseFloat(formData.get('amount') as string),
-      balance: parseFloat(formData.get('amount') as string),
-      dates: [new Date(formData.get('startDate') as string), null, null, null, null],
-      truckHireCost: parseFloat(formData.get('truckHireCost') as string) || 0,
-      fmNo : formData.get('fmNo'),
-      LR: formData.get('LR'),
+      billingType: formData.get("billingType"),
+      amount: Number(formData.get("amount")) || 0,
+      balance: Number(formData.get("amount")) || 0,
+      dates: [new Date(formData.get("startDate") as string), null, null, null, null],
+      truckHireCost: Number(formData.get("truckHireCost")) || 0,
+      fmNo: formData.get("fmNo"),
+      LR: formData.get("LR"),
       status: 0,
-      material: JSON.parse(formData.get('material') as string) || [],
-      notes: formData.get('notes') || '',
+      material: JSON.parse(formData.get("material") as string) || [],
+      loadingSlipDetails: JSON.parse(formData.get("loadingSlipDetails") as string),
+      notes: formData.get("notes") || "",
       accounts: [],
-      documents: []
+      documents: [],
     });
 
-    if (validity !== null) {
-      newTrip.ewbValidityDate = new Date(validity as string)
+    // Handle E-Way Bill upload
+    const validity = formData.get("ewbValidity");
+    if (validity) {
+      newTrip.ewbValidityDate = new Date(validity as string);
       newTrip.documents.push({
-        filename: file?.name || '',
+        filename: file?.name || "",
         type: "E-Way Bill",
-        validityDate: new Date(validity as any),
+        validityDate: new Date(validity as string),
         uploadedDate: new Date(),
-        url: fileUrl || '',
-      })
+        url: fileUrl || "",
+      });
     }
-    if (newTrip.billingType !== 'Fixed'){
-      const units = formData.get('units')
-      const rate = formData.get('rate')
-      console.log(units, rate)
-      if(!units || !rate){
-        return NextResponse.json({message : 'Units and Rate must be Specified', status : 400},{status : 400})
+
+    // Validate non-fixed billing type
+    if (newTrip.billingType !== "Fixed") {
+      const units = formData.get("units");
+      const rate = formData.get("rate");
+      if (!units || !rate) {
+        return NextResponse.json(
+          { message: "Units and Rate must be specified", status: 400 },
+          { status: 400 }
+        );
       }
-      newTrip.units= Number(units)
-      newTrip.rate= Number(rate)
+      newTrip.units = Number(units);
+      newTrip.rate = Number(rate);
     }
 
-    // Save the new trip document
-    const [savedTrip,un] = await Promise.all([newTrip.save(),recentActivity('Created New Trip',newTrip, user)]);
+    // Save trip and update recent activity in parallel
+    const [savedTrip] = await Promise.all([
+      newTrip.save(),
+      recentActivity("Created New Trip", newTrip, user),
+    ]);
 
-    // Update related records
-    await Driver.findOneAndUpdate({ user_id: user, driver_id: formData.get('driver') }, { status: 'On Trip' });
-    await Truck.findOneAndUpdate({ user_id: user, truckNo: formData.get('truck') }, { status: 'On Trip' });
+    // Update driver and truck statuses
+    await Promise.all([
+      Driver.findOneAndUpdate({ user_id: user, driver_id: newTrip.driver }, { status: "On Trip" }),
+      Truck.findOneAndUpdate({ user_id: user, truckNo: newTrip.truck }, { status: "On Trip" }),
+    ]);
 
-    // Return success response
-    return NextResponse.json({ message: 'Saved Successfully', data: savedTrip }, { status: 200 });
+    // Handle trip charges
+    const charges = [
+      { amount: newTrip.loadingSlipDetails?.charges, type: "Other Charges" },
+      { amount: newTrip.loadingSlipDetails?.haltingCharges, type: "Detention/Halting Charges" },
+    ];
+
+    const chargePromises = charges
+      .filter(({ amount }) => amount)
+      .map(({ amount, type }) =>
+        new TripCharges({
+          user_id: user,
+          trip_id: savedTrip.trip_id,
+          amount,
+          date: new Date(),
+          expenseType: type,
+          partyBill : true
+        }).save()
+      );
+
+    await Promise.all(chargePromises);
+
+    return NextResponse.json({ message: "Saved Successfully", data: savedTrip }, { status: 200 });
 
   } catch (error: any) {
-    console.error('Error saving trip:', error);
+    console.error("Error saving trip:", error);
 
-    let errorMessage = 'Internal Server Error';
-    let statusCode = 500;
+    const errorMapping: Record<string, { message: string; status: number }> = {
+      ValidationError: { message: "Validation Error", status: 400 },
+      MongoError: error.code === 11000 ? { message: "Duplicate Key Error", status: 409 } : { message: 'Mongo Error', status: 409 },
+    };
 
-    if (error.name === 'ValidationError') {
-      errorMessage = 'Validation Error';
-      statusCode = 400;
-    } else if (error.name === 'MongoError' && error.code === 11000) {
-      errorMessage = 'Duplicate Key Error';
-      statusCode = 409;
-    }
+    const { message, status } = errorMapping[error.name] || { message: "Internal Server Error", status: 500 };
 
-    return NextResponse.json({ message: errorMessage, details: error.message }, { status: statusCode });
+    return NextResponse.json({ message, details: error.message }, { status });
   }
 }
+
 

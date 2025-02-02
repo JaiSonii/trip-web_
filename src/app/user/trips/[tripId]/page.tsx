@@ -8,8 +8,9 @@ import { MdEdit, MdDelete } from 'react-icons/md';
 import { Button } from '@/components/ui/button';
 import Loading from '../loading';
 import { useTrip } from '@/context/tripContext';
-import { Frown, Loader2 } from 'lucide-react';
+import { Frown, Loader2, X } from 'lucide-react';
 import TripDetails from '@/components/trip/tripDetail/TripDetail';
+import { AnimatePresence, motion } from 'framer-motion';
 
 // Dynamically import components
 const EditTripForm = dynamic(() => import('@/components/trip/EditTripForm'), {
@@ -25,6 +26,7 @@ const TripPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [docModalOpen, setDocModalOpen] = useState(false)
   const [error, setError] = useState('')
+  const [deleteModal, setDeleteModal] = useState(false)
 
   const TripDocumentUpload = dynamic(() => import('@/components/documents/TripDocumentUpload'), { ssr: false })
 
@@ -118,7 +120,7 @@ const TripPage: React.FC = () => {
           </Button>
           <Button
             variant="destructive"
-            onClick={handleDelete}
+            onClick={()=>setDeleteModal(true)}
             className="transition-all duration-300 ease-in-out transform hover:scale-105"
           >
             <MdDelete className="mr-2" /> Delete
@@ -140,6 +142,41 @@ const TripPage: React.FC = () => {
           <TripDocumentUpload open={docModalOpen} setOpen={setDocModalOpen} tripId={tripId as string} />
         </div>
       )}
+      {deleteModal &&
+        <AnimatePresence>
+          <motion.div
+            className="modal-class"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-white rounded-lg shadow-xl p-4 w-full max-w-sm mx-4"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: 'spring', damping: 15, stiffness: 300 }}
+            >
+              <div className="flex justify-between items-center mb-3">
+                <h3 className="text-lg font-semibold">Confirm Delete</h3>
+                <Button variant="ghost" size="sm" onClick={() => setDeleteModal(false)} className='px-2 py-0'>
+                  <X className="h-4 w-4" />
+                  <span className="sr-only">Close</span>
+                </Button>
+              </div>
+              <p className="text-gray-600 mb-6">Are you sure you want to Delete?</p>
+              <div className="flex justify-end space-x-4">
+                <Button variant="outline" onClick={() => setDeleteModal(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleDelete}>
+                  Delete
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+      }
     </div>
   );
 };
