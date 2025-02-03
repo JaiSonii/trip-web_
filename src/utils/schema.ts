@@ -615,7 +615,6 @@ export const InvoiceSchema = new Schema({
   invoiceNo : {
     type : Number,
     required : true,
-    unique : true
   },
   route : {
     origin : String,

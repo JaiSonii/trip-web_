@@ -9,7 +9,6 @@ import { Bar, CartesianGrid, Cell, Label, Legend, Pie, ResponsiveContainer, XAxi
 import { useToast } from '@/components/hooks/use-toast';
 import Loading from '../loading';
 import { useAnimatedNumber } from '@/components/hooks/useAnimatedNumber';
-import RecentActivities from '@/components/RecentActivites';
 import { useExpenseData } from '@/components/hooks/useExpenseData';
 import dynamic from 'next/dynamic';
 import { useReminder } from '@/context/reminderContext';
@@ -90,12 +89,15 @@ const documentTypes = [
     icon: <BiCloudUpload className='text-bottomNavBarColor' size={40} />
   }
 ];
+
+const RecentActivities = dynamic(()=>import('@/components/RecentActivites'),{ssr : false})
 const Notification = dynamic(() => import('@/components/Notification'), { ssr: false })
 const InvoiceForm = dynamic(() => import('@/components/trip/tripDetail/TripFunctions/InvoiceForm'), { ssr: false, loading: () => <div>{loadingIndicator}</div> })
 const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), {
   ssr: false,
   loading: () => <div>{loadingIndicator}</div>
 })
+
 
 const TripSelect = ({ tripId, setTripId, trips }: { tripId: string, setTripId: React.Dispatch<React.SetStateAction<string>>, trips: any[] }) => {
   const [searchTerm, setSearchTerm] = useState('');
