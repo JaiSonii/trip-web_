@@ -181,7 +181,7 @@ const LoadingSlip: React.FC<Props> = ({trip, charges,haltingCharges}) => {
                         </div>
                     </div>
                     <div className="spacing-large mt-2">
-                        <p>Party/Customer. {parties.length > 0 ? parties?.find(party=>party.party_id === trip.party).name : ''}</p>
+                        <p>Party/Customer. {parties.length > 0 ? parties?.find(party=>party.party_id === trip.party)?.name || '' : ''}</p>
                         <p>As per discussion with {trip?.partyName}</p>
                         <p>We are sending</p>
                     </div>
