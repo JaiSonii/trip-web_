@@ -230,7 +230,7 @@ const InvoiceGenerationPage: React.FC = () => {
 
       const totalFreight = formData.freightCharges.reduce((total, charge)=>total + Number(charge.amount),0)
       const totalAdditionalCharges = formData.additionalCharges.reduce((total, charge)=>total + Number(charge.amount),0) + formData.extraAdditionalCharges.reduce((total, charge)=>total + Number(charge.amount),0)
-      const totalPayments = formData.paymentDetails.reduce((total, payment)=>total + Number(payment.amount),0) + formData.paymentDetails.reduce((total, payment)=>total + Number(payment.amount),0) 
+      const totalPayments = formData.paymentDetails.reduce((total, payment)=>total + Number(payment.amount),0) + formData.extraPaymentDetails.reduce((total, payment)=>total + Number(payment.amount),0) 
 
       const balance = Number(totalFreight) + Number(totalAdditionalCharges) - Number(totalPayments);
 
