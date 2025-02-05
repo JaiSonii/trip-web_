@@ -227,14 +227,13 @@ const InvoiceGenerationPage: React.FC = () => {
       toast({ description: 'Invoice downloaded successfully.' });
 
       // Calculate totals
-      const calculateTotal = (items: any[]) =>
-        items.reduce((sum, item) => sum + (item.amount || 0), 0);
 
-      const totalFreight = calculateTotal(formData.freightCharges);
-      const totalAdditionalCharges = Number(calculateTotal(formData.additionalCharges)) + Number(calculateTotal(formData.extraAdditionalCharges));
-      const totalPayments = Number(calculateTotal(formData.paymentDetails)) + Number(calculateTotal(formData.extraPaymentDetails));
+      const totalFreight = formData.freightCharges.reduce((total, charge)=>total + Number(charge.amount),0)
+      const totalAdditionalCharges = formData.additionalCharges.reduce((total, charge)=>total + Number(charge.amount),0) + formData.extraAdditionalCharges.reduce((total, charge)=>total + Number(charge.amount),0)
+      const totalPayments = formData.paymentDetails.reduce((total, payment)=>total + Number(payment.amount),0) + formData.paymentDetails.reduce((total, payment)=>total + Number(payment.amount),0) 
 
       const balance = Number(totalFreight) + Number(totalAdditionalCharges) - Number(totalPayments);
+
 
       // Prepare invoice data
       const invData = {

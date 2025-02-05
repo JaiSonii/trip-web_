@@ -297,7 +297,7 @@ const LoadingSlip: React.FC<Props> = ({trip, charges,haltingCharges}) => {
                         <div className="text-center">
                             <p>Thank You</p>
                             {user?.signatureUrl && <Image src={user.signatureUrl} alt="Signature" width={40} height={40} />}
-                            <p>For {trip?.partyName}</p>
+                            <p>For {user?.companyName}</p>
                         </div>
                     </div>
                 </div>

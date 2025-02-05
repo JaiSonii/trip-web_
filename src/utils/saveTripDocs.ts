@@ -34,6 +34,8 @@ export const saveInvoice = async (invData: Partial<invData>, invoiceId?: string)
     let response
     if (invoiceId) {
       delete invData['invoiceNo']
+      delete invData['dueDate']
+      delete invData['date']
       response = await fetch(`/api/invoices/${invoiceId.toString()}`, {
         method: 'PATCH',
         headers: {

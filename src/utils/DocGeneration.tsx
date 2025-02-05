@@ -313,7 +313,7 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
 }
 
 export function FMemo({ formData, payments }: { formData: FMDataType, payments: PaymentBook[] }) {
-  const netBalance = Number(formData.truckHireCost) - Number(formData.advance) - Number(formData.commision) - Number(formData.hamali) - Number(formData.cashAC) - Number(formData.extra) - Number(formData.TDS) - Number(formData.tire) - Number(formData.spareParts)
+  const netBalance = Number(formData.totalFreight) - Number(formData.advance) - Number(formData.commision) - Number(formData.hamali) - Number(formData.cashAC) - Number(formData.extra) - Number(formData.TDS) - Number(formData.tire) - Number(formData.spareParts)
   return (
     <Card className="relative max-w-[800px] mx-auto font-sans text-sm shadow-md bg-white p-0">
 
@@ -384,7 +384,7 @@ export function FMemo({ formData, payments }: { formData: FMDataType, payments: 
           </tr>
           <tr>
             <td className="border border-black p-2">Total Freight</td>
-            <td className="border border-black p-2"><strong>{formatNumber(formData.truckHireCost)}</strong></td>
+            <td className="border border-black p-2"><strong>{formatNumber(formData.totalFreight)}</strong></td>
           </tr>
           <tr>
             <td className="border border-black p-2">Advance</td>
@@ -392,7 +392,7 @@ export function FMemo({ formData, payments }: { formData: FMDataType, payments: 
           </tr>
           <tr>
             <td className="border border-black p-2">Balance</td>
-            <td className="border border-black p-2"><strong>{formatNumber(Number(formData.truckHireCost) - Number(formData.advance))}</strong></td>
+            <td className="border border-black p-2"><strong>{formatNumber(netBalance)}</strong></td>
           </tr>
           <tr>
             <td className="border border-black p-2">Commission</td>

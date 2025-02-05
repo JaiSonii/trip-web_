@@ -317,7 +317,7 @@ export interface FMDataType {
   challanNo: string
   from: string;
   to: string;
-  truckHireCost: string;
+  totalFreight: string;
   commision: string;
   weight: string;
   material: {name : string, weight : string}[];

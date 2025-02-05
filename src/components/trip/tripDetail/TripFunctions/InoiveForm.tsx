@@ -134,7 +134,7 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
         section: 'freightCharges' | 'additionalCharges' | 'paymentDetails' | 'extraAdditionalCharges' | 'extraPaymentDetails',
         index: number,
         field: string,
-        value: string
+        value: string | number
     ) => {
         setFormData(prev => ({
             ...prev,

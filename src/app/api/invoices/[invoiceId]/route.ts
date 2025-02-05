@@ -5,6 +5,22 @@ import { models, model } from "mongoose";
 
 const Invoice = models.Invoice || model("Invoice", InvoiceSchema);
 
+export async function GET(req : Request, {params} : {params : {invoiceId : string}}){
+    try {
+        const {user, error} = await verifyToken(req)
+        if(!user || error){
+            return NextResponse.json({error : 'Unauthorized user'}, {status : 401})
+        }
+        const {invoiceId} = params
+
+        const invoice = await Invoice.findById(invoiceId)
+        return NextResponse.json({invoice}, {status : 200})
+    } catch (error) {
+        console.log(error)
+        return NextResponse.json({error, status : 500}, {status : 500})
+    }
+}
+
 export async function PATCH(req: Request, { params }: { params: { invoiceId: string } }) {
     try {
         // Verify user token
@@ -21,6 +37,7 @@ export async function PATCH(req: Request, { params }: { params: { invoiceId: str
         // Get form data
         const data = await req.json()
 
+        console.log(data)
 
         // Check if the document type already exists in the documents array
 
@@ -57,7 +74,8 @@ export async function DELETE(req: Request, { params }: { params: { invoiceId: st
 
         await Trip.updateMany(
             { trip_id: { $in: invoice.trips } },
-            { $set: { invoice: false } }
+            { $set: { invoice: false, invoice_id : ''} },
+        
         );
 
 

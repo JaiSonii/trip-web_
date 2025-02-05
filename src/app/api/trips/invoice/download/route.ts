@@ -30,7 +30,7 @@ export async function POST(req: Request) {
     if (editedPayments && editedPayments.length > 0) {
       const paymentUpdates = editedPayments.map((payment: any) => ({
         updateOne: {
-          filter: { _id: payment._id },
+          filter: { _id: payment.id },
           update: { $set: payment },
         },
       }));

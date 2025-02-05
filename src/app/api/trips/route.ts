@@ -227,27 +227,6 @@ export async function POST(req: Request) {
       Truck.findOneAndUpdate({ user_id: user, truckNo: newTrip.truck }, { status: "On Trip" }),
     ]);
 
-    // Handle trip charges
-    const charges = [
-      { amount: newTrip.loadingSlipDetails?.charges, type: "Other Charges" },
-      { amount: newTrip.loadingSlipDetails?.haltingCharges, type: "Detention/Halting Charges" },
-    ];
-
-    const chargePromises = charges
-      .filter(({ amount }) => amount)
-      .map(({ amount, type }) =>
-        new TripCharges({
-          user_id: user,
-          trip_id: savedTrip.trip_id,
-          amount,
-          date: new Date(),
-          expenseType: type,
-          partyBill : true
-        }).save()
-      );
-
-    await Promise.all(chargePromises);
-
     return NextResponse.json({ message: "Saved Successfully", data: savedTrip }, { status: 200 });
 
   } catch (error: any) {

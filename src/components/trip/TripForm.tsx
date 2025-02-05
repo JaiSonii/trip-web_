@@ -121,14 +121,15 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: "", 
         ...prev,
         loadingSlipDetails: {
           ...prev.loadingSlipDetails,
-          balance: prev.amount - Number(advance) + Number(charges) + Number(haltingCharges),
+          balance: Number(sanitizeInput(prev.amount.toString())) - Number(advance) + Number(charges) + Number(haltingCharges),
         },
       };
     });
   }, [
     formData.loadingSlipDetails?.advance,
     formData.loadingSlipDetails?.charges,
-    formData.loadingSlipDetails?.haltingCharges
+    formData.loadingSlipDetails?.haltingCharges,
+    formData.amount
   ]);
 
 
@@ -259,13 +260,15 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: "", 
     }))
   }
 
+  const sanitizeInput = (value: string) => {
+    const sanitizedValue = Number.parseFloat(value.replace(/,/g, "").trim())
+    return !isNaN(Number(sanitizedValue)) ? sanitizedValue : null
+  }
+
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    const sanitizeInput = (value: string) => {
-      const sanitizedValue = Number.parseFloat(value.replace(/,/g, "").trim())
-      return !isNaN(Number(sanitizedValue)) ? sanitizedValue : null
-    }
 
     const sanitizedAmount = sanitizeInput(formData.amount.toString())
     const sanitizedTruckHireCost = sanitizeInput(formData.truckHireCost.toString())
@@ -369,11 +372,11 @@ export default function TripForm({ onSubmit, lr, duplicate }: Props = { lr: "", 
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">LR No*</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Lorry Recipt No*</label>
             <Input type="text" name="LR" value={formData.LR} placeholder="LR No" onChange={handleChange} />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-700 mb-1">FM No</label>
+            <label className="block text-xs font-medium text-gray-700 mb-1">Freight Memo No</label>
             <Input type="text" name="fmNo" value={formData.fmNo} placeholder="FM No" onChange={handleChange} />
           </div>
         </div>

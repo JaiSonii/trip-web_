@@ -2,9 +2,11 @@
 
 import { Button } from '@/components/ui/button'
 import { ITrip } from '@/utils/interface'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTrip } from '@/context/tripContext'
 import Link from 'next/link'
+import InvoiceForm from './InvoiceForm'
+import { useToast } from '@/components/hooks/use-toast'
 
 type Props = {
   trips: ITrip[] | any[]
@@ -53,32 +55,60 @@ type FormDataType = {
 }
 
 const ViewBillButton: React.FC<Props> = () => {
-  const {trip} = useTrip()
-  const [formData, setFormData] = useState<FormDataType>({
-    logourl: '',
-    billNo: '',
-    date: '',
-    from: '',
-    to: '',
-    address: '',
-    branch: '',
-    material: '',
-    partyName: '',
-    frieghtCharges: [],
-    additonalCharges: [],
-    partyDetails: [],
-    paymentDetails: [],
-  })
+  const { trip } = useTrip()
+
+  const [open, setOpen] = useState(false)
+  const [invoice, setInvoice] = useState<any>(null)
+  const { toast } = useToast()
+
+
+  const fetchInvoiceData = async (id: string) => {
+    try {
+      const res = await fetch(`/api/invoices/${id}`)
+      if (res.status === 401) {
+        await fetch(`/api/logout`)
+      }
+      if (!res.ok) {
+        toast({
+          description: 'Failed to Fetch Invoice',
+          variant: 'destructive'
+        })
+        return
+      }
+      const data = await res.json()
+      setInvoice(data.invoice)
+    } catch (error) {
+      toast({
+        description: 'Failed to Fetch Invoice',
+        variant: 'destructive'
+      })
+    }
+  }
+
+  useEffect(() => {
+    if (trip.invoice_id) {
+      fetchInvoiceData(trip.invoice_id)
+    }
+  }, [trip])
 
 
   return (
     <div>
-       <Link href={`/user/trips/invoice?party=${encodeURIComponent(trip.party)}&route=${encodeURIComponent(JSON.stringify(trip.route))}&trips=${encodeURIComponent(JSON.stringify([trip.trip_id]))}`}>
-      <Button variant="outline" >
-        <span className="truncate">Generate Bill/Invoice</span>
-      </Button>
-      </Link>
-      
+      {
+        trip.invoice_id ?
+          <Link href={`/user/trips/invoice?party=${encodeURIComponent(invoice?.party_id)}&route=${encodeURIComponent(JSON.stringify(invoice?.route))}&trips=${encodeURIComponent(JSON.stringify(invoice?.trips))}&invoiceId=${encodeURIComponent(trip.invoice_id)}`}>
+            <Button variant="outline" onClick={() => setOpen(true)}>
+              <span className="truncate">Generate Bill/Invoice</span>
+            </Button>
+          </Link> :
+          <Button variant="outline" onClick={() => setOpen(true)}>
+            <span className="truncate">Generate Bill/Invoice</span>
+          </Button>
+      }
+
+
+      <InvoiceForm open={open} setOpen={setOpen} party={trip.party} route={trip.route} tripIds={[trip.trip_id]} />
+
     </div>
   )
 }

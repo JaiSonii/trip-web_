@@ -35,6 +35,7 @@ import quotationImg from '@/assets/quotation-home-icon.png'
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { statuses } from '@/utils/schema';
+import { formatNumber } from '@/utils/utilArray';
 
 const piechartConfig: ChartConfig = {
   totalAmount: {
@@ -90,7 +91,7 @@ const documentTypes = [
   }
 ];
 
-const RecentActivities = dynamic(()=>import('@/components/RecentActivites'),{ssr : false})
+const RecentActivities = dynamic(() => import('@/components/RecentActivites'), { ssr: false })
 const Notification = dynamic(() => import('@/components/Notification'), { ssr: false })
 const InvoiceForm = dynamic(() => import('@/components/trip/tripDetail/TripFunctions/InvoiceForm'), { ssr: false, loading: () => <div>{loadingIndicator}</div> })
 const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), {
@@ -101,11 +102,12 @@ const AddExpenseModal = dynamic(() => import('@/components/AddExpenseModal'), {
 
 const TripSelect = ({ tripId, setTripId, trips }: { tripId: string, setTripId: React.Dispatch<React.SetStateAction<string>>, trips: any[] }) => {
   const [searchTerm, setSearchTerm] = useState('');
+
   const filteredTrips = useMemo(() => {
-    if (!trips || trips.length === 0) return []
-    let filtered = [...trips]
+    if (!trips || trips.length === 0) return [];
+    let filtered = [...trips];
     if (searchTerm) {
-      const lowercaseQuery = searchTerm.toLowerCase()
+      const lowercaseQuery = searchTerm.toLowerCase();
       filtered = trips.filter((trip) =>
         trip.LR.toLowerCase().includes(lowercaseQuery) ||
         trip.partyName.toLowerCase().includes(lowercaseQuery) ||
@@ -116,44 +118,47 @@ const TripSelect = ({ tripId, setTripId, trips }: { tripId: string, setTripId: R
         trip.truckHireCost.toString().includes(lowercaseQuery) ||
         trip.balance.toString().includes(lowercaseQuery) ||
         trip.truck.toLowerCase().includes(lowercaseQuery)
-      )
+      );
     }
-    return filtered
-  }, [trips, searchTerm])
+    return filtered;
+  }, [trips, searchTerm]);
+
   return (
     <div className="mb-4">
       <label className="block text-sm text-gray-700">Trip*</label>
-      <Select name="tripId" defaultValue={tripId} onValueChange={(value) => setTripId(value)} >
+      <Select name="tripId" defaultValue={tripId} onValueChange={(value) => setTripId(value)}>
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Select Trip" />
         </SelectTrigger>
-        <SelectContent className='max-h-[300px]'>
+        <SelectContent className="max-h-[300px]">
           <div className="p-2">
             <input
               type="text"
               placeholder="Search..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full p-2 border border-gray-300 rounded-md"
             />
           </div>
           {filteredTrips && filteredTrips.length > 0 ? (
             filteredTrips.map((trip) => (
-              <SelectItem key={trip.trip_id} value={trip.trip_id}>
-                <div className="flex items-center justify-between w-full p-2 space-x-4">
-
-                  {/* Display route origin to destination */}
-                  <span className="font-semibold text-gray-700 whitespace-nowrap">
-                    {trip.route.origin.split(',')[0]} &rarr; {trip.route.destination.split(',')[0]}
-                  </span>
-
-                  {/* Status indicator with progress bar */}
-                  <div className="flex flex-col w-1/2 space-y-1">
-                    {/* Status label */}
-                    <span className="text-sm text-gray-600">
-                      {statuses[trip.status as number]}
+              <SelectItem key={trip.trip_id} value={trip.trip_id} className='border rounded-md'>
+                <div className="grid grid-cols-2 gap-2 p-2 space-x-2 ">
+                  {/* Route and Party Name */}
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-gray-700 whitespace-nowrap">
+                      {trip.route.origin.split(',')[0]} &rarr; {trip.route.destination.split(',')[0]}
                     </span>
+                    <span className="text-sm text-gray-600 whitespace-nowrap">
+                      {trip.partyName}
+                    </span>
+                  </div>
 
-                    {/* Progress bar for status */}
+                  {/* Status and Progress Bar */}
+                  <div className="flex flex-col space-y-1">
+                    <span className="text-sm text-gray-600">
+                      Status: {statuses[trip.status as number]}
+                    </span>
                     <div className="relative w-full h-1 bg-gray-200 rounded">
                       <div
                         className={`absolute top-0 left-0 h-1 rounded transition-width duration-500 ${trip.status === 0
@@ -171,19 +176,27 @@ const TripSelect = ({ tripId, setTripId, trips }: { tripId: string, setTripId: R
                     </div>
                   </div>
 
-                  {/* LR number */}
-                  <span className="text-sm text-gray-600 whitespace-nowrap">
-                    {trip.LR}
-                  </span>
+                  {/* LR Number and Start Date */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600 whitespace-nowrap">
+                      LR: {trip.LR}
+                    </span>
+                    <span className="text-sm text-gray-600 whitespace-nowrap">
+                      Date: {new Date(trip.startDate).toISOString().split('T')[0]}
+                    </span>
+                  </div>
 
-                  {/* Start date */}
-                  <span className="text-sm text-gray-600 whitespace-nowrap">
-                    {new Date(trip.startDate).toISOString().split('T')[0]}
-                  </span>
-
+                  {/* Balance and Truck Details */}
+                  <div className="flex items-center gap-2 justify-between">
+                    <span className="text-sm text-gray-600 whitespace-nowrap">
+                      Balance: ₹{formatNumber(trip.balance)}
+                    </span>
+                    <span className="text-sm text-gray-600 whitespace-nowrap">
+                      Truck: {trip.truck}
+                    </span>
+                  </div>
                 </div>
               </SelectItem>
-
             ))
           ) : (
             <div className="p-2 text-gray-500">No Trips found</div>
@@ -191,9 +204,9 @@ const TripSelect = ({ tripId, setTripId, trips }: { tripId: string, setTripId: R
         </SelectContent>
       </Select>
     </div>
+  );
+};
 
-  )
-}
 const BarChart = dynamic(() => import('recharts').then((mod) => mod.BarChart), { ssr: false });
 const PieChart = dynamic(() => import('recharts').then((mod) => mod.PieChart), { ssr: false });
 
@@ -453,14 +466,14 @@ const Page = () => {
               </Button>
               <Dialog>
                 <DialogTrigger>
-                  <Button variant='ghost' className='w-full h-full'>
+                  <Button variant='ghost' className='w-full h-full '>
                     <div className='flex flex-col items-center justify-center h-full'>
                       <Image src={biltyImg} alt='Quotation' width={80} height={80} />
                       <p className='text-center text-sm mt-2'>Bilty</p>
                     </div>
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className='max-w-2xl'>
                   <h2>Select Trip</h2>
                   <TripSelect trips={trips} tripId={tripId} setTripId={setTripId} />
                   {tripId && <div className='flex justify-end'>
@@ -486,7 +499,7 @@ const Page = () => {
                     </div>
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className='max-w-2xl'>
                   <h2>Select Trip</h2>
                   <TripSelect trips={trips} tripId={tripId} setTripId={setTripId} />
                   {tripId && <div className='flex justify-end'>
