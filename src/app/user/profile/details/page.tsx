@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import type React from "react"
 import { useEffect, useState, useRef, useCallback } from "react"
 import Image from "next/image"
-import { removeBg } from "@/helpers/removebg"
+import { removeBackgroundFromImage } from "@/helpers/removebg"
 import Loading from "@/app/user/loading"
 import logoImg from "@/assets/awajahi logo.png"
 
@@ -150,73 +150,52 @@ const DetailsPage = () => {
   )
 
   const handleBgRemovalChoice = useCallback(
-    async (removeBackground: boolean) => {
+    (removeBackground: boolean) => {
       setShowBgRemovalPrompt(false)
-
       if (currentFile && canvasRef.current) {
         const { file, setter, previewKey } = currentFile
+        const reader = new FileReader()
         setInnerLoading(true)
 
-        try {
-          let processedImageDataUrl: string
-
-          if (removeBackground) {
-            processedImageDataUrl = await removeBg(file) // Wait for background removal
-          } else {
-            const reader = new FileReader()
-
-            reader.onloadend = () => {
-              const img = document.createElement("img")
-              img.onload = () => {
-                const canvas = canvasRef.current!
-                canvas.width = img.width
-                canvas.height = img.height
-                const ctx = canvas.getContext("2d")!
-                ctx.drawImage(img, 0, 0)
-                processedImageDataUrl = canvas.toDataURL("image/png")
-
-                processFile(processedImageDataUrl, previewKey, setter, removeBackground)
-              }
-              img.src = reader.result as string
+        reader.onloadend = () => {
+          const img = document.createElement("img")
+          img.onload = () => {
+            let processedImageDataUrl: string
+            if (removeBackground) {
+              processedImageDataUrl = removeBackgroundFromImage(img, canvasRef.current!) as string
+            } else {
+              const canvas = canvasRef.current!
+              canvas.width = img.width
+              canvas.height = img.height
+              const ctx = canvas.getContext("2d")!
+              ctx.drawImage(img, 0, 0)
+              processedImageDataUrl = canvas.toDataURL("image/png")
             }
 
-            reader.readAsDataURL(file)
-            return // Exit early since processing continues in `onloadend`
-          }
+            setPreviews((prev) => ({ ...prev, [previewKey]: processedImageDataUrl }))
 
-          // Process the final file
-          processFile(processedImageDataUrl, previewKey, setter, removeBackground)
-        } catch (error) {
-          console.error("Error processing image:", error)
-        } finally {
+            fetch(processedImageDataUrl)
+              .then((res) => res.blob())
+              .then((blob) => {
+                const processedFile = new File([blob], `${previewKey}${removeBackground ? "-removed-bg" : ""}.png`, {
+                  type: "image/png",
+                })
+                setter(processedFile)
+              })
+              .catch((error) => console.error("Error converting processed image to file:", error))
+          }
+          img.src = reader.result as string
           setInnerLoading(false)
         }
+        reader.readAsDataURL(file)
       }
-
       setCurrentFile(null)
     },
     [currentFile],
   )
 
   // Helper function to convert processed image URL to a File
-  const processFile = (
-    imageUrl: string,
-    previewKey: string,
-    setter: (file: File) => void,
-    removeBackground: boolean,
-  ) => {
-    setPreviews((prev) => ({ ...prev, [previewKey]: imageUrl }))
 
-    fetch(imageUrl)
-      .then((res) => res.blob())
-      .then((blob) => {
-        const processedFile = new File([blob], `${previewKey}${removeBackground ? "-removed-bg" : ""}.png`, {
-          type: "image/png",
-        })
-        setter(processedFile)
-      })
-      .catch((error) => console.error("Error converting processed image to file:", error))
-  }
 
   const renderPreview = (type: "logo" | "stamp" | "signature") => {
     const preview = previews[type]

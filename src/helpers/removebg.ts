@@ -1,4 +1,4 @@
-import {removeBackground} from '@imgly/background-removal'
+
 
 export function removeBackgroundFromImage(
   imageElement: HTMLImageElement,
@@ -232,19 +232,5 @@ function applyProcessedMask(
       // Ensure foreground is fully opaque
       data[idx + 3] = 255;
     }
-  }
-}
-
-export async function removeBg(file : File){
-  try {
-    // const buffer = await f.arrayBuffer(); // Corrected method
-    // const fileBuffer =  await Buffer.from(f.arrayBuffer())
-    const blob = await removeBackground(file);
-
-    const url = URL.createObjectURL(blob);
-    return url
-  } catch (error) {
-    console.error("Error removing background:", error); 
-    throw new Error('some error occurred')
   }
 }
