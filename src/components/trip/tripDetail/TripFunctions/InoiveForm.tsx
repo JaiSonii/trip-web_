@@ -13,6 +13,7 @@ import { InvoiceFormData as FormData } from '@/utils/interface'
 import { formatNumber } from "@/utils/utilArray"
 import Modal from "../Modal"
 import InvoicePaymentModal from "./InvoicePaymentModal"
+import { Input } from "@/components/ui/input"
 
 type AdditionalCharge = {
 
@@ -37,14 +38,14 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
 
 
     const addAddtionalCharge = (data: any) => {
-        
+
 
         setFormData((prev: any) => ({
             ...prev,
             extraAdditionalCharges: [
                 {
                     ...data,
-                    date : new Date(data.date).toISOString(),
+                    date: new Date(data.date).toISOString(),
                     id: uuidv4(),
                     truckNo: trips.find(trip => trip.trip_id === data.trip_id).truck,
                 },
@@ -61,11 +62,11 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
         }))
     }
 
-    const saveAddtionalPayment = (data : any)=>{
-        
-        setFormData(prev=>({
+    const saveAddtionalPayment = (data: any) => {
+
+        setFormData(prev => ({
             ...prev,
-            extraPaymentDetails : [
+            extraPaymentDetails: [
                 data,
                 ...prev.extraPaymentDetails
             ]
@@ -96,8 +97,8 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
                 email: user.email,
                 city: user.city,
                 pan: user.panNumber,
-                stampUrl : user.stampUrl,
-                signatureUrl : user.signatureUrl,
+                stampUrl: user.stampUrl,
+                signatureUrl: user.signatureUrl,
                 partyDetails: {
                     ...prev.partyDetails,
                     msmeNo: user.bankDetails?.msmeNo || '',
@@ -110,7 +111,7 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
                 }
             }));
 
-           
+
 
         } catch (error) {
             alert('Failed to fetch User Details')
@@ -302,6 +303,11 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
                                 className="rounded-lg text-xs"
                             />
                         </div>
+                        <div>
+                            <label>color</label>
+                            <Input type='color' value={formData.color} onChange={(e)=>setFormData((prev)=>({...prev,color : e.target.value}))}/>
+                        </div>
+
                     </div>
 
                     {/* Freight Charges */}
@@ -321,17 +327,17 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {formData.freightCharges.map((charge, index)=>(
+                                    {formData.freightCharges.map((charge, index) => (
                                         <tr key={index}>
-                                            <td className="p-2"><input disabled value={charge.lrNo}/></td>
-                                            <td className="p-2"><input disabled value={charge.truckNo}/></td>
-                                            <td className="p-2"><input disabled value={charge.material}/></td>
-                                            <td className="p-2"><input disabled value={charge.weight}/></td>
-                                            <td className="p-2"><input disabled value={charge.charged}/></td>
-                                            <td className="p-2"><input disabled value={charge.rate}/></td>
-                                            <td className="p-2"><input disabled value={formatNumber(charge.amount)}/></td>
+                                            <td className="p-2"><input disabled value={charge.lrNo} /></td>
+                                            <td className="p-2"><input disabled value={charge.truckNo} /></td>
+                                            <td className="p-2"><input disabled value={charge.material} /></td>
+                                            <td className="p-2"><input disabled value={charge.weight} /></td>
+                                            <td className="p-2"><input disabled value={charge.charged} /></td>
+                                            <td className="p-2"><input disabled value={charge.rate} /></td>
+                                            <td className="p-2"><input disabled value={formatNumber(charge.amount)} /></td>
                                         </tr>
-                                        
+
                                     ))}
                                 </tbody>
                             </table>
@@ -358,24 +364,24 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
                                     {formData.additionalCharges.length > 0 && formData.additionalCharges?.map((charge, index) => (
                                         <tr key={index}>
                                             <td className="p-2">{index + 1}</td>
-                                            <td className="p-2"><input type="date" value={new Date(charge.date).toISOString().split('T')[0]} onChange={(e)=>handleArrayInputChange('additionalCharges', index,'date',e.target.value)}/></td>
-                                            <td className="p-2"><input type="text" value={charge.truckNo} onChange={(e)=>handleArrayInputChange('additionalCharges', index,'lorryNo',e.target.value)}/></td>
-                                            <td className="p-2"><input type="text" value={charge.expenseType} onChange={(e)=>handleArrayInputChange('additionalCharges', index,'expenseType',e.target.value)}/></td>
-                                            <td className="p-2"><input type="text" value={charge.notes} onChange={(e)=>handleArrayInputChange('additionalCharges', index,'notes',e.target.value)}/></td>
-                                            <td className="p-2"><input type="number" value={charge.amount} onChange={(e)=>handleArrayInputChange('additionalCharges', index,'amount',e.target.value)}/></td>
+                                            <td className="p-2"><input type="date" value={new Date(charge.date).toISOString().split('T')[0]} onChange={(e) => handleArrayInputChange('additionalCharges', index, 'date', e.target.value)} /></td>
+                                            <td className="p-2"><input type="text" value={charge.truckNo} onChange={(e) => handleArrayInputChange('additionalCharges', index, 'lorryNo', e.target.value)} /></td>
+                                            <td className="p-2"><input type="text" value={charge.expenseType} onChange={(e) => handleArrayInputChange('additionalCharges', index, 'expenseType', e.target.value)} /></td>
+                                            <td className="p-2"><input type="text" value={charge.notes} onChange={(e) => handleArrayInputChange('additionalCharges', index, 'notes', e.target.value)} /></td>
+                                            <td className="p-2"><input type="number" value={charge.amount} onChange={(e) => handleArrayInputChange('additionalCharges', index, 'amount', e.target.value)} /></td>
                                             <td className="p-2">
                                                 <Button
                                                     type="button"
                                                     variant="destructive"
                                                     size="sm"
                                                     onClick={() => {
-                                                        setDeletedChargeIds((prev)=>([
+                                                        setDeletedChargeIds((prev) => ([
                                                             ...prev,
                                                             charge.id
                                                         ]))
-                                                        setFormData((prev)=>({
+                                                        setFormData((prev) => ({
                                                             ...prev,
-                                                            additionalCharges: prev.additionalCharges.filter((_, i) => i!== index),
+                                                            additionalCharges: prev.additionalCharges.filter((_, i) => i !== index),
                                                         }))
                                                     }}
                                                 >
@@ -387,11 +393,11 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
                                     {formData.extraAdditionalCharges.length > 0 && formData.extraAdditionalCharges?.map((charge, index) => (
                                         <tr key={index}>
                                             <td className="p-2">{index + 1}</td>
-                                            <td className="p-2"><input type="date" value={new Date(charge.date).toISOString().split('T')[0]} onChange={(e)=>handleArrayInputChange('extraAdditionalCharges', index,'date',e.target.value)}/></td>
-                                            <td className="p-2"><input type="text" value={charge.truckNo} onChange={(e)=>handleArrayInputChange('extraAdditionalCharges', index,'lorryNo',e.target.value)}/></td>
-                                            <td className="p-2"><input type="text" value={charge.expenseType} onChange={(e)=>handleArrayInputChange('extraAdditionalCharges', index,'expenseType',e.target.value)}/></td>
-                                            <td className="p-2"><input type="text" value={charge.notes} onChange={(e)=>handleArrayInputChange('extraAdditionalCharges', index,'notes',e.target.value)}/></td>
-                                            <td className="p-2"><input type="number" value={charge.amount} onChange={(e)=>handleArrayInputChange('extraAdditionalCharges', index,'amount',e.target.value)}/></td>
+                                            <td className="p-2"><input type="date" value={new Date(charge.date).toISOString().split('T')[0]} onChange={(e) => handleArrayInputChange('extraAdditionalCharges', index, 'date', e.target.value)} /></td>
+                                            <td className="p-2"><input type="text" value={charge.truckNo} onChange={(e) => handleArrayInputChange('extraAdditionalCharges', index, 'lorryNo', e.target.value)} /></td>
+                                            <td className="p-2"><input type="text" value={charge.expenseType} onChange={(e) => handleArrayInputChange('extraAdditionalCharges', index, 'expenseType', e.target.value)} /></td>
+                                            <td className="p-2"><input type="text" value={charge.notes} onChange={(e) => handleArrayInputChange('extraAdditionalCharges', index, 'notes', e.target.value)} /></td>
+                                            <td className="p-2"><input type="number" value={charge.amount} onChange={(e) => handleArrayInputChange('extraAdditionalCharges', index, 'amount', e.target.value)} /></td>
                                             <td className="p-2">
                                                 <Button
                                                     type="button"
@@ -494,12 +500,12 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
                                                     size="icon"
                                                     onClick={() => {
                                                         removeRow('paymentDetails', index, payment.id)
-                                                        setDeletedPaymentIds((prev)=>[
+                                                        setDeletedPaymentIds((prev) => [
                                                             payment.id,
                                                             ...prev
                                                         ])
                                                     }
-                                                        
+
                                                     }
                                                 >
                                                     <Trash2 className="h-4 w-4" />
@@ -573,7 +579,7 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
             )}
 
             <ChargeModal trips={trips} isOpen={chargeModalOpen} onClose={() => setChargeModalOpen(false)} onSave={(data: any) => addAddtionalCharge(data)} />
-            <InvoicePaymentModal isOpen={paymentModalOpen} onClose={() => setPaymentModalOpen(false)} onSave={saveAddtionalPayment} trips={trips} />    
+            <InvoicePaymentModal isOpen={paymentModalOpen} onClose={() => setPaymentModalOpen(false)} onSave={saveAddtionalPayment} trips={trips} />
         </div>
     )
 }

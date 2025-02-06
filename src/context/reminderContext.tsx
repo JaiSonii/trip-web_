@@ -27,8 +27,9 @@ export const ReminderProvider: React.FC<{ children: React.ReactNode }> = ({ chil
             description: 'Session Expired, Please log in again.',
             variant: 'warning',
           })
-          Cookies.remove('auth_token')
+          await fetch('/api/logout')
           router.push('/login')
+          return
         }
 
         // Check if the new data is different from the current data

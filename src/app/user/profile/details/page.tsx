@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import type React from "react"
 import { useEffect, useState, useRef, useCallback } from "react"
 import Image from "next/image"
-import { removeBackgroundFromImage } from "@/helpers/removebg"
+import { removeBg } from "@/helpers/removebg"
 import Loading from "@/app/user/loading"
 import logoImg from "@/assets/awajahi logo.png"
 
@@ -150,49 +150,73 @@ const DetailsPage = () => {
   )
 
   const handleBgRemovalChoice = useCallback(
-    (removeBackground: boolean) => {
+    async (removeBackground: boolean) => {
       setShowBgRemovalPrompt(false)
+
       if (currentFile && canvasRef.current) {
         const { file, setter, previewKey } = currentFile
-        const reader = new FileReader()
         setInnerLoading(true)
 
-        reader.onloadend = () => {
-          const img = document.createElement("img")
-          img.onload = () => {
-            let processedImageDataUrl: string
-            if (removeBackground) {
-              processedImageDataUrl = removeBackgroundFromImage(img, canvasRef.current!) as string
-            } else {
-              const canvas = canvasRef.current!
-              canvas.width = img.width
-              canvas.height = img.height
-              const ctx = canvas.getContext("2d")!
-              ctx.drawImage(img, 0, 0)
-              processedImageDataUrl = canvas.toDataURL("image/png")
+        try {
+          let processedImageDataUrl: string
+
+          if (removeBackground) {
+            processedImageDataUrl = await removeBg(file) // Wait for background removal
+          } else {
+            const reader = new FileReader()
+
+            reader.onloadend = () => {
+              const img = document.createElement("img")
+              img.onload = () => {
+                const canvas = canvasRef.current!
+                canvas.width = img.width
+                canvas.height = img.height
+                const ctx = canvas.getContext("2d")!
+                ctx.drawImage(img, 0, 0)
+                processedImageDataUrl = canvas.toDataURL("image/png")
+
+                processFile(processedImageDataUrl, previewKey, setter, removeBackground)
+              }
+              img.src = reader.result as string
             }
 
-            setPreviews((prev) => ({ ...prev, [previewKey]: processedImageDataUrl }))
-
-            fetch(processedImageDataUrl)
-              .then((res) => res.blob())
-              .then((blob) => {
-                const processedFile = new File([blob], `${previewKey}${removeBackground ? "-removed-bg" : ""}.png`, {
-                  type: "image/png",
-                })
-                setter(processedFile)
-              })
-              .catch((error) => console.error("Error converting processed image to file:", error))
+            reader.readAsDataURL(file)
+            return // Exit early since processing continues in `onloadend`
           }
-          img.src = reader.result as string
+
+          // Process the final file
+          processFile(processedImageDataUrl, previewKey, setter, removeBackground)
+        } catch (error) {
+          console.error("Error processing image:", error)
+        } finally {
           setInnerLoading(false)
         }
-        reader.readAsDataURL(file)
       }
+
       setCurrentFile(null)
     },
     [currentFile],
   )
+
+  // Helper function to convert processed image URL to a File
+  const processFile = (
+    imageUrl: string,
+    previewKey: string,
+    setter: (file: File) => void,
+    removeBackground: boolean,
+  ) => {
+    setPreviews((prev) => ({ ...prev, [previewKey]: imageUrl }))
+
+    fetch(imageUrl)
+      .then((res) => res.blob())
+      .then((blob) => {
+        const processedFile = new File([blob], `${previewKey}${removeBackground ? "-removed-bg" : ""}.png`, {
+          type: "image/png",
+        })
+        setter(processedFile)
+      })
+      .catch((error) => console.error("Error converting processed image to file:", error))
+  }
 
   const renderPreview = (type: "logo" | "stamp" | "signature") => {
     const preview = previews[type]
@@ -203,10 +227,8 @@ const DetailsPage = () => {
             <Image
               src={preview || "/placeholder.svg"}
               alt={`${type} preview`}
-              width={130}
-              height={130}
-              layout="fixed"
-              className="transition-opacity group-hover:opacity-50"
+              fill
+              className="transition-opacity group-hover:opacity-50 object-contain"
             />
             {isEditing && (
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
@@ -224,8 +246,10 @@ const DetailsPage = () => {
                   <X size={16} className="mr-1" /> Remove
                 </Button>
                 <label htmlFor={`${type}-upload`} className="cursor-pointer">
-                  <Button variant="outline" size="sm">
-                    <Upload size={16} className="mr-1" /> Change
+                  <Button variant="outline" size="sm" asChild>
+                    <span>
+                      <Upload size={16} className="mr-1" /> Change
+                    </span>
                   </Button>
                 </label>
                 <input
@@ -253,12 +277,10 @@ const DetailsPage = () => {
               name={type}
               type="file"
               accept="image/*"
-              onChange={(e) =>{
+              onChange={(e) => {
                 handleFileChange(e, type === "logo" ? setLogo : type === "stamp" ? setStamp : setSignature, type)
                 setIsEditing(true)
-              }
-                
-              }
+              }}
               hidden
             />
           </label>

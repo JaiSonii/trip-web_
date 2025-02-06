@@ -129,14 +129,14 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
                         <td className="border border-black p-1">{formData.particulars}</td>
                         <td colSpan={2} className="border border-r-0 border-black p-1">
                             <div>Party: {formData.party}</div>
-                            <div>GSTIN: { }</div>
+                            <div>GSTIN: {formData.partyDetails.gstin }</div>
                             <div>{formData.address}</div>
                         </td>
                     </tr>
                 </tbody>
             </table>
 
-            <h2 className="bg-gray-300 text-center text-xs font-bold p-2 mt-2 mb-1">Freight Charges</h2>
+            <h2 className=" text-center text-xs font-bold p-2 mt-2 mb-1" style={ {background : formData.color}}>Freight Charges</h2>
             <table className="w-full border-collapse text-[6px]">
                 <thead>
                     <tr className="">
@@ -166,7 +166,7 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
 
             {(formData.additionalCharges.length !== 0 || formData.extraAdditionalCharges.length !== 0) &&
                 <>
-                    <h2 className="bg-gray-300 text-center text-xs font-bold p-2 mt-4 mb-2">Additional Charges</h2>
+                    <h2 className="text-center text-xs font-bold p-2 mt-4 mb-2" style={{background : formData.color}}>Additional Charges</h2>
 
                     <table className="w-full ">
                         <thead>
@@ -236,7 +236,7 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
             </table>
 
             {(formData.paymentDetails.length !== 0 || formData.extraPaymentDetails.length !== 0) && <>
-                <h2 className="bg-gray-300 text-center text-sm font-bold p-1 mt-4 mb-2">Received Payment Details</h2>
+                <h2 className="text-center text-sm font-bold p-1 mt-4 mb-2" style={{background : formData.color}}>Received Payment Details</h2>
 
                 <table className="w-full border-collapse">
                     <thead>
@@ -252,7 +252,7 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
                         {formData.paymentDetails.map((payment, index) => (
                             <tr key={index}>
                                 <td className="border border-black p-2">{index + 1}</td>
-                                <td className="border border-black p-2">{payment.date}</td>
+                                <td className="border border-black p-2">{new Date(payment.date).toLocaleDateString('en-IN')}</td>
                                 <td className="border border-black p-2">{payment.paymentType}</td>
                                 <td className="border border-black p-2">{payment.notes}</td>
                                 <td className="border border-black p-2">{formatNumber(payment.amount)}</td>
@@ -261,7 +261,7 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
                         {formData.extraPaymentDetails.map((payment, index) => (
                             <tr key={index}>
                                 <td className="border border-black p-2">{index + 1}</td>
-                                <td className="border border-black p-2">{payment.date}</td>
+                                <td className="border border-black p-2">{new Date(payment.date).toLocaleDateString('en-IN')}</td>
                                 <td className="border border-black p-2">{payment.paymentType}</td>
                                 <td className="border border-black p-2">{payment.notes}</td>
                                 <td className="border border-black p-2">{formatNumber(payment.amount)}</td>

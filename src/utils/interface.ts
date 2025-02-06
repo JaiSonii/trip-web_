@@ -4,6 +4,7 @@ import { Document } from 'mongoose';
 
 
 export interface InvoiceFormData {
+  color? : string;
   logoUrl: string;
   billNo: string;
   date: string;

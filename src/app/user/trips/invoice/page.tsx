@@ -43,7 +43,7 @@ const InvoiceGenerationPage: React.FC = () => {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [formData, setFormData] = useState<FormData>({
     logoUrl: '',
-
+    color : '#d1d5db',
 
     billNo: '',
     companyName: '',
