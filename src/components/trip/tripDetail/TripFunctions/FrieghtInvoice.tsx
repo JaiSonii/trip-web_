@@ -23,7 +23,7 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
             return total + (isNaN(amount) ? 0 : amount); // Add only valid numbers
         },
         0
-    );
+    ) + formData.additionalCharges.reduce((total, charge)=>total + Number(charge.amount),0) + formData.extraAdditionalCharges.reduce((total,charge)=>total + Number(charge.amount),0);
 
     const totalBalance = useMemo(() => {
         // Combine paymentDetails and extraPaymentDetails into a single array
