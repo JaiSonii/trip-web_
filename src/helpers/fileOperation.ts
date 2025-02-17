@@ -1,5 +1,5 @@
 
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import pdf from 'pdf-parse-new';
 import sharp from 'sharp'
 import tesseract from 'node-tesseract-ocr';
@@ -16,7 +16,7 @@ const s3Client = new S3Client({
 
 // Function to compress PDF files
 async function compressPDF(pdfBuffer: Buffer): Promise<Buffer> {
-    const pdfDoc = await PDFDocument.load(pdfBuffer);
+    const pdfDoc = await PDFDocument.load(pdfBuffer as any);
 
     // Compress PDF by removing object streams, or you can apply other optimizations here
     const optimizedPdfBuffer = await pdfDoc.save({
@@ -61,6 +61,30 @@ export async function uploadFileToS3(
 
     return fileName;
 }
+
+export const deleteFileFromS3 = async (fileUrl: string) => {
+    try {
+      const bucketName = process.env.AWS_S3_BUCKET_NAME!;
+      
+      // Extract file key from URL
+      const fileKey = fileUrl.split(`https://${bucketName}.s3.${process.env.AWS_S3_REGION}.amazonaws.com/`)[1];
+      
+      if (!fileKey) {
+        throw new Error("Invalid S3 file URL");
+      }
+  
+      const command = new DeleteObjectCommand({
+        Bucket: bucketName,
+        Key: fileKey,
+      });
+  
+      await s3Client.send(command);
+      console.log(`File deleted successfully: ${fileKey}`);
+    } catch (error) {
+      console.error("Error deleting file from S3:", error);
+      throw new Error("Failed to delete file from S3");
+    }
+  };
 
 
 export async function extractValidityDate(text: string): Promise<Date | null> {

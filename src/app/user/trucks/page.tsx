@@ -16,6 +16,8 @@ import { Input } from '@/components/ui/input';
 
 import type { TruckModel as ITruck } from '@/utils/interface';
 import { useExpenseData } from '@/components/hooks/useExpenseData';
+import { BsFiletypeXlsx } from 'react-icons/bs';
+import { handleExportToExcel } from '@/utils/excelOperation';
 
 type SortConfig = {
   key: keyof ITruck | any;
@@ -23,7 +25,7 @@ type SortConfig = {
 };
 
 export default function TrucksPage() {
- 
+
   const router = useRouter();
   const { trucks, isLoading, refetchTrucks } = useExpenseData();
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: null, direction: 'asc' });
@@ -45,13 +47,13 @@ export default function TrucksPage() {
 
   const sortedTrucks = useMemo(() => {
     if (!trucks || trucks.length === 0) return [];
-    
+
     let filteredTrucks = [...trucks];
 
     if (searchQuery) {
       const lowercaseQuery = searchQuery.toLowerCase();
       filteredTrucks = filteredTrucks.filter((truck) =>
-        Object.values(truck).some(value => 
+        Object.values(truck).some(value =>
           typeof value === 'string' && value.toLowerCase().includes(lowercaseQuery)
         ) ||
         truck.latestTrip?.partyName?.toLowerCase().includes(lowercaseQuery) ||
@@ -94,6 +96,11 @@ export default function TrucksPage() {
     return text?.length > maxLength ? text.substring(0, maxLength) + '...' : text;
   };
 
+  const handleExport = ()=>{
+    const selectedColumns = ["truckNo", "driverName", "truckType", "ownership", "status", "supplierName"]
+    handleExportToExcel(sortedTrucks, selectedColumns, "trucks.xlsx")
+  }
+
   if (isLoading) return <Loading />;
 
   if (!trucks || trucks.length === 0) {
@@ -102,13 +109,18 @@ export default function TrucksPage() {
 
   return (
     <div className="w-full h-full p-4">
-      <div className="flex w-full px-60 mb-4">
+      <div className="flex items-center w-full px-60 mb-4 gap-2">
         <Input
           type="text"
           placeholder="Search..."
           onChange={handleSearch}
           className="w-full"
         />
+        <div className='p-2 flex justify-end'>
+          <Button onClick={() => handleExport()}>
+            <BsFiletypeXlsx size={20} />
+          </Button>
+        </div>
       </div>
       <Table>
         <TableHeader>
@@ -142,7 +154,7 @@ export default function TrucksPage() {
             const Icon = truckTypesIcons.find(item => item.type === truck.truckType)?.Icon;
             return (
               <TableRow
-                index = {index + 1}
+                index={index + 1}
                 key={truck.truckNo}
                 className="border-t hover:bg-gray-100 transition-colors duration-200 cursor-pointer"
                 onClick={() => router.push(`/user/trucks/${truck.truckNo}`)}
@@ -152,10 +164,10 @@ export default function TrucksPage() {
                     {truck.truckNo}
                     {truck.driverName && (
                       <span className="text-gray-400 text-sm">
-                        Driver: 
+                        Driver:
                         <Button variant="link" asChild>
-                          <Link 
-                            href={`/user/drivers/${truck.driver_id}`} 
+                          <Link
+                            href={`/user/drivers/${truck.driver_id}`}
                             onClick={(e) => e.stopPropagation()}
                           >
                             {truck.driverName}
@@ -174,9 +186,8 @@ export default function TrucksPage() {
                 <TableCell className="text-gray-700">{truck.ownership}</TableCell>
                 <TableCell>
                   <span
-                    className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${
-                      truck.status === 'Available' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                    }`}
+                    className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${truck.status === 'Available' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                      }`}
                   >
                     {truck.status}
                   </span>
@@ -184,8 +195,8 @@ export default function TrucksPage() {
                 <TableCell>
                   {truck.supplierName ? (
                     <Button variant="link" asChild>
-                      <Link 
-                        href={`/user/suppliers/${truck.supplier}/trips`} 
+                      <Link
+                        href={`/user/suppliers/${truck.supplier}/trips`}
                         onClick={(e) => e.stopPropagation()}
                       >
                         {truncateText(truck.supplierName as string, 20)}

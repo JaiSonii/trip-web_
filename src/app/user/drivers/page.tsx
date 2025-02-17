@@ -11,6 +11,9 @@ import Loading from './loading';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { useExpenseData } from '@/components/hooks/useExpenseData';
+import { handleExportToExcel } from '@/utils/excelOperation';
+import { BsFiletypeXlsx } from 'react-icons/bs';
+import { Button } from '@/components/ui/button';
 
 type SortConfig = {
   key: keyof IDriver | null;
@@ -82,6 +85,11 @@ export default function DriversPage() {
     return <FaSort />;
   }, [sortConfig]);
 
+  const handleExport = ()=>{
+    const selectedColumns = ["name", "contactNumber", "status", "balane"]
+    handleExportToExcel(sortedDrivers,selectedColumns, "drivers.xlsx")
+  }
+
   if (isLoading) return <Loading />;
 
   if (!drivers || drivers.length === 0) {
@@ -94,13 +102,18 @@ export default function DriversPage() {
 
   return (
     <div className="w-full h-full p-4">
-      <div className='flex w-full px-60 mb-4'>
+      <div className='flex items-center gap-2 w-full px-60 mb-4'>
         <Input
           type="text"
           placeholder="Search..."
           onChange={handleSearch}
           className="w-full"
         />
+        <div className='p-2 flex justify-end'>
+        <Button onClick={()=>handleExport()}>
+          <BsFiletypeXlsx size={20}/>
+        </Button>
+        </div>
       </div>
       <Table>
         <TableHeader>

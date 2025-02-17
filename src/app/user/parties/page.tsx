@@ -11,6 +11,9 @@ import { formatNumber } from '@/utils/utilArray';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 import { useExpenseData } from '@/components/hooks/useExpenseData';
+import { handleExportToExcel } from '@/utils/excelOperation';
+import { Button } from '@/components/ui/button';
+import { BsFiletypeXlsx } from 'react-icons/bs';
 
 const PartiesPage = () => {
 
@@ -45,6 +48,8 @@ const PartiesPage = () => {
     return sortableTrips;
   }, [parties, sortConfig]);
 
+  
+
 
   const requestSort = (key: any) => {
     let direction: 'asc' | 'desc' = 'asc'
@@ -61,6 +66,10 @@ const PartiesPage = () => {
     return <FaSort />
   }
 
+  const handleExport = ()=>{
+    const selectedColums = ["name", "contactPerson", "contactNumber", "address", "gstNumber", "partyBalance"]
+    handleExportToExcel(sortedParties,selectedColums, 'customers.xlsx')
+  }
 
   if (isLoading) {
     return <Loading />;
@@ -77,6 +86,11 @@ const PartiesPage = () => {
   return (
     <div className="w-full h-full p-4">
       <div className="">
+        <div className='p-2 flex justify-end'>
+        <Button onClick={()=>handleExport()}>
+          <BsFiletypeXlsx size={20}/>
+        </Button>
+        </div>
         <Table className="">
           <TableHeader>
             <TableRow>
