@@ -5,6 +5,7 @@ import { isValidPhone } from '@/utils/validate';
 import { Button } from '../ui/button';
 import { useDriver } from '@/context/driverContext';
 import { motion } from 'framer-motion';
+import { Loader2 } from 'lucide-react';
 
 interface EditDriverModalProps {
   name: string;
@@ -24,6 +25,8 @@ const EditDriverModal: React.FC<EditDriverModalProps> = ({ name, driverId, handl
     lastJoiningDate: new Date(driver.lastJoiningDate || Date.now())
   })
 
+  const [saving, setSaving]= useState(false)
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
       ...prev,
@@ -37,6 +40,7 @@ const EditDriverModal: React.FC<EditDriverModalProps> = ({ name, driverId, handl
       alert('Enter a Valid Phone')
       return
     }
+    setSaving(true)
     handleEdit(formData);
   };
 
@@ -113,8 +117,9 @@ const EditDriverModal: React.FC<EditDriverModalProps> = ({ name, driverId, handl
               </Button>
               <Button
                 type="submit"
+                disabled={saving}
               >
-                Save
+                {saving ? <Loader2 className='text-white animate-spin' /> : 'Save'}
               </Button>
             </div>
           </form>

@@ -333,7 +333,7 @@ const Driver: React.FC = () => {
                   <TableCell>
                     <div className='flex items-center space-x-2'>
                       <FaCalendarAlt className='text-bottomNavBarColor' />
-                      <span>{new Date(account.date || account.paymentDate).toLocaleDateString()}</span>
+                      <span>{new Date(account.date || account.paymentDate).toLocaleDateString('en-IN')}</span>
                     </div>
                   </TableCell>
                   <TableCell >

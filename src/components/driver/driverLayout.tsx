@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState } from "react"
 import { Calendar, FileText, Pencil, Truck, User } from "lucide-react"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import { formatNumber } from "@/utils/utilArray"
 import type { IDriver } from "@/utils/interface"
 
@@ -16,6 +16,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import Loading from "@/app/user/loading"
 import { useDriver } from "@/context/driverContext"
 import dynamic from "next/dynamic"
+import { useToast } from "../hooks/use-toast"
 
 interface DriverLayoutProps {
   driverId: string
@@ -23,15 +24,131 @@ interface DriverLayoutProps {
   children: React.ReactNode
 }
 
-const DriverModal = dynamic(()=>import('@/components/driver/driverModal'),{ssr : false})
-const EditDriverModal = dynamic(()=>import('@/components/driver/editDriverModal'),{ssr : false})
+const DriverModal = dynamic(() => import('@/components/driver/driverModal'), { ssr: false })
+const EditDriverModal = dynamic(() => import('@/components/driver/editDriverModal'), { ssr: false })
 
 export default function DriverLayout({ driverId, onDriverUpdate, children }: DriverLayoutProps) {
-  const { driver, loading } = useDriver()
+  const { driver, setDriver,loading } = useDriver()
   const [modalOpen, setModalOpen] = useState(false)
   const [modalType, setModalType] = useState<"gave" | "got" | null>(null)
   const [edit, setEdit] = useState(false)
+  const {toast} = useToast()
+  const router = useRouter()
   const pathname = usePathname()
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setModalType(null);
+  };
+
+  const handleConfirm = async (amount: number, reason: string, date: string) => {
+    try {
+      const response = await fetch(`/api/drivers/${driverId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          got: modalType === 'got' ? amount : 0,
+          gave: modalType === 'gave' ? amount : 0,
+          reason,
+          date,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update driver');
+      }
+
+      const data = await response.json();
+
+      // Update the driver state
+      setDriver((prev: any) => {
+        const latestAccount = data.accounts[data.accounts.length - 1]; // Get the last account entry from the updated response
+        const newBalance =
+          prev.balance + (latestAccount.got || 0) - (latestAccount.gave || 0); // Update balance correctly
+
+        return {
+          ...prev,
+          driverExpAccounts: [latestAccount, ...prev.driverExpAccounts], // Add the latest entry to the accounts
+          balance: newBalance, // Set the updated balance
+        };
+      });
+
+      closeModal(); // Close the modal after confirming
+    } catch (error: any) {
+      console.error('Failed to update driver:', error);
+      // setError(error.message); // Set error message if something goes wrong
+      toast({
+        description: 'Internal Server Error',
+        variant: 'destructive'
+      })
+    }
+  };
+
+  const handleEditDriver = async (updatedDriver: Partial<IDriver>) => {
+
+    try {
+      const response = await fetch(`/api/drivers/${driverId}`, {
+        method: 'PATCH', // Use PATCH to partially update the driver
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedDriver),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update driver');
+      }
+      const data = await response.json();
+
+      setDriver((prev : IDriver)=>({
+        ...prev,
+        ...data.driver
+      }))
+      setEdit(false);
+      toast({
+        description: 'Driver Updated Successfully',
+      })
+    } catch (error: any) {
+      toast({
+        description: 'Internal Server Error',
+        variant: 'destructive'
+      })
+    }
+  };
+
+  const handleDeleteDriver = async () => {
+    try {
+      const response = await fetch(`/api/drivers/${driverId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        if (response.status === 400) {
+          alert(data.message);
+          return;
+        }
+        throw new Error(data.message || 'Failed to delete driver');
+      }
+
+      alert('Driver Removed Successfully');
+      router.push('/user/drivers');
+    } catch (error: any) {
+      console.error('Failed to delete driver:', error);
+      toast({
+        description: 'Internal Server Error',
+        variant: 'destructive'
+      })
+      // setError(error.message);
+    }
+  };
+
+
 
   const tabs = [
     { icon: <Truck className="h-4 w-4" />, name: "Driver Accounts", path: `/user/drivers/${driverId}` },
@@ -74,8 +191,8 @@ export default function DriverLayout({ driverId, onDriverUpdate, children }: Dri
               >
                 Gave Money
               </Button>
-              <Button variant={'ghost'} onClick={()=>setEdit(true)}>
-                <Pencil size={15}/>
+              <Button variant={'ghost'} onClick={() => setEdit(true)}>
+                <Pencil size={15} />
               </Button>
             </div>
           </div>
@@ -128,14 +245,14 @@ export default function DriverLayout({ driverId, onDriverUpdate, children }: Dri
         open={modalOpen}
         onClose={() => setModalOpen(false)}
         type={modalType}
-        onConfirm={() => console.log("Confirm action")}
+        onConfirm={handleConfirm}
       />
 
       {edit && (
         <EditDriverModal
           driverId={driverId}
           onCancel={() => setEdit(false)}
-          handleEdit={() => console.log("Edit Driver")}
+          handleEdit={handleEditDriver}
           name={driver.name}
           contactNumber={driver.contactNumber}
         />
