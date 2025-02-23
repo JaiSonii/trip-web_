@@ -102,6 +102,8 @@ const PartiesPage = () => {
               <TableHead>Contact Person</TableHead>
               <TableHead>Contact Number</TableHead>
               <TableHead>Address</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>PAN</TableHead>
               <TableHead>GST Number</TableHead>
               <TableHead onClick={() => requestSort('partyBalance')}>
                 <div className='flex justify-between'>
@@ -136,6 +138,8 @@ const PartiesPage = () => {
                     <FaAddressBook className="text-bottomNavBarColor" />
                     <span>{party.address}</span>
                   </div></TableCell>
+                  <TableCell>{party.email}</TableCell>
+                  <TableCell>{party.pan}</TableCell>
                 <TableCell>{party.gstNumber}</TableCell>
                 <TableCell><span className='text-green-600 font-semibold'>₹{formatNumber(party.partyBalance) || ''}</span></TableCell>
               </TableRow>

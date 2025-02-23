@@ -253,20 +253,17 @@ export async function PATCH(req: Request, { params }: { params: { driverId: stri
   }
   try {
     const { driverId } = params;
-    const { name, contactNumber, status } = await req.json();
-    console.log(`${status}`)
+    const data = await req.json();
+
+    console.log(data)
 
     await connectToDatabase(); // Ensure this function is properly defined and imported
 
-    const driver = await Driver.findOne({ user_id: user, driver_id: driverId });
+    const driver = await Driver.findOneAndUpdate({ user_id: user, driver_id: driverId }, data, {new :true});
 
     if (!driver) {
       return NextResponse.json({ message: 'No Driver Found' }, { status: 404 });
     }
-
-    if (name) driver.name = name;
-    if (contactNumber) driver.contactNumber = contactNumber;
-    if (status) driver.status = status;
 
     await Promise.all([driver.save(), recentActivity('Updated Driver Detials', driver, user)]);
 

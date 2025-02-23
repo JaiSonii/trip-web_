@@ -86,7 +86,10 @@ export async function GET(req: Request) {
           name: 1,  // Project necessary fields (e.g., driver name)
           balance: 1 ,
           status : 1,
-          contactNumber : 1 // Include the calculated balance field
+          contactNumber : 1, // Include the calculated balance field
+          licenseNo : 1,
+          aadharNo : 1,
+          lastJoiningDate : 1,
         }
       }
     ]);

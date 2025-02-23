@@ -19,7 +19,7 @@ interface Party {
 
 const PartyDetails = () => {
   const router = useRouter();
-  const {party, setParty, loading} = useParty()
+  const { party, setParty, loading } = useParty()
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -59,6 +59,8 @@ const PartyDetails = () => {
             contactNumber: party.contactNumber,
             address: party.address,
             gstNumber: party.gstNumber,
+            pan: party.pan,
+            email: party.email
           }),
         });
         if (!res.ok) {
@@ -66,11 +68,11 @@ const PartyDetails = () => {
         }
         setIsEditing(false);
         // Optionally refetch data
-        
+
       } catch (err: any) {
         alert(err.message)
-      }finally{
-        
+      } finally {
+
       }
     }
   };
@@ -159,6 +161,28 @@ const PartyDetails = () => {
               disabled={!isEditing}
             />
           </div>
+          <label className="block mb-2">
+            Email
+            <input
+              type="email"
+              name="email"
+              value={party.email}
+              onChange={handleInputChange}
+              disabled={!isEditing}
+              className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
+            />
+          </label>
+          <label className="block mb-2">
+            PAN (Permanent Account Number)
+            <input
+              type="text"
+              name="pan"
+              value={party.pan}
+              onChange={handleInputChange}
+              disabled={!isEditing}
+              className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
+            />
+          </label>
           <div className="flex justify-between col-span-2">
             <div className="mt-6 flex space-x-4">
               {isEditing ? (

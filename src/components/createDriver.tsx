@@ -14,7 +14,9 @@ const DriverForm: React.FC<Props> = ({ onSubmit }) => {
   const [formData, setFormData] = useState<Partial<IDriver>>({
     name: '',
     contactNumber: '',
-    balance: 0,
+    licenseNo: '',
+    aadharNo: '',
+    lastJoiningDate: new Date(Date.now())
   });
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -25,11 +27,10 @@ const DriverForm: React.FC<Props> = ({ onSubmit }) => {
 
   // Handle input changes and update the state
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prevState => ({
-      ...prevState,
-      [name]: value,
-    }));
+    setFormData(prev => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }))
   };
 
   // Handle form submission
@@ -74,6 +75,36 @@ const DriverForm: React.FC<Props> = ({ onSubmit }) => {
           type="text"
           name="contactNumber"
           value={formData.contactNumber}
+          onChange={handleChange}
+          className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
+        />
+      </label>
+      <label className="block mb-2">
+        Aadhar Number
+        <input
+          type="text"
+          name="aadharNo"
+          value={formData.aadharNo}
+          onChange={handleChange}
+          className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
+        />
+      </label>
+      <label className="block mb-2">
+        License Number
+        <input
+          type="text"
+          name="licenseNo"
+          value={formData.licenseNo}
+          onChange={handleChange}
+          className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
+        />
+      </label>
+      <label className="block mb-2">
+        Last Joining Date
+        <input
+          type="date"
+          name="lastJoiningDate"
+          value={formData.lastJoiningDate ? new Date(formData.lastJoiningDate).toISOString().split('T')[0] : ''}
           onChange={handleChange}
           className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
         />

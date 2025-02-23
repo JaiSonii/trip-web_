@@ -10,7 +10,6 @@ import { MdDelete, MdEdit } from "react-icons/md"
 import { IoDuplicateOutline } from "react-icons/io5"
 import { IoMdUndo } from "react-icons/io"
 import { Loader2 } from "lucide-react"
-
 import type { ITrip } from "@/utils/interface"
 import { statuses } from "@/utils/schema"
 import { formatNumber } from "@/utils/utilArray"
@@ -24,12 +23,22 @@ import { useToast } from "@/components/hooks/use-toast"
 import { ewbColor } from "@/utils/EwayBillColor"
 import { useGetTripsQuery, useDeleteTripMutation, useUpdateTripStatusMutation, useEditTripMutation } from "@/store/api"
 import { useExpenseData } from "@/components/hooks/useExpenseData"
-import InvoiceForm from "@/components/trip/tripDetail/TripFunctions/InvoiceForm"
 import Link from "next/link"
 import * as XLSX from "xlsx"
 import { saveAs } from "file-saver"
 
 const EditTripForm = dynamic(() => import("@/components/trip/EditTripForm"), {
+  ssr: false,
+  loading: () => (
+    <div className="modal-class">
+      <div className="flex items-center justify-center">
+        <Loader2 className="animate-spin text-bottomNavBarColor" />
+      </div>
+    </div>
+  ),
+})
+
+const InvoiceForm = dynamic(() => import("@/components/trip/tripDetail/TripFunctions/InvoiceForm"), {
   ssr: false,
   loading: () => (
     <div className="modal-class">
@@ -71,36 +80,6 @@ export default function TripsPage() {
   const [updateTripStatus] = useUpdateTripStatusMutation()
   const [editTrip] = useEditTripMutation()
   const { refetchTrips } = useExpenseData()
-
-  const responsiveTableStyles = `
-  @media (max-width: 1023px) {
-    .responsive-table thead {
-      display: none;
-    }
-    .responsive-table tr {
-      display: block;
-      margin-bottom: 1rem;
-      border: 1px solid #e2e8f0;
-      border-radius: 0.5rem;
-      padding: 1rem;
-    }
-    .responsive-table td {
-      display: flex;
-      justify-content: space-between;
-      text-align: right;
-      padding: 0.5rem 0;
-      border-bottom: 1px solid #e2e8f0;
-    }
-    .responsive-table td:before {
-      content: attr(data-label);
-      font-weight: bold;
-      text-align: left;
-    }
-    .responsive-table td:last-child {
-      border-bottom: none;
-    }
-  }
-`
 
   useEffect(() => {
     refetchTrips()

@@ -99,6 +99,11 @@ export const partySchema = new Schema({
   gstNumber: {
     type: String,
   },
+  email : {
+    type : String
+  },
+  pan : String,
+
 });
 
 
@@ -306,6 +311,9 @@ export const driverSchema = new mongoose.Schema({
   contactNumber: {
     type: String,
   },
+  licenseNo : String,
+  aadharNo : String,
+  lastJoiningDate : Date,
   status: {
     type: String,
     enum: ['Available', 'On Trip'],

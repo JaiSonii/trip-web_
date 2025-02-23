@@ -111,6 +111,9 @@ export interface IDriver extends Document {
   driver_id: string;
   name: string;
   contactNumber: string;
+  licenseNo : string;
+  aadharNo : string;
+  lastJoiningDate : Date
   status: 'Available' | 'On Trip';
   balance?: number;
   accounts: IDriverAccount[];
@@ -204,6 +207,8 @@ export interface IParty extends Document {
   balance: number;
   createdAt: Date;
   updatedAt: Date;
+  email : string;
+  pan : string;
   partyBalance : number
 }
 

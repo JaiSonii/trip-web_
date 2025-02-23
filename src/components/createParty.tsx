@@ -18,6 +18,8 @@ const PartyForm: React.FC<Props> = ({ onSubmit }) => {
     address: '',
     gstNumber: '',
     balance: 0,
+    pan : '',
+    email : ''
   });
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
@@ -105,6 +107,26 @@ const PartyForm: React.FC<Props> = ({ onSubmit }) => {
           type="text"
           name="gstNumber"
           value={formData.gstNumber}
+          onChange={handleChange}
+          className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
+        />
+      </label>
+      <label className="block mb-2">
+        Email
+        <input
+          type="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
+        />
+      </label>
+      <label className="block mb-2">
+        PAN (Permanent Account Number)
+        <input
+          type="text"
+          name="pan"
+          value={formData.pan}
           onChange={handleChange}
           className="block w-full p-2 mt-1 border border-gray-300 rounded-md"
         />

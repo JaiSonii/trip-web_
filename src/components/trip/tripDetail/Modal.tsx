@@ -22,6 +22,8 @@ interface ModalProps {
   editData?: PaymentBook | any;
 }
 
+const paymentTypes = ['Cash', 'Cheque', 'Online Transfer', 'Bank Transfer', 'UPI', 'Fuel', 'Others']
+
 const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
@@ -32,7 +34,7 @@ const Modal: React.FC<ModalProps> = ({
 }) => {
   const [formState, setFormState] = useState({
     amount: editData?.amount || 0,
-    paymentType: editData?.paymentType || 'Cash' as 'Cash' | 'Cheque' | 'Online Transfer',
+    paymentType: editData?.paymentType || 'Cash' as string,
     receivedByDriver: editData?.driver_id ? true : false,
     date: new Date(editData?.date || Date.now()).toISOString().split('T')[0],
     notes: editData?.notes || ''
@@ -145,9 +147,9 @@ const Modal: React.FC<ModalProps> = ({
                 className="mt-1 p-2 w-full border border-gray-300 rounded-md"
                 required
               >
-                <option value="Cash">Cash</option>
-                <option value="Cheque">Cheque</option>
-                <option value="Online Transfer">Online Transfer</option>
+                {paymentTypes.map(type=>(
+                  <option key={type} value={type}>{type}</option>
+                ))}
               </select>
             </div>
             <div className="mb-4 flex items-center">

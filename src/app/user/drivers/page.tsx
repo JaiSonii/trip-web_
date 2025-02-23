@@ -28,7 +28,6 @@ export default function DriversPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
 
-
   useEffect(() => {
     refetchDrivers()
   }, [refetchDrivers])
@@ -124,6 +123,9 @@ export default function DriversPage() {
               </div>
             </TableHead>
             <TableHead>Contact Number</TableHead>
+            <TableHead>Aadhar</TableHead>
+            <TableHead>License</TableHead>
+            <TableHead>Last Joining</TableHead>
             <TableHead onClick={() => requestSort('status')} className="cursor-pointer">
               <div className='flex justify-between items-center'>
                 Status {getSortIcon('status')}
@@ -156,6 +158,9 @@ export default function DriversPage() {
                   <span>{driver.contactNumber || ''}</span>
                 </div>
               </TableCell>
+              <TableCell>{driver.aadharNo || "NA"}</TableCell>
+              <TableCell>{driver.licenseNo || "NA"}</TableCell>
+              <TableCell>{driver.lastJoiningDate ? new Date(driver.lastJoiningDate).toLocaleDateString('en-IN') : "NA"}</TableCell>
               <TableCell className="border p-4">
                 <span
                   className={`inline-block px-3 py-1 rounded-full text-sm font-semibold ${driver.status === 'Available' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
