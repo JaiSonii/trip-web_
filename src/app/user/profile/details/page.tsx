@@ -108,29 +108,43 @@ const DetailsPage = () => {
             deleteSignature,
           }),
         )
-        if (logo) formdata.append("logo", logo)
-        if (stamp) formdata.append("stamp", stamp)
-        if (signature) formdata.append("signature", signature)
+
+        // Only append files if they exist and haven't been marked for deletion
+        if (logo && !deleteLogo) {
+          console.log("Appending logo:", logo)
+          formdata.append("logo", logo)
+        }
+        if (stamp && !deleteStamp) {
+          console.log("Appending stamp:", stamp)
+          formdata.append("stamp", stamp)
+        }
+        if (signature && !deleteSignature) {
+          console.log("Appending signature:", signature)
+          formdata.append("signature", signature)
+        }
+
         const res = await fetch(`/api/users`, {
           method: "PUT",
           body: formdata,
         })
+
         if (!res.ok) {
           throw new Error("Failed to update party details")
         }
-        setIsEditing(false)
-        // Optionally refetch data
+
         const data = await res.json()
         setUser(data.user)
+        setIsEditing(false)
         // Reset deletion states
         setDeleteLogo(false)
         setDeleteStamp(false)
         setDeleteSignature(false)
       } catch (err: any) {
+        console.error("Error saving user details:", err)
         alert(err.message)
       }
+      setInnerLoading(false)
     }
-    setInnerLoading(false)
   }
 
   const handleFileChange = useCallback(
@@ -157,7 +171,7 @@ const DetailsPage = () => {
         const reader = new FileReader()
         setInnerLoading(true)
 
-        reader.onloadend = () => {
+        reader.onloadend = async () => {
           const img = document.createElement("img")
           img.onload = () => {
             let processedImageDataUrl: string
@@ -172,20 +186,27 @@ const DetailsPage = () => {
               processedImageDataUrl = canvas.toDataURL("image/png")
             }
 
+            // Update preview immediately
             setPreviews((prev) => ({ ...prev, [previewKey]: processedImageDataUrl }))
 
+            // Convert the processed image to a File object
             fetch(processedImageDataUrl)
               .then((res) => res.blob())
               .then((blob) => {
-                const processedFile = new File([blob], `${previewKey}${removeBackground ? "-removed-bg" : ""}.png`, {
+                // Create a new File from the processed image blob
+                const processedFile = new File([blob], file.name, {
                   type: "image/png",
                 })
+                // Set the processed file using the appropriate setter
                 setter(processedFile)
+                setInnerLoading(false)
               })
-              .catch((error) => console.error("Error converting processed image to file:", error))
+              .catch((error) => {
+                console.error("Error converting processed image to file:", error)
+                setInnerLoading(false)
+              })
           }
           img.src = reader.result as string
-          setInnerLoading(false)
         }
         reader.readAsDataURL(file)
       }
@@ -195,7 +216,6 @@ const DetailsPage = () => {
   )
 
   // Helper function to convert processed image URL to a File
-
 
   const renderPreview = (type: "logo" | "stamp" | "signature") => {
     const preview = previews[type]

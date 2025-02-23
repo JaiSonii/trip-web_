@@ -305,13 +305,13 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
                     <p className="mt-1">Bill Incharge</p>
                 </div>
                 <div className="text-center flex flex-col items-center">
-                    <div className="w-[50px] h-[50px]">
+                    <div className="w-[100px] h-[50px]">
                         {formData.stampUrl ? (
                             <Image
                                 src={formData.stampUrl}
                                 alt="Verified Stamp"
-                                width={50}
-                                height={50}
+                                width={100}
+                                height={100}
                                 className="object-contain"
                             />
                         ) : (

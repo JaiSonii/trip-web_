@@ -243,7 +243,7 @@ const LoadingSlip: React.FC<Props> = ({trip, charges,haltingCharges}) => {
                             </div>
                             <div className="flex justify-between">
                                 <p>Balance Amount:</p>
-                                <p>₹{formatNumber(trip.balance || trip?.loadingSlipDetails?.balance || 0)}</p>
+                                <p>₹{formatNumber(trip?.loadingSlipDetails?.balance || trip?.balance || 0)}</p>
                             </div>
 
                             <div className="flex justify-between">
