@@ -47,6 +47,7 @@ export async function PUT(req: Request, { params }: { params: { truckNo: string 
     const { truckNo } = params;
     const data = await req.json();
 
+
     await connectToDatabase();
 
     const truck = await Truck.findOneAndUpdate({ user_id: user, truckNo }, data, { new: true });

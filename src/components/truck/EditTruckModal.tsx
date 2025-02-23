@@ -13,6 +13,7 @@ import DriverSelect from '../trip/DriverSelect';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { useExpenseCtx } from '@/context/context';
 import { useExpenseData } from '../hooks/useExpenseData';
+import { Loader2 } from 'lucide-react';
 
 type FormData = {
     truckNo: string;
@@ -81,6 +82,13 @@ const EditTruckModal: React.FC<EditTruckModalProps> = ({ truck, isOpen, onClose,
         });
     }
 
+    const handleSelectChange = (name: string, value: string) => {
+        setFormdata({
+            ...formdata,
+            [name]: value
+        });
+    }
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -108,6 +116,7 @@ const EditTruckModal: React.FC<EditTruckModalProps> = ({ truck, isOpen, onClose,
         setSaving(true);
 
         onSave(formdata)
+        onClose()
         setSaving(false)
     };
 
@@ -208,7 +217,7 @@ const EditTruckModal: React.FC<EditTruckModalProps> = ({ truck, isOpen, onClose,
                                 <SupplierSelect
                                     suppliers={suppliers}
                                     value={formdata.supplier}
-                                    onChange={(value) => setFormdata({ ...formdata, supplier: value })}
+                                    onChange={handleSelectChange}
                                 />
                             </div>
 
@@ -234,8 +243,9 @@ const EditTruckModal: React.FC<EditTruckModalProps> = ({ truck, isOpen, onClose,
                         <div className='flex flex-row w-full justify-end gap-2'>
                             <Button
                                 type="submit"
+                                disabled={saving}
                             >
-                                Submit
+                                {saving ? <><Loader2 className='animate-spin'/></> : "Submit"}
                             </Button>
                             <Button
                                 variant={'ghost'}

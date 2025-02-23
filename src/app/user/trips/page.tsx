@@ -305,14 +305,27 @@ export default function TripsPage() {
     [selectedTrip, editTrip, toast],
   )
   const handleExportToExcel = () => {
-    const selectedColumns = ["startDate", "LR", "truck", "partyName", "amount", "truckHireCost","balance"]; // Define the columns you want
+    const selectedColumns = [
+      "startDate",
+      "LR",
+      "truck",
+      "from",
+      "to",
+      "partyName",
+      "amount",
+      "truckHireCost",
+      "balance"
+    ]; // Define the columns you want
   
     // Map the sortedTrips data to include only the selected columns
-    const filteredData = sortedTrips.map(trip =>
-      Object.fromEntries(
+    const filteredData = sortedTrips.map(trip => ({
+      ...Object.fromEntries(
         selectedColumns.map(col => [col, trip[col as keyof ITrip] || ""]) // Ensure missing values are empty
-      )
-    );
+      ),
+      startDate : new Date(trip.startDate).toLocaleDateString('en-IN') || "",
+      from: trip.route?.origin || "", // Extract origin as "from"
+      to: trip.route?.destination || "" // Extract destination as "to"
+    }));
   
     const worksheet = XLSX.utils.json_to_sheet(filteredData);
     const workbook = XLSX.utils.book_new();
@@ -325,6 +338,7 @@ export default function TripsPage() {
   
     saveAs(data, "trips.xlsx");
   };
+  
   
 
   if (isLoading) return <Loading />

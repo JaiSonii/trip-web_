@@ -19,6 +19,7 @@ import AddExpenseModal from '../AddExpenseModal';
 import { handleAddExpense } from '@/helpers/ExpenseOperation';
 import { useTruck } from '@/context/truckContext';
 import { Frown } from 'lucide-react';
+import { useExpenseData } from '../hooks/useExpenseData';
 
 interface TruckLayoutProps {
     children: React.ReactNode;
@@ -26,6 +27,7 @@ interface TruckLayoutProps {
 
 const TruckLayout = ({ children }: TruckLayoutProps) => {
     const { truck, setTruck, loading } = useTruck()
+    const {suppliers} = useExpenseData()
     const router = useRouter();
     const pathname = usePathname();
     const { truckNo } = useParams()
@@ -45,6 +47,7 @@ const TruckLayout = ({ children }: TruckLayoutProps) => {
     const [edit, setEdit] = useState<boolean>(false);
 
     const [showDetails, setShowDetails] = useState(false);
+    const [saving, setSaving] = useState(false)
 
     const toggleDetails = () => setShowDetails(!showDetails);
 
@@ -74,7 +77,9 @@ const TruckLayout = ({ children }: TruckLayoutProps) => {
 
 
     const handleEdit = async (formData: any) => {
-        try {
+        // console.log(formData)
+        setSaving(true)
+        try {   
             const response = await fetch(`/api/trucks/${truckNo}`, {
                 method: 'PUT',
                 headers: {
@@ -84,16 +89,19 @@ const TruckLayout = ({ children }: TruckLayoutProps) => {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to update truck');
+                throw new Error('Failed to update truck');  
             }
             const data = await response.json();
             setTruck((prev : TruckModel | any)=>({
                 ...prev,
-                ...data.truck
+                ...data.truck,
+                supplierName : suppliers.find(supplier=>supplier.supplier_id === data.truck.supplier)?.name || ''
             }))
         } catch (error) {
             console.error('Error updating truck:', error);
             setError('Failed to update truck. Please try again later.');
+        }finally{
+            setSaving(false)
         }
         
     };
@@ -116,9 +124,6 @@ const TruckLayout = ({ children }: TruckLayoutProps) => {
         }
         router.push('/user/trucks');
     };
-
-
-
     if (loading) return <Loading />;
     if (!truck) {
         return <div className='flex items-center justify-center space-x-2'><Frown className='text-bottomNavBarColor' /> Truck Not Found</div>
@@ -128,6 +133,9 @@ const TruckLayout = ({ children }: TruckLayoutProps) => {
 
     return (
         <div className="w-full h-full p-4 bg-gray-50 rounded-lg shadow-sm min-h-screen">
+            {saving && <div>
+                <Loading />
+                </div>}
             <div className="flex flex-col space-y-4">
                 <div className="flex items-center justify-between p-4 bg-lightOrange rounded-sm text-buttonTextColor">
                     <div className="flex items-center space-x-4">
