@@ -108,6 +108,7 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
             <div className="text-center mb-1">{formData.address}</div>
             <div className="absolute right-1 top-1">
                 <div>{formData.phone}</div>
+                <div>{formData.altPhone}</div>
             </div>
             <table className="w-full border-collapse text-[6px]">
                 <tbody>

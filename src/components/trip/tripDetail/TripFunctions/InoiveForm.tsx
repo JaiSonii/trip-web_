@@ -2,16 +2,12 @@
 
 import React, { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { useTrip } from "@/context/tripContext"
-import { Download, Plus, Trash2 } from 'lucide-react'
-import FreightInvoice from "./FrieghtInvoice"
+import { Plus, Trash2 } from 'lucide-react'
 import { useToast } from "@/components/hooks/use-toast"
 import ChargeModal from "../ChargeModal"
 import { v4 as uuidv4 } from 'uuid'
 import { InvoiceFormData as FormData } from '@/utils/interface'
 import { formatNumber } from "@/utils/utilArray"
-import Modal from "../Modal"
 import InvoicePaymentModal from "./InvoicePaymentModal"
 import { Input } from "@/components/ui/input"
 
@@ -99,6 +95,7 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
                 pan: user.panNumber,
                 stampUrl: user.stampUrl,
                 signatureUrl: user.signatureUrl,
+                altPhone : user.altPhone || "",
                 partyDetails: {
                     ...prev.partyDetails,
                     msmeNo: user.bankDetails?.msmeNo || '',

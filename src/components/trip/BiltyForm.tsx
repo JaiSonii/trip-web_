@@ -115,6 +115,7 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
     signature: "",
     materials: trip.material || [],
     grtdWeight: trip.guaranteedWeight || '',
+    altPhone : ""
   })
   const billRef = useRef<HTMLDivElement>(null)
 
@@ -140,6 +141,7 @@ export default function BiltyForm({ isOpen, onClose, trip, setTrip }: Props) {
         pan: user.panNumber,
         city: user.city,
         email: user.email,
+        altPhone : user.altPhone || ""
       }))
     } catch (error) {
       alert("Failed to fetch User Details")

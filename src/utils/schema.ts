@@ -372,6 +372,7 @@ export const supplierSchema: Schema = new Schema({
 export const userSchema = new Schema({
   user_id: { type: String, required: true, unique: true },
   phone: { type: String, required: true, unique: true },
+  altPhone : String,
   name: { type: String },
   role: {
     name: String,

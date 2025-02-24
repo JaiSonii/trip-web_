@@ -166,6 +166,10 @@ const LoadingSlip: React.FC<Props> = ({trip, charges,haltingCharges}) => {
                                     <i className="fas fa-phone-alt"></i>
                                     {user?.phone}
                                 </p>
+                                <p className="text-sm">
+                                    <i className="fas fa-phone-alt"></i>
+                                    {user?.altPhone}
+                                </p>
                             </div>
                         </div>
                         <p className="text-sm mt-2 spacing-large">

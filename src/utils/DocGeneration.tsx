@@ -69,6 +69,7 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
               </div>
               <div>
                 <p className="text-xs">{formData.contactNumber}</p>
+                <p className="text-xs">{formData.altPhone || ""}</p>
               </div>
             </div>
 
@@ -322,6 +323,7 @@ export function FMemo({ formData, payments }: { formData: FMDataType, payments: 
           <h1 className="text-lg font-semibold uppercase text-center border-b-2 border-gray-500 pb-1">Challan / Freight Memo</h1>
           <div className="text-right text-xs">
             <p>📞 {formData.contactNumber}</p>
+            <p>📞 {formData.altPhone || ""}</p>
           </div>
         </div>
 

@@ -127,6 +127,7 @@ export default function FrieghtMemo({ isOpen, onClose }: Props) {
     challanNo: trip.fmNo || "",
     logo: "",
     signature: "",
+    altPhone : ""
   })
   const { toast } = useToast()
 
@@ -154,6 +155,7 @@ export default function FrieghtMemo({ isOpen, onClose }: Props) {
           city: user.city,
           pan: user.panNumber,
           signature: user.signatureUrl,
+          altPhone : user.altPhone || ""
         }))
       } else {
         toast({

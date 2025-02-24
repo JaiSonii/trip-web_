@@ -9,6 +9,8 @@ import Image from "next/image"
 import { removeBackgroundFromImage } from "@/helpers/removebg"
 import Loading from "@/app/user/loading"
 import logoImg from "@/assets/awajahi logo.png"
+import { isValidPhone } from "@/utils/validate"
+import { useToast } from "@/components/hooks/use-toast"
 
 const DetailsPage = () => {
   const [user, setUser] = useState<any>()
@@ -35,6 +37,7 @@ const DetailsPage = () => {
   const [deleteLogo, setDeleteLogo] = useState(false)
   const [deleteStamp, setDeleteStamp] = useState(false)
   const [deleteSignature, setDeleteSignature] = useState(false)
+  const {toast} = useToast()
 
   const fetchUser = async () => {
     setLoading(true)
@@ -87,6 +90,13 @@ const DetailsPage = () => {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
+    if(user.altPhone && !isValidPhone(user.altPhone)){
+      toast({
+        description : "Please enter a correct phone number",
+        variant : "destructive"
+      })
+      return
+    }
     setInnerLoading(true)
     if (user) {
       try {
@@ -103,6 +113,7 @@ const DetailsPage = () => {
             panNumber: user.panNumber,
             bankDetails: user.bankDetails,
             email: user.email,
+            altPhone : user.altPhone,
             deleteLogo,
             deleteStamp,
             deleteSignature,
@@ -118,6 +129,7 @@ const DetailsPage = () => {
           console.log("Appending stamp:", stamp)
           formdata.append("stamp", stamp)
         }
+        
         if (signature && !deleteSignature) {
           console.log("Appending signature:", signature)
           formdata.append("signature", signature)
@@ -316,6 +328,18 @@ const DetailsPage = () => {
                 name="company"
                 value={user.company || ""}
                 onChange={handleInputChange}
+                className="border border-gray-300 rounded-md p-2"
+                disabled={!isEditing}
+              />
+            </div>
+            <div>
+              <label className="block font-medium text-gray-700">Secondary Phone:</label>
+              <input
+                type="text"
+                name="altPhone"
+                value={user.altPhone || ""}
+                onChange={handleInputChange}
+                placeholder="9876543210"
                 className="border border-gray-300 rounded-md p-2"
                 disabled={!isEditing}
               />

@@ -16,6 +16,7 @@ export interface InvoiceFormData {
   party: string;
   companyName: string;
   phone: string
+  altPhone? : string;
   email: string;
   signatureUrl : string;
   stampUrl : string
@@ -292,6 +293,7 @@ export type EWBFormDataType = {
   from : string,
   to : string;
   contactNumber: string
+  altPhone? : string
   email: string
   date: Date
   LR: string
@@ -317,6 +319,7 @@ export interface FMDataType {
   address: string;
   city: string;
   pincode: string;
+  altPhone? : string;
   contactNumber: string;
   email: string;
   date: Date;
