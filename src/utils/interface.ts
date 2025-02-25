@@ -7,6 +7,8 @@ export interface InvoiceFormData {
   color? : string;
   logoUrl: string;
   billNo: string;
+  partygst :  string
+  partyAddress : string;
   date: string;
   to: string;
   from: string;

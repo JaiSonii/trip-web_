@@ -28,6 +28,9 @@ const InvoiceGenerationPage: React.FC = () => {
   const invoiceId = params.get('invoiceId') as string
   const route = JSON.parse(params.get('route') as string)
 
+  const issuedDate = params.get('issuedDate') as string
+  const dueDate = params.get('dueDate') as string
+
 
   const router = useRouter()
   const { toast } = useToast()
@@ -44,13 +47,14 @@ const InvoiceGenerationPage: React.FC = () => {
   const [formData, setFormData] = useState<FormData>({
     logoUrl: '',
     color : '#d1d5db',
-
+    partygst : "",
+    partyAddress : "",
     billNo: '',
     companyName: '',
     email: '',
     phone: '',
-    date: new Date().toISOString().split('T')[0],
-    dueDate: new Date().toISOString().split('T')[0],
+    date: new Date(issuedDate || Date.now()).toISOString().split('T')[0],
+    dueDate: new Date(dueDate || Date.now()).toISOString().split('T')[0],
     to: '',
     from: '',
     branch: '',
@@ -80,12 +84,15 @@ const InvoiceGenerationPage: React.FC = () => {
       const res = await fetch(`/api/trips/invoice?trips=${encodeURIComponent(JSON.stringify(paramtrips))}`)
       const data = await res.json()
 
+
       setTrips(data.trips)
       setFormData({
         ...formData,
         to: data.trips[0]?.route?.origin || '',
         from: data.trips[0]?.route?.destination || '',
         party: data.trips[0]?.partyName || '',
+        partygst : data.trips[0].partyDetails.gstNumber || "",
+        partyAddress : data.trips[0].partyDetails.address || "",
         freightCharges: data.trips?.map((trip: ITrip) => ({
           lrNo: trip.LR,
           truckNo: trip.truck,

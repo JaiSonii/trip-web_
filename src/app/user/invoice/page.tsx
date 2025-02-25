@@ -152,7 +152,7 @@ const InvoicePage = () => {
                 <motion.tr
                   key={invoice._id}
                   className="hover:bg-gray-50 cursor-pointer"
-                  onClick={() => router.push(`/user/trips/invoice?party=${encodeURIComponent(invoice.party_id)}&route=${encodeURIComponent(JSON.stringify(invoice.route))}&trips=${encodeURIComponent(JSON.stringify(invoice.trips))}&invoiceId=${encodeURIComponent(invoice._id)}`)}
+                  onClick={() => router.push(`/user/trips/invoice?party=${encodeURIComponent(invoice.party_id)}&route=${encodeURIComponent(JSON.stringify(invoice.route))}&trips=${encodeURIComponent(JSON.stringify(invoice.trips))}&invoiceId=${encodeURIComponent(invoice._id)}&issuedDate=${encodeURIComponent(invoice.date)}&dueDate=${encodeURIComponent(invoice.dueDate)}`)}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}

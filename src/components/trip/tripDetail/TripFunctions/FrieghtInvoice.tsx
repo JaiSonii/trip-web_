@@ -130,8 +130,8 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
                         <td className="border border-black p-1">{formData.particulars}</td>
                         <td colSpan={2} className="border border-r-0 border-black p-1">
                             <div>Party: {formData.party}</div>
-                            <div>GSTIN: {formData.partyDetails.gstin }</div>
-                            <div>{formData.address}</div>
+                            <div>GSTIN: {formData.partygst }</div>
+                            <div>{formData.partyAddress}</div>
                         </td>
                     </tr>
                 </tbody>
