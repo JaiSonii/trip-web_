@@ -1,6 +1,6 @@
 "use client";
 
-import React, { FormEvent, useEffect, useState, useTransition } from "react";
+import React, { FormEvent, useEffect, useRef, useState, useTransition } from "react";
 import {
   InputOTP,
   InputOTPGroup,
@@ -23,7 +23,6 @@ import { isValidPhone } from "@/utils/validate";
 import { Loader2 } from "lucide-react";
 
 function OtpLogin() {
-  const router = useRouter();
   const [phoneNumber, setPhoneNumber] = useState("");
   const [countryCode, setCountryCode] = useState("+91");
   const [otp, setOtp] = useState("");
@@ -32,6 +31,9 @@ function OtpLogin() {
   const [resendCountdown, setResendCountdown] = useState(0);
   const [session, setSession] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const otpRef = useRef<HTMLDivElement | null>(null)
+
+  const router = useRouter();
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -60,8 +62,7 @@ function OtpLogin() {
           }),
         });
 
-        const result = await res.json();
-        console.log(result)
+        const result = await res.json();  
 
         if (result.status === 200) {
           Cookies.set("selectedRole", "carrier");
@@ -107,6 +108,10 @@ function OtpLogin() {
         if (data.Status === "Success") {
           setSuccess("OTP sent successfully.");
           setSession(data.Details);
+          setTimeout(()=>{
+            otpRef.current?.focus()
+          },500)
+          
         } else {
           setError("Failed to send OTP. Please try again.");
         }
@@ -156,8 +161,8 @@ function OtpLogin() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        {countryCodes.map((code) => (
-                          <SelectItem key={code.dial_code} value={code.dial_code}>
+                        {countryCodes.map((code, index) => (
+                          <SelectItem key={index} value={code.dial_code}>
                             {code.code} {code.name} ({code.dial_code})
                           </SelectItem>
                         ))}
@@ -204,12 +209,12 @@ function OtpLogin() {
                   className="otp-input size-full flex items-center justify-between"
                 >
                   <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
-                    <InputOTPSlot index={2} />
-                    <InputOTPSlot index={3} />
-                    <InputOTPSlot index={4} />
-                    <InputOTPSlot index={5} />
+                    <InputOTPSlot index={0} ref={otpRef}key={0}/>
+                    <InputOTPSlot index={1} key={1}/>
+                    <InputOTPSlot index={2} key={2}/>
+                    <InputOTPSlot index={3} key={3}/>
+                    <InputOTPSlot index={4} key={4}/>
+                    <InputOTPSlot index={5} key={5}/>
                   </InputOTPGroup>
                 </InputOTP>
                 <span className="text-[#7A7A7A]">

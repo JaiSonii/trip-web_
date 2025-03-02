@@ -45,8 +45,6 @@ export default function RootLayout({
     }
   }, []);
   return (
-    <html lang="en">
-      <body className={`${roboto.variable}`}>
         <div className="flex flex-row">
           {/* Sidebar: 3/12 width */}
           <div className="w-screen text-black">
@@ -55,8 +53,5 @@ export default function RootLayout({
             <SpeedInsights />
           </div>
         </div>
-      </body>
-
-    </html>
   );
 }

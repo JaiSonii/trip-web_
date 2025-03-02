@@ -156,7 +156,7 @@ export function Bilty({ formData, color, selectedCopy }: { formData: EWBFormData
                 </div>
                 <div className="border-b-2 border-r-2 border-black px-2 pb-6 flex gap-2 items-center">
                   <p>Consignee Name and Address :</p>
-                  <p className="text-red-600">{formData.consignee.name + " " + formData.consignee.address + ', ' + formData.consignee.city + ', ' + formData.consigner.pincode}</p>
+                  <p className="text-red-600">{formData.consignee.name + " " + formData.consignee.address + ', ' + formData.consignee.city + ', ' + formData.consignee.pincode}</p>
                 </div>
               </div>
 

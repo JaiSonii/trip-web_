@@ -1,6 +1,6 @@
 import { uploadFileToS3 } from "@/helpers/fileOperation";
 import { verifyToken } from "@/utils/auth";
-import { connectToDatabase, userSchema } from "@/utils/schema";
+import { connectToDatabase, DeletedAccountSchema, driverSchema, ExpenseSchema, InvoiceSchema, PartyPaymentSchema, partySchema, supplierAccountSchema, supplierSchema, tripChargesSchema, tripSchema, truckSchema, userSchema } from "@/utils/schema";
 import { model, models } from "mongoose";
 import { NextResponse } from "next/server";
 import { v4 as uuidV4 } from 'uuid'
@@ -167,3 +167,50 @@ export async function PUT(req: Request) {
   }
 }
 
+
+export async function DELETE(req : Request){
+  const Trip = models.Trip || model('Trip', tripSchema)
+  const Expense = models.Expenses || model('Expense', ExpenseSchema)
+  const Invoice = models.Invoice || model('Invoice', InvoiceSchema)
+  const Truck = models.Truck || model('Truck', truckSchema)
+  const Party = models.Party || model('Party', partySchema)
+  const Driver = models.Driver || model('Driver', driverSchema)
+  const DeletedAccount = models.DeletedAccount || model('DeletedAccount', DeletedAccountSchema)
+  const Supplier = models.Supplier || model('Supplier', supplierSchema)
+  const TripCharges = models.TripCharges || model('TripCharges', tripChargesSchema)
+  const PartyPayment = models.PartyPayment || model('PartyPayment', PartyPaymentSchema)
+  const SupplierAccount = models.SupplierAccount || model('SupplierAccount', supplierAccountSchema)
+
+  try {
+    const { user, error } = await verifyToken(req);
+    if (!user || error) {
+      console.error("Token verification error:", error);
+      return NextResponse.json({ error: 'Unauthorized access', status: 401 }, {status : 401});
+    }
+    const data = await req.json();
+    const {reason} = data.reason;
+    await connectToDatabase();
+
+    const deletedUser = await User.findOneAndDelete({user_id : user})
+
+    await Promise.all([
+      Trip.deleteMany({user_id : user}),
+      Expense.deleteMany({user_id : user}),
+      Invoice.deleteMany({user_id : user}),
+      Truck.deleteMany({user_id : user}),
+      Party.deleteMany({user_id : user}),
+      Driver.deleteMany({user_id : user}),
+      Supplier.deleteMany({user_id : user}),
+      TripCharges.deleteMany({user_id : user}),
+      PartyPayment.deleteMany({user_id : user}),
+      SupplierAccount.deleteMany({user_id : user}),
+      DeletedAccount.create({user_id : user, phone : deletedUser.phone, reason : reason}) // create a new entry in DeletedAccount table with user_id and reason for deletion
+    ])
+
+    return NextResponse.json({message : "Account Deleted Successfully"}, {status : 200})
+
+  } catch (error) {
+    console.log(error)
+    return NextResponse.json({error : "Internal Server Error"}, {status : 500})
+  }
+}

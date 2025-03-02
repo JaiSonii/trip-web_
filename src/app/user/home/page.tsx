@@ -354,93 +354,108 @@ const Page = () => {
             {/* Trips Section */}
             <div className="bg-white rounded-xl border shadow-md p-4">
               <h2 className="text-xl font-semibold mb-4">Trips</h2>
-              <ChartContainer config={chartConfig} className="h-[200px] w-full" title="Trips per month">
-                <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={data.trips} barSize={15} margin={{ left: -20, right: 10 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis
-                      dataKey="monthYear"
-                      tickLine={false}
-                      tickMargin={10}
-                      axisLine={false}
-                      tickFormatter={(value) => value.slice(0, 3)}
-                      fontSize={10}
-                    />
-                    <YAxis axisLine={false} tickLine={false} tick={false} />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="count" fill={chartConfig.count.color} radius={[8, 8, 8, 8]} width={5} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+              {data.trips.length > 0 ?
+                <ChartContainer config={chartConfig} className="h-[200px] w-full" title="Trips per month">
+                  <ResponsiveContainer width="100%" height={250}>
+                    <BarChart data={data.trips} barSize={15} margin={{ left: -20, right: 10 }}>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                      <XAxis
+                        dataKey="monthYear"
+                        tickLine={false}
+                        tickMargin={10}
+                        axisLine={false}
+                        tickFormatter={(value) => value.slice(0, 3)}
+                        fontSize={10}
+                      />
+                      <YAxis axisLine={false} tickLine={false} tick={false} />
+                      <ChartTooltip content={<ChartTooltipContent />} />
+                      <Bar dataKey="count" fill={chartConfig.count.color} radius={[8, 8, 8, 8]} width={5} />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+                :
+                <div className="flex items-center justify-center ">
+                  <p className="text-center text-gray-500 text-xs">Your monthly trips</p>
+                </div>
+
+              }
+
             </div>
 
             {/* Expenses Section */}
             <div className="bg-white rounded-xl border shadow-md p-4">
               <h2 className="text-xl font-semibold mb-4">Expenses</h2>
-              <ChartContainer
-                config={piechartConfig}
-                className="mx-auto aspect-square h-[200px] w-full"
-              >
-                <ResponsiveContainer width="100%" height={250}>
-                  <PieChart>
-                    <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
-                    <ChartLegend
-                      content={<ChartLegendContent className="flex flex-col items-start xl:items-end" />}
-                      iconSize={25}
-                      layout="vertical"
-                      align="right"
-                      verticalAlign="middle"
-                    />
-                    <Pie
-                      data={data.expenses}
-                      dataKey="totalAmount"
-                      nameKey="_id"
-                      innerRadius="60%"
-                      outerRadius="100%"
-                      paddingAngle={2}
-                    >
-                      {data.expenses.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={
-                            piechartConfig[entry._id as keyof typeof piechartConfig]?.color ||
-                            piechartConfig.totalAmount.color
-                          }
+              {
+                data.expenses.length > 0 ?
+                  <ChartContainer
+                    config={piechartConfig}
+                    className="mx-auto aspect-square h-[200px] w-full"
+                  >
+                    <ResponsiveContainer width="100%" height={250}>
+                      <PieChart>
+                        <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+                        <ChartLegend
+                          content={<ChartLegendContent className="flex flex-col items-start xl:items-end" />}
+                          iconSize={25}
+                          layout="vertical"
+                          align="right"
+                          verticalAlign="middle"
                         />
-                      ))}
-                      <Label
-                        content={({ viewBox }) => {
-                          if (viewBox && "cx" in viewBox && "cy" in viewBox) {
-                            return (
-                              <text
-                                x={viewBox.cx}
-                                y={viewBox.cy}
-                                textAnchor="middle"
-                                dominantBaseline="middle"
-                              >
-                                <tspan
-                                  x={viewBox.cx}
-                                  y={viewBox.cy}
-                                  className="fill-foreground text-xl font-semibold"
-                                >
-                                  ₹{totalCost.toLocaleString("en-IN")}
-                                </tspan>
-                                <tspan
-                                  x={viewBox.cx}
-                                  y={(viewBox.cy || 0) + 20}
-                                  className="fill-muted-foreground text-xs"
-                                >
-                                  Total Expense
-                                </tspan>
-                              </text>
-                            );
-                          }
-                        }}
-                      />
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
-              </ChartContainer>
+                        <Pie
+                          data={data.expenses}
+                          dataKey="totalAmount"
+                          nameKey="_id"
+                          innerRadius="60%"
+                          outerRadius="100%"
+                          paddingAngle={2}
+                        >
+                          {data.expenses.map((entry, index) => (
+                            <Cell
+                              key={`cell-${index}`}
+                              fill={
+                                piechartConfig[entry._id as keyof typeof piechartConfig]?.color ||
+                                piechartConfig.totalAmount.color
+                              }
+                            />
+                          ))}
+                          <Label
+                            content={({ viewBox }) => {
+                              if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                                return (
+                                  <text
+                                    x={viewBox.cx}
+                                    y={viewBox.cy}
+                                    textAnchor="middle"
+                                    dominantBaseline="middle"
+                                  >
+                                    <tspan
+                                      x={viewBox.cx}
+                                      y={viewBox.cy}
+                                      className="fill-foreground text-xl font-semibold"
+                                    >
+                                      ₹{totalCost.toLocaleString("en-IN")}
+                                    </tspan>
+                                    <tspan
+                                      x={viewBox.cx}
+                                      y={(viewBox.cy || 0) + 20}
+                                      className="fill-muted-foreground text-xs"
+                                    >
+                                      Total Expense
+                                    </tspan>
+                                  </text>
+                                );
+                              }
+                            }}
+                          />
+                        </Pie>
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </ChartContainer> :
+                  <div className='flex items-center justify-center text-gray-500 text-xs'>
+                    <p className='text-center'>Your Expense Analysis</p>
+                  </div>
+              }
+
             </div>
           </div>
           <div className='p-2 bg-gray-100 rounded-xl shadow-sm mt-8'>

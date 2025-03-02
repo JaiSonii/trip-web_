@@ -639,6 +639,15 @@ export const InvoiceSchema = new Schema({
   invoiceStatus : {type : String, required : true, enum : ['Paid', 'Due'], default : 'Due'},
 })
 
+export const DeletedAccountSchema = new Schema({
+  user_id : {
+    type : String,
+    required : true
+  },
+  phone : { type : String, required : true},
+  reason : String
+})
+
 
 const connectString: any = process.env.NEXT_PUBLIC_MONGO_URL
 

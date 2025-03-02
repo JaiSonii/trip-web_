@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"
 export async function POST(req: Request) {
     try {
         const { phone } = await req.json()
-        if (phone === process.env.DUMMY_CRED_PHONE) {
+        if (phone === `+91${process.env.DUMMY_CRED_PHONE}`) {
             return NextResponse.json({
                 data: {
                     "Status": "Success",

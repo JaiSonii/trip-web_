@@ -11,6 +11,7 @@ import Loading from "@/app/user/loading"
 import logoImg from "@/assets/awajahi logo.png"
 import { isValidPhone } from "@/utils/validate"
 import { useToast } from "@/components/hooks/use-toast"
+import LogoutModal from "@/components/LogoutModal"
 
 const DetailsPage = () => {
   const [user, setUser] = useState<any>()
@@ -486,8 +487,8 @@ const DetailsPage = () => {
               If the Background is not removed properly please upload brighter image*
             </footer>
           )}
-          <div className="flex justify-between col-span-2">
-            <div className="mt-6 flex space-x-4">
+          <div className="flex items-center justify-between col-span-2">
+            <div className="mt-6 flex items-center   space-x-4">
               {isEditing ? (
                 <>
                   <Button type="submit" variant="ghost" disabled={innerLoading}>
@@ -506,6 +507,7 @@ const DetailsPage = () => {
                 Back to Parties List
               </Button>
             </div>
+           {!isEditing && <LogoutModal />}
           </div>
         </form>
       )}
