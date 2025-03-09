@@ -11,10 +11,6 @@ import { formatNumber } from "@/utils/utilArray"
 import InvoicePaymentModal from "./InvoicePaymentModal"
 import { Input } from "@/components/ui/input"
 
-type AdditionalCharge = {
-
-}
-
 type Props = {
     setShow?: React.Dispatch<React.SetStateAction<boolean>>,
     trips: any[],
@@ -172,22 +168,6 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
         }))
     }
 
-    // const handleDownload = () => {
-    //     const invoiceContent = document.getElementById('invoice-content');
-    //     if (invoiceContent) {
-    //         const html = invoiceContent.outerHTML;
-    //         const blob = new Blob([html], { type: 'text/html' });
-    //         const url = URL.createObjectURL(blob);
-    //         const a = document.createElement('a');
-    //         a.href = url;
-    //         a.download = `invoice_${formData.billNo}.html`;
-    //         document.body.appendChild(a);
-    //         a.click();
-    //         document.body.removeChild(a);
-    //         URL.revokeObjectURL(url);
-    //     }
-    // }
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setShowInvoice(true);
@@ -199,24 +179,6 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
                 <form className="space-y-6" onSubmit={handleSubmit}>
                     {/* Invoice Details */}
                     <div className="grid grid-cols-3 gap-4 p-4 bg-gray-100 rounded-lg">
-                        {/* <div className="space-y-2">
-                            <label htmlFor="logo">Logo</label>
-                            <input
-                                id="logo"
-                                type="file"
-                                className="cursor-pointer"
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0]
-                                    if (file) {
-                                        const reader = new FileReader()
-                                        reader.onloadend = () => {
-                                            handleInputChange('logoUrl', 'logoUrl', reader.result as string)
-                                        }
-                                        reader.readAsDataURL(file)
-                                    }
-                                }}
-                            />
-                        </div> */}
                         <div className="space-y-2">
                             <label htmlFor="billNo">Bill No.</label>
                             <input
@@ -298,6 +260,17 @@ export default function InvoiceForm({ setShow, trips, formData, setFormData, set
                                 value={new Date(formData.dueDate).toISOString().split('T')[0]}
                                 onChange={(e) => handleInputChange('dueDate', 'dueDate', e.target.value)}
                                 className="rounded-lg text-xs"
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label htmlFor="party">GST (%)</label>
+                            <input
+                                type='number'
+                                id="gst"
+                                value={formData.gst}
+                                onChange={(e) => handleInputChange('gst', 'gst', e.target.value)}
+                                className="rounded-lg text-xs"
+                                onFocus={(e)=>setFormData((prev)=>({...prev, gst : undefined}))}
                             />
                         </div>
                         <div>

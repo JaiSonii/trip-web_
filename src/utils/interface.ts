@@ -23,6 +23,7 @@ export interface InvoiceFormData {
   signatureUrl : string;
   stampUrl : string
   dueDate : string
+  gst? : number | undefined,
   freightCharges: {
     lrNo: string;
     truckNo: string;

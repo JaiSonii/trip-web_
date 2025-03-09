@@ -354,7 +354,7 @@ const Page = () => {
             {/* Trips Section */}
             <div className="bg-white rounded-xl border shadow-md p-4">
               <h2 className="text-xl font-semibold mb-4">Trips</h2>
-              {data.trips.length > 0 ?
+              {data?.trips?.length > 0 ?
                 <ChartContainer config={chartConfig} className="h-[200px] w-full" title="Trips per month">
                   <ResponsiveContainer width="100%" height={250}>
                     <BarChart data={data.trips} barSize={15} margin={{ left: -20, right: 10 }}>
@@ -375,7 +375,7 @@ const Page = () => {
                 </ChartContainer>
                 :
                 <div className="flex items-center justify-center ">
-                  <p className="text-center text-gray-500 text-xs">Your monthly trips</p>
+                  <p className="text-center text-gray-500 text-xs">Your monthly trips</p>   
                 </div>
 
               }

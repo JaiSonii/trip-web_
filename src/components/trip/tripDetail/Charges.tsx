@@ -46,7 +46,7 @@ const Charges : React.FC<props> = ({tripId}) => {
           data.newCharge,
           ...prev.tripCharges
         ],
-        balance : newCharge.partyBill ? prev.balance + newCharge.amount : prev.balance - newCharge.amount,
+        balance : newCharge.partyBill ? prev.balance + Number(newCharge.amount) : prev.balance - Number(newCharge.amount),
       }))
     } catch (error) {
       alert(error)
@@ -78,7 +78,7 @@ const Charges : React.FC<props> = ({tripId}) => {
       setTrip((prev : ITrip | any) =>({
         ...prev,
         tripCharges : prev.tripCharges.filter((charge : any) => charge._id !== chargeToDelete._id),
-        balance : chargeToDelete.partyBill ? prev.balance - chargeToDelete.amount : prev.balance + chargeToDelete 
+        balance : chargeToDelete.partyBill ? prev.balance - chargeToDelete.amount : prev.balance + chargeToDelete .amount
       }))
       
     } else {

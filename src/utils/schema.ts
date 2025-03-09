@@ -625,6 +625,7 @@ export const InvoiceSchema = new Schema({
     type : Number,
     required : true,
   },
+  gst : Number,
   route : {
     origin : String,
     destination : String

@@ -1,8 +1,6 @@
 
-import { uploadFileToS3 } from "@/helpers/fileOperation";
-import { recentActivity } from "@/helpers/recentActivity";
+
 import { verifyToken } from "@/utils/auth";
-import { invData } from "@/utils/interface";
 import { connectToDatabase, InvoiceSchema, tripSchema } from "@/utils/schema";
 import { model, models } from "mongoose";
 import { NextResponse } from "next/server";
@@ -37,7 +35,7 @@ export async function GET(req: Request) {
           let: { party_id: '$party' },
           pipeline: [
             { $match: { $expr: { $eq: ['$party_id', '$$party_id'] } } },
-            { $project: { name: 1 } }  // Project only the fields needed
+            { $project: { name: 1, address : 1 } }  // Project only the fields needed
           ],
           as: 'partyDetails'
         }

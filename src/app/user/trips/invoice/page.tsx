@@ -30,6 +30,7 @@ const InvoiceGenerationPage: React.FC = () => {
 
   const issuedDate = params.get('issuedDate') as string
   const dueDate = params.get('dueDate') as string
+  const gst = parseFloat(params.get('gst') as string)
 
 
   const router = useRouter()
@@ -51,6 +52,7 @@ const InvoiceGenerationPage: React.FC = () => {
     partyAddress : "",
     billNo: '',
     companyName: '',
+    gst : gst || 0,
     email: '',
     phone: '',
     date: new Date(issuedDate || Date.now()).toISOString().split('T')[0],
@@ -83,8 +85,6 @@ const InvoiceGenerationPage: React.FC = () => {
     try {
       const res = await fetch(`/api/trips/invoice?trips=${encodeURIComponent(JSON.stringify(paramtrips))}`)
       const data = await res.json()
-
-
       setTrips(data.trips)
       setFormData({
         ...formData,
@@ -145,6 +145,7 @@ const InvoiceGenerationPage: React.FC = () => {
       setLoading(false)
     }
   }
+
 
   useEffect(() => {
     fetchData()
@@ -253,6 +254,7 @@ const InvoiceGenerationPage: React.FC = () => {
           destination : route.destination
         },
         party_id: party,
+        gst : formData.gst || 0,
         invoiceStatus: balance === 0 ? 'Paid' : 'Due',
         trips: paramtrips,
         advance: totalPayments,
@@ -294,11 +296,6 @@ const InvoiceGenerationPage: React.FC = () => {
 
   return (
     <div className="h-screen flex flex-col">
-      {/* <div className="bg-primary text-primary-foreground p-4 flex justify-end">
-        <Button onClick={() => router.push('/user/trips')} variant="secondary">
-          Back to Trips
-        </Button>
-      </div> */}
       <ResizablePanelGroup
         direction="horizontal"
         className="flex-grow"
@@ -323,23 +320,10 @@ const InvoiceGenerationPage: React.FC = () => {
           collapsedSize={0}
           onCollapse={() => setIsCollapsed(true)}
           onExpand={() => setIsCollapsed(false)}
-        //className={cn(
-        //  "transition-all duration-300 ease-in-out",
-        //  isCollapsed ? "min-w-[50px] md:min-w-[70px]" : ""
-        //)}
         >
 
           <div className="h-full flex flex-col">
-            {/* <div className="flex justify-end items-center p-4 bg-secondary">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsCollapsed(true)}
-                >
-                  <ChevronRight className="h-4 w-4" />
-                  <span className="sr-only">Collapse invoice preview</span>
-                </Button>
-              </div> */}
+           
             <div className="flex-grow overflow-y-auto p-4 thin-scrollbar">
               <div>
                 <FreightInvoice formData={formData} />
