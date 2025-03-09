@@ -232,12 +232,12 @@ const FreightInvoice: React.FC<{ formData: FormData }> = ({ formData }) => {
                             <div>Branch Name {formData.partyDetails.bankBranch}</div>
                         </td>
                         <td className="font-bold text-center p-2">BALANCE</td>
-                        <td className="font-bold text-right p-2 pr-2.5">{formatNumber(!formData.gst ? totalBalance :  totalBalance - (totalBalance * formData.gst)/100)}</td>
+                        <td className="font-bold text-right p-2 pr-2.5">{formatNumber(!formData.gst ? totalBalance :  totalBalance + (totalBalance * formData.gst)/100)}</td>
                     </tr>
                     
                     <tr>
                         <td colSpan={3} className="text-center font-bold text-xs p-2.5 border-t border-b border-black">
-                            Total amount in words :- {numberToWordsIndian(!formData.gst ? totalBalance :  totalBalance - (totalBalance * formData.gst)/100)} rupees only
+                            Total amount in words :- {numberToWordsIndian(!formData.gst ? totalBalance :  totalBalance + (totalBalance * formData.gst)/100)} rupees only
                         </td>
                     </tr>
                 </tbody>
